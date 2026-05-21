@@ -74,8 +74,4 @@ Notiee/
 - [ ] 真实 AVFoundation 原生相机捕获（进行中）
 - [ ] 后台异步处理队列与真实大模型 (OpenAI Compatible) API 联动（规划中）
 
----
 
-## 📄 开源协议
-
-本项目采用 MIT 协议开源。详情请参阅 [LICENSE](LICENSE) 文件。
