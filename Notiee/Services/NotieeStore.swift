@@ -13,6 +13,8 @@ final class NotieeStore: ObservableObject {
     private let calendar: Calendar
     private let recordStore: NoteRecordPersisting
     private let scheduleMatcher: ScheduleMatcher
+    private let aiService: MockAIProcessingService
+    private let autoProcess: Bool
 
     init(
         currentDate: Date = Date(),
@@ -21,7 +23,9 @@ final class NotieeStore: ObservableObject {
         todos: [NoteTodo],
         records: [NoteRecord],
         recordStore: NoteRecordPersisting = JSONNoteRecordStore.live,
-        scheduleMatcher: ScheduleMatcher = ScheduleMatcher()
+        scheduleMatcher: ScheduleMatcher = ScheduleMatcher(),
+        aiService: MockAIProcessingService = MockAIProcessingService(),
+        autoProcess: Bool = false
     ) {
         self.currentDate = currentDate
         self.calendar = calendar
@@ -30,6 +34,8 @@ final class NotieeStore: ObservableObject {
         self.records = records
         self.recordStore = recordStore
         self.scheduleMatcher = scheduleMatcher
+        self.aiService = aiService
+        self.autoProcess = autoProcess
     }
 
     var currentEvent: ScheduledEvent? {
@@ -97,7 +103,76 @@ final class NotieeStore: ObservableObject {
 
         records.insert(record, at: 0)
         persistRecords()
+
+        if autoProcess {
+            enqueueProcessing(for: record)
+        }
+
         return record
+    }
+
+    /// 手动触发对指定记录的 AI 处理管线。
+    func processRecord(_ record: NoteRecord) {
+        enqueueProcessing(for: record)
+    }
+
+    // MARK: - Record & Todo Mutations
+
+    func updateRecord(_ updated: NoteRecord) {
+        guard let index = records.firstIndex(where: { $0.id == updated.id }) else {
+            return
+        }
+        records[index] = updated
+        persistRecords()
+    }
+
+    func addTodo(_ todo: NoteTodo) {
+        todos.append(todo)
+    }
+
+    // MARK: - AI Processing Pipeline
+
+    private func enqueueProcessing(for record: NoteRecord) {
+        let recordID = record.id
+        let eventTitle = eventTitle(for: record)
+        let service = aiService
+
+        Task {
+            // Phase 1: pending → processing（模拟网络传输延迟）
+            try? await Task.sleep(for: .milliseconds(Int.random(in: 800...1500)))
+            self.setProcessingState(.processing, for: recordID)
+
+            // Phase 2: processing → completed（模拟大模型推理耗时）
+            let delayMs = Int(Double.random(in: service.processingDelay) * 1000)
+            try? await Task.sleep(for: .milliseconds(delayMs))
+
+            let result = service.generate(for: eventTitle)
+            self.applyAIResult(result, to: recordID)
+        }
+    }
+
+    private func setProcessingState(_ state: AIProcessingState, for recordID: UUID) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else {
+            return
+        }
+        records[index].processingState = state
+        persistRecords()
+    }
+
+    private func applyAIResult(_ result: MockAIProcessingService.Result, to recordID: UUID) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else {
+            return
+        }
+        records[index].title = result.title
+        records[index].ocrText = result.ocrText
+        records[index].summary = result.summary
+        records[index].processingState = .completed
+        persistRecords()
+
+        for content in result.todos {
+            let todo = NoteTodo(recordID: recordID, content: content)
+            addTodo(todo)
+        }
     }
 
     static func sample(currentDate: Date = Date()) -> NotieeStore {
@@ -120,7 +195,8 @@ final class NotieeStore: ObservableObject {
             events: today.events,
             todos: today.todos,
             records: persistedRecords.isEmpty ? today.records : persistedRecords,
-            recordStore: store
+            recordStore: store,
+            autoProcess: true
         )
     }
 
