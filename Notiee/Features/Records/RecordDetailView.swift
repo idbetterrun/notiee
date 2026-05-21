@@ -1,0 +1,185 @@
+import SwiftUI
+
+struct RecordDetailView: View {
+    @ObservedObject private var viewModel: RecordDetailViewModel
+
+    init(viewModel: RecordDetailViewModel) {
+        self.viewModel = viewModel
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                header
+                imagePreview
+                summarySection
+                todoSection
+                ocrSection
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 40)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("记录详情")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(viewModel.eventTitle, systemImage: viewModel.eventTitle == "未分类" ? "tray" : "calendar")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Text(viewModel.record.title)
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .lineLimit(2)
+                .minimumScaleFactor(0.78)
+
+            HStack(spacing: 10) {
+                Label(viewModel.statusTitle, systemImage: viewModel.record.processingState.symbolName)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(viewModel.record.processingState.tint)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(viewModel.record.processingState.tint.opacity(0.12), in: Capsule())
+
+                Text(viewModel.record.capturedAt.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
+                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var imagePreview: some View {
+        RoundedRectangle(cornerRadius: 26, style: .continuous)
+            .fill(.linearGradient(
+                colors: [
+                    viewModel.record.processingState.tint.opacity(0.18),
+                    Color(.secondarySystemGroupedBackground)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ))
+            .frame(maxWidth: .infinity)
+            .aspectRatio(1.28, contentMode: .fit)
+            .overlay(alignment: .center) {
+                VStack(spacing: 12) {
+                    Image(systemName: "photo")
+                        .font(.system(size: 44, weight: .regular))
+                        .foregroundStyle(viewModel.record.processingState.tint)
+
+                    Text(viewModel.record.localImagePath)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .padding(.horizontal, 24)
+                }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .stroke(.white.opacity(0.8), lineWidth: 1)
+            }
+    }
+
+    private var summarySection: some View {
+        DetailSection(title: "AI 摘要", systemImage: "sparkles") {
+            Text(viewModel.summaryText)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var todoSection: some View {
+        DetailSection(title: "待办事项", systemImage: "checklist") {
+            if viewModel.todos.isEmpty {
+                Text("AI 提取出的行动项会显示在这里。")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(viewModel.todos) { todo in
+                        HStack(spacing: 12) {
+                            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(todo.isCompleted ? .green : .secondary)
+                                .font(.title3)
+
+                            Text(todo.content)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+                                .strikethrough(todo.isCompleted)
+
+                            Spacer()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var ocrSection: some View {
+        DetailSection(title: "OCR 原文", systemImage: "text.viewfinder") {
+            Text(viewModel.ocrText)
+                .font(.callout.monospaced())
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+private struct DetailSection<Content: View>: View {
+    let title: String
+    let systemImage: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(title, systemImage: systemImage)
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            content
+                .padding(18)
+                .background(.background, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+    }
+}
+
+private extension AIProcessingState {
+    var symbolName: String {
+        switch self {
+        case .pending:
+            "clock"
+        case .processing:
+            "sparkles"
+        case .completed:
+            "checkmark.circle"
+        case .failed:
+            "exclamationmark.triangle"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .pending:
+            .orange
+        case .processing:
+            .blue
+        case .completed:
+            .green
+        case .failed:
+            .red
+        }
+    }
+}
+
+#Preview {
+    let store = NotieeStore.sample()
+    return NavigationStack {
+        RecordDetailView(viewModel: RecordDetailViewModel(record: store.sortedRecords[0], store: store))
+    }
+}

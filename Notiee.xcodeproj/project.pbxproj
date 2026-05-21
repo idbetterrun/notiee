@@ -1,0 +1,622 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		200000000000000000000001 /* NotieeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000001 /* NotieeApp.swift */; };
+		200000000000000000000002 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000002 /* RootTabView.swift */; };
+		200000000000000000000003 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* TodayView.swift */; };
+		200000000000000000000004 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000004 /* CaptureView.swift */; };
+		200000000000000000000005 /* RecordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000005 /* RecordsView.swift */; };
+		200000000000000000000006 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000006 /* SettingsView.swift */; };
+		200000000000000000000007 /* ScheduledEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000007 /* ScheduledEvent.swift */; };
+		200000000000000000000008 /* NoteRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000008 /* NoteRecord.swift */; };
+		200000000000000000000009 /* NoteTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000009 /* NoteTodo.swift */; };
+		200000000000000000000010 /* AIProcessingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000010 /* AIProcessingState.swift */; };
+		200000000000000000000011 /* ScheduleMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* ScheduleMatcherTests.swift */; };
+		200000000000000000000012 /* ScheduleMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* ScheduleMatcher.swift */; };
+		200000000000000000000013 /* ProjectConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* ProjectConfigurationTests.swift */; };
+		200000000000000000000014 /* TodayViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* TodayViewModelTests.swift */; };
+		200000000000000000000015 /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000015 /* TodayViewModel.swift */; };
+		200000000000000000000016 /* CaptureViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000016 /* CaptureViewModelTests.swift */; };
+		200000000000000000000017 /* CaptureViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000017 /* CaptureViewModel.swift */; };
+		200000000000000000000018 /* NotieeStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000018 /* NotieeStoreTests.swift */; };
+		200000000000000000000019 /* JSONNoteRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000019 /* JSONNoteRecordStore.swift */; };
+		200000000000000000000020 /* NotieeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000020 /* NotieeStore.swift */; };
+		200000000000000000000021 /* RecordDetailViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000021 /* RecordDetailViewModelTests.swift */; };
+		200000000000000000000022 /* RecordDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000022 /* RecordDetailViewModel.swift */; };
+		200000000000000000000023 /* RecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000023 /* RecordDetailView.swift */; };
+		200000000000000000000024 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000024 /* SettingsViewModelTests.swift */; };
+		200000000000000000000025 /* AppTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000025 /* AppTab.swift */; };
+		200000000000000000000026 /* AIModelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000026 /* AIModelConfiguration.swift */; };
+		200000000000000000000027 /* UserDefaultsAppSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000027 /* UserDefaultsAppSettingsStore.swift */; };
+		200000000000000000000028 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000028 /* SettingsViewModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		400000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000000003;
+			remoteInfo = Notiee;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		000000000000000000000006 /* Notiee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notiee.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000007 /* NotieeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NotieeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000001 /* NotieeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeApp.swift; sourceTree = "<group>"; };
+		100000000000000000000002 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		100000000000000000000003 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		100000000000000000000004 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
+		100000000000000000000005 /* RecordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordsView.swift; sourceTree = "<group>"; };
+		100000000000000000000006 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		100000000000000000000007 /* ScheduledEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduledEvent.swift; sourceTree = "<group>"; };
+		100000000000000000000008 /* NoteRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRecord.swift; sourceTree = "<group>"; };
+		100000000000000000000009 /* NoteTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTodo.swift; sourceTree = "<group>"; };
+		100000000000000000000010 /* AIProcessingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProcessingState.swift; sourceTree = "<group>"; };
+		100000000000000000000011 /* ScheduleMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleMatcherTests.swift; sourceTree = "<group>"; };
+		100000000000000000000012 /* ScheduleMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleMatcher.swift; sourceTree = "<group>"; };
+		100000000000000000000013 /* ProjectConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectConfigurationTests.swift; sourceTree = "<group>"; };
+		100000000000000000000014 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
+		100000000000000000000015 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
+		100000000000000000000016 /* CaptureViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewModelTests.swift; sourceTree = "<group>"; };
+		100000000000000000000017 /* CaptureViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewModel.swift; sourceTree = "<group>"; };
+		100000000000000000000018 /* NotieeStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeStoreTests.swift; sourceTree = "<group>"; };
+		100000000000000000000019 /* JSONNoteRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONNoteRecordStore.swift; sourceTree = "<group>"; };
+		100000000000000000000020 /* NotieeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeStore.swift; sourceTree = "<group>"; };
+		100000000000000000000021 /* RecordDetailViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordDetailViewModelTests.swift; sourceTree = "<group>"; };
+		100000000000000000000022 /* RecordDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordDetailViewModel.swift; sourceTree = "<group>"; };
+		100000000000000000000023 /* RecordDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordDetailView.swift; sourceTree = "<group>"; };
+		100000000000000000000024 /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
+		100000000000000000000025 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
+		100000000000000000000026 /* AIModelConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModelConfiguration.swift; sourceTree = "<group>"; };
+		100000000000000000000027 /* UserDefaultsAppSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsAppSettingsStore.swift; sourceTree = "<group>"; };
+		100000000000000000000028 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		300000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		000000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000008 /* Notiee */,
+				000000000000000000000016 /* NotieeTests */,
+				000000000000000000000005 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000005 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000006 /* Notiee.app */,
+				000000000000000000000007 /* NotieeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		000000000000000000000008 /* Notiee */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000009 /* App */,
+				000000000000000000000010 /* Features */,
+				000000000000000000000015 /* Models */,
+				000000000000000000000017 /* Services */,
+			);
+			path = Notiee;
+			sourceTree = "<group>";
+		};
+		000000000000000000000009 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000001 /* NotieeApp.swift */,
+				100000000000000000000002 /* RootTabView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		000000000000000000000010 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000011 /* Today */,
+				000000000000000000000012 /* Capture */,
+				000000000000000000000013 /* Records */,
+				000000000000000000000014 /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		000000000000000000000011 /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000003 /* TodayView.swift */,
+				100000000000000000000015 /* TodayViewModel.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		000000000000000000000012 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000004 /* CaptureView.swift */,
+				100000000000000000000017 /* CaptureViewModel.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		000000000000000000000013 /* Records */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000005 /* RecordsView.swift */,
+				100000000000000000000023 /* RecordDetailView.swift */,
+				100000000000000000000022 /* RecordDetailViewModel.swift */,
+			);
+			path = Records;
+			sourceTree = "<group>";
+		};
+		000000000000000000000014 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000006 /* SettingsView.swift */,
+				100000000000000000000028 /* SettingsViewModel.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		000000000000000000000015 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000007 /* ScheduledEvent.swift */,
+				100000000000000000000008 /* NoteRecord.swift */,
+				100000000000000000000009 /* NoteTodo.swift */,
+				100000000000000000000010 /* AIProcessingState.swift */,
+				100000000000000000000025 /* AppTab.swift */,
+				100000000000000000000026 /* AIModelConfiguration.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		000000000000000000000016 /* NotieeTests */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000011 /* ScheduleMatcherTests.swift */,
+				100000000000000000000013 /* ProjectConfigurationTests.swift */,
+				100000000000000000000014 /* TodayViewModelTests.swift */,
+				100000000000000000000016 /* CaptureViewModelTests.swift */,
+				100000000000000000000018 /* NotieeStoreTests.swift */,
+				100000000000000000000021 /* RecordDetailViewModelTests.swift */,
+				100000000000000000000024 /* SettingsViewModelTests.swift */,
+			);
+			path = NotieeTests;
+			sourceTree = "<group>";
+		};
+		000000000000000000000017 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000012 /* ScheduleMatcher.swift */,
+				100000000000000000000019 /* JSONNoteRecordStore.swift */,
+				100000000000000000000020 /* NotieeStore.swift */,
+				100000000000000000000027 /* UserDefaultsAppSettingsStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		000000000000000000000003 /* Notiee */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 700000000000000000000002 /* Build configuration list for PBXNativeTarget "Notiee" */;
+			buildPhases = (
+				300000000000000000000001 /* Sources */,
+				300000000000000000000002 /* Frameworks */,
+				300000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Notiee;
+			productName = Notiee;
+			productReference = 000000000000000000000006 /* Notiee.app */;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000000004 /* NotieeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 700000000000000000000003 /* Build configuration list for PBXNativeTarget "NotieeTests" */;
+			buildPhases = (
+				300000000000000000000004 /* Sources */,
+				300000000000000000000005 /* Frameworks */,
+				300000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				400000000000000000000001 /* PBXTargetDependency */,
+			);
+			name = NotieeTests;
+			productName = NotieeTests;
+			productReference = 000000000000000000000007 /* NotieeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		000000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					000000000000000000000003 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					000000000000000000000004 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 000000000000000000000003;
+					};
+				};
+			};
+			buildConfigurationList = 700000000000000000000001 /* Build configuration list for PBXProject "Notiee" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 000000000000000000000002;
+			productRefGroup = 000000000000000000000005 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				000000000000000000000003 /* Notiee */,
+				000000000000000000000004 /* NotieeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		300000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		300000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000001 /* NotieeApp.swift in Sources */,
+				200000000000000000000002 /* RootTabView.swift in Sources */,
+				200000000000000000000003 /* TodayView.swift in Sources */,
+				200000000000000000000004 /* CaptureView.swift in Sources */,
+				200000000000000000000005 /* RecordsView.swift in Sources */,
+				200000000000000000000023 /* RecordDetailView.swift in Sources */,
+				200000000000000000000022 /* RecordDetailViewModel.swift in Sources */,
+				200000000000000000000006 /* SettingsView.swift in Sources */,
+				200000000000000000000007 /* ScheduledEvent.swift in Sources */,
+				200000000000000000000008 /* NoteRecord.swift in Sources */,
+				200000000000000000000009 /* NoteTodo.swift in Sources */,
+				200000000000000000000010 /* AIProcessingState.swift in Sources */,
+				200000000000000000000025 /* AppTab.swift in Sources */,
+				200000000000000000000026 /* AIModelConfiguration.swift in Sources */,
+				200000000000000000000012 /* ScheduleMatcher.swift in Sources */,
+				200000000000000000000019 /* JSONNoteRecordStore.swift in Sources */,
+				200000000000000000000020 /* NotieeStore.swift in Sources */,
+				200000000000000000000027 /* UserDefaultsAppSettingsStore.swift in Sources */,
+				200000000000000000000015 /* TodayViewModel.swift in Sources */,
+				200000000000000000000017 /* CaptureViewModel.swift in Sources */,
+				200000000000000000000028 /* SettingsViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000011 /* ScheduleMatcherTests.swift in Sources */,
+				200000000000000000000013 /* ProjectConfigurationTests.swift in Sources */,
+				200000000000000000000014 /* TodayViewModelTests.swift in Sources */,
+				200000000000000000000016 /* CaptureViewModelTests.swift in Sources */,
+				200000000000000000000018 /* NotieeStoreTests.swift in Sources */,
+				200000000000000000000021 /* RecordDetailViewModelTests.swift in Sources */,
+				200000000000000000000024 /* SettingsViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		400000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000000000003 /* Notiee */;
+			targetProxy = 400000000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		600000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		600000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		600000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Notiee;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Notiee needs camera access to capture class and meeting notes.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.notiee.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		600000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Notiee;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Notiee needs camera access to capture class and meeting notes.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.notiee.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		600000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.notiee.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Notiee.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Notiee";
+			};
+			name = Debug;
+		};
+		600000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.notiee.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Notiee.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Notiee";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		700000000000000000000001 /* Build configuration list for PBXProject "Notiee" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				600000000000000000000001 /* Debug */,
+				600000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		700000000000000000000002 /* Build configuration list for PBXNativeTarget "Notiee" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				600000000000000000000003 /* Debug */,
+				600000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		700000000000000000000003 /* Build configuration list for PBXNativeTarget "NotieeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				600000000000000000000005 /* Debug */,
+				600000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 000000000000000000000001 /* Project object */;
+}
