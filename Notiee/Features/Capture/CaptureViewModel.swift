@@ -43,6 +43,12 @@ final class CaptureViewModel: ObservableObject {
                 self?.handleCapturedImage(image)
             }
             .store(in: &cancellables)
+            
+        cameraManager.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     var currentEvent: ScheduledEvent? {

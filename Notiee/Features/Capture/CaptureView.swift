@@ -25,16 +25,31 @@ struct CaptureView: View {
 
             if viewModel.cameraManager.status == .ready {
                 CameraPreviewView(session: viewModel.cameraManager.session)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea()
             } else if viewModel.cameraManager.status == .unauthorized {
-                VStack {
+                VStack(spacing: 16) {
                     Image(systemName: "camera.slash")
-                        .font(.largeTitle)
-                        .padding(.bottom, 8)
+                        .font(.system(size: 48))
+                        .foregroundStyle(.white.opacity(0.6))
+                    
                     Text("需要相机权限才能进行拍记")
                         .font(.headline)
+                        .foregroundStyle(.white.opacity(0.8))
+                        
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Text("前往设置开启")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(.white, in: Capsule())
+                    }
                 }
-                .foregroundStyle(.white.opacity(0.7))
             }
 
             VStack(spacing: 22) {

@@ -158,6 +158,24 @@ final class NotieeStore: ObservableObject {
 
     // MARK: - AI Processing Pipeline
 
+    func retryAIProcessing(for recordID: UUID) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
+        var record = records[index]
+        guard record.processingState == .failed else { return }
+        
+        record.processingState = .pending
+        records[index] = record
+        persistRecords()
+        
+        enqueueProcessing(for: record)
+    }
+
+    func updateRecordEvent(recordID: UUID, newEventID: UUID?) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
+        records[index].eventID = newEventID
+        persistRecords()
+    }
+
     private func enqueueProcessing(for record: NoteRecord) {
         let recordID = record.id
         let eventTitle = eventTitle(for: record)

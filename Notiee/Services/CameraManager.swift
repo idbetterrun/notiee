@@ -51,7 +51,20 @@ final class CameraManager: NSObject, ObservableObject {
             self.session.sessionPreset = .photo
 
             // Add video input
-            guard let videoDevice = AVCaptureDevice.default(for: .video),
+            let deviceTypes: [AVCaptureDevice.DeviceType] = [
+                .builtInTripleCamera,
+                .builtInDualWideCamera,
+                .builtInDualCamera,
+                .builtInWideAngleCamera
+            ]
+            
+            let discoverySession = AVCaptureDevice.DiscoverySession(
+                deviceTypes: deviceTypes,
+                mediaType: .video,
+                position: .back
+            )
+            
+            guard let videoDevice = discoverySession.devices.first ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
                   let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
                   self.session.canAddInput(videoDeviceInput) else {
                 Task { @MainActor in self.status = .failed }

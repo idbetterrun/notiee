@@ -35,9 +35,30 @@ struct RecordDetailView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label(viewModel.eventTitle, systemImage: viewModel.eventTitle == "未分类" ? "tray" : "calendar")
+            Menu {
+                ForEach(viewModel.availableEvents) { event in
+                    Button(event.title) {
+                        viewModel.reassignEvent(to: event.id)
+                    }
+                }
+                
+                Divider()
+                
+                Button("未分类") {
+                    viewModel.reassignEvent(to: nil)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Label(viewModel.eventTitle, systemImage: viewModel.eventTitle == "未分类" ? "tray" : "calendar")
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                }
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(.secondary.opacity(0.12), in: Capsule())
+            }
 
             Text(viewModel.record.title)
                 .font(.system(size: 34, weight: .bold, design: .rounded))
@@ -65,6 +86,13 @@ struct RecordDetailView: View {
                     .font(.caption.weight(.bold))
                     .buttonStyle(.borderedProminent)
                     .tint(.blue)
+                } else if viewModel.record.processingState == .failed {
+                    Button("重试") {
+                        viewModel.retryProcessing()
+                    }
+                    .font(.caption.weight(.bold))
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
                 }
             }
         }

@@ -67,4 +67,16 @@ final class RecordDetailViewModel: ObservableObject {
     func processRecord() {
         store.processRecord(record)
     }
+
+    func retryProcessing() {
+        store.retryAIProcessing(for: record.id)
+    }
+
+    func reassignEvent(to eventID: UUID?) {
+        store.updateRecordEvent(recordID: record.id, newEventID: eventID)
+    }
+
+    var availableEvents: [ScheduledEvent] {
+        store.events
+    }
 }
