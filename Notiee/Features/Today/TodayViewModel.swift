@@ -7,10 +7,8 @@ final class TodayViewModel: ObservableObject {
     let currentDate: Date
     private let calendar: Calendar
     private let scheduleMatcher: ScheduleMatcher
-    private var cancellables: Set<AnyCancellable> = []
+    private weak var store: NotieeStore?
 
-    // When backed by a shared NotieeStore, data flows from the store.
-    // When standalone (e.g. tests), data is held locally.
     @Published private(set) var events: [ScheduledEvent]
     @Published private(set) var todos: [NoteTodo]
     @Published private(set) var records: [NoteRecord]
@@ -30,6 +28,7 @@ final class TodayViewModel: ObservableObject {
         self.todos = todos
         self.records = records
         self.scheduleMatcher = scheduleMatcher
+        self.store = nil
     }
 
     /// Store-backed initializer — data is kept in sync with the shared NotieeStore.
@@ -40,40 +39,90 @@ final class TodayViewModel: ObservableObject {
         self.todos = store.todos
         self.records = store.records
         self.scheduleMatcher = ScheduleMatcher()
+        self.store = store
 
-        store.$events
-            .assign(to: &$events)
-        store.$todos
-            .assign(to: &$todos)
-        store.$records
-            .assign(to: &$records)
+        store.$events.assign(to: &$events)
+        store.$todos.assign(to: &$todos)
+        store.$records.assign(to: &$records)
     }
+
+    // MARK: - Current Event
 
     var currentEvent: ScheduledEvent? {
         scheduleMatcher.currentEvent(from: events, at: currentDate)
     }
 
-    var timelineItems: [ScheduledEvent] {
-        events.sorted { lhs, rhs in
-            lhs.startDate < rhs.startDate
-        }
+    // MARK: - Grouped Timeline
+
+    var completedEvents: [ScheduledEvent] {
+        events
+            .filter { $0.status(at: currentDate) == .completed }
+            .sorted { $0.startDate < $1.startDate }
     }
+
+    var currentEvents: [ScheduledEvent] {
+        events
+            .filter { $0.status(at: currentDate) == .current }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    var upcomingEvents: [ScheduledEvent] {
+        events
+            .filter { $0.status(at: currentDate) == .upcoming }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    var timelineItems: [ScheduledEvent] {
+        events.sorted { $0.startDate < $1.startDate }
+    }
+
+    // MARK: - Todos
 
     var pendingTodos: [NoteTodo] {
         todos
             .filter { !$0.isCompleted }
-            .sorted { lhs, rhs in
-                lhs.createdAt < rhs.createdAt
-            }
+            .sorted { $0.createdAt < $1.createdAt }
     }
+
+    var allTodos: [NoteTodo] {
+        todos.sorted { $0.createdAt < $1.createdAt }
+    }
+
+    func toggleTodo(id: UUID) {
+        if let store {
+            store.toggleTodo(id: id)
+        } else {
+            // Standalone mode (tests/previews)
+            if let index = todos.firstIndex(where: { $0.id == id }) {
+                todos[index].isCompleted.toggle()
+            }
+        }
+    }
+
+    // MARK: - Today Records
 
     var todayRecords: [NoteRecord] {
         records
             .filter { calendar.isDate($0.capturedAt, inSameDayAs: currentDate) }
-            .sorted { lhs, rhs in
-                lhs.capturedAt > rhs.capturedAt
-            }
+            .sorted { $0.capturedAt > $1.capturedAt }
     }
+
+    // MARK: - Formatted Date
+
+    var formattedDateWithWeek: String {
+        let weekOfYear = calendar.component(.weekOfYear, from: currentDate)
+        let dateString = currentDate.formatted(
+            .dateTime.year().month(.defaultDigits).day()
+                .locale(Locale(identifier: "zh_CN"))
+        )
+        let weekday = currentDate.formatted(
+            .dateTime.weekday(.abbreviated)
+                .locale(Locale(identifier: "zh_CN"))
+        )
+        return "\(dateString) 第\(weekOfYear)周 \(weekday)"
+    }
+
+    // MARK: - Sample Data
 
     static func sample(currentDate: Date = Date()) -> TodayViewModel {
         let calendar = Calendar.current

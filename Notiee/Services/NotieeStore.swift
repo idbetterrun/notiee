@@ -130,6 +130,13 @@ final class NotieeStore: ObservableObject {
         todos.append(todo)
     }
 
+    func toggleTodo(id: UUID) {
+        guard let index = todos.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        todos[index].isCompleted.toggle()
+    }
+
     // MARK: - AI Processing Pipeline
 
     private func enqueueProcessing(for record: NoteRecord) {
