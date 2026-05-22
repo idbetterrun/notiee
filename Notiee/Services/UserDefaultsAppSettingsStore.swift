@@ -6,6 +6,27 @@ protocol AppSettingsPersisting {
     func saveDefaultTab(_ tab: AppTab)
     func loadConfiguration(for kind: AIModelKind) -> AIModelConfiguration
     func saveConfiguration(_ configuration: AIModelConfiguration, for kind: AIModelKind) throws
+    
+    func loadBool(forKey key: String, defaultValue: Bool) -> Bool
+    func saveBool(_ value: Bool, forKey key: String)
+    func loadInt(forKey key: String, defaultValue: Int) -> Int
+    func saveInt(_ value: Int, forKey key: String)
+    func loadString(forKey key: String, defaultValue: String) -> String
+    func saveString(_ value: String, forKey key: String)
+    
+    // Custom models
+    func loadCustomModels() -> [CustomAIModel]
+    func saveCustomModels(_ models: [CustomAIModel])
+}
+
+struct CustomAIModel: Codable, Identifiable, Hashable {
+    var id: UUID = UUID()
+    var name: String
+    var kind: AIModelKind
+    var endpoint: String
+    var protocolType: AIProtocol
+    var modelIdentifier: String
+    var apiKey: String
 }
 
 protocol SecretPersisting {
@@ -69,6 +90,46 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
             try secretStore.removeString(forKey: Keys.apiKey(for: kind))
         } else {
             try secretStore.setString(normalized.apiKey, forKey: Keys.apiKey(for: kind))
+        }
+    }
+
+    func loadBool(forKey key: String, defaultValue: Bool) -> Bool {
+        if userDefaults.object(forKey: key) == nil { return defaultValue }
+        return userDefaults.bool(forKey: key)
+    }
+    
+    func saveBool(_ value: Bool, forKey key: String) {
+        userDefaults.set(value, forKey: key)
+    }
+    
+    func loadInt(forKey key: String, defaultValue: Int) -> Int {
+        if userDefaults.object(forKey: key) == nil { return defaultValue }
+        return userDefaults.integer(forKey: key)
+    }
+    
+    func saveInt(_ value: Int, forKey key: String) {
+        userDefaults.set(value, forKey: key)
+    }
+    
+    func loadString(forKey key: String, defaultValue: String) -> String {
+        return userDefaults.string(forKey: key) ?? defaultValue
+    }
+    
+    func saveString(_ value: String, forKey key: String) {
+        userDefaults.set(value, forKey: key)
+    }
+
+    func loadCustomModels() -> [CustomAIModel] {
+        guard let data = userDefaults.data(forKey: "notiee.customModels"),
+              let models = try? JSONDecoder().decode([CustomAIModel].self, from: data) else {
+            return []
+        }
+        return models
+    }
+
+    func saveCustomModels(_ models: [CustomAIModel]) {
+        if let data = try? JSONEncoder().encode(models) {
+            userDefaults.set(data, forKey: "notiee.customModels")
         }
     }
 }

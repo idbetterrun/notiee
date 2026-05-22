@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import AVFoundation
 
 struct CaptureView: View {
     @StateObject private var viewModel: CaptureViewModel
@@ -7,6 +8,7 @@ struct CaptureView: View {
     @State private var shutterIsPressed = false
     @State private var selectedItem: PhotosPickerItem?
     @State private var presentedRecord: NoteRecord?
+    @State private var currentZoomFactor: CGFloat = 1.0
 
     @MainActor
     init() {
@@ -20,13 +22,137 @@ struct CaptureView: View {
 
     var body: some View {
         ZStack {
-            Color(.notieeCameraBackground)
+            Color.black
                 .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                topBar
+                
+                infoBannerView
+                
+                Spacer()
+
+                viewfinder
+                
+                Spacer()
+
+                captureModeSwitcher
+                
+                bottomControls
+                    .padding(.bottom, 10)
+            }
+            .padding(.top, 10)
+            .padding(.bottom, 24)
+
+            if showsCaptureFlash {
+                Color.black
+                    .opacity(0.8)
+                    .ignoresSafeArea()
+            }
+        }
+        .animation(.easeOut(duration: 0.1), value: showsCaptureFlash)
+        .onAppear {
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
+    }
+
+    private var topBar: some View {
+        HStack {
+            // Flash button
+            Button {
+                let current = viewModel.cameraManager.flashMode
+                viewModel.cameraManager.flashMode = current == .auto ? .on : (current == .on ? .off : .auto)
+            } label: {
+                Image(systemName: flashIcon(for: viewModel.cameraManager.flashMode))
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(viewModel.cameraManager.flashMode == .on ? .black : .white)
+                    .frame(width: 32, height: 32)
+                    .background(viewModel.cameraManager.flashMode == .on ? Color.yellow : Color.white.opacity(0.15), in: Circle())
+            }
+
+            Spacer()
+
+            Text(viewModel.contextTitle)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(.white)
+
+            Spacer()
+
+            // Event Selection (Folder)
+            Menu {
+                ForEach(viewModel.events) { event in
+                    Button(event.title) {
+                        viewModel.selectedEventID = event.id
+                    }
+                }
+                
+                Divider()
+                
+                Button("未分类") {
+                    viewModel.selectedEventID = nil
+                }
+            } label: {
+                Image(systemName: "folder.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.black)
+                    .frame(width: 32, height: 32)
+                    .background(Color.white, in: Circle())
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private func flashIcon(for mode: AVCaptureDevice.FlashMode) -> String {
+        switch mode {
+        case .on: return "bolt.fill"
+        case .off: return "bolt.slash.fill"
+        default: return "bolt.badge.a.fill"
+        }
+    }
+
+    private var infoBannerView: some View {
+        let isUncategorized = viewModel.currentEvent == nil
+        let groupName = isUncategorized ? "未分类分组" : "\(viewModel.contextTitle)分组"
+        
+        return Group {
+            Text("当前\(isUncategorized ? "无日程" : "日程为" + viewModel.contextTitle)，拍摄的图片将存放在：")
+                .foregroundStyle(.white.opacity(0.8))
+            + Text(groupName)
+                .foregroundStyle(.yellow)
+            + Text("，您可通过右上角修改存储路径")
+                .foregroundStyle(.white.opacity(0.8))
+        }
+        .font(.system(size: 10))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            Capsule()
+                .stroke(.white.opacity(0.3), lineWidth: 0.5)
+                .background(Color.black.opacity(0.6))
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+    }
+
+    private var viewfinder: some View {
+        ZStack {
+            Color(white: 0.05)
 
             if viewModel.cameraManager.status == .ready {
                 CameraPreviewView(session: viewModel.cameraManager.session)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea()
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { value in
+                                viewModel.cameraManager.setZoom(factor: currentZoomFactor * value)
+                            }
+                            .onEnded { value in
+                                currentZoomFactor = max(1.0, currentZoomFactor * value)
+                                viewModel.cameraManager.setZoom(factor: currentZoomFactor)
+                            }
+                    )
             } else if viewModel.cameraManager.status == .unauthorized {
                 VStack(spacing: 16) {
                     Image(systemName: "camera.slash")
@@ -51,184 +177,83 @@ struct CaptureView: View {
                     }
                 }
             }
-
-            VStack(spacing: 22) {
-                contextHeader
-
-                viewfinder
-
-                Spacer()
-
-                latestCaptureStatus
-                captureControls
-            }
-            .padding(.horizontal, 22)
-            .padding(.top, 20)
-            .padding(.bottom, 24)
-
-            if showsCaptureFlash {
-                Color.white
-                    .opacity(0.18)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-            }
-        }
-        .animation(.easeOut(duration: 0.16), value: showsCaptureFlash)
-        .animation(.spring(response: 0.24, dampingFraction: 0.72), value: shutterIsPressed)
-        .onAppear {
-            viewModel.onAppear()
-        }
-        .onDisappear {
-            viewModel.onDisappear()
-        }
-    }
-
-    private var contextHeader: some View {
-        HStack(spacing: 12) {
-            Image(systemName: viewModel.currentEvent == nil ? "tray.full" : "calendar.badge.clock")
-                .font(.headline)
-                .frame(width: 36, height: 36)
-                .background(.white.opacity(0.12), in: Circle())
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(viewModel.contextTitle)
-                    .font(.headline.weight(.semibold))
-                    .lineLimit(1)
-
-                Text(viewModel.contextSubtitle)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.66))
-                    .lineLimit(1)
-            }
-
-            Spacer(minLength: 10)
-        }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay {
-            Capsule()
-                .stroke(.white.opacity(0.14), lineWidth: 1)
-        }
-    }
-
-    private var viewfinder: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(Color.white.opacity(0.06))
-
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .stroke(.white.opacity(0.16), lineWidth: 1)
-
+            
+            // 3x3 Grid
             VStack {
-                HStack {
-                    Label("AUTO", systemImage: "sparkles")
-                        .font(.caption.weight(.bold))
-                        .labelStyle(.titleAndIcon)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 7)
-                        .background(Color(.notieeCameraBackground).opacity(0.58), in: Capsule())
-
-                    Spacer()
-
-                    Text(viewModel.currentEvent?.kind.displayName ?? "INBOX")
-                        .font(.caption.monospaced().weight(.bold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 7)
-                        .background(Color(.notieeCameraBackground).opacity(0.58), in: Capsule())
-                }
-                .foregroundStyle(.white.opacity(0.86))
-
                 Spacer()
-
-                VStack(spacing: 10) {
-                    Image(systemName: "viewfinder")
-                        .font(.system(size: 42, weight: .regular))
-                        .foregroundStyle(.white.opacity(0.54))
-
-                    Text(viewModel.latestRecord?.title ?? viewModel.contextTitle)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.92))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.82)
-                }
-
+                Rectangle().fill(Color.white.opacity(0.2)).frame(height: 0.5)
                 Spacer()
-
-                HStack {
-                    Image(systemName: "scope")
-                    Text(Date.now.formatted(.dateTime.hour().minute()))
-                        .font(.caption.monospacedDigit().weight(.semibold))
-
-                    Spacer()
-
-                    if !viewModel.capturedRecords.isEmpty {
-                        Text("\(viewModel.capturedRecords.count) 张")
-                            .font(.caption.weight(.semibold))
-                    }
-                }
-                .foregroundStyle(.white.opacity(0.7))
+                Rectangle().fill(Color.white.opacity(0.2)).frame(height: 0.5)
+                Spacer()
             }
-            .padding(18)
+            HStack {
+                Spacer()
+                Rectangle().fill(Color.white.opacity(0.2)).frame(width: 0.5)
+                Spacer()
+                Rectangle().fill(Color.white.opacity(0.2)).frame(width: 0.5)
+                Spacer()
+            }
 
-            CornerGuides()
-                .stroke(.white.opacity(0.48), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                .padding(18)
+            // Zoom Indicator
+            VStack {
+                Spacer()
+                Button {
+                    currentZoomFactor = 1.0
+                    viewModel.cameraManager.setZoom(factor: 1.0)
+                } label: {
+                    let zoomText = currentZoomFactor == 1.0 ? "1x" : String(format: "%.1fx", currentZoomFactor)
+                    Text(zoomText)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Color.black.opacity(0.6), in: Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                }
+                .padding(.bottom, 16)
+            }
         }
-        .aspectRatio(0.75, contentMode: .fit)
+        .aspectRatio(3.0/4.0, contentMode: .fit)
         .frame(maxWidth: .infinity)
     }
 
-    @ViewBuilder
-    private var latestCaptureStatus: some View {
-        if let latestRecord = viewModel.latestRecord {
-            HStack(spacing: 10) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-
-                Text(latestRecord.title)
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(1)
-
-                Spacer(minLength: 8)
-
-                Text(latestRecord.processingState.displayName)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.62))
+    private var captureModeSwitcher: some View {
+        HStack(spacing: 24) {
+            Button("单拍") {
+                withAnimation(.easeInOut(duration: 0.2)) { viewModel.captureMode = .single }
             }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .font(.system(size: 13, weight: viewModel.captureMode == .single ? .bold : .regular))
+            .foregroundStyle(viewModel.captureMode == .single ? .yellow : .white.opacity(0.6))
+
+            Button("连拍") {
+                withAnimation(.easeInOut(duration: 0.2)) { viewModel.captureMode = .batch }
+            }
+            .font(.system(size: 13, weight: viewModel.captureMode == .batch ? .bold : .regular))
+            .foregroundStyle(viewModel.captureMode == .batch ? .yellow : .white.opacity(0.6))
         }
+        .padding(.bottom, 16)
     }
 
-    private var captureControls: some View {
-        HStack(alignment: .center) {
+    private var bottomControls: some View {
+        HStack {
+            // Left: 暂存区
             Button {
                 if let latest = viewModel.latestRecord {
                     presentedRecord = latest
                 }
             } label: {
                 ZStack(alignment: .topTrailing) {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(.white.opacity(0.12))
-                        .frame(width: 58, height: 58)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.white.opacity(0.8), lineWidth: 1.5)
+                        .frame(width: 54, height: 54)
                         .overlay {
                             if let latestRecord = viewModel.latestRecord,
-                               let image = LocalImageStore.shared.loadImage(path: latestRecord.localImagePath) {
+                               let path = latestRecord.localImagePaths.first,
+                               let image = LocalImageStore.shared.loadImage(path: path) {
                                 Image(uiImage: image)
                                     .resizable()
                                     .scaledToFill()
-                                    .frame(width: 58, height: 58)
-                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                            } else {
-                                Image(systemName: viewModel.latestRecord == nil ? "tray" : "photo")
-                                    .font(.title3.weight(.semibold))
-                                    .foregroundStyle(.white)
+                                    .frame(width: 54, height: 54)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                             }
                         }
 
@@ -237,57 +262,85 @@ struct CaptureView: View {
                             .font(.caption2.weight(.bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
+                            .padding(.vertical, 2)
                             .background(.blue, in: Capsule())
-                            .offset(x: 6, y: -6)
+                            .offset(x: 8, y: -8)
                     }
                 }
             }
+            .frame(width: 80)
             .accessibilityLabel("暂存区")
 
             Spacer()
 
+            // Center: Shutter
             Button {
                 capture()
             } label: {
                 Circle()
                     .fill(.white)
-                    .frame(width: 74, height: 74)
+                    .frame(width: 66, height: 66)
+                    .scaleEffect(shutterIsPressed ? 0.9 : 1)
                     .overlay {
                         Circle()
-                            .stroke(.white.opacity(0.42), lineWidth: 6)
-                            .frame(width: 88, height: 88)
+                            .stroke(.white, lineWidth: 4)
+                            .frame(width: 80, height: 80)
                     }
-                    .overlay {
-                        Circle()
-                            .stroke(Color(.notieeCameraBackground).opacity(0.18), lineWidth: 1)
-                            .frame(width: 64, height: 64)
-                    }
-                    .scaleEffect(shutterIsPressed ? 0.94 : 1)
             }
             .accessibilityLabel("拍摄")
-
+            
             Spacer()
 
-            PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
-                Image(systemName: "photo.on.rectangle")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 58, height: 58)
-                    .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            }
-            .accessibilityLabel("相册")
-            .onChange(of: selectedItem) { newValue in
-                Task {
-                    if let data = try? await newValue?.loadTransferable(type: Data.self),
-                       let image = UIImage(data: data) {
-                        viewModel.importPhoto(image)
+            // Right: Photos Picker or Finish Batch
+            Group {
+                if viewModel.captureMode == .batch && !viewModel.batchImagePaths.isEmpty {
+                    Button {
+                        viewModel.finishBatch()
+                    } label: {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 54, height: 54)
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundStyle(.black)
+                            
+                            Text("\(viewModel.batchImagePaths.count)")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(.blue, in: Capsule())
+                                .offset(x: 18, y: -18)
+                        }
                     }
-                    selectedItem = nil
+                    .accessibilityLabel("完成连拍")
+                } else {
+                    PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.15))
+                                .frame(width: 54, height: 54)
+                            Image(systemName: "photo.on.rectangle")
+                                .font(.system(size: 24))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .accessibilityLabel("相册")
+                    .onChange(of: selectedItem) { _, newValue in
+                        Task {
+                            if let data = try? await newValue?.loadTransferable(type: Data.self),
+                               let image = UIImage(data: data) {
+                                viewModel.importPhoto(image)
+                            }
+                            selectedItem = nil
+                        }
+                    }
                 }
             }
+            .frame(width: 80)
         }
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 30)
         .sheet(item: $presentedRecord) { record in
             if let store = viewModel.store {
                 NavigationStack {
@@ -299,57 +352,16 @@ struct CaptureView: View {
 
     private func capture() {
         withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-            viewModel.capturePhoto()
             shutterIsPressed = true
             showsCaptureFlash = true
         }
 
+        viewModel.capturePhoto()
+
         Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(120))
+            try? await Task.sleep(for: .milliseconds(100))
             shutterIsPressed = false
             showsCaptureFlash = false
-        }
-    }
-}
-
-private struct CornerGuides: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let length: CGFloat = 34
-
-        path.move(to: CGPoint(x: rect.minX, y: rect.minY + length))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.minX + length, y: rect.minY))
-
-        path.move(to: CGPoint(x: rect.maxX - length, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + length))
-
-        path.move(to: CGPoint(x: rect.maxX, y: rect.maxY - length))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.maxX - length, y: rect.maxY))
-
-        path.move(to: CGPoint(x: rect.minX + length, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - length))
-
-        return path
-    }
-}
-
-private extension UIColor {
-    static let notieeCameraBackground = UIColor(red: 0.07, green: 0.08, blue: 0.09, alpha: 1.0)
-}
-
-private extension ScheduledEvent.Kind {
-    var displayName: String {
-        switch self {
-        case .course:
-            "课程"
-        case .meeting:
-            "会议"
-        case .uncategorized:
-            "未分类"
         }
     }
 }

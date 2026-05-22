@@ -63,6 +63,19 @@ final class RecordDetailViewModel: ObservableObject {
     func toggleTodo(id: UUID) {
         store.toggleTodo(id: id)
     }
+    
+    func deleteTodo(id: UUID) {
+        store.deleteTodo(id: id)
+    }
+    
+    func deleteRecord() {
+        store.toggleDeleted(id: record.id)
+    }
+    
+    func saveEdits(updatedRecord: NoteRecord, updatedTodos: [NoteTodo]) {
+        store.updateRecord(updatedRecord)
+        store.replaceTodos(for: updatedRecord.id, with: updatedTodos)
+    }
 
     func processRecord() {
         store.processRecord(record)
@@ -78,5 +91,13 @@ final class RecordDetailViewModel: ObservableObject {
 
     var availableEvents: [ScheduledEvent] {
         store.events
+    }
+    
+    func reassignFolder(to folderID: UUID?) {
+        store.assignRecordToFolder(recordID: record.id, folderID: folderID)
+    }
+    
+    var availableFolders: [CustomFolder] {
+        store.customFolders
     }
 }

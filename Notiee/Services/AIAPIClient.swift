@@ -1,7 +1,7 @@
 import Foundation
 
 enum OpenAICaller {
-    static func callVision(endpoint: String, model: String, apiKey: String, base64Image: String, prompt: String) async throws -> String {
+    static func callVision(endpoint: String, model: String, apiKey: String, base64Image: String, prompt: String) async throws -> (String, Int) {
         let payload: [String: Any] = [
             "model": model,
             "messages": [
@@ -19,7 +19,7 @@ enum OpenAICaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
 
-    static func callText(endpoint: String, model: String, apiKey: String, prompt: String) async throws -> String {
+    static func callText(endpoint: String, model: String, apiKey: String, prompt: String) async throws -> (String, Int) {
         let payload: [String: Any] = [
             "model": model,
             "messages": [
@@ -31,7 +31,7 @@ enum OpenAICaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
     
-    private static func performRequest(endpoint: String, apiKey: String, payload: [String: Any]) async throws -> String {
+    private static func performRequest(endpoint: String, apiKey: String, payload: [String: Any]) async throws -> (String, Int) {
         guard let url = URL(string: endpoint) else {
             throw AIError.apiError("Invalid URL")
         }
@@ -62,12 +62,14 @@ enum OpenAICaller {
             throw AIError.parsingFailed
         }
         
-        return content
+        let tokens = (json["usage"] as? [String: Any])?["total_tokens"] as? Int ?? 0
+        
+        return (content, tokens)
     }
 }
 
 enum AnthropicCaller {
-    static func callVision(endpoint: String, model: String, apiKey: String, base64Image: String, prompt: String) async throws -> String {
+    static func callVision(endpoint: String, model: String, apiKey: String, base64Image: String, prompt: String) async throws -> (String, Int) {
         let payload: [String: Any] = [
             "model": model,
             "max_tokens": 1500,
@@ -94,7 +96,7 @@ enum AnthropicCaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
 
-    static func callText(endpoint: String, model: String, apiKey: String, prompt: String) async throws -> String {
+    static func callText(endpoint: String, model: String, apiKey: String, prompt: String) async throws -> (String, Int) {
         let payload: [String: Any] = [
             "model": model,
             "max_tokens": 1000,
@@ -105,7 +107,7 @@ enum AnthropicCaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
     
-    private static func performRequest(endpoint: String, apiKey: String, payload: [String: Any]) async throws -> String {
+    private static func performRequest(endpoint: String, apiKey: String, payload: [String: Any]) async throws -> (String, Int) {
         guard let url = URL(string: endpoint) else {
             throw AIError.apiError("Invalid URL")
         }
@@ -136,6 +138,11 @@ enum AnthropicCaller {
             throw AIError.parsingFailed
         }
         
-        return text
+        let usage = json["usage"] as? [String: Any]
+        let inputTokens = usage?["input_tokens"] as? Int ?? 0
+        let outputTokens = usage?["output_tokens"] as? Int ?? 0
+        let tokens = inputTokens + outputTokens
+        
+        return (text, tokens)
     }
 }

@@ -20,25 +20,25 @@ struct RootTabView: View {
         TabView(selection: $selectedTab) {
             TodayView(store: store)
                 .tabItem {
-                    Label(AppTab.today.title, systemImage: AppTab.today.systemImage)
+                    Label(AppTab.today.titleKey, systemImage: AppTab.today.systemImage)
                 }
                 .tag(AppTab.today)
 
             CaptureView(viewModel: CaptureViewModel(store: store))
                 .tabItem {
-                    Label(AppTab.capture.title, systemImage: AppTab.capture.systemImage)
+                    Label(AppTab.capture.titleKey, systemImage: AppTab.capture.systemImage)
                 }
                 .tag(AppTab.capture)
 
             RecordsView(store: store)
                 .tabItem {
-                    Label(AppTab.records.title, systemImage: AppTab.records.systemImage)
+                    Label(AppTab.records.titleKey, systemImage: AppTab.records.systemImage)
                 }
                 .tag(AppTab.records)
 
-            SettingsView(settingsStore: settingsStore)
+            MeView(settingsStore: settingsStore, store: store)
                 .tabItem {
-                    Label(AppTab.settings.title, systemImage: AppTab.settings.systemImage)
+                    Label(AppTab.settings.titleKey, systemImage: AppTab.settings.systemImage)
                 }
                 .tag(AppTab.settings)
         }

@@ -2,25 +2,40 @@ import Combine
 import Foundation
 import UIKit
 
+enum CaptureMode {
+    case single
+    case batch
+}
+
 @MainActor
 final class CaptureViewModel: ObservableObject {
     @Published private(set) var capturedRecords: [NoteRecord] = []
     
+    @Published var captureMode: CaptureMode = .single
+    @Published var batchImagePaths: [String] = []
+    
     let cameraManager = CameraManager()
 
-    private let currentDate: Date
-    private let events: [ScheduledEvent]
+    let currentDate: Date
+    private let calendar: Calendar
     private let scheduleMatcher: ScheduleMatcher
     let store: NotieeStore?
+    
+    @Published var selectedEventID: UUID?
+    
+    var events: [ScheduledEvent] {
+        store?.events ?? []
+    }
+    
     private var cancellables: Set<AnyCancellable> = []
 
     init(
         currentDate: Date = Date(),
-        events: [ScheduledEvent] = [],
+        calendar: Calendar = .current,
         scheduleMatcher: ScheduleMatcher = ScheduleMatcher()
     ) {
         self.currentDate = currentDate
-        self.events = events
+        self.calendar = calendar
         self.scheduleMatcher = scheduleMatcher
         self.store = nil
         
@@ -29,7 +44,7 @@ final class CaptureViewModel: ObservableObject {
 
     init(store: NotieeStore) {
         self.currentDate = store.currentDate
-        self.events = store.events
+        self.calendar = .current
         self.scheduleMatcher = ScheduleMatcher()
         self.store = store
         
@@ -52,10 +67,9 @@ final class CaptureViewModel: ObservableObject {
     }
 
     var currentEvent: ScheduledEvent? {
-        if let store {
-            return store.currentEvent
+        if let id = selectedEventID, let event = events.first(where: { $0.id == id }) {
+            return event
         }
-
         return scheduleMatcher.currentEvent(from: events, at: currentDate)
     }
 
@@ -68,7 +82,7 @@ final class CaptureViewModel: ObservableObject {
     }
 
     var latestRecord: NoteRecord? {
-        capturedRecords.first
+        store?.records.max(by: { $0.capturedAt < $1.capturedAt })
     }
 
     func onAppear() {
@@ -92,28 +106,51 @@ final class CaptureViewModel: ObservableObject {
         do {
             let relativePath = try LocalImageStore.shared.saveImage(image)
             
-            if let store {
-                let record = store.capturePhoto(localImagePath: relativePath)
-                capturedRecords.insert(record, at: 0)
+            if captureMode == .batch {
+                batchImagePaths.append(relativePath)
+                if batchImagePaths.count == 9 {
+                    finishBatch()
+                }
             } else {
-                let event = currentEvent
-                let captureIndex = capturedRecords.count + 1
-                let record = NoteRecord(
-                    eventID: event?.id,
-                    capturedAt: currentDate,
-                    localImagePath: relativePath,
-                    title: event.map { "\($0.title) 拍记" } ?? "未分类拍记",
-                    processingState: .pending
-                )
-                capturedRecords.insert(record, at: 0)
+                if let store {
+                    let record = store.capturePhoto(localImagePaths: [relativePath])
+                    store.processRecord(record)
+                } else {
+                    let record = NoteRecord(
+                        eventID: currentEvent?.id,
+                        capturedAt: currentDate,
+                        localImagePaths: [relativePath],
+                        title: currentEvent.map { "\($0.title) 拍记" } ?? "未分类拍记",
+                        processingState: .pending
+                    )
+                    capturedRecords.insert(record, at: 0)
+                }
             }
         } catch {
             print("Failed to save captured image: \(error)")
         }
     }
 
+    func finishBatch() {
+        guard !batchImagePaths.isEmpty else { return }
+        if let store {
+            let record = store.capturePhoto(localImagePaths: batchImagePaths)
+            store.processRecord(record)
+        } else {
+            let record = NoteRecord(
+                eventID: currentEvent?.id,
+                capturedAt: currentDate,
+                localImagePaths: batchImagePaths,
+                title: currentEvent.map { "\($0.title) 连拍" } ?? "未分类连拍",
+                processingState: .pending
+            )
+            capturedRecords.insert(record, at: 0)
+        }
+        batchImagePaths.removeAll()
+    }
+
     static func sample(currentDate: Date = Date()) -> CaptureViewModel {
-        let today = TodayViewModel.sample(currentDate: currentDate)
-        return CaptureViewModel(currentDate: currentDate, events: today.events)
+        let currentDate = Date()
+        return CaptureViewModel(currentDate: currentDate)
     }
 }

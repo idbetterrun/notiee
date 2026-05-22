@@ -4,7 +4,7 @@ import Foundation
 @MainActor
 final class TodayViewModel: ObservableObject {
 
-    let currentDate: Date
+    @Published var currentDate: Date
     private let calendar: Calendar
     private let scheduleMatcher: ScheduleMatcher
     weak var store: NotieeStore?
@@ -44,6 +44,7 @@ final class TodayViewModel: ObservableObject {
         store.$events.assign(to: &$events)
         store.$todos.assign(to: &$todos)
         store.$records.assign(to: &$records)
+        store.$currentDate.assign(to: &$currentDate)
     }
 
     // MARK: - Current Event
@@ -81,11 +82,20 @@ final class TodayViewModel: ObservableObject {
     var pendingTodos: [NoteTodo] {
         todos
             .filter { !$0.isCompleted }
+            .filter { todo in
+                guard let record = store?.sortedRecords.first(where: { $0.id == todo.recordID }) else { return false }
+                return !record.isDeleted
+            }
             .sorted { $0.createdAt < $1.createdAt }
     }
 
     var allTodos: [NoteTodo] {
-        todos.sorted { $0.createdAt < $1.createdAt }
+        todos
+            .filter { todo in
+                guard let record = store?.sortedRecords.first(where: { $0.id == todo.recordID }) else { return false }
+                return !record.isDeleted
+            }
+            .sorted { $0.createdAt < $1.createdAt }
     }
 
     func toggleTodo(id: UUID) {
@@ -184,7 +194,7 @@ final class TodayViewModel: ObservableObject {
             NoteRecord(
                 eventID: course.id,
                 capturedAt: calendar.date(byAdding: .minute, value: -8, to: currentDate)!,
-                localImagePath: "mock://whiteboard-flow",
+                localImagePaths: ["mock://whiteboard-flow"],
                 title: "白板：拍记流程",
                 ocrText: "capture queue, schedule matching, ai summary",
                 summary: "拍照后自动关联当前课程，进入后台处理队列。",
@@ -193,7 +203,7 @@ final class TodayViewModel: ObservableObject {
             NoteRecord(
                 eventID: course.id,
                 capturedAt: calendar.date(byAdding: .minute, value: -46, to: currentDate)!,
-                localImagePath: "mock://schedule-context",
+                localImagePaths: ["mock://schedule-context"],
                 title: "课件：日程感知",
                 ocrText: "calendar import, current event, inbox fallback",
                 summary: "通过日程时间段给照片补充课程上下文。",
@@ -202,7 +212,7 @@ final class TodayViewModel: ObservableObject {
             NoteRecord(
                 eventID: nil,
                 capturedAt: calendar.date(byAdding: .day, value: -1, to: currentDate)!,
-                localImagePath: "mock://yesterday",
+                localImagePaths: ["mock://yesterday"],
                 title: "昨天记录",
                 ocrText: "",
                 summary: "",

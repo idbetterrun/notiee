@@ -18,6 +18,7 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable {
     var startDate: Date
     var endDate: Date
     var kind: Kind
+    var tagID: UUID?
     var updatedAt: Date
 
     init(
@@ -26,6 +27,7 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable {
         startDate: Date,
         endDate: Date,
         kind: Kind = .course,
+        tagID: UUID? = nil,
         updatedAt: Date = Date()
     ) {
         self.id = id
@@ -33,6 +35,7 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable {
         self.startDate = startDate
         self.endDate = endDate
         self.kind = kind
+        self.tagID = tagID
         self.updatedAt = updatedAt
     }
 

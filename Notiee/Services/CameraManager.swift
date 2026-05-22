@@ -12,16 +12,23 @@ final class CameraManager: NSObject, ObservableObject {
 
     @Published private(set) var status: Status = .unconfigured
     @Published private(set) var capturedImage: UIImage?
+    @Published var flashMode: AVCaptureDevice.FlashMode = .auto
 
     let session = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
     private let sessionQueue = DispatchQueue(label: "com.notiee.camera.session")
+    private var videoDevice: AVCaptureDevice?
 
     func checkPermissionsAndConfigure() {
         #if targetEnvironment(simulator)
         Task { @MainActor in self.status = .ready }
         return
         #endif
+
+        if status == .ready {
+            startSession()
+            return
+        }
 
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -64,14 +71,16 @@ final class CameraManager: NSObject, ObservableObject {
                 position: .back
             )
             
-            guard let videoDevice = discoverySession.devices.first ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-                  let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
-                  self.session.canAddInput(videoDeviceInput) else {
-                Task { @MainActor in self.status = .failed }
-                self.session.commitConfiguration()
-                return
+            if let videoDevice = discoverySession.devices.first ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
+                self.videoDevice = videoDevice
+                guard let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
+                      self.session.canAddInput(videoDeviceInput) else {
+                    Task { @MainActor in self.status = .failed }
+                    self.session.commitConfiguration()
+                    return
+                }
+                self.session.addInput(videoDeviceInput)
             }
-            self.session.addInput(videoDeviceInput)
 
             // Add photo output
             guard self.session.canAddOutput(self.photoOutput) else {
@@ -91,16 +100,30 @@ final class CameraManager: NSObject, ObservableObject {
     }
 
     func startSession() {
-        guard status == .ready, !session.isRunning else { return }
+        guard status == .ready else { return }
         sessionQueue.async { [weak self] in
-            self?.session.startRunning()
+            guard let self = self, !self.session.isRunning else { return }
+            self.session.startRunning()
         }
     }
 
     func stopSession() {
-        guard session.isRunning else { return }
         sessionQueue.async { [weak self] in
-            self?.session.stopRunning()
+            guard let self = self, self.session.isRunning else { return }
+            self.session.stopRunning()
+        }
+    }
+
+    // MARK: - Photo Capture
+
+    func setZoom(factor: CGFloat) {
+        guard let device = videoDevice else { return }
+        do {
+            try device.lockForConfiguration()
+            device.videoZoomFactor = max(device.minAvailableVideoZoomFactor, min(factor, device.maxAvailableVideoZoomFactor))
+            device.unlockForConfiguration()
+        } catch {
+            print("Failed to set zoom: \(error)")
         }
     }
 
@@ -129,6 +152,9 @@ final class CameraManager: NSObject, ObservableObject {
         sessionQueue.async { [weak self] in
             guard let self else { return }
             let settings = AVCapturePhotoSettings()
+            if self.photoOutput.supportedFlashModes.contains(self.flashMode) {
+                settings.flashMode = self.flashMode
+            }
             
             if let videoConnection = self.photoOutput.connection(with: .video) {
                 // Ensure orientation is correct for portrait (common on iPhones)

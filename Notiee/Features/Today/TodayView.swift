@@ -6,6 +6,7 @@ struct TodayView: View {
     @State private var currentCollapsed = false
     @State private var upcomingCollapsed = false
     @State private var selectedTodo: NoteTodo?
+    @State private var selectedEvent: ScheduledEvent?
 
     @MainActor
     init() {
@@ -86,6 +87,9 @@ struct TodayView: View {
             .sheet(item: $selectedTodo) { todo in
                 TodoDetailSheet(todo: todo, viewModel: viewModel)
             }
+            .sheet(item: $selectedEvent) { event in
+                EventDetailSheet(event: event, viewModel: viewModel)
+            }
         }
     }
 
@@ -150,10 +154,15 @@ struct TodayView: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 } else {
                     ForEach(events) { event in
-                        EventCard(event: event, currentDate: viewModel.currentDate)
+                        Button {
+                            selectedEvent = event
+                        } label: {
+                            EventCard(event: event, currentDate: viewModel.currentDate, tag: viewModel.store?.customTags.first(where: { $0.id == event.tagID }))
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -193,7 +202,7 @@ struct TodayView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             } else {
                 ForEach(viewModel.allTodos) { todo in
                     TodoRow(todo: todo, onToggle: {
@@ -229,7 +238,7 @@ struct TodayView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             } else {
                 ForEach(viewModel.todayRecords) { record in
                     NavigationLink(value: record) {
@@ -247,16 +256,17 @@ struct TodayView: View {
 private struct EventCard: View {
     let event: ScheduledEvent
     let currentDate: Date
+    let tag: EventTag?
 
     var body: some View {
         HStack(spacing: 14) {
-            // Kind badge
-            Text(event.kind.shortLabel)
+            // Tag badge
+            Text(tag?.name ?? "普通")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
-                .background(event.kind.badgeColor, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(tag?.color ?? .secondary, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.title)
@@ -271,7 +281,7 @@ private struct EventCard: View {
             Spacer(minLength: 4)
         }
         .padding(14)
-        .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     private var timeRange: String {
@@ -311,7 +321,7 @@ private struct TodoRow: View {
             .buttonStyle(.plain)
         }
         .padding(14)
-        .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
@@ -394,27 +404,120 @@ private struct RecordCard: View {
             Spacer(minLength: 0)
         }
         .padding(14)
-        .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
-// MARK: - Model Extensions
+// MARK: - EventDetailSheet
 
-private extension ScheduledEvent.Kind {
-    var shortLabel: String {
-        switch self {
-        case .course: "课程"
-        case .meeting: "会议"
-        case .uncategorized: "其他"
+private struct EventDetailSheet: View {
+    let event: ScheduledEvent
+    @ObservedObject var viewModel: TodayViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var showingAddTagAlert = false
+    @State private var newTagName = ""
+    @State private var newTagColor = "#007AFF"
+    
+    let presetColors = [
+        "#007AFF", // Blue
+        "#FF9500", // Orange
+        "#34C759", // Green
+        "#AF52DE", // Purple
+        "#FF3B30", // Red
+        "#5856D6", // Indigo
+        "#FFCC00"  // Yellow
+    ]
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("日程信息") {
+                    LabeledContent("标题", value: event.title)
+                    LabeledContent("开始时间", value: event.startDate.formatted(date: .abbreviated, time: .shortened))
+                    LabeledContent("结束时间", value: event.endDate.formatted(date: .abbreviated, time: .shortened))
+                    LabeledContent("持续时间", value: formattedDuration(from: event.startDate, to: event.endDate))
+                }
+                
+                Section {
+                    let currentTagID = viewModel.store?.events.first(where: { $0.id == event.id })?.tagID
+                    
+                    if let store = viewModel.store {
+                        ForEach(store.customTags) { tag in
+                            Button {
+                                store.assignTagToEvent(eventID: event.id, tagID: tag.id)
+                            } label: {
+                                HStack {
+                                    Circle()
+                                        .fill(tag.color)
+                                        .frame(width: 16, height: 16)
+                                    Text(tag.name)
+                                        .foregroundStyle(.primary)
+                                    Spacer()
+                                    if currentTagID == tag.id {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    Button("普通 (无标签)") {
+                        viewModel.store?.assignTagToEvent(eventID: event.id, tagID: nil)
+                    }
+                    .foregroundStyle(.secondary)
+                    
+                } header: {
+                    Text("选择标签")
+                }
+                
+                Section {
+                    Button("新建标签...") {
+                        newTagName = ""
+                        newTagColor = "#007AFF"
+                        showingAddTagAlert = true
+                    }
+                }
+            }
+            .navigationTitle("日程详情")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("新建标签", isPresented: $showingAddTagAlert) {
+                TextField("标签名称", text: $newTagName)
+                Button("取消", role: .cancel) { }
+                Button("创建") {
+                    if !newTagName.isEmpty {
+                        viewModel.store?.createTag(name: newTagName, colorHex: newTagColor)
+                        // Assign the newly created tag
+                        if let newTag = viewModel.store?.customTags.last {
+                            viewModel.store?.assignTagToEvent(eventID: event.id, tagID: newTag.id)
+                        }
+                    }
+                }
+            } message: {
+                Text("将在下次更新中提供自选颜色 UI，目前默认使用蓝色。")
+            }
         }
     }
-
-    var badgeColor: Color {
-        switch self {
-        case .course: .orange
-        case .meeting: .blue
-        case .uncategorized: .secondary
+    
+    private func formattedDuration(from: Date, to: Date) -> String {
+        let minutes = Int(to.timeIntervalSince(from) / 60)
+        if minutes >= 60 {
+            let hours = minutes / 60
+            let mins = minutes % 60
+            if mins == 0 {
+                return "\(hours) 小时"
+            }
+            return "\(hours) 小时 \(mins) 分钟"
         }
+        return "\(minutes) 分钟"
     }
 }
 

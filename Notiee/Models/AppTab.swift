@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum AppTab: String, CaseIterable, Codable, Identifiable, Sendable {
     case today
@@ -10,16 +11,16 @@ enum AppTab: String, CaseIterable, Codable, Identifiable, Sendable {
         rawValue
     }
 
-    var title: String {
+    var titleKey: LocalizedStringKey {
         switch self {
         case .today:
-            "Today"
+            return "Today"
         case .capture:
-            "拍记"
+            return "Snap"
         case .records:
-            "记录"
+            return "Records"
         case .settings:
-            "我"
+            return "Me"
         }
     }
 

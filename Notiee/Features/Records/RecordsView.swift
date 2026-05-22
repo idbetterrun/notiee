@@ -3,6 +3,16 @@ import SwiftUI
 struct RecordsView: View {
     @ObservedObject private var store: NotieeStore
     @State private var searchText = ""
+    
+    @State private var showingCreateFolderAlert = false
+    @State private var newFolderName = ""
+    
+    @State private var showingRenameFolderAlert = false
+    @State private var folderToRename: CustomFolder?
+    @State private var renameFolderName = ""
+    
+    @State private var showingDeleteFolderAlert = false
+    @State private var folderToDelete: CustomFolder?
 
     @MainActor
     init() {
@@ -17,9 +27,51 @@ struct RecordsView: View {
         NavigationStack {
             List {
                 Section("系统文件夹") {
-                    FolderSummaryRow(title: "未分类", systemImage: "tray", count: store.uncategorizedCount)
-                    FolderSummaryRow(title: "今日拍记", systemImage: "calendar", count: store.todayRecordCount)
-                    FolderSummaryRow(title: "待处理", systemImage: "clock", count: store.pendingRecordsCount)
+                    NavigationLink(destination: GenericRecordListView(title: "收藏夹", systemImage: "star.fill", records: store.favoriteRecords, store: store)) {
+                        FolderSummaryRow(title: "收藏夹", systemImage: "star.fill", count: store.favoriteRecords.count)
+                    }
+                    NavigationLink(destination: GenericRecordListView(title: "未分类", systemImage: "tray", records: store.sortedRecords.filter { $0.eventID == nil && $0.folderID == nil }, store: store)) {
+                        FolderSummaryRow(title: "未分类", systemImage: "tray", count: store.sortedRecords.filter { $0.eventID == nil && $0.folderID == nil }.count)
+                    }
+                    NavigationLink(destination: GenericRecordListView(title: "今日拍记", systemImage: "calendar", records: store.todayRecords, store: store)) {
+                        FolderSummaryRow(title: "今日拍记", systemImage: "calendar", count: store.todayRecordCount)
+                    }
+                    NavigationLink(destination: GenericRecordListView(title: "待处理", systemImage: "clock", records: store.sortedRecords.filter { $0.processingState == .pending }, store: store)) {
+                        FolderSummaryRow(title: "待处理", systemImage: "clock", count: store.pendingRecordsCount)
+                    }
+                    NavigationLink(destination: GenericRecordListView(title: "回收站", systemImage: "trash", records: store.deletedRecords, store: store, isTrash: true)) {
+                        FolderSummaryRow(title: "回收站", systemImage: "trash", count: store.deletedRecords.count)
+                    }
+                }
+                
+                if !store.customFolders.isEmpty {
+                    Section("自建文件夹") {
+                        ForEach(store.customFolders) { folder in
+                            NavigationLink(destination: GenericRecordListView(title: folder.name, systemImage: "folder", records: store.sortedRecords.filter { $0.folderID == folder.id }, store: store)) {
+                                FolderSummaryRow(
+                                    title: folder.name,
+                                    systemImage: "folder",
+                                    count: store.records.filter { $0.folderID == folder.id && !$0.isDeleted }.count
+                                )
+                            }
+                            .contextMenu {
+                                Button {
+                                    renameFolderName = folder.name
+                                    folderToRename = folder
+                                    showingRenameFolderAlert = true
+                                } label: {
+                                    Label("重命名", systemImage: "pencil")
+                                }
+                                
+                                Button(role: .destructive) {
+                                    folderToDelete = folder
+                                    showingDeleteFolderAlert = true
+                                } label: {
+                                    Label("删除", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if !store.eventsWithRecords.isEmpty {
@@ -52,12 +104,68 @@ struct RecordsView: View {
                             } label: {
                                 RecordListRow(record: record, eventTitle: store.eventTitle(for: record))
                             }
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                Button {
+                                    store.toggleFavorite(id: record.id)
+                                } label: {
+                                    Label(record.isFavorite ? "取消收藏" : "收藏", systemImage: record.isFavorite ? "star.slash" : "star")
+                                }
+                                .tint(.orange)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    store.toggleDeleted(id: record.id)
+                                } label: {
+                                    Label("删除", systemImage: "trash")
+                                }
+                            }
                         }
                     }
                 }
             }
             .navigationTitle("记录")
             .searchable(text: $searchText, prompt: "搜索标题、摘要或 OCR")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        newFolderName = ""
+                        showingCreateFolderAlert = true
+                    } label: {
+                        Image(systemName: "folder.badge.plus")
+                    }
+                    .accessibilityLabel("新建文件夹")
+                }
+            }
+            .alert("新建文件夹", isPresented: $showingCreateFolderAlert) {
+                TextField("文件夹名称", text: $newFolderName)
+                Button("取消", role: .cancel) { }
+                Button("创建") {
+                    let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !trimmed.isEmpty {
+                        store.createFolder(name: trimmed)
+                    }
+                }
+            }
+            .alert("重命名文件夹", isPresented: $showingRenameFolderAlert) {
+                TextField("文件夹名称", text: $renameFolderName)
+                Button("取消", role: .cancel) { }
+                Button("确定") {
+                    let trimmed = renameFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !trimmed.isEmpty, let folder = folderToRename {
+                        store.renameFolder(id: folder.id, newName: trimmed)
+                    }
+                }
+            }
+            .alert("删除文件夹", isPresented: $showingDeleteFolderAlert) {
+                Button("取消", role: .cancel) { }
+                Button("删除", role: .destructive) {
+                    if let folder = folderToDelete {
+                        store.deleteFolder(id: folder.id)
+                    }
+                }
+            } message: {
+                Text("删除此文件夹不会删除其中的拍记，它们将被移至“未分类”。")
+            }
         }
     }
 
@@ -125,4 +233,115 @@ struct RecordListRow: View {
     }
 }
 
-
+struct GenericRecordListView: View {
+    let title: String
+    let systemImage: String
+    var records: [NoteRecord]
+    @ObservedObject var store: NotieeStore
+    var isTrash: Bool = false
+    
+    @State private var selection = Set<UUID>()
+    @Environment(\.editMode) private var editMode
+    
+    var body: some View {
+        List(selection: $selection) {
+            ForEach(records) { record in
+                NavigationLink {
+                    RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+                } label: {
+                    RecordListRow(record: record, eventTitle: store.eventTitle(for: record))
+                }
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    if !isTrash {
+                        Button {
+                            store.toggleFavorite(id: record.id)
+                        } label: {
+                            Label(record.isFavorite ? "取消收藏" : "收藏", systemImage: record.isFavorite ? "star.slash" : "star")
+                        }
+                        .tint(.orange)
+                    } else {
+                        Button {
+                            store.toggleDeleted(id: record.id)
+                        } label: {
+                            Label("恢复", systemImage: "arrow.uturn.backward")
+                        }
+                        .tint(.blue)
+                    }
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    if !isTrash {
+                        Button(role: .destructive) {
+                            store.toggleDeleted(id: record.id)
+                        } label: {
+                            Label("删除", systemImage: "trash")
+                        }
+                        .tint(.red)
+                    } else {
+                        Button(role: .destructive) {
+                            store.permanentlyDelete(id: record.id)
+                        } label: {
+                            Label("彻底删除", systemImage: "trash.fill")
+                        }
+                        .tint(.red)
+                    }
+                }
+            }
+        }
+        .navigationTitle(title)
+        .overlay {
+            if records.isEmpty {
+                ContentUnavailableView(isTrash ? "回收站为空" : "暂无记录", systemImage: systemImage)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                EditButton()
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if editMode?.wrappedValue.isEditing == true {
+                HStack {
+                    if !isTrash {
+                        Button(role: .destructive) {
+                            store.toggleDeletedMultiple(ids: selection, isDeleted: true)
+                            selection.removeAll()
+                            editMode?.wrappedValue = .inactive
+                        } label: {
+                            Text("删除选中 (\(selection.count))")
+                        }
+                        .disabled(selection.isEmpty)
+                        .foregroundColor(selection.isEmpty ? .secondary : .red)
+                        .padding(.vertical, 8)
+                    } else {
+                        Button {
+                            store.toggleDeletedMultiple(ids: selection, isDeleted: false)
+                            selection.removeAll()
+                            editMode?.wrappedValue = .inactive
+                        } label: {
+                            Text("恢复选中 (\(selection.count))")
+                        }
+                        .disabled(selection.isEmpty)
+                        .padding(.vertical, 8)
+                        
+                        Spacer()
+                        
+                        Button(role: .destructive) {
+                            store.permanentlyDeleteMultiple(ids: selection)
+                            selection.removeAll()
+                            editMode?.wrappedValue = .inactive
+                        } label: {
+                            Text("彻底删除 (\(selection.count))")
+                        }
+                        .disabled(selection.isEmpty)
+                        .foregroundColor(selection.isEmpty ? .secondary : .red)
+                        .padding(.vertical, 8)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+                .frame(maxWidth: .infinity)
+                .background(.regularMaterial)
+            }
+        }
+    }
+}

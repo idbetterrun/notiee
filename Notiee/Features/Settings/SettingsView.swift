@@ -1,6 +1,228 @@
 import SwiftUI
+import Charts
 
-struct SettingsView: View {
+// MARK: - MeView
+struct MeView: View {
+    let settingsStore: AppSettingsPersisting
+    @ObservedObject var store: NotieeStore
+    
+    @State private var showLoginAlert = false
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Button(action: {
+                        showLoginAlert = true
+                    }) {
+                        HStack(spacing: 16) {
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .frame(width: 50, height: 50)
+                                .foregroundColor(.accentColor)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("登录您的 TomaGo 账户")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                Text("开启多端同步与高级功能")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.footnote)
+                        }
+                        .padding(.vertical, 8)
+                    }
+                }
+                
+                Section {
+                    NavigationLink {
+                        ReviewView(store: store)
+                    } label: {
+                        Label("回顾", systemImage: "chart.pie.fill")
+                            .foregroundColor(.blue)
+                    }
+                }
+                
+                Section {
+                    NavigationLink {
+                        SettingsMainView(settingsStore: settingsStore)
+                    } label: {
+                        Label("设置", systemImage: "gearshape.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .navigationTitle("我")
+            .alert("暂未开放", isPresented: $showLoginAlert) {
+                Button("确定", role: .cancel) { }
+            } message: {
+                Text("暂未开放登录与注册，敬请期待！")
+            }
+        }
+    }
+}
+
+// MARK: - ReviewView
+struct ReviewView: View {
+    @ObservedObject var store: NotieeStore
+    @State private var selectedRange: TimeRange = .today
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                Picker("时间范围", selection: $selectedRange) {
+                    ForEach(TimeRange.allCases) { range in
+                        Text(range.rawValue).tag(range)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("预估 Token 消耗")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("\(store.totalTokens(in: selectedRange))")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundColor(.accentColor)
+                    
+                    Text(tokenComparisonText(for: store.totalTokens(in: selectedRange)))
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .padding(.vertical)
+                
+                let topRecords = topRecordsByToken()
+                if !topRecords.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("最耗 Token 的记录 (Top 5)")
+                            .font(.headline)
+                            .padding(.horizontal)
+                        
+                        ForEach(Array(topRecords.enumerated()), id: \.element.id) { index, record in
+                            HStack {
+                                Text("\(index + 1)")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 24)
+                                
+                                VStack(alignment: .leading) {
+                                    Text(record.title)
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                    Text(record.capturedAt.formatted(date: .abbreviated, time: .omitted))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Text("\(record.tokenUsage) tk")
+                                    .font(.subheadline)
+                                    .foregroundColor(.orange)
+                            }
+                            .padding()
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+                
+                let chartData = tokenDataByEvent()
+                if !chartData.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("按日程消耗占比")
+                            .font(.headline)
+                            .padding(.horizontal)
+                        
+                        Chart(chartData) { data in
+                            SectorMark(
+                                angle: .value("Tokens", data.tokens),
+                                innerRadius: .ratio(0.6),
+                                angularInset: 1.5
+                            )
+                            .foregroundStyle(by: .value("日程", data.eventName))
+                        }
+                        .frame(height: 250)
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    }
+                }
+                
+                Text("声明：以上 Token 数仅为本地根据返回结果的粗略统计，不保证百分百与最终云端扣费结果一致。")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+            .padding(.vertical)
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .navigationTitle("使用回顾")
+    }
+    
+    private func tokenComparisonText(for tokens: Int) -> String {
+        switch tokens {
+        case 0:
+            return "还没有消耗 Token 哦，快去拍记吧！"
+        case 1..<10_000:
+            return "大约相当于写了一篇小短文的数量。"
+        case 10_000..<100_000:
+            return "大约相当于读完了一本薄薄的杂志。"
+        case 100_000..<500_000:
+            return "大约相当于一两部中篇小说的字数啦！"
+        case 500_000..<1_000_000:
+            return "大概花了一本《西游记》的 Token 数咯！"
+        default:
+            return "天哪！这相当于读完了好几本大部头巨著！"
+        }
+    }
+    
+    private func topRecordsByToken() -> [NoteRecord] {
+        let records = store.records(in: selectedRange)
+        return Array(records.sorted(by: { $0.tokenUsage > $1.tokenUsage }).prefix(5))
+    }
+    
+    struct EventTokenData: Identifiable {
+        let id = UUID()
+        let eventName: String
+        let tokens: Int
+    }
+    
+    private func tokenDataByEvent() -> [EventTokenData] {
+        let records = store.records(in: selectedRange)
+        var dict: [String: Int] = [:]
+        
+        for record in records {
+            let name: String
+            if let eventID = record.eventID, let event = store.events.first(where: { $0.id == eventID }) {
+                name = event.title
+            } else {
+                name = "未分类"
+            }
+            dict[name, default: 0] += record.tokenUsage
+        }
+        
+        return dict.map { EventTokenData(eventName: $0.key, tokens: $0.value) }
+            .sorted(by: { $0.tokens > $1.tokens })
+    }
+}
+
+// MARK: - SettingsMainView
+struct SettingsMainView: View {
     @StateObject private var viewModel: SettingsViewModel
 
     @MainActor
@@ -9,21 +231,55 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("启动偏好") {
-                    Picker("默认页面", selection: $viewModel.defaultTab) {
-                        ForEach(AppTab.launchCandidates) { tab in
-                            Label(tab.title, systemImage: tab.systemImage)
-                                .tag(tab)
-                        }
-                    }
-                    .onChange(of: viewModel.defaultTab) { _, _ in
-                        viewModel.saveDefaultTab()
+        Form {
+            Section("常规") {
+                Toggle("显示周数", isOn: $viewModel.showWeekNumbers)
+                if viewModel.showWeekNumbers {
+                    Picker("第一周开始日", selection: $viewModel.firstWeekStartDay) {
+                        Text("周日").tag(1)
+                        Text("周一").tag(2)
                     }
                 }
+            }
+            .onChange(of: viewModel.showWeekNumbers) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.firstWeekStartDay) { _, _ in viewModel.saveAll() }
+            
+            Section("外观") {
+                Picker("颜色主题", selection: $viewModel.theme) {
+                    Text("浅色").tag("light")
+                    Text("深色").tag("dark")
+                    Text("跟随系统").tag("system")
+                }
+                
+                Picker("字体大小", selection: $viewModel.fontSize) {
+                    Text("小").tag("small")
+                    Text("中 (默认)").tag("medium")
+                    Text("大").tag("large")
+                    Text("超大").tag("extraLarge")
+                }
+                
+                Picker("语言切换", selection: $viewModel.language) {
+                    Text("跟随系统").tag("system")
+                    Text("简体中文").tag("zh-Hans")
+                    Text("繁體中文").tag("zh-Hant")
+                    Text("English").tag("en")
+                }
+                Text("切换语言后需要重新启动应用才能生效").font(.caption).foregroundColor(.secondary)
+            }
+            .onChange(of: viewModel.theme) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.fontSize) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.language) { _, _ in viewModel.saveAll() }
 
-                Section("AI API") {
+            Section("大模型") {
+                Toggle("启用大模型处理功能", isOn: $viewModel.aiEnabled)
+                
+                if viewModel.aiEnabled {
+                    Toggle("摘要 (较低消耗)", isOn: $viewModel.aiEnableSummary)
+                    Toggle("详细内容 (极高消耗)", isOn: $viewModel.aiEnableDetailedContent)
+                    Toggle("待办事项 (较低消耗)", isOn: $viewModel.aiEnableTodos)
+                    
+                    Toggle("拍记完后立即分析", isOn: $viewModel.autoProcessAfterCapture)
+                    
                     NavigationLink {
                         AIConfigurationView(viewModel: viewModel, kind: .text)
                     } label: {
@@ -43,124 +299,317 @@ struct SettingsView: View {
                             configuration: viewModel.visionConfiguration
                         )
                     }
-
-                    if let lastSaveError = viewModel.lastSaveError {
-                        Label(lastSaveError, systemImage: "exclamationmark.triangle")
-                            .font(.footnote)
-                            .foregroundStyle(.red)
+                    
+                    Button("测试双端连接") {
+                        viewModel.testConnection(for: .text)
+                        viewModel.testConnection(for: .vision)
+                    }
+                    if viewModel.connectionTestStatus != .idle {
+                        ConnectionStatusView(status: viewModel.connectionTestStatus)
+                    }
+                    
+                    DisclosureGroup("官方帮助文档") {
+                        Link("阿里云百炼文档", destination: URL(string: "https://help.aliyun.com/zh/model-studio/")!)
+                        Link("火山引擎文档", destination: URL(string: "https://www.volcengine.com/docs/82379/1399009")!)
+                        Link("DeepSeek 文档", destination: URL(string: "https://api-docs.deepseek.com/zh-cn/")!)
+                        Link("MiniMax 文档", destination: URL(string: "https://platform.minimaxi.com/docs/guides/text-generation")!)
                     }
                 }
+            }
+            .onChange(of: viewModel.aiEnabled) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.aiEnableSummary) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.aiEnableDetailedContent) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.aiEnableTodos) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.autoProcessAfterCapture) { _, _ in viewModel.saveAll() }
+            
+            Section("通知") {
+                Toggle("启用日程提醒", isOn: $viewModel.notificationEnabled)
+                if viewModel.notificationEnabled {
+                    Picker("提前时间", selection: $viewModel.notificationAdvanceTime) {
+                        Text("准点提醒").tag(0)
+                        Text("5 分钟前").tag(5)
+                        Text("10 分钟前").tag(10)
+                        Text("20 分钟前").tag(20)
+                        Text("30 分钟前").tag(30)
+                        Text("45 分钟前").tag(45)
+                        Text("1 小时前").tag(60)
+                        Text("2 小时前").tag(120)
+                    }
+                }
+                Toggle("启用日程实时活动", isOn: $viewModel.liveActivityEnabled)
+            }
+            .onChange(of: viewModel.notificationEnabled) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.notificationAdvanceTime) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.liveActivityEnabled) { _, _ in viewModel.saveAll() }
 
-                Section("高级设置") {
+            Section("高级设置") {
+                NavigationLink {
+                    DeveloperOptionsView(viewModel: viewModel)
+                } label: {
+                    Label("开发者选项", systemImage: "hammer")
+                }
+                
+                Toggle("使用自定义大模型", isOn: $viewModel.customModelsEnabled)
+                if viewModel.customModelsEnabled {
                     NavigationLink {
-                        DeveloperOptionsView(viewModel: viewModel)
+                        CustomModelsListView(viewModel: viewModel)
                     } label: {
-                        Label("开发者选项", systemImage: "hammer")
+                        Label("管理自定义模型", systemImage: "slider.horizontal.3")
+                    }
+                }
+            }
+            .onChange(of: viewModel.customModelsEnabled) { _, _ in viewModel.saveAll() }
+            
+            Section("关于") {
+                HStack {
+                    Text("版本号")
+                    Spacer()
+                    Text("1.0")
+                        .foregroundColor(.secondary)
+                }
+                HStack {
+                    Text("开发者")
+                    Spacer()
+                    Text("douyin@idbetterrun")
+                        .foregroundColor(.secondary)
+                }
+                HStack {
+                    Text("联系邮箱")
+                    Spacer()
+                    Text("woxiantao@icloud.com")
+                        .foregroundColor(.secondary)
+                }
+                NavigationLink {
+                    OpenSourceAcknowledgmentsView()
+                } label: {
+                    Text("开源声明")
+                }
+            }
+        }
+        .navigationTitle("设置")
+    }
+}
+
+// MARK: - CustomModelsListView
+struct CustomModelsListView: View {
+    @ObservedObject var viewModel: SettingsViewModel
+    @State private var showingAddSheet = false
+    @State private var editingModel: CustomAIModel?
+
+    var body: some View {
+        List {
+            if viewModel.customModels.isEmpty {
+                Section {
+                    Text("暂无自定义模型，点击下方按钮添加。")
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                ForEach(viewModel.customModels) { model in
+                    Button {
+                        editingModel = model
+                        showingAddSheet = true
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(model.name)
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                HStack {
+                                    Text(model.kind.title)
+                                        .font(.caption)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.accentColor.opacity(0.1))
+                                        .foregroundColor(.accentColor)
+                                        .cornerRadius(4)
+                                    
+                                    Text(model.protocolType.rawValue)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.footnote)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                .onDelete(perform: deleteModels)
+            }
+        }
+        .navigationTitle("管理自定义模型")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    editingModel = nil
+                    showingAddSheet = true
+                }) {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddSheet) {
+            CustomModelEditSheet(
+                model: editingModel,
+                onSave: { newModel in
+                    if let index = viewModel.customModels.firstIndex(where: { $0.id == newModel.id }) {
+                        viewModel.customModels[index] = newModel
+                    } else {
+                        viewModel.customModels.append(newModel)
+                    }
+                    viewModel.saveAll()
+                }
+            )
+        }
+    }
+    
+    private func deleteModels(at offsets: IndexSet) {
+        viewModel.customModels.remove(atOffsets: offsets)
+        viewModel.saveAll()
+    }
+}
+
+struct CustomModelEditSheet: View {
+    @Environment(\.dismiss) var dismiss
+    
+    let model: CustomAIModel?
+    let onSave: (CustomAIModel) -> Void
+    
+    @State private var name: String = ""
+    @State private var kind: AIModelKind = .text
+    @State private var protocolType: AIProtocol = .openai
+    @State private var endpoint: String = ""
+    @State private var modelIdentifier: String = ""
+    @State private var apiKey: String = ""
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("基础信息") {
+                    TextField("名称 (如: 我的本地 Qwen)", text: $name)
+                    Picker("类型", selection: $kind) {
+                        Text(AIModelKind.text.title).tag(AIModelKind.text)
+                        Text(AIModelKind.vision.title).tag(AIModelKind.vision)
+                    }
+                    Picker("协议", selection: $protocolType) {
+                        Text("OpenAI").tag(AIProtocol.openai)
+                        Text("Anthropic").tag(AIProtocol.anthropic)
                     }
                 }
                 
-                Section("安全与隐私") {
-                    Text("API Key 将加密保存在本机 Keychain，不写入普通偏好存储。")
-                        .foregroundStyle(.secondary)
+                Section("连接配置") {
+                    TextField("Endpoint (如: https://api.openai.com/v1/chat/completions)", text: $endpoint)
+                        .keyboardType(.URL)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                    
+                    TextField("Model ID (如: gpt-4o)", text: $modelIdentifier)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                    
+                    SecureField("API Key", text: $apiKey)
                 }
             }
-            .navigationTitle("我")
-        }
-    }
-}
-
-#Preview {
-    SettingsView()
-}
-
-private struct AIConfigurationRow: View {
-    let title: String
-    let systemImage: String
-    let configuration: AIModelConfiguration
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.title3)
-                .foregroundStyle(configuration.isComplete ? .green : .secondary)
-                .frame(width: 26)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-
-                Text(configuration.isComplete ? configuration.modelName : "未配置")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+            .navigationTitle(model == nil ? "添加模型" : "编辑模型")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        let newModel = CustomAIModel(
+                            id: model?.id ?? UUID(),
+                            name: name.isEmpty ? "未命名模型" : name,
+                            kind: kind,
+                            endpoint: endpoint,
+                            protocolType: protocolType,
+                            modelIdentifier: modelIdentifier,
+                            apiKey: apiKey
+                        )
+                        onSave(newModel)
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                if let model = model {
+                    name = model.name
+                    kind = model.kind
+                    protocolType = model.protocolType
+                    endpoint = model.endpoint
+                    modelIdentifier = model.modelIdentifier
+                    apiKey = model.apiKey
+                }
             }
         }
-        .accessibilityElement(children: .combine)
     }
 }
 
-private struct AIConfigurationView: View {
+// MARK: - AIConfigurationView
+struct AIConfigurationView: View {
     @ObservedObject var viewModel: SettingsViewModel
     let kind: AIModelKind
 
     var body: some View {
         Form {
-            Section("服务商") {
-                Picker("选择供应商", selection: configuration.providerType) {
-                    ForEach(AIProviderType.allCases.filter { supports(provider: $0, for: kind) }) { provider in
-                        Text(provider.displayName).tag(provider)
-                    }
+            if viewModel.customModelsEnabled {
+                Section {
+                    Text("自定义大模型模式已开启。请前往高级设置中的“管理自定义模型”进行配置。")
+                        .foregroundStyle(.orange)
                 }
-                .onChange(of: configuration.wrappedValue.providerType) { _ in
-                    let currentProvider = configuration.wrappedValue.providerType
-                    if let firstModel = currentProvider.predefinedModels.first {
-                        configuration.wrappedValue.modelName = firstModel
-                    } else {
-                        configuration.wrappedValue.modelName = ""
-                    }
-                }
-                
-
-            }
-
-            Section("模型设置") {
-                let currentProvider = configuration.wrappedValue.providerType
-                if !currentProvider.predefinedModels.isEmpty {
-                    Picker("模型名称", selection: configuration.modelName) {
-                        ForEach(currentProvider.predefinedModels, id: \.self) { model in
-                            Text(model).tag(model)
+            } else {
+                Section("服务商") {
+                    Picker("选择供应商", selection: configuration.providerType) {
+                        ForEach(AIProviderType.allCases.filter { supports(provider: $0, for: kind) && $0 != .custom }) { provider in
+                            Text(provider.displayName).tag(provider)
                         }
                     }
-                } else {
-                    TextField(currentProvider.isEndpointIdRequired ? "接入点 ID (ep-xxxxxx)" : "模型名称", text: configuration.modelName)
+                    .onChange(of: configuration.wrappedValue.providerType) { _, _ in
+                        let currentProvider = configuration.wrappedValue.providerType
+                        if let firstModel = currentProvider.predefinedModels.first {
+                            configuration.wrappedValue.modelName = firstModel
+                        } else {
+                            configuration.wrappedValue.modelName = ""
+                        }
+                    }
+                }
+
+                Section("模型设置") {
+                    let currentProvider = configuration.wrappedValue.providerType
+                    if !currentProvider.predefinedModels.isEmpty {
+                        Picker("模型名称", selection: configuration.modelName) {
+                            ForEach(currentProvider.predefinedModels, id: \.self) { model in
+                                Text(model).tag(model)
+                            }
+                        }
+                    } else {
+                        TextField(currentProvider.isEndpointIdRequired ? "接入点 ID (ep-xxxxxx)" : "模型名称", text: configuration.modelName)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+                    
+                    SecureField("API Key", text: configuration.apiKey)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 }
-                
-                SecureField("API Key", text: configuration.apiKey)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-            }
 
-            if configuration.wrappedValue.providerType.isEndpointIdRequired {
+                if configuration.wrappedValue.providerType.isEndpointIdRequired {
+                    Section {
+                        Text("火山方舟要求传入您创建的专属接入点 ID (Endpoint ID，以 ep- 开头)，而不是模型原始名称。")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section {
-                    Text("火山方舟要求传入您创建的专属接入点 ID (Endpoint ID，以 ep- 开头)，而不是模型原始名称。")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                    Button("保存配置") {
+                        saveConfiguration()
+                    }
                 }
-            }
-
-            Section {
-                Button("保存配置") {
-                    saveConfiguration()
-                }
-
-                Button("测试连接") {
-                    viewModel.testConnection(for: kind)
-                }
-            }
-
-            Section("连接状态") {
-                ConnectionStatusView(status: viewModel.connectionTestStatus)
             }
         }
         .navigationTitle(kind.title)
@@ -196,13 +645,39 @@ private struct AIConfigurationView: View {
     }
 }
 
+// MARK: - Components
+private struct AIConfigurationRow: View {
+    let title: String
+    let systemImage: String
+    let configuration: AIModelConfiguration
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.title3)
+                .foregroundStyle(configuration.isComplete ? .green : .secondary)
+                .frame(width: 26)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+
+                Text(configuration.isComplete ? configuration.modelName : "未配置")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
 private struct ConnectionStatusView: View {
     let status: AIConnectionTestStatus
 
     var body: some View {
         switch status {
         case .idle:
-            Text("点击“连接测试”验证配置是否可用。")
+            Text("点击“测试连接”验证配置是否可用。")
                 .foregroundStyle(.secondary)
         case .testing:
             HStack(spacing: 8) {
@@ -213,9 +688,51 @@ private struct ConnectionStatusView: View {
         case .success(let message):
             Label(message, systemImage: "checkmark.circle")
                 .foregroundStyle(.green)
+                .textSelection(.enabled)
         case .failure(let message):
             Label(message, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
+                .textSelection(.enabled)
+        }
+    }
+}
+
+// MARK: - OpenSourceAcknowledgmentsView
+struct OpenSourceAcknowledgmentsView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Notiee 感谢开源社区的力量，正是这些优秀的项目让我们的应用变得更好！")
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .padding()
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    openSourceItem(name: "SwiftUI", url: "https://developer.apple.com/xcode/swiftui/", description: "Notiee 全面采用了 SwiftUI 构建现代化、响应式的用户界面，感谢苹果提供的强大底层框架。")
+                    openSourceItem(name: "Swift Charts", url: "https://developer.apple.com/documentation/charts", description: "Notiee 的数据回顾仪表盘由 Swift Charts 提供图表渲染，直观展示您的 Token 消耗。")
+                    openSourceItem(name: "Vision Framework", url: "https://developer.apple.com/documentation/vision", description: "原生提供了强大的 OCR 视觉框架，为 Notiee 本地初步的文字提取提供了技术支持。")
+                }
+            }
+            .padding()
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .navigationTitle("开源声明")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    private func openSourceItem(name: String, url: String, description: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Link(name, destination: URL(string: url)!)
+                .font(.headline)
+                .foregroundColor(.blue)
+            
+            Text(description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            
+            Divider()
         }
     }
 }
