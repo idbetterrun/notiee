@@ -6,6 +6,7 @@ struct CaptureView: View {
     @State private var showsCaptureFlash = false
     @State private var shutterIsPressed = false
     @State private var selectedItem: PhotosPickerItem?
+    @State private var presentedRecord: NoteRecord?
 
     @MainActor
     init() {
@@ -193,6 +194,9 @@ struct CaptureView: View {
     private var captureControls: some View {
         HStack(alignment: .center) {
             Button {
+                if let latest = viewModel.latestRecord {
+                    presentedRecord = latest
+                }
             } label: {
                 ZStack(alignment: .topTrailing) {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -269,6 +273,13 @@ struct CaptureView: View {
             }
         }
         .padding(.horizontal, 6)
+        .sheet(item: $presentedRecord) { record in
+            if let store = viewModel.store {
+                NavigationStack {
+                    RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+                }
+            }
+        }
     }
 
     private func capture() {

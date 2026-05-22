@@ -202,8 +202,14 @@ private struct ConnectionStatusView: View {
     var body: some View {
         switch status {
         case .idle:
-            Text("保存配置后可在本机校验字段完整性。")
+            Text("点击“连接测试”验证配置是否可用。")
                 .foregroundStyle(.secondary)
+        case .testing:
+            HStack(spacing: 8) {
+                ProgressView()
+                Text("正在连接 API 并发送测试请求...")
+                    .foregroundStyle(.secondary)
+            }
         case .success(let message):
             Label(message, systemImage: "checkmark.circle")
                 .foregroundStyle(.green)

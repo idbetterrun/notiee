@@ -90,6 +90,7 @@ struct AIModelConfiguration: Equatable, Codable, Sendable {
 
 enum AIConnectionTestStatus: Equatable, Sendable {
     case idle
+    case testing
     case success(String)
     case failure(String)
 }

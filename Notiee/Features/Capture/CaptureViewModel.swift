@@ -11,7 +11,7 @@ final class CaptureViewModel: ObservableObject {
     private let currentDate: Date
     private let events: [ScheduledEvent]
     private let scheduleMatcher: ScheduleMatcher
-    private let store: NotieeStore?
+    let store: NotieeStore?
     private var cancellables: Set<AnyCancellable> = []
 
     init(

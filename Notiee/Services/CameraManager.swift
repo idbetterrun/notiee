@@ -51,7 +51,7 @@ final class CameraManager: NSObject, ObservableObject {
             self.session.sessionPreset = .photo
 
             // Add video input
-            guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+            guard let videoDevice = AVCaptureDevice.default(for: .video),
                   let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
                   self.session.canAddInput(videoDeviceInput) else {
                 Task { @MainActor in self.status = .failed }
