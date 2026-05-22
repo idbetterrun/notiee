@@ -18,6 +18,11 @@ final class CameraManager: NSObject, ObservableObject {
     private let sessionQueue = DispatchQueue(label: "com.notiee.camera.session")
 
     func checkPermissionsAndConfigure() {
+        #if targetEnvironment(simulator)
+        Task { @MainActor in self.status = .ready }
+        return
+        #endif
+
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             configureSession()
@@ -88,13 +93,35 @@ final class CameraManager: NSObject, ObservableObject {
 
     func capturePhoto() {
         guard status == .ready else { return }
+        
+        #if targetEnvironment(simulator)
+        Task { @MainActor in
+            let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1080, height: 1920))
+            let fakeImage = renderer.image { ctx in
+                UIColor.darkGray.setFill()
+                ctx.fill(CGRect(x: 0, y: 0, width: 1080, height: 1920))
+                
+                let attrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 100, weight: .bold),
+                    .foregroundColor: UIColor.white
+                ]
+                let text = "Simulator Photo" as NSString
+                text.draw(at: CGPoint(x: 100, y: 900), withAttributes: attrs)
+            }
+            self.capturedImage = fakeImage
+        }
+        return
+        #endif
+
         sessionQueue.async { [weak self] in
             guard let self else { return }
             let settings = AVCapturePhotoSettings()
             
             if let videoConnection = self.photoOutput.connection(with: .video) {
                 // Ensure orientation is correct for portrait (common on iPhones)
-                videoConnection.videoRotationAngle = 90
+                if videoConnection.isVideoRotationAngleSupported(90) {
+                    videoConnection.videoRotationAngle = 90
+                }
             }
 
             self.photoOutput.capturePhoto(with: settings, delegate: self)

@@ -29,7 +29,7 @@ struct RealAIProcessingService: AIProcessingService {
     }
 
     private func processImage(from path: String) async throws -> String {
-        guard let image = UIImage(contentsOfFile: path) else {
+        guard let image = await MainActor.run(body: { LocalImageStore.shared.loadImage(path: path) }) else {
             throw AIError.imageProcessingFailed
         }
         
