@@ -1,9 +1,11 @@
 import SwiftUI
+import PhotosUI
 
 struct CaptureView: View {
     @StateObject private var viewModel: CaptureViewModel
     @State private var showsCaptureFlash = false
     @State private var shutterIsPressed = false
+    @State private var selectedItem: PhotosPickerItem?
 
     @MainActor
     init() {
@@ -248,8 +250,7 @@ struct CaptureView: View {
 
             Spacer()
 
-            Button {
-            } label: {
+            PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
                 Image(systemName: "photo.on.rectangle")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.white)
@@ -257,6 +258,15 @@ struct CaptureView: View {
                     .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
             .accessibilityLabel("相册")
+            .onChange(of: selectedItem) { newValue in
+                Task {
+                    if let data = try? await newValue?.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        viewModel.importPhoto(image)
+                    }
+                    selectedItem = nil
+                }
+            }
         }
         .padding(.horizontal, 6)
     }

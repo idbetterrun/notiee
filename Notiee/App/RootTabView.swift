@@ -42,5 +42,8 @@ struct RootTabView: View {
                 }
                 .tag(AppTab.settings)
         }
+        .onAppear {
+            store.syncCalendar()
+        }
     }
 }

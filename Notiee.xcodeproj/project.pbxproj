@@ -40,6 +40,7 @@
 		005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F441ADF365412A945FE92D /* CameraManager.swift */; };
 		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
 		ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */; };
+		1874632278E7417482471181 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		C7F441ADF365412A945FE92D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageStore.swift; sourceTree = "<group>"; };
 		ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,6 +228,7 @@
 		000000000000000000000017 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */,
 				8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */,
 				C7F441ADF365412A945FE92D /* CameraManager.swift */,
 				100000000000000000000012 /* ScheduleMatcher.swift */,
@@ -335,6 +338,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1874632278E7417482471181 /* CalendarService.swift in Sources */,
 				ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */,
 				3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */,
 				005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */,
@@ -510,6 +514,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Notiee 需要访问您的日历以便在您拍照时自动关联当前进行的课程或会议。";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Notiee 需要访问您的日历以便在您拍照时自动关联当前进行的课程或会议。";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -536,6 +542,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Notiee 需要访问您的日历以便在您拍照时自动关联当前进行的课程或会议。";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Notiee 需要访问您的日历以便在您拍照时自动关联当前进行的课程或会议。";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;

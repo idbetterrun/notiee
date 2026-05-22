@@ -137,6 +137,20 @@ final class NotieeStore: ObservableObject {
         todos[index].isCompleted.toggle()
     }
 
+    // MARK: - Calendar Sync
+
+    func syncCalendar() {
+        Task {
+            let granted = await CalendarService.shared.requestAccess()
+            if granted {
+                let realEvents = CalendarService.shared.fetchTodayEvents(currentDate: currentDate)
+                if !realEvents.isEmpty {
+                    self.events = realEvents
+                }
+            }
+        }
+    }
+
     // MARK: - AI Processing Pipeline
 
     private func enqueueProcessing(for record: NoteRecord) {

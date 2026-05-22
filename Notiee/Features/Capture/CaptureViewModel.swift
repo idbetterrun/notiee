@@ -78,6 +78,10 @@ final class CaptureViewModel: ObservableObject {
         // The actual record creation happens in handleCapturedImage when the camera returns the image
     }
 
+    func importPhoto(_ image: UIImage) {
+        handleCapturedImage(image)
+    }
+
     private func handleCapturedImage(_ image: UIImage) {
         do {
             let relativePath = try LocalImageStore.shared.saveImage(image)
