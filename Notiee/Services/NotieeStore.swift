@@ -140,6 +140,15 @@ final class NotieeStore: ObservableObject {
             return
         }
         todos[index].isCompleted.toggle()
+        persistRecords()
+    }
+
+    func updateTodoContent(id: UUID, newContent: String) {
+        guard let index = todos.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        todos[index].content = newContent
+        persistRecords()
     }
 
     // MARK: - Calendar Sync

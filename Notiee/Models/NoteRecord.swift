@@ -1,6 +1,6 @@
 import Foundation
 
-struct NoteRecord: Identifiable, Equatable, Codable, Sendable {
+struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     let id: UUID
     var eventID: UUID?
     var capturedAt: Date

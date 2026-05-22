@@ -3,6 +3,9 @@ import SwiftUI
 struct TodayView: View {
     @StateObject private var viewModel: TodayViewModel
     @State private var completedCollapsed = true
+    @State private var currentCollapsed = false
+    @State private var upcomingCollapsed = false
+    @State private var selectedTodo: NoteTodo?
 
     @MainActor
     init() {
@@ -44,7 +47,7 @@ struct TodayView: View {
                             count: viewModel.currentEvents.count,
                             tint: .green,
                             events: viewModel.currentEvents,
-                            collapsed: .constant(false)
+                            collapsed: $currentCollapsed
                         )
 
                         timelineStatusGroup(
@@ -52,7 +55,7 @@ struct TodayView: View {
                             count: viewModel.upcomingEvents.count,
                             tint: .orange,
                             events: viewModel.upcomingEvents,
-                            collapsed: .constant(false)
+                            collapsed: $upcomingCollapsed
                         )
                     }
                     .padding(.horizontal, 20)
@@ -75,6 +78,14 @@ struct TodayView: View {
             }
             .background(Color(.systemGroupedBackground))
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: NoteRecord.self) { record in
+                if let store = viewModel.store {
+                    RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+                }
+            }
+            .sheet(item: $selectedTodo) { todo in
+                TodoDetailSheet(todo: todo, viewModel: viewModel)
+            }
         }
     }
 
@@ -185,11 +196,13 @@ struct TodayView: View {
                     .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             } else {
                 ForEach(viewModel.allTodos) { todo in
-                    TodoRow(todo: todo) {
+                    TodoRow(todo: todo, onToggle: {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             viewModel.toggleTodo(id: todo.id)
                         }
-                    }
+                    }, onInfo: {
+                        selectedTodo = todo
+                    })
                 }
             }
         }
@@ -219,7 +232,10 @@ struct TodayView: View {
                     .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             } else {
                 ForEach(viewModel.todayRecords) { record in
-                    RecordCard(record: record)
+                    NavigationLink(value: record) {
+                        RecordCard(record: record)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -268,6 +284,7 @@ private struct EventCard: View {
 private struct TodoRow: View {
     let todo: NoteTodo
     let onToggle: () -> Void
+    let onInfo: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -282,11 +299,69 @@ private struct TodoRow: View {
                 .font(.body.weight(.medium))
                 .foregroundStyle(todo.isCompleted ? .secondary : .primary)
                 .strikethrough(todo.isCompleted)
+                .lineLimit(1)
 
             Spacer(minLength: 8)
+            
+            Button(action: onInfo) {
+                Image(systemName: "info.circle")
+                    .font(.title3)
+                    .foregroundStyle(.tertiary)
+            }
+            .buttonStyle(.plain)
         }
         .padding(14)
         .background(.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+}
+
+// MARK: - TodoDetailSheet
+
+private struct TodoDetailSheet: View {
+    let todo: NoteTodo
+    @ObservedObject var viewModel: TodayViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var editedContent: String
+    
+    init(todo: NoteTodo, viewModel: TodayViewModel) {
+        self.todo = todo
+        self.viewModel = viewModel
+        _editedContent = State(initialValue: todo.content)
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("待办内容") {
+                    TextEditor(text: $editedContent)
+                        .frame(minHeight: 100)
+                }
+                
+                Section("相关信息") {
+                    LabeledContent("状态", value: todo.isCompleted ? "已完成" : "未完成")
+                    if let record = viewModel.record(for: todo) {
+                        LabeledContent("来源", value: record.title)
+                    }
+                }
+            }
+            .navigationTitle("待办详情")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        viewModel.editTodo(id: todo.id, newContent: editedContent)
+                        dismiss()
+                    }
+                    .disabled(editedContent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
     }
 }
 

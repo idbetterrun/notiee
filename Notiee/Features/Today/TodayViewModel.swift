@@ -7,7 +7,7 @@ final class TodayViewModel: ObservableObject {
     let currentDate: Date
     private let calendar: Calendar
     private let scheduleMatcher: ScheduleMatcher
-    private weak var store: NotieeStore?
+    weak var store: NotieeStore?
 
     @Published private(set) var events: [ScheduledEvent]
     @Published private(set) var todos: [NoteTodo]
@@ -89,14 +89,16 @@ final class TodayViewModel: ObservableObject {
     }
 
     func toggleTodo(id: UUID) {
-        if let store {
-            store.toggleTodo(id: id)
-        } else {
-            // Standalone mode (tests/previews)
-            if let index = todos.firstIndex(where: { $0.id == id }) {
-                todos[index].isCompleted.toggle()
-            }
-        }
+        store?.toggleTodo(id: id)
+    }
+
+    func editTodo(id: UUID, newContent: String) {
+        store?.updateTodoContent(id: id, newContent: newContent)
+    }
+
+    func record(for todo: NoteTodo) -> NoteRecord? {
+        guard let store = store else { return nil }
+        return store.records.first(where: { $0.id == todo.recordID })
     }
 
     // MARK: - Today Records
