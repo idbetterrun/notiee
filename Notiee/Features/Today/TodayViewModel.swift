@@ -3,14 +3,19 @@ import Foundation
 
 @MainActor
 final class TodayViewModel: ObservableObject {
-    @Published private(set) var events: [ScheduledEvent]
-    @Published private(set) var todos: [NoteTodo]
-    @Published private(set) var records: [NoteRecord]
 
     let currentDate: Date
     private let calendar: Calendar
     private let scheduleMatcher: ScheduleMatcher
+    private var cancellables: Set<AnyCancellable> = []
 
+    // When backed by a shared NotieeStore, data flows from the store.
+    // When standalone (e.g. tests), data is held locally.
+    @Published private(set) var events: [ScheduledEvent]
+    @Published private(set) var todos: [NoteTodo]
+    @Published private(set) var records: [NoteRecord]
+
+    /// Standalone initializer for tests and previews.
     init(
         currentDate: Date = Date(),
         calendar: Calendar = .current,
@@ -25,6 +30,23 @@ final class TodayViewModel: ObservableObject {
         self.todos = todos
         self.records = records
         self.scheduleMatcher = scheduleMatcher
+    }
+
+    /// Store-backed initializer — data is kept in sync with the shared NotieeStore.
+    init(store: NotieeStore) {
+        self.currentDate = store.currentDate
+        self.calendar = .current
+        self.events = store.events
+        self.todos = store.todos
+        self.records = store.records
+        self.scheduleMatcher = ScheduleMatcher()
+
+        store.$events
+            .assign(to: &$events)
+        store.$todos
+            .assign(to: &$todos)
+        store.$records
+            .assign(to: &$records)
     }
 
     var currentEvent: ScheduledEvent? {

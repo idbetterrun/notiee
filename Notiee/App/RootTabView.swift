@@ -18,7 +18,7 @@ struct RootTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            TodayView()
+            TodayView(store: store)
                 .tabItem {
                     Label(AppTab.today.title, systemImage: AppTab.today.systemImage)
                 }

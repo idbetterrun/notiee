@@ -9,6 +9,11 @@ struct TodayView: View {
     }
 
     @MainActor
+    init(store: NotieeStore) {
+        _viewModel = StateObject(wrappedValue: TodayViewModel(store: store))
+    }
+
+    @MainActor
     init(viewModel: TodayViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
