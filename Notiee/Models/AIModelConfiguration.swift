@@ -28,37 +28,63 @@ enum AIModelKind: String, CaseIterable, Codable, Identifiable, Sendable {
 }
 
 struct AIModelConfiguration: Equatable, Codable, Sendable {
-    var providerName: String
-    var endpoint: String
+    var providerType: AIProviderType
+    var customEndpoint: String
+    var customProtocol: AIProtocol
     var modelName: String
     var apiKey: String
 
     init(
-        providerName: String = "OpenAI Compatible",
-        endpoint: String = "",
+        providerType: AIProviderType,
+        customEndpoint: String = "",
+        customProtocol: AIProtocol = .openai,
         modelName: String = "",
         apiKey: String = ""
     ) {
-        self.providerName = providerName
-        self.endpoint = endpoint
+        self.providerType = providerType
+        self.customEndpoint = customEndpoint
+        self.customProtocol = customProtocol
         self.modelName = modelName
         self.apiKey = apiKey
     }
 
     var isComplete: Bool {
-        !providerName.trimmed.isEmpty
-            && !endpoint.trimmed.isEmpty
-            && !modelName.trimmed.isEmpty
-            && !apiKey.trimmed.isEmpty
+        if providerType == .custom {
+            return !customEndpoint.trimmed.isEmpty
+                && !modelName.trimmed.isEmpty
+                && !apiKey.trimmed.isEmpty
+        } else {
+            return !modelName.trimmed.isEmpty
+                && !apiKey.trimmed.isEmpty
+        }
+    }
+    
+    var activeEndpoint: String {
+        providerType == .custom ? customEndpoint : providerType.endpoint
+    }
+    
+    var activeProtocol: AIProtocol {
+        providerType == .custom ? customProtocol : providerType.protocolType
     }
 
     var normalized: AIModelConfiguration {
         AIModelConfiguration(
-            providerName: providerName.trimmed,
-            endpoint: endpoint.trimmed,
+            providerType: providerType,
+            customEndpoint: customEndpoint.trimmed,
+            customProtocol: customProtocol,
             modelName: modelName.trimmed,
             apiKey: apiKey.trimmed
         )
+    }
+    
+    // Custom decoding to prevent crash from old schema
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.providerType = try container.decodeIfPresent(AIProviderType.self, forKey: .providerType) ?? .qwenText
+        self.customEndpoint = try container.decodeIfPresent(String.self, forKey: .customEndpoint) ?? ""
+        self.customProtocol = try container.decodeIfPresent(AIProtocol.self, forKey: .customProtocol) ?? .openai
+        self.modelName = try container.decodeIfPresent(String.self, forKey: .modelName) ?? ""
+        self.apiKey = try container.decodeIfPresent(String.self, forKey: .apiKey) ?? ""
     }
 }
 

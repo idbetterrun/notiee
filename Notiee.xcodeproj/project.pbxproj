@@ -44,6 +44,11 @@
 		990000000000000000000002 /* AIProcessingState+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000001 /* AIProcessingState+UI.swift */; };
 		990000000000000000000004 /* RecordThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000003 /* RecordThumbnailView.swift */; };
 		990000000000000000000006 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000005 /* EventDetailView.swift */; };
+		990000000000000000000008 /* DeveloperOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000007 /* DeveloperOptionsView.swift */; };
+		99000000000000000000000A /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000009 /* AIProvider.swift */; };
+		99000000000000000000000C /* RealAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000B /* RealAIProcessingService.swift */; };
+		99000000000000000000000E /* AIAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000D /* AIAPIClient.swift */; };
+		990000000000000000000010 /* AIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000F /* AIProcessingService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +101,11 @@
 		990000000000000000000001 /* AIProcessingState+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIProcessingState+UI.swift"; sourceTree = "<group>"; };
 		990000000000000000000003 /* RecordThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordThumbnailView.swift; sourceTree = "<group>"; };
 		990000000000000000000005 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
+		990000000000000000000007 /* DeveloperOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperOptionsView.swift; sourceTree = "<group>"; };
+		990000000000000000000009 /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvider.swift; sourceTree = "<group>"; };
+		99000000000000000000000B /* RealAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealAIProcessingService.swift; sourceTree = "<group>"; };
+		99000000000000000000000D /* AIAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAPIClient.swift; sourceTree = "<group>"; };
+		99000000000000000000000F /* AIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProcessingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +211,7 @@
 			children = (
 				100000000000000000000006 /* SettingsView.swift */,
 				100000000000000000000028 /* SettingsViewModel.swift */,
+				990000000000000000000007 /* DeveloperOptionsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -212,6 +223,7 @@
 				100000000000000000000008 /* NoteRecord.swift */,
 				100000000000000000000009 /* NoteTodo.swift */,
 				100000000000000000000010 /* AIProcessingState.swift */,
+				990000000000000000000009 /* AIProvider.swift */,
 				100000000000000000000025 /* AppTab.swift */,
 				100000000000000000000026 /* AIModelConfiguration.swift */,
 				990000000000000000000001 /* AIProcessingState+UI.swift */,
@@ -241,6 +253,9 @@
 				8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */,
 				C7F441ADF365412A945FE92D /* CameraManager.swift */,
 				100000000000000000000012 /* ScheduleMatcher.swift */,
+				99000000000000000000000B /* RealAIProcessingService.swift */,
+				99000000000000000000000D /* AIAPIClient.swift */,
+				99000000000000000000000F /* AIProcessingService.swift */,
 				100000000000000000000019 /* JSONNoteRecordStore.swift */,
 				100000000000000000000020 /* NotieeStore.swift */,
 				100000000000000000000027 /* UserDefaultsAppSettingsStore.swift */,
@@ -347,6 +362,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99000000000000000000000C /* RealAIProcessingService.swift in Sources */,
+				99000000000000000000000E /* AIAPIClient.swift in Sources */,
+				990000000000000000000010 /* AIProcessingService.swift in Sources */,
+				99000000000000000000000A /* AIProvider.swift in Sources */,
+				990000000000000000000008 /* DeveloperOptionsView.swift in Sources */,
 				990000000000000000000002 /* AIProcessingState+UI.swift in Sources */,
 				990000000000000000000004 /* RecordThumbnailView.swift in Sources */,
 				990000000000000000000006 /* EventDetailView.swift in Sources */,

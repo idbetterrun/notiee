@@ -5,15 +5,7 @@ import Foundation
 /// 拍照后，该服务模拟异步延迟并返回预设的 OCR 文本、摘要、小标题和待办事项，
 /// 使主流程在尚未接入真实大模型 API 之前即可完整走通。
 /// 后续接入真实 Vision / Text LLM 时，只需替换此服务的实现。
-struct MockAIProcessingService: Sendable {
-
-    /// 模拟 AI 处理后的结构化结果。
-    struct Result: Sendable {
-        let title: String
-        let ocrText: String
-        let summary: String
-        let todos: [String]
-    }
+struct MockAIProcessingService: AIProcessingService {
 
     /// 模拟 AI 处理的延迟区间（秒）。
     var processingDelay: ClosedRange<Double>
@@ -27,7 +19,10 @@ struct MockAIProcessingService: Sendable {
     /// - Parameter eventTitle: 当前绑定的日程名称，用于选取对口的 Mock 数据。
     ///   传入 nil 表示未分类拍记。
     /// - Returns: 一组模拟的 OCR、摘要、小标题和待办事项。
-    func generate(for eventTitle: String?) -> Result {
+    func process(imagePath: String, eventTitle: String?) async throws -> AIProcessingResult {
+        let delay = Double.random(in: processingDelay)
+        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+
         // 尝试按关键字匹配一条上下文相关的 Mock 数据
         if let eventTitle {
             for entry in Self.pool {
@@ -47,13 +42,13 @@ struct MockAIProcessingService: Sendable {
 
     private struct TaggedResult {
         let keywords: [String]
-        let result: Result
+        let result: AIProcessingResult
     }
 
     private static let pool: [TaggedResult] = [
         TaggedResult(
             keywords: ["数学", "高数", "微积分", "线代"],
-            result: Result(
+            result: AIProcessingResult(
                 title: "极限与连续性",
                 ocrText: """
                 定义 2.1  函数极限的 ε-δ 定义
@@ -68,7 +63,7 @@ struct MockAIProcessingService: Sendable {
         ),
         TaggedResult(
             keywords: ["设计", "产品", "UI", "UX", "交互"],
-            result: Result(
+            result: AIProcessingResult(
                 title: "用户旅程与交互原型",
                 ocrText: """
                 用户旅程图 (User Journey Map)
@@ -82,7 +77,7 @@ struct MockAIProcessingService: Sendable {
         ),
         TaggedResult(
             keywords: ["项目", "讨论", "会议", "周会", "站会"],
-            result: Result(
+            result: AIProcessingResult(
                 title: "项目进度与分工确认",
                 ocrText: """
                 Sprint 回顾：已完成 12/15 个 Story Point
@@ -96,7 +91,7 @@ struct MockAIProcessingService: Sendable {
         ),
         TaggedResult(
             keywords: ["英语", "English", "语言"],
-            result: Result(
+            result: AIProcessingResult(
                 title: "学术写作结构",
                 ocrText: """
                 Academic Essay Structure
@@ -111,7 +106,7 @@ struct MockAIProcessingService: Sendable {
         ),
         TaggedResult(
             keywords: ["物理", "力学", "电磁"],
-            result: Result(
+            result: AIProcessingResult(
                 title: "牛顿运动定律应用",
                 ocrText: """
                 牛顿第二定律: F = ma
@@ -125,7 +120,7 @@ struct MockAIProcessingService: Sendable {
         ),
     ]
 
-    private static let fallback = Result(
+    private static let fallback = AIProcessingResult(
         title: "课堂笔记摘要",
         ocrText: """
         重点概念梳理

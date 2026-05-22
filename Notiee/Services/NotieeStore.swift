@@ -13,7 +13,7 @@ final class NotieeStore: ObservableObject {
     private let calendar: Calendar
     private let recordStore: NoteRecordPersisting
     private let scheduleMatcher: ScheduleMatcher
-    private let aiService: MockAIProcessingService
+    private let aiService: any AIProcessingService
     private let autoProcess: Bool
 
     init(
@@ -24,7 +24,7 @@ final class NotieeStore: ObservableObject {
         records: [NoteRecord],
         recordStore: NoteRecordPersisting = JSONNoteRecordStore.live,
         scheduleMatcher: ScheduleMatcher = ScheduleMatcher(),
-        aiService: MockAIProcessingService = MockAIProcessingService(),
+        aiService: any AIProcessingService = RealAIProcessingService(),
         autoProcess: Bool = false
     ) {
         self.currentDate = currentDate
@@ -164,16 +164,15 @@ final class NotieeStore: ObservableObject {
         let service = aiService
 
         Task {
-            // Phase 1: pending → processing（模拟网络传输延迟）
-            try? await Task.sleep(for: .milliseconds(Int.random(in: 800...1500)))
             self.setProcessingState(.processing, for: recordID)
 
-            // Phase 2: processing → completed（模拟大模型推理耗时）
-            let delayMs = Int(Double.random(in: service.processingDelay) * 1000)
-            try? await Task.sleep(for: .milliseconds(delayMs))
-
-            let result = service.generate(for: eventTitle)
-            self.applyAIResult(result, to: recordID)
+            do {
+                let result = try await service.process(imagePath: record.localImagePath, eventTitle: eventTitle)
+                self.applyAIResult(result, to: recordID)
+            } catch {
+                self.setProcessingState(.failed, for: recordID)
+                print("AI Processing failed: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -185,7 +184,7 @@ final class NotieeStore: ObservableObject {
         persistRecords()
     }
 
-    private func applyAIResult(_ result: MockAIProcessingService.Result, to recordID: UUID) {
+    private func applyAIResult(_ result: AIProcessingResult, to recordID: UUID) {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else {
             return
         }

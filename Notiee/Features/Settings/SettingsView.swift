@@ -51,6 +51,14 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("高级设置") {
+                    NavigationLink {
+                        DeveloperOptionsView(viewModel: viewModel)
+                    } label: {
+                        Label("开发者选项", systemImage: "hammer")
+                    }
+                }
+                
                 Section("安全与隐私") {
                     Text("API Key 将加密保存在本机 Keychain，不写入普通偏好存储。")
                         .foregroundStyle(.secondary)
@@ -96,22 +104,49 @@ private struct AIConfigurationView: View {
 
     var body: some View {
         Form {
-            Section("服务") {
-                TextField("供应商名称", text: configuration.providerName)
-                    .textInputAutocapitalization(.never)
+            Section("服务商") {
+                Picker("选择供应商", selection: configuration.providerType) {
+                    ForEach(AIProviderType.allCases.filter { supports(provider: $0, for: kind) }) { provider in
+                        Text(provider.displayName).tag(provider)
+                    }
+                }
+                .onChange(of: configuration.wrappedValue.providerType) { _ in
+                    let currentProvider = configuration.wrappedValue.providerType
+                    if let firstModel = currentProvider.predefinedModels.first {
+                        configuration.wrappedValue.modelName = firstModel
+                    } else {
+                        configuration.wrappedValue.modelName = ""
+                    }
+                }
+                
 
-                TextField("接口地址", text: configuration.endpoint)
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+            }
 
-                TextField("模型名称", text: configuration.modelName)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-
+            Section("模型设置") {
+                let currentProvider = configuration.wrappedValue.providerType
+                if !currentProvider.predefinedModels.isEmpty {
+                    Picker("模型名称", selection: configuration.modelName) {
+                        ForEach(currentProvider.predefinedModels, id: \.self) { model in
+                            Text(model).tag(model)
+                        }
+                    }
+                } else {
+                    TextField(currentProvider.isEndpointIdRequired ? "接入点 ID (ep-xxxxxx)" : "模型名称", text: configuration.modelName)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+                
                 SecureField("API Key", text: configuration.apiKey)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+            }
+
+            if configuration.wrappedValue.providerType.isEndpointIdRequired {
+                Section {
+                    Text("火山方舟要求传入您创建的专属接入点 ID (Endpoint ID，以 ep- 开头)，而不是模型原始名称。")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section {
@@ -138,6 +173,16 @@ private struct AIConfigurationView: View {
             $viewModel.textConfiguration
         case .vision:
             $viewModel.visionConfiguration
+        }
+    }
+    
+    private func supports(provider: AIProviderType, for kind: AIModelKind) -> Bool {
+        if provider == .custom { return true }
+        switch kind {
+        case .text:
+            return [.qwenText, .doubaoText, .deepseek, .minimax].contains(provider)
+        case .vision:
+            return [.qwenVision, .doubaoVision].contains(provider)
         }
     }
 

@@ -44,9 +44,15 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
     }
 
     func loadConfiguration(for kind: AIModelKind) -> AIModelConfiguration {
-        AIModelConfiguration(
-            providerName: userDefaults.string(forKey: Keys.providerName(for: kind)) ?? "OpenAI Compatible",
-            endpoint: userDefaults.string(forKey: Keys.endpoint(for: kind)) ?? "",
+        let providerTypeStr = userDefaults.string(forKey: Keys.providerType(for: kind)) ?? ""
+        let providerType = AIProviderType(rawValue: providerTypeStr) ?? (kind == .text ? .qwenText : .qwenVision)
+        let customProtocolStr = userDefaults.string(forKey: Keys.customProtocol(for: kind)) ?? ""
+        let customProtocol = AIProtocol(rawValue: customProtocolStr) ?? .openai
+        
+        return AIModelConfiguration(
+            providerType: providerType,
+            customEndpoint: userDefaults.string(forKey: Keys.customEndpoint(for: kind)) ?? "",
+            customProtocol: customProtocol,
             modelName: userDefaults.string(forKey: Keys.modelName(for: kind)) ?? "",
             apiKey: secretStore.string(forKey: Keys.apiKey(for: kind)) ?? ""
         )
@@ -54,8 +60,9 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
 
     func saveConfiguration(_ configuration: AIModelConfiguration, for kind: AIModelKind) throws {
         let normalized = configuration.normalized
-        userDefaults.set(normalized.providerName, forKey: Keys.providerName(for: kind))
-        userDefaults.set(normalized.endpoint, forKey: Keys.endpoint(for: kind))
+        userDefaults.set(normalized.providerType.rawValue, forKey: Keys.providerType(for: kind))
+        userDefaults.set(normalized.customEndpoint, forKey: Keys.customEndpoint(for: kind))
+        userDefaults.set(normalized.customProtocol.rawValue, forKey: Keys.customProtocol(for: kind))
         userDefaults.set(normalized.modelName, forKey: Keys.modelName(for: kind))
 
         if normalized.apiKey.isEmpty {
@@ -138,12 +145,16 @@ enum SecretStoreError: LocalizedError {
 private enum Keys {
     static let defaultTab = "notiee.defaultTab"
 
-    static func providerName(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).providerName"
+    static func providerType(for kind: AIModelKind) -> String {
+        "notiee.ai.\(kind.rawValue).providerType"
     }
 
-    static func endpoint(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).endpoint"
+    static func customEndpoint(for kind: AIModelKind) -> String {
+        "notiee.ai.\(kind.rawValue).customEndpoint"
+    }
+
+    static func customProtocol(for kind: AIModelKind) -> String {
+        "notiee.ai.\(kind.rawValue).customProtocol"
     }
 
     static func modelName(for kind: AIModelKind) -> String {
