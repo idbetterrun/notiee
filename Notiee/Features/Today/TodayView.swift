@@ -297,15 +297,7 @@ private struct RecordCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
-            // Thumbnail placeholder
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.secondary.opacity(0.12))
-                .frame(width: 72, height: 72)
-                .overlay {
-                    Image(systemName: record.processingState == .completed ? "doc.richtext" : "photo")
-                        .font(.title3)
-                        .foregroundStyle(record.processingState.tint)
-                }
+            RecordThumbnailView(record: record, size: 72, cornerRadius: 12)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(record.title)
@@ -351,34 +343,7 @@ private extension ScheduledEvent.Kind {
     }
 }
 
-private extension AIProcessingState {
-    var displayName: String {
-        switch self {
-        case .pending: "等待处理"
-        case .processing: "AI 处理中"
-        case .completed: "已生成摘要"
-        case .failed: "处理失败"
-        }
-    }
 
-    var symbolName: String {
-        switch self {
-        case .pending: "clock"
-        case .processing: "sparkles"
-        case .completed: "checkmark.circle"
-        case .failed: "exclamationmark.triangle"
-        }
-    }
-
-    var tint: Color {
-        switch self {
-        case .pending: .secondary
-        case .processing: .orange
-        case .completed: .green
-        case .failed: .red
-        }
-    }
-}
 
 // MARK: - Preview
 

@@ -59,4 +59,12 @@ final class RecordDetailViewModel: ObservableObject {
             "处理失败后可以稍后重试。"
         }
     }
+
+    func toggleTodo(id: UUID) {
+        store.toggleTodo(id: id)
+    }
+
+    func processRecord() {
+        store.processRecord(record)
+    }
 }

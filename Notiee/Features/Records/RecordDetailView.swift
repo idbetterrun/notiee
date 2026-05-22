@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RecordDetailView: View {
     @ObservedObject private var viewModel: RecordDetailViewModel
+    @State private var loadedImage: UIImage? = nil
 
     init(viewModel: RecordDetailViewModel) {
         self.viewModel = viewModel
@@ -23,6 +24,13 @@ struct RecordDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("记录详情")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            Task.detached(priority: .userInitiated) {
+                if let img = await MainActor.run(body: { LocalImageStore.shared.loadImage(path: viewModel.record.localImagePath) }) {
+                    await MainActor.run { self.loadedImage = img }
+                }
+            }
+        }
     }
 
     private var header: some View {
@@ -47,40 +55,65 @@ struct RecordDetailView: View {
                 Text(viewModel.record.capturedAt.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
                     .font(.caption.monospacedDigit().weight(.semibold))
                     .foregroundStyle(.secondary)
+                    
+                Spacer()
+                
+                if viewModel.record.processingState == .pending {
+                    Button("触发 AI 分析") {
+                        viewModel.processRecord()
+                    }
+                    .font(.caption.weight(.bold))
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                }
             }
         }
     }
 
     private var imagePreview: some View {
-        RoundedRectangle(cornerRadius: 26, style: .continuous)
-            .fill(.linearGradient(
-                colors: [
-                    viewModel.record.processingState.tint.opacity(0.18),
-                    Color(.secondarySystemGroupedBackground)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ))
-            .frame(maxWidth: .infinity)
-            .aspectRatio(1.28, contentMode: .fit)
-            .overlay(alignment: .center) {
-                VStack(spacing: 12) {
-                    Image(systemName: "photo")
-                        .font(.system(size: 44, weight: .regular))
-                        .foregroundStyle(viewModel.record.processingState.tint)
-
-                    Text(viewModel.record.localImagePath)
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .padding(.horizontal, 24)
-                }
-            }
-            .overlay {
+        Group {
+            if let loadedImage {
+                Image(uiImage: loadedImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .stroke(.white.opacity(0.8), lineWidth: 1)
+                    }
+            } else {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .stroke(.white.opacity(0.8), lineWidth: 1)
+                    .fill(.linearGradient(
+                        colors: [
+                            viewModel.record.processingState.tint.opacity(0.18),
+                            Color(.secondarySystemGroupedBackground)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(1.28, contentMode: .fit)
+                    .overlay(alignment: .center) {
+                        VStack(spacing: 12) {
+                            Image(systemName: "photo")
+                                .font(.system(size: 44, weight: .regular))
+                                .foregroundStyle(viewModel.record.processingState.tint)
+        
+                            Text(viewModel.record.localImagePath)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .padding(.horizontal, 24)
+                        }
+                    }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .stroke(.white.opacity(0.8), lineWidth: 1)
+                    }
             }
+        }
     }
 
     private var summarySection: some View {
@@ -103,9 +136,16 @@ struct RecordDetailView: View {
                 VStack(spacing: 12) {
                     ForEach(viewModel.todos) { todo in
                         HStack(spacing: 12) {
-                            Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(todo.isCompleted ? .green : .secondary)
-                                .font(.title3)
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.toggleTodo(id: todo.id)
+                                }
+                            } label: {
+                                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(todo.isCompleted ? .green : .secondary)
+                                    .font(.title3)
+                            }
+                            .buttonStyle(.plain)
 
                             Text(todo.content)
                                 .font(.body.weight(.medium))
@@ -149,33 +189,7 @@ private struct DetailSection<Content: View>: View {
     }
 }
 
-private extension AIProcessingState {
-    var symbolName: String {
-        switch self {
-        case .pending:
-            "clock"
-        case .processing:
-            "sparkles"
-        case .completed:
-            "checkmark.circle"
-        case .failed:
-            "exclamationmark.triangle"
-        }
-    }
 
-    var tint: Color {
-        switch self {
-        case .pending:
-            .orange
-        case .processing:
-            .blue
-        case .completed:
-            .green
-        case .failed:
-            .red
-        }
-    }
-}
 
 #Preview {
     let store = NotieeStore.sample()

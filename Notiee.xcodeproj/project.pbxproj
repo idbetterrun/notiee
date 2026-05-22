@@ -41,6 +41,9 @@
 		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
 		ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */; };
 		1874632278E7417482471181 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */; };
+		990000000000000000000002 /* AIProcessingState+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000001 /* AIProcessingState+UI.swift */; };
+		990000000000000000000004 /* RecordThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000003 /* RecordThumbnailView.swift */; };
+		990000000000000000000006 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000005 /* EventDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +93,9 @@
 		8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageStore.swift; sourceTree = "<group>"; };
 		ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		990000000000000000000001 /* AIProcessingState+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIProcessingState+UI.swift"; sourceTree = "<group>"; };
+		990000000000000000000003 /* RecordThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordThumbnailView.swift; sourceTree = "<group>"; };
+		990000000000000000000005 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,6 +190,8 @@
 				100000000000000000000005 /* RecordsView.swift */,
 				100000000000000000000023 /* RecordDetailView.swift */,
 				100000000000000000000022 /* RecordDetailViewModel.swift */,
+				990000000000000000000003 /* RecordThumbnailView.swift */,
+				990000000000000000000005 /* EventDetailView.swift */,
 			);
 			path = Records;
 			sourceTree = "<group>";
@@ -206,6 +214,7 @@
 				100000000000000000000010 /* AIProcessingState.swift */,
 				100000000000000000000025 /* AppTab.swift */,
 				100000000000000000000026 /* AIModelConfiguration.swift */,
+				990000000000000000000001 /* AIProcessingState+UI.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -338,6 +347,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				990000000000000000000002 /* AIProcessingState+UI.swift in Sources */,
+				990000000000000000000004 /* RecordThumbnailView.swift in Sources */,
+				990000000000000000000006 /* EventDetailView.swift in Sources */,
 				1874632278E7417482471181 /* CalendarService.swift in Sources */,
 				ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */,
 				3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */,

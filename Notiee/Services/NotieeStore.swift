@@ -60,6 +60,11 @@ final class NotieeStore: ObservableObject {
         records.filter { $0.processingState == .pending }.count
     }
 
+    var eventsWithRecords: [ScheduledEvent] {
+        let eventIDs = Set(records.compactMap { $0.eventID })
+        return events.filter { eventIDs.contains($0.id) }
+    }
+
     func records(matching query: String) -> [NoteRecord] {
         let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedQuery.isEmpty else {

@@ -328,21 +328,6 @@ private extension ScheduledEvent.Kind {
     }
 }
 
-private extension AIProcessingState {
-    var displayName: String {
-        switch self {
-        case .pending:
-            "待处理"
-        case .processing:
-            "处理中"
-        case .completed:
-            "已完成"
-        case .failed:
-            "失败"
-        }
-    }
-}
-
 #Preview {
     CaptureView()
 }
