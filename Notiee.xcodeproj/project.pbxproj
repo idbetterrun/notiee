@@ -37,6 +37,9 @@
 		200000000000000000000028 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000028 /* SettingsViewModel.swift */; };
 		200000000000000000000029 /* MockAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000029 /* MockAIProcessingService.swift */; };
 		200000000000000000000030 /* MockAIProcessingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000030 /* MockAIProcessingServiceTests.swift */; };
+		005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F441ADF365412A945FE92D /* CameraManager.swift */; };
+		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
+		ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +85,9 @@
 		100000000000000000000028 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		100000000000000000000029 /* MockAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingService.swift; sourceTree = "<group>"; };
 		100000000000000000000030 /* MockAIProcessingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingServiceTests.swift; sourceTree = "<group>"; };
+		C7F441ADF365412A945FE92D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageStore.swift; sourceTree = "<group>"; };
+		ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +169,7 @@
 		000000000000000000000012 /* Capture */ = {
 			isa = PBXGroup;
 			children = (
+				ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */,
 				100000000000000000000004 /* CaptureView.swift */,
 				100000000000000000000017 /* CaptureViewModel.swift */,
 			);
@@ -219,6 +226,8 @@
 		000000000000000000000017 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */,
+				C7F441ADF365412A945FE92D /* CameraManager.swift */,
 				100000000000000000000012 /* ScheduleMatcher.swift */,
 				100000000000000000000019 /* JSONNoteRecordStore.swift */,
 				100000000000000000000020 /* NotieeStore.swift */,
@@ -326,6 +335,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */,
+				3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */,
+				005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */,
 				200000000000000000000001 /* NotieeApp.swift in Sources */,
 				200000000000000000000002 /* RootTabView.swift in Sources */,
 				200000000000000000000003 /* TodayView.swift in Sources */,

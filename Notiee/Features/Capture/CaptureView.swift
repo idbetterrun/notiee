@@ -20,13 +20,19 @@ struct CaptureView: View {
             Color(.notieeCameraBackground)
                 .ignoresSafeArea()
 
-            RadialGradient(
-                colors: [.white.opacity(0.13), .clear],
-                center: .topTrailing,
-                startRadius: 20,
-                endRadius: 360
-            )
-            .ignoresSafeArea()
+            if viewModel.cameraManager.status == .ready {
+                CameraPreviewView(session: viewModel.cameraManager.session)
+                    .ignoresSafeArea()
+            } else if viewModel.cameraManager.status == .unauthorized {
+                VStack {
+                    Image(systemName: "camera.slash")
+                        .font(.largeTitle)
+                        .padding(.bottom, 8)
+                    Text("需要相机权限才能进行拍记")
+                        .font(.headline)
+                }
+                .foregroundStyle(.white.opacity(0.7))
+            }
 
             VStack(spacing: 22) {
                 contextHeader
@@ -51,6 +57,12 @@ struct CaptureView: View {
         }
         .animation(.easeOut(duration: 0.16), value: showsCaptureFlash)
         .animation(.spring(response: 0.24, dampingFraction: 0.72), value: shutterIsPressed)
+        .onAppear {
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
     }
 
     private var contextHeader: some View {
@@ -185,9 +197,18 @@ struct CaptureView: View {
                         .fill(.white.opacity(0.12))
                         .frame(width: 58, height: 58)
                         .overlay {
-                            Image(systemName: viewModel.latestRecord == nil ? "tray" : "photo")
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(.white)
+                            if let latestRecord = viewModel.latestRecord,
+                               let image = LocalImageStore.shared.loadImage(path: latestRecord.localImagePath) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 58, height: 58)
+                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            } else {
+                                Image(systemName: viewModel.latestRecord == nil ? "tray" : "photo")
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(.white)
+                            }
                         }
 
                     if !viewModel.capturedRecords.isEmpty {
@@ -242,7 +263,7 @@ struct CaptureView: View {
 
     private func capture() {
         withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-            _ = viewModel.capturePhoto()
+            viewModel.capturePhoto()
             shutterIsPressed = true
             showsCaptureFlash = true
         }

@@ -1,14 +1,18 @@
 import Combine
 import Foundation
+import UIKit
 
 @MainActor
 final class CaptureViewModel: ObservableObject {
     @Published private(set) var capturedRecords: [NoteRecord] = []
+    
+    let cameraManager = CameraManager()
 
     private let currentDate: Date
     private let events: [ScheduledEvent]
     private let scheduleMatcher: ScheduleMatcher
     private let store: NotieeStore?
+    private var cancellables: Set<AnyCancellable> = []
 
     init(
         currentDate: Date = Date(),
@@ -19,6 +23,8 @@ final class CaptureViewModel: ObservableObject {
         self.events = events
         self.scheduleMatcher = scheduleMatcher
         self.store = nil
+        
+        setupBindings()
     }
 
     init(store: NotieeStore) {
@@ -26,6 +32,17 @@ final class CaptureViewModel: ObservableObject {
         self.events = store.events
         self.scheduleMatcher = ScheduleMatcher()
         self.store = store
+        
+        setupBindings()
+    }
+    
+    private func setupBindings() {
+        cameraManager.$capturedImage
+            .compactMap { $0 }
+            .sink { [weak self] image in
+                self?.handleCapturedImage(image)
+            }
+            .store(in: &cancellables)
     }
 
     var currentEvent: ScheduledEvent? {
@@ -48,26 +65,41 @@ final class CaptureViewModel: ObservableObject {
         capturedRecords.first
     }
 
-    @discardableResult
-    func capturePhoto(localImagePath: String? = nil) -> NoteRecord {
-        if let store {
-            let record = store.capturePhoto(localImagePath: localImagePath)
-            capturedRecords.insert(record, at: 0)
-            return record
+    func onAppear() {
+        cameraManager.checkPermissionsAndConfigure()
+    }
+
+    func onDisappear() {
+        cameraManager.stopSession()
+    }
+
+    func capturePhoto() {
+        cameraManager.capturePhoto()
+        // The actual record creation happens in handleCapturedImage when the camera returns the image
+    }
+
+    private func handleCapturedImage(_ image: UIImage) {
+        do {
+            let relativePath = try LocalImageStore.shared.saveImage(image)
+            
+            if let store {
+                let record = store.capturePhoto(localImagePath: relativePath)
+                capturedRecords.insert(record, at: 0)
+            } else {
+                let event = currentEvent
+                let captureIndex = capturedRecords.count + 1
+                let record = NoteRecord(
+                    eventID: event?.id,
+                    capturedAt: currentDate,
+                    localImagePath: relativePath,
+                    title: event.map { "\($0.title) 拍记" } ?? "未分类拍记",
+                    processingState: .pending
+                )
+                capturedRecords.insert(record, at: 0)
+            }
+        } catch {
+            print("Failed to save captured image: \(error)")
         }
-
-        let event = currentEvent
-        let captureIndex = capturedRecords.count + 1
-        let record = NoteRecord(
-            eventID: event?.id,
-            capturedAt: currentDate,
-            localImagePath: localImagePath ?? "mock://capture-\(captureIndex)",
-            title: event.map { "\($0.title) 拍记" } ?? "未分类拍记",
-            processingState: .pending
-        )
-
-        capturedRecords.insert(record, at: 0)
-        return record
     }
 
     static func sample(currentDate: Date = Date()) -> CaptureViewModel {
