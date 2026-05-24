@@ -262,6 +262,7 @@ final class NotieeStore: ObservableObject {
             record.title.localizedCaseInsensitiveContains(normalizedQuery)
                 || record.summary.localizedCaseInsensitiveContains(normalizedQuery)
                 || record.ocrText.localizedCaseInsensitiveContains(normalizedQuery)
+                || record.detailedContent.localizedCaseInsensitiveContains(normalizedQuery)
         }
     }
 
