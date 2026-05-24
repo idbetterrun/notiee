@@ -1,6 +1,6 @@
 import SwiftUI
-import UIKit
 import AVFoundation
+import AVKit
 
 struct RootTabView: View {
     @StateObject private var store: NotieeStore
