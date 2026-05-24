@@ -38,7 +38,7 @@ struct TMNImportPreviewSheet: View {
                             store.addTodo(todo)
                         }
                         var importedRecord = record
-                        importedRecord.folderID = store.getOrCreateImportedFolder()
+                        importedRecord.folderID = store.createImportedFolder()
                         store.addRecord(importedRecord)
                         dismiss()
                     }

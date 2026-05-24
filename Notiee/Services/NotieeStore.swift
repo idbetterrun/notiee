@@ -477,11 +477,11 @@ final class NotieeStore: ObservableObject {
         persistTags()
     }
     
-    func getOrCreateImportedFolder() -> UUID {
-        if let folder = customFolders.first(where: { $0.name == "已导入" }) {
-            return folder.id
-        }
-        let newFolder = CustomFolder(name: "已导入")
+    func createImportedFolder() -> UUID {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M月d日"
+        let name = "\(formatter.string(from: Date())) 导入记录"
+        let newFolder = CustomFolder(name: name)
         customFolders.append(newFolder)
         persistFolders()
         return newFolder.id

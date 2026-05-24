@@ -200,7 +200,7 @@ struct BackupImportPreviewSheet: View {
         NavigationStack {
             List {
                 Section {
-                    Text("共解析到 \(previewData.count) 条记录。点击“确认恢复”将它们统一保存至“已导入”文件夹中。")
+                    Text("共解析到 \(previewData.count) 条记录。点击确认恢复将它们统一保存至日期导入记录文件夹中。")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -241,7 +241,7 @@ struct BackupImportPreviewSheet: View {
     }
     
     private func importAll() {
-        let folderId = store.getOrCreateImportedFolder()
+        let folderId = store.createImportedFolder()
         
         for data in previewData {
             let newRecord = NoteRecord(
