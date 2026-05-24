@@ -275,12 +275,20 @@ final class NotieeStore: ObservableObject {
     }
 
     @discardableResult
-    func capturePhoto(localImagePaths: [String]? = nil) -> NoteRecord {
+    func capturePhoto(localImagePaths: [String]? = nil, eventID: UUID? = nil) -> NoteRecord {
+        let resolvedEventID = eventID ?? currentEvent?.id
+        let resolvedEventTitle: String? = {
+            if let id = resolvedEventID {
+                return events.first(where: { $0.id == id })?.title
+            }
+            return currentEvent?.title
+        }()
+
         let record = NoteRecord(
-            eventID: currentEvent?.id,
+            eventID: resolvedEventID,
             capturedAt: currentDate,
             localImagePaths: localImagePaths ?? [],
-            title: currentEvent.map { "\($0.title) 拍记" } ?? "未分类拍记",
+            title: resolvedEventTitle.map { "\($0) 拍记" } ?? "未分类拍记",
             processingState: .pending
         )
 

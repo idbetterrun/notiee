@@ -125,7 +125,7 @@ final class CaptureViewModel: ObservableObject {
                 }
             } else {
                 if let store {
-                    let record = store.capturePhoto(localImagePaths: [relativePath])
+                    let record = store.capturePhoto(localImagePaths: [relativePath], eventID: currentEvent?.id)
                     if !store.autoProcessAfterCapture {
                         store.processRecord(record)
                     }
@@ -148,7 +148,7 @@ final class CaptureViewModel: ObservableObject {
     func finishBatch() {
         guard !batchImagePaths.isEmpty else { return }
         if let store {
-            let record = store.capturePhoto(localImagePaths: batchImagePaths)
+            let record = store.capturePhoto(localImagePaths: batchImagePaths, eventID: currentEvent?.id)
             if !store.autoProcessAfterCapture {
                 store.processRecord(record)
             }
