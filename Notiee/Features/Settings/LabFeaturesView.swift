@@ -2,8 +2,10 @@ import SwiftUI
 
 struct LabFeaturesView: View {
     @ObservedObject var store: NotieeStore
+    @StateObject private var iCloudService = ICloudSyncService.shared
     @State private var showingDocumentPicker = false
     @State private var previewData: PreviewData?
+    @State private var syncResultMessage: String?
     
     @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
     @AppStorage("notiee.studentMode") private var studentModeEnabled = false
@@ -60,29 +62,37 @@ struct LabFeaturesView: View {
             }
             
             Section {
-                if ICloudSyncService.shared.isAvailable() {
+                if iCloudService.isAvailable() {
                     HStack {
                         Label("iCloud 同步", systemImage: "icloud.and.arrow.up")
                         Spacer()
-                        if let date = ICloudSyncService.shared.lastSyncDate {
+                        if let date = iCloudService.lastSyncDate {
                             Text("上次同步：" + date.formatted(.relative(presentation: .numeric)))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
+                    
+                    if let message = syncResultMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundColor(message.hasPrefix("✓") ? .green : .red)
+                            .padding(.vertical, 4)
+                    }
 
                     Button {
+                        syncResultMessage = nil
                         Task {
                             do {
-                                let count = try await ICloudSyncService.shared.uploadAllRecords(store: store)
-                                print("Uploaded \(count) records to iCloud")
+                                let count = try await iCloudService.uploadAllRecords(store: store)
+                                syncResultMessage = "✓ 成功上传 \(count) 条记录"
                             } catch {
-                                print("Upload failed: \(error.localizedDescription)")
+                                syncResultMessage = error.localizedDescription
                             }
                         }
                     } label: {
                         HStack {
-                            if ICloudSyncService.shared.isSyncing {
+                            if iCloudService.isSyncing {
                                 ProgressView()
                                     .padding(.trailing, 4)
                             }
@@ -91,20 +101,21 @@ struct LabFeaturesView: View {
                             Image(systemName: "arrow.up.doc.fill")
                         }
                     }
-                    .disabled(ICloudSyncService.shared.isSyncing)
+                    .disabled(iCloudService.isSyncing)
 
                     Button {
+                        syncResultMessage = nil
                         Task {
                             do {
-                                let count = try await ICloudSyncService.shared.downloadAndMerge(store: store)
-                                print("Downloaded and merged \(count) records from iCloud")
+                                let count = try await iCloudService.downloadAndMerge(store: store)
+                                syncResultMessage = "✓ 成功下载合并 \(count) 条记录"
                             } catch {
-                                print("Download failed: \(error.localizedDescription)")
+                                syncResultMessage = error.localizedDescription
                             }
                         }
                     } label: {
                         HStack {
-                            if ICloudSyncService.shared.isSyncing {
+                            if iCloudService.isSyncing {
                                 ProgressView()
                                     .padding(.trailing, 4)
                             }
@@ -113,16 +124,22 @@ struct LabFeaturesView: View {
                             Image(systemName: "arrow.down.doc.fill")
                         }
                     }
-                    .disabled(ICloudSyncService.shared.isSyncing)
+                    .disabled(iCloudService.isSyncing)
                 } else {
-                    HStack {
-                        Label("iCloud 同步不可用", systemImage: "icloud.slash")
-                        Spacer()
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Label("iCloud 同步不可用", systemImage: "icloud.slash")
+                            Spacer()
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                        }
+                        .foregroundColor(.secondary)
+                        
+                        Text("需要 Apple Developer Program 付费账号（$99/年）才能使用 iCloud 同步。请改用「备份与恢复」页面通过 AirDrop 在设备间传输。")
                             .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    .foregroundColor(.secondary)
                 }
             } footer: {
                 Text("通过 iCloud Drive 在设备间同步记录。使用 UUID 去重，editedAt 版本比较解决冲突。")
