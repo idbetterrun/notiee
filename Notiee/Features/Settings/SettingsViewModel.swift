@@ -1,4 +1,5 @@
 import Combine
+import EventKit
 import Foundation
 import UIKit
 
@@ -33,6 +34,10 @@ final class SettingsViewModel: ObservableObject {
     @Published var liveActivityEnabled: Bool
     @Published var notificationAdvanceTime: Int
     
+    // Calendar Selection
+    @Published var availableCalendars: [EKCalendar] = []
+    @Published var selectedCalendarIDs: Set<String> = []
+
     // Advanced
     @Published var customModels: [CustomAIModel]
     @Published var selectedCustomModelID: UUID?
@@ -65,6 +70,21 @@ final class SettingsViewModel: ObservableObject {
         notificationAdvanceTime = settingsStore.loadInt(forKey: "notiee.notificationAdvanceTime", defaultValue: 5)
         
         customModels = settingsStore.loadCustomModels()
+        loadCalendarSelection()
+    }
+    
+    func loadCalendarSelection() {
+        availableCalendars = CalendarService.shared.availableCalendars
+        selectedCalendarIDs = CalendarService.shared.selectedCalendarIDs()
+    }
+    
+    func toggleCalendar(_ id: String) {
+        if selectedCalendarIDs.contains(id) {
+            selectedCalendarIDs.remove(id)
+        } else {
+            selectedCalendarIDs.insert(id)
+        }
+        CalendarService.shared.saveSelectedCalendarIDs(selectedCalendarIDs)
     }
     
     func saveAll() {

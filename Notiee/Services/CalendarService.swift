@@ -8,6 +8,7 @@ final class CalendarService: ObservableObject {
     private let eventStore = EKEventStore()
     
     @Published private(set) var isAuthorized = false
+    @Published private(set) var availableCalendars: [EKCalendar] = []
     
     private init() {
         checkAuthorizationStatus()
@@ -20,6 +21,27 @@ final class CalendarService: ObservableObject {
         } else {
             isAuthorized = (status == .authorized)
         }
+        if isAuthorized {
+            reloadCalendars()
+        }
+    }
+    
+    func reloadCalendars() {
+        availableCalendars = eventStore.calendars(for: .event).sorted { $0.title < $1.title }
+    }
+    
+    func selectedCalendarIDs() -> Set<String> {
+        guard let data = UserDefaults.standard.data(forKey: "notiee.selectedCalendarIdentifiers"),
+              let ids = try? JSONDecoder().decode(Set<String>.self, from: data) else {
+            return Set(availableCalendars.map { $0.calendarIdentifier })
+        }
+        return ids
+    }
+    
+    func saveSelectedCalendarIDs(_ ids: Set<String>) {
+        if let data = try? JSONEncoder().encode(ids) {
+            UserDefaults.standard.set(data, forKey: "notiee.selectedCalendarIdentifiers")
+        }
     }
     
     func requestAccess() async -> Bool {
@@ -31,6 +53,9 @@ final class CalendarService: ObservableObject {
                 granted = try await eventStore.requestAccess(to: .event)
             }
             isAuthorized = granted
+            if granted {
+                reloadCalendars()
+            }
             return granted
         } catch {
             print("Failed to request calendar access: \(error)")
@@ -47,7 +72,14 @@ final class CalendarService: ObservableObject {
             return []
         }
         
-        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
+        let allowedIDs = selectedCalendarIDs()
+        let filteredCalendars: [EKCalendar]?
+        if allowedIDs.isEmpty {
+            filteredCalendars = nil
+        } else {
+            filteredCalendars = availableCalendars.filter { allowedIDs.contains($0.calendarIdentifier) }
+        }
+        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: filteredCalendars)
         let ekEvents = eventStore.events(matching: predicate)
         
         return ekEvents.map { ekEvent in
