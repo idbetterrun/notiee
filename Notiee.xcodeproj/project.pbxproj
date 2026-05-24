@@ -195,6 +195,7 @@
 		612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PastSchedulesView.swift; sourceTree = "<group>"; };
 		69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImageSaver.swift; sourceTree = "<group>"; };
 		6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpecialDayEvent.swift; sourceTree = "<group>"; };
+		6E0AFE1B3C5C3986B1B38397 /* NotieeCaptureExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NotieeCaptureExtension.entitlements; sourceTree = "<group>"; };
 		7F8B25934CD853078C1F734F /* WelcomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		82877F4ACD877D140D13DE81 /* HighlightedText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HighlightedText.swift; sourceTree = "<group>"; };
 		868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduledEventStore.swift; sourceTree = "<group>"; };
@@ -491,6 +492,7 @@
 			children = (
 				9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */,
 				BCEEAF1F66C49780FE20324C /* Info.plist */,
+				6E0AFE1B3C5C3986B1B38397 /* NotieeCaptureExtension.entitlements */,
 			);
 			name = NotieeCaptureExtension;
 			sourceTree = "<group>";
@@ -1113,6 +1115,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = NotieeCaptureExtension/NotieeCaptureExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UPZ7VCKGB7;
@@ -1133,6 +1136,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = NotieeCaptureExtension/NotieeCaptureExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UPZ7VCKGB7;
