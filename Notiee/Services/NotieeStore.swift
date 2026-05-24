@@ -32,6 +32,8 @@ final class NotieeStore: ObservableObject {
     // Map of identifier to ignore mode: "once_\(date)" or "future"
     @Published private(set) var ignoredCalendarEventKeys: Set<String> = []
 
+    @Published private(set) var liveActivityDisabledEventIDs: Set<UUID> = []
+
     var aiEnabled: Bool {
         settingsStore.loadBool(forKey: "notiee.aiEnabled", defaultValue: true)
     }
@@ -110,6 +112,11 @@ final class NotieeStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "notiee.ignoredCalendarEventKeys"),
            let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) {
             self.ignoredCalendarEventKeys = decoded
+        }
+        
+        if let data = UserDefaults.standard.data(forKey: "notiee.liveActivityDisabledEventIDs"),
+           let decoded = try? JSONDecoder().decode(Set<UUID>.self, from: data) {
+            self.liveActivityDisabledEventIDs = decoded
         }
         
         // Listen to Live Activity setting changes if needed, or update immediately
@@ -587,10 +594,31 @@ final class NotieeStore: ObservableObject {
         let checkDate = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil ? currentDate : Date()
         
         if let event = scheduleMatcher.currentEvent(from: events, at: checkDate) {
+            guard !event.isAllDay else {
+                LiveActivityManager.shared.endActivity()
+                return
+            }
+            guard !liveActivityDisabledEventIDs.contains(event.id) else {
+                LiveActivityManager.shared.endActivity()
+                return
+            }
             LiveActivityManager.shared.startActivity(for: event)
         } else {
             LiveActivityManager.shared.endActivity()
         }
+    }
+
+    func toggleLiveActivityForEvent(_ eventID: UUID) {
+        if liveActivityDisabledEventIDs.contains(eventID) {
+            liveActivityDisabledEventIDs.remove(eventID)
+        } else {
+            liveActivityDisabledEventIDs.insert(eventID)
+            LiveActivityManager.shared.endActivity()
+        }
+        if let data = try? JSONEncoder().encode(liveActivityDisabledEventIDs) {
+            UserDefaults.standard.set(data, forKey: "notiee.liveActivityDisabledEventIDs")
+        }
+        Task { await updateLiveActivity() }
     }
 
     // MARK: - AI Processing Pipeline

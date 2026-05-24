@@ -196,7 +196,16 @@ struct TodayView: View {
                         Button {
                             selectedEvent = event
                         } label: {
-                            EventCard(event: event, currentDate: viewModel.currentDate, tag: viewModel.store?.customTags.first(where: { $0.id == event.tagID }))
+                            EventCard(
+                                event: event,
+                                currentDate: viewModel.currentDate,
+                                tag: viewModel.store?.customTags.first(where: { $0.id == event.tagID }),
+                                isLiveDisabled: viewModel.store?.liveActivityDisabledEventIDs.contains(event.id) ?? false,
+                                showLiveToggle: event.status(at: viewModel.currentDate) == .current && !event.isAllDay,
+                                onToggleLive: {
+                                    viewModel.store?.toggleLiveActivityForEvent(event.id)
+                                }
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -293,6 +302,9 @@ private struct EventCard: View {
     let event: ScheduledEvent
     let currentDate: Date
     let tag: EventTag?
+    let isLiveDisabled: Bool
+    let showLiveToggle: Bool
+    let onToggleLive: () -> Void
 
     var body: some View {
         HStack(spacing: 14) {
@@ -315,6 +327,23 @@ private struct EventCard: View {
             }
 
             Spacer(minLength: 4)
+            
+            if showLiveToggle {
+                Button(action: onToggleLive) {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(isLiveDisabled ? Color.secondary : Color.green)
+                            .frame(width: 6, height: 6)
+                        Text("Live")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(isLiveDisabled ? Color.secondary : Color.green)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(isLiveDisabled ? Color.secondary.opacity(0.1) : Color.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(14)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
