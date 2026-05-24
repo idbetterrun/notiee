@@ -107,45 +107,74 @@ final class CalendarService: ObservableObject {
         }.sorted { $0.startDate < $1.startDate }
     }
     
-    func holidayOrBirthdayText(for date: Date) -> String? {
-        guard isAuthorized else { return nil }
-        
+    func specialDayEvents(for date: Date) -> [SpecialDayEvent] {
+        guard isAuthorized else { return [] }
+
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
-        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return nil }
-        
+        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return [] }
+
         let allowedIDs = selectedCalendarIDs()
         let filteredCalendars = allowedIDs.isEmpty
             ? eventStore.calendars(for: .event)
             : eventStore.calendars(for: .event).filter { allowedIDs.contains($0.calendarIdentifier) }
-        
+
         let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: filteredCalendars)
         let events = eventStore.events(matching: predicate)
-        
+
+        var results: [SpecialDayEvent] = []
+
         for ekEvent in events {
-            if ekEvent.calendar?.type == .birthday {
-                if let title = ekEvent.title {
-                    return title
-                }
+            if ekEvent.calendar?.type == .birthday, let title = ekEvent.title {
+                results.append(SpecialDayEvent(title: title, type: .birthday))
+                continue
             }
-            
+
             let calTitle = ekEvent.calendar?.title ?? ""
-            if calTitle.contains("节") || calTitle.contains("假日") || calTitle.contains("Holiday") || calTitle.contains("节日") {
-                if let title = ekEvent.title {
-                    return title
+            let isHolidayCalendar = calTitle.contains("节") || calTitle.contains("假日") || calTitle.contains("Holiday") || calTitle.contains("节日")
+
+            if isHolidayCalendar, let title = ekEvent.title {
+                if isSolarTerm(title) {
+                    results.append(SpecialDayEvent(title: title, type: .solarTerm))
+                } else {
+                    results.append(SpecialDayEvent(title: title, type: .holiday))
                 }
+                continue
             }
-            
+
             let eventTitle = ekEvent.title ?? ""
             if eventTitle.contains("生日") || eventTitle.localizedCaseInsensitiveContains("birthday") {
-                return eventTitle
+                results.append(SpecialDayEvent(title: eventTitle, type: .birthday))
+                continue
             }
-            
-            if eventTitle.contains("节") && eventTitle.count < 20 {
-                return eventTitle
+
+            if eventTitle.contains("节") && eventTitle.count < 20 && !eventTitle.contains("节目") && !eventTitle.contains("环节") {
+                if isSolarTerm(eventTitle) {
+                    results.append(SpecialDayEvent(title: eventTitle, type: .solarTerm))
+                } else {
+                    results.append(SpecialDayEvent(title: eventTitle, type: .holiday))
+                }
             }
         }
-        
-        return nil
+
+        return results
+    }
+
+    private func isSolarTerm(_ title: String) -> Bool {
+        let solarTerms = ["立春", "雨水", "惊蛰", "春分", "清明", "谷雨",
+                          "立夏", "小满", "芒种", "夏至", "小暑", "大暑",
+                          "立秋", "处暑", "白露", "秋分", "寒露", "霜降",
+                          "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"]
+        return solarTerms.contains(where: { title.contains($0) })
+    }
+
+    func holidayOrBirthdayText(for date: Date) -> String? {
+        specialDayEvents(for: date).first?.title
+    }
+
+    func isSpecialAllDayEvent(_ event: ScheduledEvent) -> Bool {
+        guard event.isAllDay else { return false }
+        let events = specialDayEvents(for: event.startDate)
+        return events.contains(where: { $0.title == event.title })
     }
 }
