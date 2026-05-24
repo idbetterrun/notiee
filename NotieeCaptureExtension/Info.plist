@@ -6,8 +6,8 @@
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.locked-camera-capture</string>
-		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).Extension</string>
 	</dict>
+	<key>WKAppBundleIdentifier</key>
+	<string>com.notiee.app</string>
 </dict>
 </plist>
