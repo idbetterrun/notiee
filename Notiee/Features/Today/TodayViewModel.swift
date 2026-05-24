@@ -48,33 +48,41 @@ final class TodayViewModel: ObservableObject {
     }
 
     // MARK: - Current Event
+    
+    private var todayEvents: [ScheduledEvent] {
+        events.filter {
+            calendar.isDate($0.startDate, inSameDayAs: currentDate) ||
+            calendar.isDate($0.endDate, inSameDayAs: currentDate) ||
+            ($0.startDate < currentDate && $0.endDate > currentDate)
+        }
+    }
 
     var currentEvent: ScheduledEvent? {
-        scheduleMatcher.currentEvent(from: events, at: currentDate)
+        scheduleMatcher.currentEvent(from: todayEvents, at: currentDate)
     }
 
     // MARK: - Grouped Timeline
 
     var completedEvents: [ScheduledEvent] {
-        events
+        todayEvents
             .filter { $0.status(at: currentDate) == .completed }
             .sorted { $0.startDate < $1.startDate }
     }
 
     var currentEvents: [ScheduledEvent] {
-        events
+        todayEvents
             .filter { $0.status(at: currentDate) == .current }
             .sorted { $0.startDate < $1.startDate }
     }
 
     var upcomingEvents: [ScheduledEvent] {
-        events
+        todayEvents
             .filter { $0.status(at: currentDate) == .upcoming }
             .sorted { $0.startDate < $1.startDate }
     }
 
     var timelineItems: [ScheduledEvent] {
-        events.sorted { $0.startDate < $1.startDate }
+        todayEvents.sorted { $0.startDate < $1.startDate }
     }
 
     // MARK: - Todos
@@ -115,23 +123,32 @@ final class TodayViewModel: ObservableObject {
 
     var todayRecords: [NoteRecord] {
         records
-            .filter { calendar.isDate($0.capturedAt, inSameDayAs: currentDate) }
+            .filter { !$0.isDeleted && calendar.isDate($0.capturedAt, inSameDayAs: currentDate) }
             .sorted { $0.capturedAt > $1.capturedAt }
     }
 
     // MARK: - Formatted Date
 
     var formattedDateWithWeek: String {
-        let weekOfYear = calendar.component(.weekOfYear, from: currentDate)
-        let dateString = currentDate.formatted(
-            .dateTime.year().month(.defaultDigits).day()
-                .locale(Locale(identifier: "zh_CN"))
-        )
         let weekday = currentDate.formatted(
             .dateTime.weekday(.abbreviated)
                 .locale(Locale(identifier: "zh_CN"))
         )
-        return "\(dateString) 第\(weekOfYear)周 \(weekday)"
+        if let store = store {
+            return "\(store.formattedDateWithWeek(for: currentDate)) \(weekday)"
+        }
+        
+        let monthDay = currentDate.formatted(
+            .dateTime.month(.defaultDigits).day()
+                .locale(Locale(identifier: "zh_CN"))
+        )
+        let currentWeekday = currentDate.formatted(
+            .dateTime.weekday(.abbreviated)
+                .locale(Locale(identifier: "zh_CN"))
+        )
+        let weekOfYear = calendar.component(.weekOfYear, from: currentDate)
+        let weekStr = " 第\(weekOfYear)周"
+        return "\(monthDay)日 \(currentWeekday)\(weekStr)"
     }
 
     // MARK: - Sample Data
@@ -146,7 +163,7 @@ final class TodayViewModel: ObservableObject {
         let upcomingEnd = calendar.date(byAdding: .hour, value: 3, to: currentDate)!
 
         let course = ScheduledEvent(
-            title: "产品设计课",
+            title: "当前课程",
             startDate: currentStart,
             endDate: currentEnd,
             kind: .course,
@@ -155,7 +172,7 @@ final class TodayViewModel: ObservableObject {
 
         let events = [
             ScheduledEvent(
-                title: "高等数学",
+                title: "已完成课程",
                 startDate: earlierStart,
                 endDate: earlierEnd,
                 kind: .course,
@@ -163,7 +180,7 @@ final class TodayViewModel: ObservableObject {
             ),
             course,
             ScheduledEvent(
-                title: "项目讨论",
+                title: "即将开始的会议",
                 startDate: upcomingStart,
                 endDate: upcomingEnd,
                 kind: .meeting,
@@ -174,49 +191,19 @@ final class TodayViewModel: ObservableObject {
         let todos = [
             NoteTodo(
                 recordID: nil,
-                content: "整理白板上的用户旅程图",
+                content: "整理课堂笔记",
                 createdAt: calendar.date(byAdding: .minute, value: -20, to: currentDate)!
             ),
             NoteTodo(
                 recordID: nil,
-                content: "补充竞品截图到课程记录",
+                content: "完成课后练习",
                 createdAt: calendar.date(byAdding: .minute, value: -12, to: currentDate)!
             ),
             NoteTodo(
                 recordID: nil,
-                content: "同步昨天的课堂笔记",
+                content: "复习上次课程内容",
                 isCompleted: true,
                 createdAt: calendar.date(byAdding: .hour, value: -2, to: currentDate)!
-            )
-        ]
-
-        let records = [
-            NoteRecord(
-                eventID: course.id,
-                capturedAt: calendar.date(byAdding: .minute, value: -8, to: currentDate)!,
-                localImagePaths: ["mock://whiteboard-flow"],
-                title: "白板：拍记流程",
-                ocrText: "capture queue, schedule matching, ai summary",
-                summary: "拍照后自动关联当前课程，进入后台处理队列。",
-                processingState: .completed
-            ),
-            NoteRecord(
-                eventID: course.id,
-                capturedAt: calendar.date(byAdding: .minute, value: -46, to: currentDate)!,
-                localImagePaths: ["mock://schedule-context"],
-                title: "课件：日程感知",
-                ocrText: "calendar import, current event, inbox fallback",
-                summary: "通过日程时间段给照片补充课程上下文。",
-                processingState: .processing
-            ),
-            NoteRecord(
-                eventID: nil,
-                capturedAt: calendar.date(byAdding: .day, value: -1, to: currentDate)!,
-                localImagePaths: ["mock://yesterday"],
-                title: "昨天记录",
-                ocrText: "",
-                summary: "",
-                processingState: .completed
             )
         ]
 
@@ -225,7 +212,7 @@ final class TodayViewModel: ObservableObject {
             calendar: calendar,
             events: events,
             todos: todos,
-            records: records
+            records: []
         )
     }
 }

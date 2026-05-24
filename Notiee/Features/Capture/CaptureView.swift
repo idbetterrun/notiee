@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import AVFoundation
+import AVKit
 
 struct CaptureView: View {
     @StateObject private var viewModel: CaptureViewModel
@@ -24,6 +25,10 @@ struct CaptureView: View {
         ZStack {
             Color.black
                 .ignoresSafeArea()
+            
+            CameraControlView {
+                capture()
+            }
 
             VStack(spacing: 0) {
                 topBar
@@ -364,6 +369,29 @@ struct CaptureView: View {
             showsCaptureFlash = false
         }
     }
+}
+
+struct CameraControlView: UIViewControllerRepresentable {
+    var onCapture: () -> Void
+    
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = UIViewController()
+        #if !targetEnvironment(simulator)
+        if #available(iOS 17.2, *) {
+            let interaction = AVCaptureEventInteraction { event in
+                if event.phase == .began {
+                    DispatchQueue.main.async {
+                        onCapture()
+                    }
+                }
+            }
+            vc.view.addInteraction(interaction)
+        }
+        #endif
+        return vc
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 #Preview {

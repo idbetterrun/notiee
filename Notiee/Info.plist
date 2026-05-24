@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Notiee Archive</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.notiee.tmn</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.archive</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Notiee Archive</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>com.notiee.tmn</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tmn</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Notiee 需要使用相机进行拍照和扫描记录。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Notiee 需要使用麦克风进行语音记录。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Notiee 需要访问相册以便您能导入图片进行记录。</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Notiee 需要使用语音识别技术将您的语音转换为文本记录。</string>
+</dict>
+</plist>

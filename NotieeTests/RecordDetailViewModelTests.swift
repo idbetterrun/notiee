@@ -7,7 +7,7 @@ final class RecordDetailViewModelTests: XCTestCase {
         let recordID = UUID(uuidString: "00000000-0000-0000-0000-000000000301")!
         let event = ScheduledEvent(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000302")!,
-            title: "产品设计课",
+            title: "测试课程",
             startDate: referenceDate.addingTimeInterval(-30 * 60),
             endDate: referenceDate.addingTimeInterval(30 * 60)
         )
@@ -15,7 +15,7 @@ final class RecordDetailViewModelTests: XCTestCase {
             id: recordID,
             eventID: event.id,
             capturedAt: referenceDate,
-            localImagePath: "mock://detail",
+            localImagePaths: ["detail"],
             title: "白板：用户旅程",
             ocrText: "",
             summary: "",
@@ -46,7 +46,7 @@ final class RecordDetailViewModelTests: XCTestCase {
 
         let viewModel = RecordDetailViewModel(record: record, store: store)
 
-        XCTAssertEqual(viewModel.eventTitle, "产品设计课")
+        XCTAssertEqual(viewModel.eventTitle, "测试课程")
         XCTAssertEqual(viewModel.summaryText, "AI 正在整理这条记录。")
         XCTAssertEqual(viewModel.ocrText, "OCR 结果生成后会显示在这里。")
         XCTAssertEqual(viewModel.todos.map(\.content), [
@@ -60,7 +60,7 @@ final class RecordDetailViewModelTests: XCTestCase {
         let record = NoteRecord(
             eventID: nil,
             capturedAt: referenceDate,
-            localImagePath: "mock://uncategorized",
+            localImagePaths: ["uncategorized"],
             title: "未分类拍记",
             ocrText: "whiteboard notes",
             summary: "拍摄了白板上的流程草图。",

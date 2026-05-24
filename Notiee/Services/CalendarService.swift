@@ -15,7 +15,11 @@ final class CalendarService: ObservableObject {
     
     private func checkAuthorizationStatus() {
         let status = EKEventStore.authorizationStatus(for: .event)
-        isAuthorized = (status == .authorized || status == .fullAccess || status == .writeOnly)
+        if #available(iOS 17.0, *) {
+            isAuthorized = (status == .fullAccess || status == .writeOnly)
+        } else {
+            isAuthorized = (status == .authorized)
+        }
     }
     
     func requestAccess() async -> Bool {
@@ -34,16 +38,16 @@ final class CalendarService: ObservableObject {
         }
     }
     
-    func fetchTodayEvents(currentDate: Date = Date()) -> [ScheduledEvent] {
+    func fetchEvents(currentDate: Date = Date()) -> [ScheduledEvent] {
         guard isAuthorized else { return [] }
         
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: currentDate)
-        guard let endOfDay = calendar.date(byAdding: DateComponents(day: 1, second: -1), to: startOfDay) else {
+        guard let startDate = calendar.date(byAdding: .month, value: -1, to: currentDate),
+              let endDate = calendar.date(byAdding: .month, value: 6, to: currentDate) else {
             return []
         }
         
-        let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: nil)
+        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         let ekEvents = eventStore.events(matching: predicate)
         
         return ekEvents.map { ekEvent in
@@ -64,7 +68,8 @@ final class CalendarService: ObservableObject {
                 startDate: ekEvent.startDate,
                 endDate: ekEvent.endDate,
                 kind: kind,
-                updatedAt: ekEvent.lastModifiedDate ?? Date()
+                updatedAt: ekEvent.lastModifiedDate ?? Date(),
+                source: .systemCalendar(identifier: ekEvent.eventIdentifier)
             )
         }.sorted { $0.startDate < $1.startDate }
     }

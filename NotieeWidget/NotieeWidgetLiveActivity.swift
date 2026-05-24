@@ -18,7 +18,7 @@ struct NotieeWidgetLiveActivity: Widget {
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("当前日程")
+                    Text(context.state.endTime > Date() ? "当前日程" : "日程已结束")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
@@ -34,13 +34,19 @@ struct NotieeWidgetLiveActivity: Widget {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text(timerInterval: Date()...context.state.endTime, countsDown: true)
-                        .multilineTextAlignment(.trailing)
-                        .font(.title2.monospacedDigit().weight(.bold))
-                        .foregroundColor(.blue)
-                        // Force the frame to a reasonable maximum width so it aligns right
-                        // without flying off the screen.
-                        .frame(maxWidth: 90, alignment: .trailing)
+                    if context.state.endTime > Date() {
+                        Text(timerInterval: Date()...context.state.endTime, countsDown: true)
+                            .multilineTextAlignment(.trailing)
+                            .font(.title2.monospacedDigit().weight(.bold))
+                            .foregroundColor(.blue)
+                            .frame(maxWidth: 90, alignment: .trailing)
+                    } else {
+                        Text("已结束")
+                            .multilineTextAlignment(.trailing)
+                            .font(.title2.monospacedDigit().weight(.bold))
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: 90, alignment: .trailing)
+                    }
                 }
             }
             .padding()
@@ -58,9 +64,15 @@ struct NotieeWidgetLiveActivity: Widget {
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(timerInterval: Date()...context.state.endTime, countsDown: true)
-                        .font(.headline.monospacedDigit())
-                        .foregroundColor(.blue)
+                    if context.state.endTime > Date() {
+                        Text(timerInterval: Date()...context.state.endTime, countsDown: true)
+                            .font(.headline.monospacedDigit())
+                            .foregroundColor(.blue)
+                    } else {
+                        Text("已结束")
+                            .font(.headline.monospacedDigit())
+                            .foregroundColor(.secondary)
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack {
@@ -74,9 +86,15 @@ struct NotieeWidgetLiveActivity: Widget {
                 Image(systemName: context.attributes.eventKind == "course" ? "book.fill" : "calendar")
                     .foregroundColor(.blue)
             } compactTrailing: {
-                Text(timerInterval: Date()...context.state.endTime, countsDown: true)
-                    .font(.caption.monospacedDigit())
-                    .frame(maxWidth: 40)
+                if context.state.endTime > Date() {
+                    Text(timerInterval: Date()...context.state.endTime, countsDown: true)
+                        .font(.caption.monospacedDigit())
+                        .frame(maxWidth: 40)
+                } else {
+                    Text("结束")
+                        .font(.caption.monospacedDigit())
+                        .frame(maxWidth: 40)
+                }
             } minimal: {
                 Image(systemName: "calendar")
                     .foregroundColor(.blue)

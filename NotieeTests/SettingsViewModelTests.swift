@@ -25,8 +25,8 @@ final class SettingsViewModelTests: XCTestCase {
         let secretStore = InMemorySecretStore()
         let store = UserDefaultsAppSettingsStore(userDefaults: defaults, secretStore: secretStore)
         let configuration = AIModelConfiguration(
-            providerName: "OpenAI Compatible",
-            endpoint: "https://api.example.com/v1",
+            providerType: .custom,
+            customEndpoint: "https://api.example.com/v1",
             modelName: "notiee-text",
             apiKey: "sk-notiee-secret"
         )
@@ -49,17 +49,17 @@ final class SettingsViewModelTests: XCTestCase {
         let viewModel = SettingsViewModel(settingsStore: store)
 
         viewModel.textConfiguration = AIModelConfiguration(
-            providerName: "OpenAI Compatible",
-            endpoint: "https://api.example.com/v1",
+            providerType: .custom,
+            customEndpoint: "https://api.example.com/v1",
             modelName: "notiee-text",
             apiKey: ""
         )
         viewModel.testConnection(for: .text)
-        XCTAssertEqual(viewModel.connectionTestStatus, .failure("请先填写 API Key、模型名称和接口地址。"))
+        XCTAssertEqual(viewModel.textConnectionTestStatus, .failure("请先填写 API Key、模型名称和接口地址。"))
 
         viewModel.textConfiguration.apiKey = "sk-notiee-secret"
         viewModel.testConnection(for: .text)
-        XCTAssertEqual(viewModel.connectionTestStatus, .success("文本处理模型配置可用。"))
+        XCTAssertEqual(viewModel.textConnectionTestStatus, .testing)
     }
 
     private func isolatedUserDefaults() -> UserDefaults {

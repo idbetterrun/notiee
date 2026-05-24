@@ -1,7 +1,14 @@
 import Foundation
 
-struct ScheduledEvent: Identifiable, Equatable, Sendable {
-    enum Kind: String, CaseIterable, Sendable {
+enum EventSource: Codable, Equatable, Sendable {
+    case systemCalendar(identifier: String)
+    case notiee
+    case ai
+    case ics
+}
+
+struct ScheduledEvent: Identifiable, Equatable, Sendable, Codable {
+    enum Kind: String, CaseIterable, Sendable, Codable {
         case course
         case meeting
         case uncategorized
@@ -20,6 +27,8 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable {
     var kind: Kind
     var tagID: UUID?
     var updatedAt: Date
+    var source: EventSource
+    var notes: String?
 
     init(
         id: UUID = UUID(),
@@ -28,7 +37,9 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable {
         endDate: Date,
         kind: Kind = .course,
         tagID: UUID? = nil,
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        source: EventSource = .notiee,
+        notes: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -37,6 +48,8 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable {
         self.kind = kind
         self.tagID = tagID
         self.updatedAt = updatedAt
+        self.source = source
+        self.notes = notes
     }
 
     func contains(_ date: Date) -> Bool {

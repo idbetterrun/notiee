@@ -4,6 +4,7 @@ struct RootTabView: View {
     @StateObject private var store: NotieeStore
     @State private var selectedTab: AppTab
 
+    @State private var previewData: PreviewData?
     private let settingsStore: AppSettingsPersisting
 
     @MainActor
@@ -11,7 +12,7 @@ struct RootTabView: View {
         store: NotieeStore? = nil,
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live
     ) {
-        _store = StateObject(wrappedValue: store ?? NotieeStore.live())
+        _store = StateObject(wrappedValue: store ?? NotieeStore.live(settingsStore: settingsStore))
         _selectedTab = State(initialValue: settingsStore.loadDefaultTab())
         self.settingsStore = settingsStore
     }
@@ -44,6 +45,23 @@ struct RootTabView: View {
         }
         .onAppear {
             store.syncCalendar()
+        }
+        .onOpenURL { url in
+            guard url.pathExtension == "tmn" else { return }
+            
+            Task {
+                do {
+                    let (record, todos) = try await TMNImportService.importTMN(url: url)
+                    await MainActor.run {
+                        self.previewData = PreviewData(record: record, todos: todos)
+                    }
+                } catch {
+                    print("Import failed from URL: \(error.localizedDescription)")
+                }
+            }
+        }
+        .sheet(item: $previewData) { data in
+            TMNImportPreviewSheet(record: data.record, todos: data.todos, store: store)
         }
     }
 }

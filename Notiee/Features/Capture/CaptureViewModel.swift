@@ -95,7 +95,19 @@ final class CaptureViewModel: ObservableObject {
 
     func capturePhoto() {
         cameraManager.capturePhoto()
-        // The actual record creation happens in handleCapturedImage when the camera returns the image
+    }
+
+    @discardableResult
+    func capturePhoto(localImagePath: String) -> NoteRecord {
+        let record = NoteRecord(
+            eventID: currentEvent?.id,
+            capturedAt: currentDate,
+            localImagePaths: [localImagePath],
+            title: currentEvent.map { "\($0.title) 拍记" } ?? "未分类拍记",
+            processingState: .pending
+        )
+        capturedRecords.insert(record, at: 0)
+        return record
     }
 
     func importPhoto(_ image: UIImage) {
@@ -114,7 +126,9 @@ final class CaptureViewModel: ObservableObject {
             } else {
                 if let store {
                     let record = store.capturePhoto(localImagePaths: [relativePath])
-                    store.processRecord(record)
+                    if !store.autoProcessAfterCapture {
+                        store.processRecord(record)
+                    }
                 } else {
                     let record = NoteRecord(
                         eventID: currentEvent?.id,
@@ -135,7 +149,9 @@ final class CaptureViewModel: ObservableObject {
         guard !batchImagePaths.isEmpty else { return }
         if let store {
             let record = store.capturePhoto(localImagePaths: batchImagePaths)
-            store.processRecord(record)
+            if !store.autoProcessAfterCapture {
+                store.processRecord(record)
+            }
         } else {
             let record = NoteRecord(
                 eventID: currentEvent?.id,

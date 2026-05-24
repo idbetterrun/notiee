@@ -1,9 +1,11 @@
 import Combine
 import Foundation
+import UIKit
 
 @MainActor
 final class NotieeStore: ObservableObject {
     @Published private(set) var events: [ScheduledEvent]
+    @Published private(set) var allEvents: [ScheduledEvent]
     @Published private(set) var todos: [NoteTodo]
     @Published private(set) var records: [NoteRecord]
     @Published private(set) var customFolders: [CustomFolder]
@@ -18,14 +20,60 @@ final class NotieeStore: ObservableObject {
     private let recordStore: NoteRecordPersisting
     private let folderStore: CustomFolderPersisting
     private let tagStore: EventTagPersisting
+    private let eventStore: ScheduledEventPersisting
     private let scheduleMatcher: ScheduleMatcher
     private let aiService: any AIProcessingService
     private let autoProcess: Bool
+    let settingsStore: AppSettingsPersisting
+
+    private var customEvents: [ScheduledEvent] = []
+    private var calendarEvents: [ScheduledEvent] = []
+
+    // Map of identifier to ignore mode: "once_\(date)" or "future"
+    @Published private(set) var ignoredCalendarEventKeys: Set<String> = []
+
+    var aiEnabled: Bool {
+        settingsStore.loadBool(forKey: "notiee.aiEnabled", defaultValue: true)
+    }
+
+    var autoProcessAfterCapture: Bool {
+        settingsStore.loadBool(forKey: "notiee.autoProcessAfterCapture", defaultValue: true)
+    }
+
+    var semesterStartDate: Date? {
+        guard let timeInterval = UserDefaults.standard.object(forKey: "notiee.semesterStartDate") as? TimeInterval else {
+            return nil
+        }
+        return Date(timeIntervalSince1970: timeInterval)
+    }
+
+    var showWeekNumbers: Bool {
+        if UserDefaults.standard.object(forKey: "notiee.showWeekNumbers") == nil {
+            return true
+        }
+        return UserDefaults.standard.bool(forKey: "notiee.showWeekNumbers")
+    }
+
+    func formattedDateWithWeek(for date: Date) -> String {
+        let dateString = date.formatted(.dateTime.year().month(.defaultDigits).day().locale(Locale(identifier: "zh_CN")))
+        if showWeekNumbers {
+            if let semesterStart = semesterStartDate {
+                let daysSinceStart = calendar.dateComponents([.day], from: semesterStart, to: date).day ?? 0
+                let weekNumber = max(1, (daysSinceStart / 7) + 1)
+                return "\(dateString) 第\(weekNumber)周"
+            } else {
+                let weekOfYear = calendar.component(.weekOfYear, from: date)
+                return "\(dateString) 第\(weekOfYear)周"
+            }
+        }
+        return dateString
+    }
 
     init(
         currentDate: Date = Date(),
         calendar: Calendar = .current,
-        events: [ScheduledEvent],
+        events: [ScheduledEvent] = [],
+        customEvents: [ScheduledEvent],
         todos: [NoteTodo],
         records: [NoteRecord],
         customFolders: [CustomFolder] = [],
@@ -34,13 +82,17 @@ final class NotieeStore: ObservableObject {
         recordStore: NoteRecordPersisting = JSONNoteRecordStore.live,
         folderStore: CustomFolderPersisting = JSONCustomFolderStore.live,
         tagStore: EventTagPersisting = JSONEventTagStore.live,
+        eventStore: ScheduledEventPersisting = JSONScheduledEventStore.live,
         scheduleMatcher: ScheduleMatcher = ScheduleMatcher(),
         aiService: any AIProcessingService = RealAIProcessingService(),
+        settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
         autoProcess: Bool = false
     ) {
         self.currentDate = currentDate
         self.calendar = calendar
         self.events = events
+        self.allEvents = events
+        self.customEvents = customEvents
         self.todos = todos
         self.records = records
         self.customFolders = customFolders
@@ -49,9 +101,16 @@ final class NotieeStore: ObservableObject {
         self.recordStore = recordStore
         self.folderStore = folderStore
         self.tagStore = tagStore
+        self.eventStore = eventStore
         self.scheduleMatcher = scheduleMatcher
         self.aiService = aiService
+        self.settingsStore = settingsStore
         self.autoProcess = autoProcess
+        
+        if let data = UserDefaults.standard.data(forKey: "notiee.ignoredCalendarEventKeys"),
+           let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) {
+            self.ignoredCalendarEventKeys = decoded
+        }
         
         // Listen to Live Activity setting changes if needed, or update immediately
         Task { await updateLiveActivity() }
@@ -60,7 +119,19 @@ final class NotieeStore: ObservableObject {
             Task { await self?.updateLiveActivity() }
         }
         
+        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                self?.currentDate = Date()
+                await self?.updateLiveActivity()
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.objectWillChange.send()
+        }
+        
         setupTimeRefresh()
+        updateEventsList()
     }
     
     private func setupTimeRefresh() {
@@ -136,6 +207,31 @@ final class NotieeStore: ObservableObject {
         records(in: range).reduce(0) { $0 + $1.tokenUsage }
     }
     
+    func deletedRecords(in range: TimeRange) -> [NoteRecord] {
+        let now = Date()
+        return deletedRecords.filter { record in
+            switch range {
+            case .today:
+                return calendar.isDate(record.capturedAt, inSameDayAs: now)
+            case .last7Days:
+                guard let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: now) else { return false }
+                return record.capturedAt >= sevenDaysAgo
+            case .thisMonth:
+                return calendar.isDate(record.capturedAt, equalTo: now, toGranularity: .month)
+            case .halfYear:
+                guard let halfYearAgo = calendar.date(byAdding: .month, value: -6, to: now) else { return false }
+                return record.capturedAt >= halfYearAgo
+            case .oneYear:
+                guard let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: now) else { return false }
+                return record.capturedAt >= oneYearAgo
+            }
+        }
+    }
+    
+    func deletedTokens(in range: TimeRange) -> Int {
+        deletedRecords(in: range).reduce(0) { $0 + $1.tokenUsage }
+    }
+    
     func topRecordsByToken(in range: TimeRange, limit: Int = 5) -> [NoteRecord] {
         Array(records(in: range).sorted(by: { $0.tokenUsage > $1.tokenUsage }).prefix(limit))
     }
@@ -180,31 +276,35 @@ final class NotieeStore: ObservableObject {
 
     @discardableResult
     func capturePhoto(localImagePaths: [String]? = nil) -> NoteRecord {
-        let captureIndex = records.count + 1
         let record = NoteRecord(
             eventID: currentEvent?.id,
             capturedAt: currentDate,
-            localImagePaths: localImagePaths ?? ["mock://capture-\(captureIndex)"],
-            title: "待提取内容",
+            localImagePaths: localImagePaths ?? [],
+            title: currentEvent.map { "\($0.title) 拍记" } ?? "未分类拍记",
             processingState: .pending
         )
 
         records.insert(record, at: 0)
         persistRecords()
 
-        if autoProcess {
+        if autoProcess && aiEnabled && autoProcessAfterCapture {
             enqueueProcessing(for: record)
         }
 
         return record
     }
 
-    /// 手动触发对指定记录的 AI 处理管线。
     func processRecord(_ record: NoteRecord) {
+        guard aiEnabled else { return }
         enqueueProcessing(for: record)
     }
 
     // MARK: - Record & Todo Mutations
+
+    func addRecord(_ record: NoteRecord) {
+        records.insert(record, at: 0)
+        persistRecords()
+    }
 
     func updateRecord(_ updated: NoteRecord) {
         guard let index = records.firstIndex(where: { $0.id == updated.id }) else {
@@ -361,6 +461,16 @@ final class NotieeStore: ObservableObject {
         persistTags()
     }
     
+    func getOrCreateImportedFolder() -> UUID {
+        if let folder = customFolders.first(where: { $0.name == "已导入" }) {
+            return folder.id
+        }
+        let newFolder = CustomFolder(name: "已导入")
+        customFolders.append(newFolder)
+        persistFolders()
+        return newFolder.id
+    }
+    
     func assignTagToEvent(eventID: UUID, tagID: UUID?) {
         if let index = events.firstIndex(where: { $0.id == eventID }) {
             events[index].tagID = tagID
@@ -374,26 +484,84 @@ final class NotieeStore: ObservableObject {
         }
     }
 
+    func addEvent(_ event: ScheduledEvent) {
+        customEvents.append(event)
+        persistCustomEvents()
+        updateEventsList()
+    }
+
+    func deleteEvent(id: UUID) {
+        customEvents.removeAll { $0.id == id }
+        persistCustomEvents()
+        updateEventsList()
+    }
+
+    func ignoreCalendarEvent(identifier: String, date: Date, future: Bool) {
+        if future {
+            ignoredCalendarEventKeys.insert("future_\(identifier)")
+        } else {
+            let dateStr = date.formatted(.dateTime.year().month().day())
+            ignoredCalendarEventKeys.insert("once_\(identifier)_\(dateStr)")
+        }
+        persistIgnoredKeys()
+        updateEventsList()
+    }
+
+    func restoreCalendarEvent(identifier: String) {
+        ignoredCalendarEventKeys = ignoredCalendarEventKeys.filter { !$0.contains(identifier) }
+        persistIgnoredKeys()
+        updateEventsList()
+    }
+
+    private func persistIgnoredKeys() {
+        if let data = try? JSONEncoder().encode(ignoredCalendarEventKeys) {
+            UserDefaults.standard.set(data, forKey: "notiee.ignoredCalendarEventKeys")
+        }
+    }
+
+    private func isEventIgnored(_ event: ScheduledEvent) -> Bool {
+        if case .systemCalendar(let identifier) = event.source {
+            if ignoredCalendarEventKeys.contains("future_\(identifier)") {
+                return true
+            }
+            let dateStr = event.startDate.formatted(.dateTime.year().month().day())
+            if ignoredCalendarEventKeys.contains("once_\(identifier)_\(dateStr)") {
+                return true
+            }
+        }
+        return false
+    }
+
+    private func updateEventsList() {
+        let all = (customEvents + calendarEvents).sorted { $0.startDate < $1.startDate }
+        self.allEvents = all
+        self.events = all.filter { !isEventIgnored($0) }
+        
+        let advanceTime = UserDefaults.standard.integer(forKey: "notiee.notificationAdvanceTime")
+        NotificationManager.shared.scheduleNotifications(for: self.events, advanceTimeMinutes: advanceTime)
+        Task { await updateLiveActivity() }
+    }
+
+    func addStandaloneTodo(content: String, dueDate: Date?, hasReminder: Bool) {
+        let todo = NoteTodo(recordID: nil, content: content, dueDate: dueDate, hasReminder: hasReminder)
+        todos.append(todo)
+    }
+
     // MARK: - Calendar Sync
 
     func syncCalendar() {
         Task {
             let granted = await CalendarService.shared.requestAccess()
             if granted {
-                let fetchedEvents = CalendarService.shared.fetchTodayEvents(currentDate: currentDate)
-                if !fetchedEvents.isEmpty {
-                    self.events = fetchedEvents.map { event in
+                let fetchedEvents = CalendarService.shared.fetchEvents(currentDate: currentDate)
+                await MainActor.run {
+                    self.calendarEvents = fetchedEvents.map { event in
                         var newEvent = event
                         newEvent.tagID = self.eventTagMapping[event.title]
                         return newEvent
                     }
+                    self.updateEventsList()
                 }
-                
-                
-                let advanceTime = UserDefaults.standard.integer(forKey: "notiee.notificationAdvanceTime")
-                NotificationManager.shared.scheduleNotifications(for: self.events, advanceTimeMinutes: advanceTime)
-                
-                await self.updateLiveActivity()
             }
         }
     }
@@ -438,6 +606,7 @@ final class NotieeStore: ObservableObject {
     }
 
     private func enqueueProcessing(for record: NoteRecord) {
+        guard aiEnabled else { return }
         let recordID = record.id
         let service = aiService
 
@@ -490,17 +659,18 @@ final class NotieeStore: ObservableObject {
         return NotieeStore(
             currentDate: currentDate,
             events: today.events,
+            customEvents: today.events,
             todos: today.todos,
             records: today.records,
             customFolders: []
         )
     }
 
-    static func live(currentDate: Date = Date()) -> NotieeStore {
-        let today = TodayViewModel.sample(currentDate: currentDate)
+    static func live(currentDate: Date = Date(), settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live) -> NotieeStore {
         let store = JSONNoteRecordStore.live
         let folderStore = JSONCustomFolderStore.live
         let tagStore = JSONEventTagStore.live
+        let eventStore = JSONScheduledEventStore.live
         
         let persistedRecords = (try? store.loadRecords()) ?? []
         let persistedFolders = (try? folderStore.loadFolders()) ?? []
@@ -517,36 +687,28 @@ final class NotieeStore: ObservableObject {
         
         let finalTags = EventTag.systemTags + customTags
 
+        let customEvents = (try? eventStore.loadEvents()) ?? []
+
         return NotieeStore(
             currentDate: currentDate,
-            events: today.events,
-            todos: today.todos,
-            records: persistedRecords.isEmpty ? today.records : persistedRecords,
+            events: [],
+            customEvents: customEvents,
+            todos: [],
+            records: persistedRecords,
             customFolders: persistedFolders,
             customTags: finalTags,
             eventTagMapping: mapping,
             recordStore: store,
             folderStore: folderStore,
             tagStore: tagStore,
+            eventStore: eventStore,
+            settingsStore: settingsStore,
             autoProcess: true
         )
     }
 
-    private func loadMockData() {
-        let mockRecords = (1...10).map { i in
-            NoteRecord(
-                eventID: UUID(),
-                capturedAt: Date().addingTimeInterval(TimeInterval(-i * 86400)),
-                localImagePaths: ["fail"],
-                title: "Mock Record \(i)",
-                ocrText: "Sample OCR \(i)",
-                summary: "Summary for mock \(i)",
-                detailedContent: "Detailed content \(i)",
-                processingState: .completed,
-                tokenUsage: Int.random(in: 1000...50000)
-            )
-        }
-        records = mockRecords
+    private func persistCustomEvents() {
+        try? eventStore.saveEvents(customEvents)
     }
 
     private func persistRecords() {

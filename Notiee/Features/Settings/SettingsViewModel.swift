@@ -1,16 +1,19 @@
 import Combine
 import Foundation
+import UIKit
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
     @Published var defaultTab: AppTab
     @Published var textConfiguration: AIModelConfiguration
     @Published var visionConfiguration: AIModelConfiguration
-    @Published private(set) var connectionTestStatus: AIConnectionTestStatus = .idle
+    @Published private(set) var textConnectionTestStatus: AIConnectionTestStatus = .idle
+    @Published private(set) var visionConnectionTestStatus: AIConnectionTestStatus = .idle
     @Published private(set) var lastSaveError: String?
 
     // General
     @Published var showWeekNumbers: Bool
+    @Published var semesterStartDate: Date?
     @Published var firstWeekStartDay: Int
     
     // Appearance
@@ -31,8 +34,8 @@ final class SettingsViewModel: ObservableObject {
     @Published var notificationAdvanceTime: Int
     
     // Advanced
-    @Published var customModelsEnabled: Bool
     @Published var customModels: [CustomAIModel]
+    @Published var selectedCustomModelID: UUID?
 
     private let settingsStore: AppSettingsPersisting
 
@@ -44,6 +47,9 @@ final class SettingsViewModel: ObservableObject {
         
         showWeekNumbers = settingsStore.loadBool(forKey: "notiee.showWeekNumbers", defaultValue: true)
         firstWeekStartDay = settingsStore.loadInt(forKey: "notiee.firstWeekStartDay", defaultValue: 2)
+        if let timeInterval = UserDefaults.standard.object(forKey: "notiee.semesterStartDate") as? TimeInterval {
+            semesterStartDate = Date(timeIntervalSince1970: timeInterval)
+        }
         theme = settingsStore.loadString(forKey: "notiee.theme", defaultValue: "system")
         fontSize = settingsStore.loadString(forKey: "notiee.fontSize", defaultValue: "medium")
         language = settingsStore.loadString(forKey: "notiee.language", defaultValue: "system")
@@ -58,16 +64,27 @@ final class SettingsViewModel: ObservableObject {
         liveActivityEnabled = settingsStore.loadBool(forKey: "notiee.liveActivityEnabled", defaultValue: false)
         notificationAdvanceTime = settingsStore.loadInt(forKey: "notiee.notificationAdvanceTime", defaultValue: 5)
         
-        customModelsEnabled = settingsStore.loadBool(forKey: "notiee.customModelsEnabled", defaultValue: false)
         customModels = settingsStore.loadCustomModels()
     }
     
     func saveAll() {
         settingsStore.saveBool(showWeekNumbers, forKey: "notiee.showWeekNumbers")
         settingsStore.saveInt(firstWeekStartDay, forKey: "notiee.firstWeekStartDay")
+        if let date = semesterStartDate {
+            UserDefaults.standard.set(date.timeIntervalSince1970, forKey: "notiee.semesterStartDate")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "notiee.semesterStartDate")
+        }
         settingsStore.saveString(theme, forKey: "notiee.theme")
         settingsStore.saveString(fontSize, forKey: "notiee.fontSize")
         settingsStore.saveString(language, forKey: "notiee.language")
+        
+        if language == "system" {
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        } else {
+            UserDefaults.standard.set([language], forKey: "AppleLanguages")
+        }
+        UserDefaults.standard.synchronize()
         
         settingsStore.saveBool(aiEnabled, forKey: "notiee.aiEnabled")
         settingsStore.saveBool(aiEnableSummary, forKey: "notiee.aiEnableSummary")
@@ -80,7 +97,6 @@ final class SettingsViewModel: ObservableObject {
         NotificationCenter.default.post(name: NSNotification.Name("LiveActivitySettingsChanged"), object: nil)
         settingsStore.saveInt(notificationAdvanceTime, forKey: "notiee.notificationAdvanceTime")
         
-        settingsStore.saveBool(customModelsEnabled, forKey: "notiee.customModelsEnabled")
         settingsStore.saveCustomModels(customModels)
         
         if notificationEnabled {
@@ -108,28 +124,57 @@ final class SettingsViewModel: ObservableObject {
         saveConfiguration(for: .vision)
     }
 
+    func applyCustomModel(_ model: CustomAIModel, for kind: AIModelKind) {
+        let config = AIModelConfiguration(
+            providerType: .custom,
+            customEndpoint: model.endpoint,
+            customProtocol: model.protocolType,
+            modelName: model.modelIdentifier,
+            apiKey: model.apiKey
+        )
+        setConfiguration(config, for: kind)
+        saveConfiguration(for: kind)
+    }
+
     func testConnection(for kind: AIModelKind) {
         let configuration = configuration(for: kind).normalized
         guard configuration.isComplete else {
-            connectionTestStatus = .failure("请先填写 API Key、模型名称和接口地址。")
+            switch kind {
+            case .text:
+                textConnectionTestStatus = .failure("请先填写 API Key、模型名称和接口地址。")
+            case .vision:
+                visionConnectionTestStatus = .failure("请先填写 API Key、模型名称和接口地址。")
+            }
             return
         }
 
-        connectionTestStatus = .testing
+        switch kind {
+        case .text:
+            textConnectionTestStatus = .testing
+        case .vision:
+            visionConnectionTestStatus = .testing
+        }
         
         Task {
             do {
                 if kind == .text {
-                    let service = RealAIProcessingService(settingsStore: settingsStore)
                     _ = try await callTextPing(config: configuration)
                 } else {
-                    // 对于视觉模型，发个简单的测试图（如果支持，或者统一用文本接口 ping 端点）
-                    // 为了简化，我们发一个超小的 1x1 透明图
                     _ = try await callVisionPing(config: configuration)
                 }
-                self.connectionTestStatus = .success(kind.readyMessage)
+                switch kind {
+                case .text:
+                    self.textConnectionTestStatus = .success(kind.readyMessage)
+                case .vision:
+                    self.visionConnectionTestStatus = .success(kind.readyMessage)
+                }
             } catch {
-                self.connectionTestStatus = .failure("连接失败：\(error.localizedDescription)")
+                switch kind {
+                case .text:
+                    self.textConnectionTestStatus = .failure("连接失败：\(error.localizedDescription)")
+                case .vision:
+                    self.visionConnectionTestStatus = .failure("连接失败：\(error.localizedDescription)")
+                }
             }
         }
     }
@@ -144,13 +189,25 @@ final class SettingsViewModel: ObservableObject {
     }
     
     private func callVisionPing(config: AIModelConfiguration) async throws -> String {
-        let base64Image = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+        let base64Image = generateTestImageBase64()
         let prompt = "Hi, reply 'OK'."
         if config.activeProtocol == .openai {
             return try await OpenAICaller.callVision(endpoint: config.activeEndpoint, model: config.modelName, apiKey: config.apiKey, base64Image: base64Image, prompt: prompt).0
         } else {
             return try await AnthropicCaller.callVision(endpoint: config.activeEndpoint, model: config.modelName, apiKey: config.apiKey, base64Image: base64Image, prompt: prompt).0
         }
+    }
+
+    private func generateTestImageBase64() -> String {
+        let size = CGSize(width: 15, height: 15)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { ctx in
+            UIColor.systemBlue.setFill()
+            ctx.fill(CGRect(x: 0, y: 0, width: 8, height: 15))
+            UIColor.systemGreen.setFill()
+            ctx.fill(CGRect(x: 8, y: 0, width: 7, height: 15))
+        }
+        return image.jpegData(compressionQuality: 0.8)?.base64EncodedString() ?? ""
     }
 
     private func saveConfiguration(for kind: AIModelKind) {

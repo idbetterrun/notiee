@@ -5,7 +5,7 @@ import Foundation
 final class RecordDetailViewModel: ObservableObject {
     let record: NoteRecord
 
-    private let store: NotieeStore
+    let store: NotieeStore
 
     init(record: NoteRecord, store: NotieeStore) {
         self.record = record

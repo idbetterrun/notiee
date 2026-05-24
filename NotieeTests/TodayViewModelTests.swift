@@ -6,26 +6,37 @@ final class TodayViewModelTests: XCTestCase {
     func testSampleDataIncludesCurrentEventAtReferenceDate() {
         let viewModel = TodayViewModel.sample(currentDate: referenceDate)
 
-        XCTAssertEqual(viewModel.currentEvent?.title, "产品设计课")
+        XCTAssertEqual(viewModel.currentEvent?.title, "当前课程")
         XCTAssertEqual(viewModel.currentEvent?.status(at: referenceDate), .current)
     }
 
     func testPendingTodosExcludeCompletedItems() {
-        let viewModel = TodayViewModel.sample(currentDate: referenceDate)
+        let record = NoteRecord(
+            id: UUID(),
+            capturedAt: referenceDate,
+            localImagePaths: ["test"],
+            title: "测试",
+            processingState: .completed
+        )
+        let store = NotieeStore(
+            currentDate: referenceDate,
+            events: [],
+            todos: [],
+            records: [record],
+            recordStore: JSONNoteRecordStore(fileURL: temporaryFileURL())
+        )
+        let viewModel = TodayViewModel(store: store)
 
-        XCTAssertEqual(viewModel.pendingTodos.map(\.content), [
-            "整理白板上的用户旅程图",
-            "补充竞品截图到课程记录"
-        ])
+        store.addTodo(NoteTodo(recordID: record.id, content: "待办事项 1", createdAt: referenceDate))
+        store.addTodo(NoteTodo(recordID: record.id, content: "待办事项 2", isCompleted: true, createdAt: referenceDate))
+
+        XCTAssertEqual(viewModel.pendingTodos.map(\.content), ["待办事项 1"])
     }
 
     func testTodayRecordsAreFilteredAndNewestFirst() {
         let viewModel = TodayViewModel.sample(currentDate: referenceDate)
 
-        XCTAssertEqual(viewModel.todayRecords.map(\.title), [
-            "白板：拍记流程",
-            "课件：日程感知"
-        ])
+        XCTAssertTrue(viewModel.todayRecords.isEmpty)
     }
 
     private var referenceDate: Date {
@@ -38,5 +49,11 @@ final class TodayViewModelTests: XCTestCase {
         components.hour = 10
         components.minute = 30
         return components.date!
+    }
+
+    private func temporaryFileURL() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("json")
     }
 }

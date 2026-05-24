@@ -4,11 +4,9 @@ import XCTest
 @MainActor
 final class MockAIProcessingServiceTests: XCTestCase {
 
-    // MARK: - MockAIProcessingService Unit Tests
-
-    func testGenerateReturnsMatchingResultForMathEvent() {
-        let service = MockAIProcessingService()
-        let result = service.generate(for: "高等数学")
+    func testProcessReturnsResultForAnyEventTitle() async throws {
+        let service = MockAIProcessingService(processingDelay: 0.01...0.02)
+        let result = try await service.process(imagePaths: ["test"], eventTitle: "任意课程名称")
 
         XCTAssertFalse(result.title.isEmpty)
         XCTAssertFalse(result.ocrText.isEmpty)
@@ -16,31 +14,23 @@ final class MockAIProcessingServiceTests: XCTestCase {
         XCTAssertFalse(result.todos.isEmpty)
     }
 
-    func testGenerateReturnsMatchingResultForDesignEvent() {
-        let service = MockAIProcessingService()
-        let result = service.generate(for: "产品设计课")
+    func testProcessReturnsResultForNilEvent() async throws {
+        let service = MockAIProcessingService(processingDelay: 0.01...0.02)
+        let result = try await service.process(imagePaths: ["test"], eventTitle: nil)
 
         XCTAssertFalse(result.title.isEmpty)
         XCTAssertFalse(result.summary.isEmpty)
     }
 
-    func testGenerateReturnsFallbackForUnknownEvent() {
-        let service = MockAIProcessingService()
-        let result = service.generate(for: "完全未知的活动名称 XYZ")
-
-        XCTAssertFalse(result.title.isEmpty)
-        XCTAssertFalse(result.ocrText.isEmpty)
+    func testProcessThrowsOnFailPath() async {
+        let service = MockAIProcessingService(processingDelay: 0.01...0.02)
+        do {
+            _ = try await service.process(imagePaths: ["fail"], eventTitle: nil)
+            XCTFail("Expected error for fail path")
+        } catch {
+            XCTAssertEqual((error as NSError).code, 500)
+        }
     }
-
-    func testGenerateReturnsFallbackForNilEvent() {
-        let service = MockAIProcessingService()
-        let result = service.generate(for: nil)
-
-        XCTAssertFalse(result.title.isEmpty)
-        XCTAssertFalse(result.summary.isEmpty)
-    }
-
-    // MARK: - NotieeStore AI Pipeline Integration Tests
 
     func testCapturePhotoWithAutoProcessTransitionsToProcessing() async throws {
         let store = NotieeStore(
@@ -53,13 +43,11 @@ final class MockAIProcessingServiceTests: XCTestCase {
             autoProcess: true
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://test")
+        let record = store.capturePhoto(localImagePaths: ["test-photo"])
         XCTAssertEqual(record.processingState, .pending)
 
-        // Wait for Phase 1: pending → processing
         try await Task.sleep(for: .seconds(2))
         let updatedRecord = store.records.first { $0.id == record.id }
-        // By now it should be either .processing or .completed
         XCTAssertNotEqual(updatedRecord?.processingState, .pending)
     }
 
@@ -74,16 +62,15 @@ final class MockAIProcessingServiceTests: XCTestCase {
             autoProcess: true
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://test-complete")
+        let record = store.capturePhoto(localImagePaths: ["test-complete"])
 
-        // Wait enough for both phases to complete
         try await Task.sleep(for: .seconds(3))
 
         let completed = store.records.first { $0.id == record.id }!
         XCTAssertEqual(completed.processingState, .completed)
-        XCTAssertFalse(completed.ocrText.isEmpty, "OCR text should be filled after processing")
-        XCTAssertFalse(completed.summary.isEmpty, "Summary should be filled after processing")
-        XCTAssertNotEqual(completed.title, "未分类拍记", "Title should be updated by AI")
+        XCTAssertFalse(completed.ocrText.isEmpty)
+        XCTAssertFalse(completed.summary.isEmpty)
+        XCTAssertNotEqual(completed.title, "待提取内容")
     }
 
     func testCapturePhotoWithAutoProcessAddsTodos() async throws {
@@ -97,13 +84,12 @@ final class MockAIProcessingServiceTests: XCTestCase {
             autoProcess: true
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://test-todos")
+        let record = store.capturePhoto(localImagePaths: ["test-todos"])
 
-        // Wait for full pipeline
         try await Task.sleep(for: .seconds(3))
 
         let todosForRecord = store.todos(for: store.records.first { $0.id == record.id }!)
-        XCTAssertFalse(todosForRecord.isEmpty, "AI should have extracted todos for this record")
+        XCTAssertFalse(todosForRecord.isEmpty)
     }
 
     func testCapturePhotoWithoutAutoProcessStaysPending() {
@@ -116,7 +102,7 @@ final class MockAIProcessingServiceTests: XCTestCase {
             autoProcess: false
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://no-auto")
+        let record = store.capturePhoto(localImagePaths: ["no-auto"])
         XCTAssertEqual(record.processingState, .pending)
         XCTAssertEqual(store.records.first?.processingState, .pending)
     }
@@ -132,7 +118,7 @@ final class MockAIProcessingServiceTests: XCTestCase {
             autoProcess: false
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://manual")
+        let record = store.capturePhoto(localImagePaths: ["manual"])
         XCTAssertEqual(record.processingState, .pending)
 
         store.processRecord(record)
@@ -152,7 +138,7 @@ final class MockAIProcessingServiceTests: XCTestCase {
             recordStore: JSONNoteRecordStore(fileURL: temporaryFileURL())
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://update-test")
+        let record = store.capturePhoto(localImagePaths: ["update-test"])
         var updated = record
         updated.summary = "手动更新的摘要"
         store.updateRecord(updated)
@@ -175,8 +161,6 @@ final class MockAIProcessingServiceTests: XCTestCase {
         XCTAssertEqual(store.todos.count, 1)
         XCTAssertEqual(store.todos.first?.content, "测试待办事项")
     }
-
-    // MARK: - Helpers
 
     private func temporaryFileURL() -> URL {
         FileManager.default.temporaryDirectory

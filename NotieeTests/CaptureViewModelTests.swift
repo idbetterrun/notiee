@@ -3,30 +3,23 @@ import XCTest
 
 @MainActor
 final class CaptureViewModelTests: XCTestCase {
-    func testCaptureCreatesRecordAttachedToCurrentEvent() {
-        let event = ScheduledEvent(
-            id: UUID(uuidString: "00000000-0000-0000-0000-000000000101")!,
-            title: "产品设计课",
-            startDate: referenceDate.addingTimeInterval(-10 * 60),
-            endDate: referenceDate.addingTimeInterval(50 * 60),
-            updatedAt: referenceDate.addingTimeInterval(-60 * 60)
-        )
-        let viewModel = CaptureViewModel(currentDate: referenceDate, events: [event])
+    func testCaptureCreatesRecordFallbackToUncategorizedWhenNoStore() {
+        let viewModel = CaptureViewModel(currentDate: referenceDate)
 
-        let record = viewModel.capturePhoto(localImagePath: "mock://capture-1")
+        let record = viewModel.capturePhoto(localImagePath: "test-capture")
 
-        XCTAssertEqual(record.eventID, event.id)
-        XCTAssertEqual(record.title, "产品设计课 拍记")
+        XCTAssertNil(record.eventID)
+        XCTAssertEqual(record.title, "未分类拍记")
         XCTAssertEqual(record.processingState, .pending)
-        XCTAssertEqual(record.localImagePath, "mock://capture-1")
-        XCTAssertEqual(viewModel.contextTitle, "产品设计课")
+        XCTAssertEqual(record.localImagePaths, ["test-capture"])
+        XCTAssertEqual(viewModel.contextTitle, "未分类")
         XCTAssertEqual(viewModel.capturedRecords, [record])
     }
 
     func testCaptureFallsBackToUncategorizedWhenNoCurrentEvent() {
-        let viewModel = CaptureViewModel(currentDate: referenceDate, events: [])
+        let viewModel = CaptureViewModel(currentDate: referenceDate)
 
-        let record = viewModel.capturePhoto(localImagePath: "mock://uncategorized")
+        let record = viewModel.capturePhoto(localImagePath: "uncategorized")
 
         XCTAssertNil(record.eventID)
         XCTAssertEqual(record.title, "未分类拍记")
@@ -35,16 +28,16 @@ final class CaptureViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.contextSubtitle, "当前无日程，照片会进入暂存区")
     }
 
-    func testLatestRecordUsesNewestCapture() {
-        let viewModel = CaptureViewModel(currentDate: referenceDate, events: [])
+    func testMultipleCapturesAreStoredInOrder() {
+        let viewModel = CaptureViewModel(currentDate: referenceDate)
 
-        _ = viewModel.capturePhoto(localImagePath: "mock://capture-1")
-        let newest = viewModel.capturePhoto(localImagePath: "mock://capture-2")
+        _ = viewModel.capturePhoto(localImagePath: "capture-1")
+        _ = viewModel.capturePhoto(localImagePath: "capture-2")
 
-        XCTAssertEqual(viewModel.latestRecord, newest)
-        XCTAssertEqual(viewModel.capturedRecords.map(\.localImagePath), [
-            "mock://capture-2",
-            "mock://capture-1"
+        XCTAssertEqual(viewModel.capturedRecords.count, 2)
+        XCTAssertEqual(viewModel.capturedRecords.map(\.localImagePaths), [
+            ["capture-2"],
+            ["capture-1"]
         ])
     }
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import MarkdownUI
 
 struct RecordDetailView: View {
     @ObservedObject private var viewModel: RecordDetailViewModel
@@ -14,6 +15,8 @@ struct RecordDetailView: View {
     @State private var isTodosExpanded = true
     
     @State private var fullScreenItem: FullScreenImageItem?
+    
+    @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
     
     @Environment(\.dismiss) private var dismiss
 
@@ -47,11 +50,30 @@ struct RecordDetailView: View {
                     showInfoSheet = true
                 }
                 
-                ShareLink(
-                    item: buildShareContent(),
-                    subject: Text(viewModel.record.title),
-                    message: Text("分享一条 Notiee 记录")
-                ) {
+                Menu {
+                    Button("导出为 .tmn 文件") {
+                        Task {
+                            do {
+                                let url = try await TMNExportService.export(record: viewModel.record, store: viewModel.store)
+                                let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                   let window = windowScene.windows.first,
+                                   let rootVC = window.rootViewController {
+                                    rootVC.present(activityVC, animated: true)
+                                }
+                            } catch {
+                                print("Export failed: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                    ShareLink(
+                        item: buildShareContent(),
+                        subject: Text(viewModel.record.title),
+                        message: Text("分享一条 Notiee 记录")
+                    ) {
+                        Label("分享...", systemImage: "square.and.arrow.up")
+                    }
+                } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
                 
@@ -72,7 +94,7 @@ struct RecordDetailView: View {
                 .presentationDetents([.medium])
         }
         .fullScreenCover(item: $fullScreenItem) { item in
-            FullScreenImageView(image: item.image)
+            FullScreenImageView(images: item.images, initialIndex: item.initialIndex)
         }
         .onAppear {
             Task.detached(priority: .userInitiated) {
@@ -154,7 +176,7 @@ struct RecordDetailView: View {
                     .padding(.vertical, 7)
                     .background(viewModel.record.processingState.tint.opacity(0.12), in: Capsule())
 
-                Text(viewModel.record.capturedAt.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
+                Text(viewModel.store.formattedDateWithWeek(for: viewModel.record.capturedAt) + " " + viewModel.record.capturedAt.formatted(.dateTime.hour().minute()))
                     .font(.caption.monospacedDigit().weight(.semibold))
                     .foregroundStyle(.secondary)
                     
@@ -191,7 +213,7 @@ struct RecordDetailView: View {
                             .frame(height: 300)
                             .clipped()
                             .onTapGesture {
-                                fullScreenItem = FullScreenImageItem(image: loadedImages[index])
+                                fullScreenItem = FullScreenImageItem(images: loadedImages, initialIndex: index)
                             }
                             .contextMenu {
                                 ShareLink(item: Image(uiImage: loadedImages[index]), preview: SharePreview("图片", image: Image(uiImage: loadedImages[index]))) {
@@ -250,8 +272,20 @@ struct RecordDetailView: View {
     }
     
     private var detailedContentSection: some View {
-        DetailSection(title: "详细内容", systemImage: "doc.text.magnifyingglass", isExpanded: $isDetailExpanded) {
-            Text(viewModel.record.detailedContent.isEmpty ? "无详细内容" : viewModel.record.detailedContent)
+            let content = viewModel.record.detailedContent
+            let hasMarkdown = content.contains("#") || content.contains("*") || content.contains("- ") || content.contains("`") || content.contains(">") || content.contains("[")
+            let shouldRenderMarkdown = markdownRenderingEnabled && hasMarkdown
+
+            return DetailSection(title: "详细内容", systemImage: "doc.text.magnifyingglass", isExpanded: $isDetailExpanded, showMarkdownIcon: shouldRenderMarkdown) {
+                Group {
+                    if content.isEmpty {
+                        Text("无详细内容")
+                    } else if shouldRenderMarkdown {
+                        Markdown(content)
+                    } else {
+                        Text(content)
+                    }
+                }
                 .font(.body)
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
@@ -325,6 +359,9 @@ struct RecordDetailView: View {
         NavigationStack {
             List {
                 Section("基础信息") {
+                    if let deviceName = viewModel.record.deviceName {
+                        LabeledContent("设备名称", value: deviceName)
+                    }
                     LabeledContent("创建时间", value: viewModel.record.capturedAt.formatted(date: .abbreviated, time: .standard))
                     if let editDate = viewModel.record.editedAt {
                         LabeledContent("最近编辑", value: editDate.formatted(date: .abbreviated, time: .standard))
@@ -370,6 +407,7 @@ private struct DetailSection<Content: View>: View {
     let title: String
     let systemImage: String
     @Binding var isExpanded: Bool
+    var showMarkdownIcon: Bool = false
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -379,9 +417,17 @@ private struct DetailSection<Content: View>: View {
                     .padding(18)
                     .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             } label: {
-                Label(title, systemImage: systemImage)
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
+                HStack {
+                    Label(title, systemImage: systemImage)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                    
+                    if showMarkdownIcon {
+                        Image(systemName: "m.square")
+                            .foregroundStyle(.blue)
+                            .font(.subheadline)
+                    }
+                }
             }
             .tint(.secondary)
         }
@@ -390,33 +436,54 @@ private struct DetailSection<Content: View>: View {
 
 struct FullScreenImageItem: Identifiable {
     let id = UUID()
-    let image: UIImage
+    let images: [UIImage]
+    let initialIndex: Int
 }
 
 struct FullScreenImageView: View {
-    let image: UIImage
+    let images: [UIImage]
+    let initialIndex: Int
     @Environment(\.dismiss) var dismiss
     @State private var currentScale: CGFloat = 1.0
     @State private var finalScale: CGFloat = 1.0
+    @State private var currentIndex: Int
+    @State private var showSaveSuccess = false
+    
+    init(images: [UIImage], initialIndex: Int) {
+        self.images = images
+        self.initialIndex = initialIndex
+        _currentIndex = State(initialValue: initialIndex)
+    }
     
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .scaleEffect(finalScale * currentScale)
-                .gesture(
-                    MagnificationGesture()
-                        .onChanged { value in
-                            currentScale = value
-                        }
-                        .onEnded { value in
-                            finalScale = max(1.0, min(finalScale * value, 5.0))
-                            currentScale = 1.0
-                        }
-                )
+            TabView(selection: $currentIndex) {
+                ForEach(0..<images.count, id: \.self) { index in
+                    Image(uiImage: images[index])
+                        .resizable()
+                        .scaledToFit()
+                        .scaleEffect(currentIndex == index ? finalScale * currentScale : 1.0)
+                        .gesture(
+                            MagnificationGesture()
+                                .onChanged { value in
+                                    if currentIndex == index {
+                                        currentScale = value
+                                    }
+                                }
+                                .onEnded { value in
+                                    if currentIndex == index {
+                                        finalScale = max(1.0, min(finalScale * value, 5.0))
+                                        currentScale = 1.0
+                                    }
+                                }
+                        )
+                        .tag(index)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: images.count > 1 ? .always : .never))
+            .ignoresSafeArea()
             
             VStack {
                 HStack {
@@ -431,9 +498,18 @@ struct FullScreenImageView: View {
                     }
                     
                     Spacer()
-                    
-                    ShareLink(item: Image(uiImage: image), preview: SharePreview("图片", image: Image(uiImage: image))) {
-                        Image(systemName: "square.and.arrow.up")
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 12)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button {
+                        saveCurrentImage()
+                    } label: {
+                        Image(systemName: "square.and.arrow.down")
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.white)
                             .padding(12)
@@ -441,11 +517,39 @@ struct FullScreenImageView: View {
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 12)
-                
-                Spacer()
+                .padding(.bottom, 24)
             }
         }
+        .overlay {
+            if showSaveSuccess {
+                VStack {
+                    Image(systemName: "checkmark")
+                        .font(.largeTitle)
+                        .padding()
+                    Text("已保存到相册")
+                        .font(.headline)
+                }
+                .padding(20)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .transition(.opacity.combined(with: .scale))
+                .zIndex(1)
+            }
+        }
+    }
+    
+    private func saveCurrentImage() {
+        let saver = ImageSaver()
+        saver.onSuccess = {
+            withAnimation {
+                showSaveSuccess = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                withAnimation {
+                    showSaveSuccess = false
+                }
+            }
+        }
+        saver.writeToPhotoAlbum(image: images[currentIndex])
     }
 }
 

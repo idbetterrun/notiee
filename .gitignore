@@ -7,3 +7,6 @@ xcuserdata/
 # PRD
 Notiee 产品需求文档 (PRD) v1.0.md
 
+# Ignoring tmn folder
+tmn/
+.gemini/

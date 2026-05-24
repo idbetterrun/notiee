@@ -43,10 +43,35 @@ struct MeView: View {
                 
                 Section {
                     NavigationLink {
+                        AllSchedulesView(store: store)
+                    } label: {
+                        Label("全部日程", systemImage: "calendar")
+                            .foregroundColor(.orange)
+                    }
+                    
+                    NavigationLink {
+                        ImportScheduleView(store: store)
+                    } label: {
+                        Label("导入日程", systemImage: "square.and.arrow.down")
+                            .foregroundColor(.green)
+                    }
+                }
+                
+                Section {
+                    NavigationLink {
                         ReviewView(store: store)
                     } label: {
                         Label("回顾", systemImage: "chart.pie.fill")
                             .foregroundColor(.blue)
+                    }
+                }
+                
+                Section {
+                    NavigationLink {
+                        LabFeaturesView(store: store)
+                    } label: {
+                        Label("实验室功能", systemImage: "flask.fill")
+                            .foregroundColor(.purple)
                     }
                 }
                 
@@ -233,16 +258,24 @@ struct SettingsMainView: View {
     var body: some View {
         Form {
             Section("常规") {
+                Picker("App 启动页", selection: $viewModel.defaultTab) {
+                    Text(AppTab.today.titleKey).tag(AppTab.today)
+                    Text(AppTab.capture.titleKey).tag(AppTab.capture)
+                    Text(AppTab.records.titleKey).tag(AppTab.records)
+                }
+                .onChange(of: viewModel.defaultTab) { _, _ in viewModel.saveDefaultTab() }
+                
                 Toggle("显示周数", isOn: $viewModel.showWeekNumbers)
                 if viewModel.showWeekNumbers {
-                    Picker("第一周开始日", selection: $viewModel.firstWeekStartDay) {
-                        Text("周日").tag(1)
-                        Text("周一").tag(2)
-                    }
+                    let dateBinding = Binding<Date>(
+                        get: { viewModel.semesterStartDate ?? Date() },
+                        set: { viewModel.semesterStartDate = $0 }
+                    )
+                    DatePicker("第一周开始日期", selection: dateBinding, displayedComponents: .date)
                 }
             }
             .onChange(of: viewModel.showWeekNumbers) { _, _ in viewModel.saveAll() }
-            .onChange(of: viewModel.firstWeekStartDay) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.semesterStartDate) { _, _ in viewModel.saveAll() }
             
             Section("外观") {
                 Picker("颜色主题", selection: $viewModel.theme) {
@@ -304,8 +337,17 @@ struct SettingsMainView: View {
                         viewModel.testConnection(for: .text)
                         viewModel.testConnection(for: .vision)
                     }
-                    if viewModel.connectionTestStatus != .idle {
-                        ConnectionStatusView(status: viewModel.connectionTestStatus)
+                    if viewModel.textConnectionTestStatus != .idle {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("文本模型：").font(.caption).foregroundStyle(.secondary)
+                            ConnectionStatusView(status: viewModel.textConnectionTestStatus)
+                        }
+                    }
+                    if viewModel.visionConnectionTestStatus != .idle {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("视觉模型：").font(.caption).foregroundStyle(.secondary)
+                            ConnectionStatusView(status: viewModel.visionConnectionTestStatus)
+                        }
                     }
                     
                     DisclosureGroup("官方帮助文档") {
@@ -344,41 +386,22 @@ struct SettingsMainView: View {
 
             Section("高级设置") {
                 NavigationLink {
-                    DeveloperOptionsView(viewModel: viewModel)
+                    CustomModelsListView(viewModel: viewModel)
                 } label: {
-                    Label("开发者选项", systemImage: "hammer")
-                }
-                
-                Toggle("使用自定义大模型", isOn: $viewModel.customModelsEnabled)
-                if viewModel.customModelsEnabled {
-                    NavigationLink {
-                        CustomModelsListView(viewModel: viewModel)
-                    } label: {
-                        Label("管理自定义模型", systemImage: "slider.horizontal.3")
-                    }
+                    Label("管理自定义模型", systemImage: "slider.horizontal.3")
                 }
             }
-            .onChange(of: viewModel.customModelsEnabled) { _, _ in viewModel.saveAll() }
             
             Section("关于") {
-                HStack {
-                    Text("版本号")
-                    Spacer()
-                    Text("1.0")
-                        .foregroundColor(.secondary)
+                NavigationLink {
+                    AboutNotieeView()
+                } label: {
+                    HStack {
+                        Text("关于 Notiee")
+                        Spacer()
+                    }
                 }
-                HStack {
-                    Text("开发者")
-                    Spacer()
-                    Text("douyin@idbetterrun")
-                        .foregroundColor(.secondary)
-                }
-                HStack {
-                    Text("联系邮箱")
-                    Spacer()
-                    Text("woxiantao@icloud.com")
-                        .foregroundColor(.secondary)
-                }
+                
                 NavigationLink {
                     OpenSourceAcknowledgmentsView()
                 } label: {
@@ -556,20 +579,25 @@ struct AIConfigurationView: View {
 
     var body: some View {
         Form {
-            if viewModel.customModelsEnabled {
+            if configuration.wrappedValue.providerType == .custom {
                 Section {
-                    Text("自定义大模型模式已开启。请前往高级设置中的“管理自定义模型”进行配置。")
+                    Text("当前正在使用自定义大模型，请前往“高级设置 -> 管理自定义模型”中修改配置。如果要换回内置服务商，请在下方重新选择。")
                         .foregroundStyle(.orange)
                 }
-            } else {
-                Section("服务商") {
-                    Picker("选择供应商", selection: configuration.providerType) {
-                        ForEach(AIProviderType.allCases.filter { supports(provider: $0, for: kind) && $0 != .custom }) { provider in
-                            Text(provider.displayName).tag(provider)
-                        }
+            }
+            
+            Section("服务商") {
+                Picker("选择供应商", selection: configuration.providerType) {
+                    if configuration.wrappedValue.providerType == .custom {
+                        Text("自定义配置").tag(AIProviderType.custom)
                     }
-                    .onChange(of: configuration.wrappedValue.providerType) { _, _ in
-                        let currentProvider = configuration.wrappedValue.providerType
+                    ForEach(AIProviderType.allCases.filter { supports(provider: $0, for: kind) && $0 != .custom }) { provider in
+                        Text(provider.displayName).tag(provider)
+                    }
+                }
+                .onChange(of: configuration.wrappedValue.providerType) { _, _ in
+                    let currentProvider = configuration.wrappedValue.providerType
+                    if currentProvider != .custom {
                         if let firstModel = currentProvider.predefinedModels.first {
                             configuration.wrappedValue.modelName = firstModel
                         } else {
@@ -577,7 +605,9 @@ struct AIConfigurationView: View {
                         }
                     }
                 }
+            }
 
+            if configuration.wrappedValue.providerType != .custom {
                 Section("模型设置") {
                     let currentProvider = configuration.wrappedValue.providerType
                     if !currentProvider.predefinedModels.isEmpty {
@@ -712,6 +742,10 @@ struct OpenSourceAcknowledgmentsView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     openSourceItem(name: "SwiftUI", url: "https://developer.apple.com/xcode/swiftui/", description: "Notiee 全面采用了 SwiftUI 构建现代化、响应式的用户界面，感谢苹果提供的强大底层框架。")
                     openSourceItem(name: "Swift Charts", url: "https://developer.apple.com/documentation/charts", description: "Notiee 的数据回顾仪表盘由 Swift Charts 提供图表渲染，直观展示您的 Token 消耗。")
+                    openSourceItem(name: "swift-markdown-ui", url: "https://github.com/gonzalezreal/swift-markdown-ui", description: "Notiee 使用该库在详情页提供了优雅的 Markdown 渲染支持。")
+                    openSourceItem(name: "ZIPFoundation", url: "https://github.com/weichsel/ZIPFoundation", description: "Notiee 使用该库提供了可靠的压缩和解压能力，用于处理 .tmn 文件的导入与导出。")
+                    openSourceItem(name: "OnboardingKit", url: "https://github.com/danielsaidi/OnboardingKit", description: "Notiee 使用该库构建了精美的欢迎与首次引导页面。")
+                    openSourceItem(name: "WhatsNewKit", url: "https://github.com/SvenTiigi/WhatsNewKit", description: "Notiee 使用该库来展示更新日志和新版本特性。")
                     openSourceItem(name: "Vision Framework", url: "https://developer.apple.com/documentation/vision", description: "原生提供了强大的 OCR 视觉框架，为 Notiee 本地初步的文字提取提供了技术支持。")
                 }
             }

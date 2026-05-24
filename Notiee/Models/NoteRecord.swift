@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     let id: UUID
@@ -17,6 +18,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     var editedAt: Date?
     var modelsUsed: [String]?
     var tokenUsage: Int
+    var deviceName: String?
 
     init(
         id: UUID = UUID(),
@@ -33,7 +35,8 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         isDeleted: Bool = false,
         editedAt: Date? = nil,
         modelsUsed: [String]? = nil,
-        tokenUsage: Int = 0
+        tokenUsage: Int = 0,
+        deviceName: String? = UIDevice.current.modelName
     ) {
         self.id = id
         self.eventID = eventID
@@ -50,5 +53,6 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.editedAt = editedAt
         self.modelsUsed = modelsUsed
         self.tokenUsage = tokenUsage
+        self.deviceName = deviceName
     }
 }

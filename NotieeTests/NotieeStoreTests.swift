@@ -7,7 +7,7 @@ final class NotieeStoreTests: XCTestCase {
         let recordStore = JSONNoteRecordStore(fileURL: temporaryFileURL())
         let event = ScheduledEvent(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000201")!,
-            title: "产品设计课",
+            title: "测试课程",
             startDate: referenceDate.addingTimeInterval(-10 * 60),
             endDate: referenceDate.addingTimeInterval(50 * 60),
             updatedAt: referenceDate.addingTimeInterval(-60 * 60)
@@ -20,11 +20,11 @@ final class NotieeStoreTests: XCTestCase {
             recordStore: recordStore
         )
 
-        let record = store.capturePhoto(localImagePath: "mock://shared-capture")
+        let record = store.capturePhoto(localImagePaths: ["test-photo"])
 
         XCTAssertEqual(store.records, [record])
         XCTAssertEqual(record.eventID, event.id)
-        XCTAssertEqual(record.title, "产品设计课 拍记")
+        XCTAssertEqual(record.title, "测试课程 拍记")
         XCTAssertEqual(try recordStore.loadRecords(), [record])
         XCTAssertNil(store.lastPersistenceError)
     }
@@ -33,7 +33,7 @@ final class NotieeStoreTests: XCTestCase {
         let older = NoteRecord(
             eventID: nil,
             capturedAt: referenceDate.addingTimeInterval(-60),
-            localImagePath: "mock://older",
+            localImagePaths: ["older"],
             title: "白板：旅程图",
             ocrText: "persona journey map",
             summary: "课堂白板记录",
@@ -42,7 +42,7 @@ final class NotieeStoreTests: XCTestCase {
         let newer = NoteRecord(
             eventID: nil,
             capturedAt: referenceDate,
-            localImagePath: "mock://newer",
+            localImagePaths: ["newer"],
             title: "竞品截图",
             ocrText: "benchmark capture",
             summary: "补充 journey 对比",

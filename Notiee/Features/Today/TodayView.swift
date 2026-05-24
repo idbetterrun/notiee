@@ -7,6 +7,7 @@ struct TodayView: View {
     @State private var upcomingCollapsed = false
     @State private var selectedTodo: NoteTodo?
     @State private var selectedEvent: ScheduledEvent?
+    @State private var showCreateSheet = false
 
     @MainActor
     init() {
@@ -90,20 +91,35 @@ struct TodayView: View {
             .sheet(item: $selectedEvent) { event in
                 EventDetailSheet(event: event, viewModel: viewModel)
             }
+            .sheet(isPresented: $showCreateSheet) {
+                CreateItemSheet(viewModel: viewModel)
+            }
         }
     }
 
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Today")
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Today")
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
 
-            Text(viewModel.formattedDateWithWeek)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                Text(viewModel.formattedDateWithWeek)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button {
+                showCreateSheet = true
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundStyle(.blue)
+            }
         }
     }
 
