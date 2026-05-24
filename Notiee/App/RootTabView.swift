@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import AVFoundation
 
 struct RootTabView: View {
@@ -44,10 +45,10 @@ struct RootTabView: View {
                 }
                 .tag(AppTab.settings)
         }
-        .overlay {
-            RootCameraControlView {
+        .background {
+            CameraControlOverlayView(onCapture: {
                 selectedTab = .capture
-            }
+            })
         }
         .onAppear {
             store.syncCalendar()
@@ -72,13 +73,13 @@ struct RootTabView: View {
     }
 }
 
-private struct RootCameraControlView: UIViewControllerRepresentable {
+private struct CameraControlOverlayView: UIViewRepresentable {
     var onCapture: () -> Void
 
-    func makeUIViewController(context: Context) -> UIViewController {
-        let vc = UIViewController()
-        vc.view.backgroundColor = .clear
-        vc.view.isUserInteractionEnabled = true
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.isUserInteractionEnabled = true
         #if !targetEnvironment(simulator)
         if #available(iOS 18.0, *) {
             let interaction = AVCaptureEventInteraction { event in
@@ -86,11 +87,11 @@ private struct RootCameraControlView: UIViewControllerRepresentable {
                     DispatchQueue.main.async { onCapture() }
                 }
             }
-            vc.view.addInteraction(interaction)
+            view.addInteraction(interaction)
         }
         #endif
-        return vc
+        return view
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+    func updateUIView(_ uiView: UIView, context: Context) {}
 }
