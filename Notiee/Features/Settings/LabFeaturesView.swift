@@ -5,7 +5,6 @@ struct LabFeaturesView: View {
     @State private var showingDocumentPicker = false
     @State private var previewData: PreviewData?
     
-    @AppStorage("labICloudSyncEnabled") private var iCloudSyncEnabled = false
     @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
     @AppStorage("notiee.studentMode") private var studentModeEnabled = false
     
@@ -61,11 +60,72 @@ struct LabFeaturesView: View {
             }
             
             Section {
-                Toggle(isOn: $iCloudSyncEnabled) {
-                    Label("手动同步 iCloud", systemImage: "icloud.and.arrow.up")
+                if ICloudSyncService.shared.isAvailable() {
+                    HStack {
+                        Label("iCloud 同步", systemImage: "icloud.and.arrow.up")
+                        Spacer()
+                        if let date = ICloudSyncService.shared.lastSyncDate {
+                            Text("上次同步：" + date.formatted(.relative(presentation: .numeric)))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Button {
+                        Task {
+                            do {
+                                let count = try await ICloudSyncService.shared.uploadAllRecords(store: store)
+                                print("Uploaded \(count) records to iCloud")
+                            } catch {
+                                print("Upload failed: \(error.localizedDescription)")
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            if ICloudSyncService.shared.isSyncing {
+                                ProgressView()
+                                    .padding(.trailing, 4)
+                            }
+                            Text("上传同步")
+                            Spacer()
+                            Image(systemName: "arrow.up.doc.fill")
+                        }
+                    }
+                    .disabled(ICloudSyncService.shared.isSyncing)
+
+                    Button {
+                        Task {
+                            do {
+                                let count = try await ICloudSyncService.shared.downloadAndMerge(store: store)
+                                print("Downloaded and merged \(count) records from iCloud")
+                            } catch {
+                                print("Download failed: \(error.localizedDescription)")
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            if ICloudSyncService.shared.isSyncing {
+                                ProgressView()
+                                    .padding(.trailing, 4)
+                            }
+                            Text("下载同步")
+                            Spacer()
+                            Image(systemName: "arrow.down.doc.fill")
+                        }
+                    }
+                    .disabled(ICloudSyncService.shared.isSyncing)
+                } else {
+                    HStack {
+                        Label("iCloud 同步不可用", systemImage: "icloud.slash")
+                        Spacer()
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
                 }
             } footer: {
-                Text("将本地记录同步到您的个人 iCloud 空间。（即将推出，敬请期待）")
+                Text("通过 iCloud Drive 在设备间同步记录。使用 UUID 去重，editedAt 版本比较解决冲突。")
             }
         }
         .navigationTitle("实验室")
