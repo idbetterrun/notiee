@@ -27,6 +27,13 @@ final class CaptureViewModel: ObservableObject {
         store?.events ?? []
     }
     
+    var todayAllDayEvent: ScheduledEvent? {
+        let calendar = Calendar.current
+        return events.first { event in
+            event.isAllDay && calendar.isDate(event.startDate, inSameDayAs: currentDate)
+        }
+    }
+    
     private var cancellables: Set<AnyCancellable> = []
 
     init(

@@ -89,23 +89,47 @@ struct CaptureView: View {
             // Event Selection (Folder)
             Menu {
                 let deduplicated = deduplicateEvents(viewModel.events)
-                let hasActiveUnselected = viewModel.currentEvent != nil && viewModel.selectedEventID == nil
-                let activeEvent: ScheduledEvent? = hasActiveUnselected ? viewModel.currentEvent : viewModel.events.first(where: { $0.id == viewModel.selectedEventID })
-
-                if let active = activeEvent {
+                let todayAllDay = viewModel.todayAllDayEvent
+                let currentNonAllDay: ScheduledEvent? = {
+                    if let e = viewModel.currentEvent, !e.isAllDay {
+                        return e
+                    }
+                    return nil
+                }()
+                let todaySpecials = CalendarService.shared.specialDayEvents(for: viewModel.currentDate)
+                let todaySpecialTitles = Set(todaySpecials.map { $0.title })
+                
+                // 1. 全天事件
+                if let allDay = todayAllDay {
                     Button {
-                        viewModel.selectedEventID = active.id
+                        viewModel.selectedEventID = allDay.id
                     } label: {
                         HStack {
-                            Text(active.title)
+                            Text(allDay.title)
                             Spacer()
-                            if viewModel.selectedEventID == active.id {
+                            if viewModel.selectedEventID == allDay.id {
                                 Image(systemName: "checkmark")
                             }
                         }
                     }
                 }
-
+                
+                // 2. 当前非全天事件
+                if let current = currentNonAllDay {
+                    Button {
+                        viewModel.selectedEventID = current.id
+                    } label: {
+                        HStack {
+                            Text(current.title)
+                            Spacer()
+                            if viewModel.selectedEventID == current.id {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+                
+                // 3. 未分类
                 Button {
                     viewModel.selectedEventID = nil
                 } label: {
@@ -117,20 +141,31 @@ struct CaptureView: View {
                         }
                     }
                 }
-
-                if !deduplicated.isEmpty {
-                    Divider()
+                
+                // Filter remaining: exclude pinned items, exclude holidays/birthdays unless today IS that holiday
+                let pinnedIDs: Set<UUID?> = [todayAllDay?.id, currentNonAllDay?.id]
+                let remaining = deduplicated.filter { event in
+                    guard !pinnedIDs.contains(event.id) else { return false }
+                    // If today IS this special event, allow it below divider too
+                    if todaySpecialTitles.contains(event.title) {
+                        return true
+                    }
+                    // Exclude other special all-day events from the list
+                    return !CalendarService.shared.isSpecialAllDayEvent(event)
                 }
-
-                ForEach(deduplicated.filter { $0.id != activeEvent?.id }) { event in
-                    Button {
-                        viewModel.selectedEventID = event.id
-                    } label: {
-                        HStack {
-                            Text(event.title)
-                            Spacer()
-                            if viewModel.selectedEventID == event.id {
-                                Image(systemName: "checkmark")
+                
+                if !remaining.isEmpty {
+                    Divider()
+                    ForEach(remaining) { event in
+                        Button {
+                            viewModel.selectedEventID = event.id
+                        } label: {
+                            HStack {
+                                Text(event.title)
+                                Spacer()
+                                if viewModel.selectedEventID == event.id {
+                                    Image(systemName: "checkmark")
+                                }
                             }
                         }
                     }
