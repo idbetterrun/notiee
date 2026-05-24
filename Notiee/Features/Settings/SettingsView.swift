@@ -68,6 +68,15 @@ struct MeView: View {
                 
                 Section {
                     NavigationLink {
+                        BackupRestoreView(store: store)
+                    } label: {
+                        Label("备份与恢复", systemImage: "arrow.triangle.2.circlepath.doc.on.clipboard")
+                            .foregroundColor(.blue)
+                    }
+                }
+                
+                Section {
+                    NavigationLink {
                         LabFeaturesView(store: store)
                     } label: {
                         Label("实验室功能", systemImage: "flask.fill")

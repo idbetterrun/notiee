@@ -35,19 +35,6 @@ struct BackupRestoreView: View {
                 .padding(.vertical, 8)
             }
             
-            Section {
-                Button {
-                    // TODO: Implement iCloud sync
-                    print("iCloud sync triggered")
-                } label: {
-                    HStack {
-                        Image(systemName: "icloud.and.arrow.up")
-                        Text("手动同步 iCloud")
-                    }
-                }
-            } footer: {
-                Text("将本地记录同步到您的个人 iCloud 空间。（即将推出）")
-            }
             
             Section {
                 Button {

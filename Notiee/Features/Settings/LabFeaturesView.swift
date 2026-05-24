@@ -5,6 +5,7 @@ struct LabFeaturesView: View {
     @State private var showingDocumentPicker = false
     @State private var previewData: PreviewData?
     
+    @AppStorage("labICloudSyncEnabled") private var iCloudSyncEnabled = false
     @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
     @AppStorage("notiee.studentMode") private var studentModeEnabled = false
     
@@ -57,6 +58,14 @@ struct LabFeaturesView: View {
                 .foregroundColor(.primary)
             } footer: {
                 Text(".tmn 文件是 Notiee 及关联应用专属的结构化导出格式，支持包含图文等完整记录内容的无损备份与迁移。")
+            }
+            
+            Section {
+                Toggle(isOn: $iCloudSyncEnabled) {
+                    Label("手动同步 iCloud", systemImage: "icloud.and.arrow.up")
+                }
+            } footer: {
+                Text("将本地记录同步到您的个人 iCloud 空间。（即将推出，敬请期待）")
             }
         }
         .navigationTitle("实验室")
