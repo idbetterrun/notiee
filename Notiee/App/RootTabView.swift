@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 struct RootTabView: View {
     @StateObject private var store: NotieeStore
@@ -43,6 +44,11 @@ struct RootTabView: View {
                 }
                 .tag(AppTab.settings)
         }
+        .overlay {
+            RootCameraControlView {
+                selectedTab = .capture
+            }
+        }
         .onAppear {
             store.syncCalendar()
         }
@@ -64,4 +70,27 @@ struct RootTabView: View {
             TMNImportPreviewSheet(record: data.record, todos: data.todos, store: store)
         }
     }
+}
+
+private struct RootCameraControlView: UIViewControllerRepresentable {
+    var onCapture: () -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .clear
+        vc.view.isUserInteractionEnabled = true
+        #if !targetEnvironment(simulator)
+        if #available(iOS 18.0, *) {
+            let interaction = AVCaptureEventInteraction { event in
+                if event.phase == .began {
+                    DispatchQueue.main.async { onCapture() }
+                }
+            }
+            vc.view.addInteraction(interaction)
+        }
+        #endif
+        return vc
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
