@@ -184,9 +184,9 @@ Notiee/
 
 ### Prerequisites ｜ 环境要求
 
-- **iOS 17.0+**
-- **Xcode 15.0+**
-- **Swift 5.9+**
+- **iOS 18.0+**
+- **Xcode 16.0+**
+- **Swift 6.0+**
 
 ### Run & Test ｜ 运行与测试
 
