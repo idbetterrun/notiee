@@ -12,6 +12,7 @@ final class TodayViewModel: ObservableObject {
     @Published private(set) var events: [ScheduledEvent]
     @Published private(set) var todos: [NoteTodo]
     @Published private(set) var records: [NoteRecord]
+    private var cancellables: Set<AnyCancellable> = []
 
     /// Standalone initializer for tests and previews.
     init(
@@ -45,6 +46,9 @@ final class TodayViewModel: ObservableObject {
         store.$todos.assign(to: &$todos)
         store.$records.assign(to: &$records)
         store.$currentDate.assign(to: &$currentDate)
+        store.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }.store(in: &cancellables)
     }
 
     // MARK: - Current Event

@@ -200,7 +200,7 @@ struct TodayView: View {
                                 event: event,
                                 currentDate: viewModel.currentDate,
                                 tag: viewModel.store?.customTags.first(where: { $0.id == event.tagID }),
-                                isLiveDisabled: viewModel.store?.liveActivityDisabledEventIDs.contains(event.id) ?? false,
+                                isLiveActive: LiveActivityManager.shared.activeEventUUID == event.id,
                                 showLiveToggle: event.status(at: viewModel.currentDate) == .current && !event.isAllDay,
                                 onToggleLive: {
                                     viewModel.store?.toggleLiveActivityForEvent(event.id)
@@ -302,7 +302,7 @@ private struct EventCard: View {
     let event: ScheduledEvent
     let currentDate: Date
     let tag: EventTag?
-    let isLiveDisabled: Bool
+    let isLiveActive: Bool
     let showLiveToggle: Bool
     let onToggleLive: () -> Void
 
@@ -338,15 +338,15 @@ private struct EventCard: View {
                 Button(action: onToggleLive) {
                     HStack(spacing: 4) {
                         Circle()
-                            .fill(isLiveDisabled ? Color.secondary : Color.green)
+                            .fill(isLiveActive ? Color.green : Color.secondary)
                             .frame(width: 6, height: 6)
                         Text("Live")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(isLiveDisabled ? Color.secondary : Color.green)
+                            .foregroundStyle(isLiveActive ? .green : .secondary)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(isLiveDisabled ? Color.secondary.opacity(0.1) : Color.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
+                    .background(isLiveActive ? Color.green.opacity(0.1) : Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
                 }
                 .buttonStyle(.plain)
             }

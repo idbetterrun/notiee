@@ -8,6 +8,7 @@ class LiveActivityManager: ObservableObject {
     static let shared = LiveActivityManager()
     
     private var currentActivity: Activity<ScheduleActivityAttributes>?
+    @Published private(set) var activeEventUUID: UUID? = nil
     private static let endNotificationPrefix = "liveactivity-end-"
     
     private init() {
@@ -44,6 +45,7 @@ class LiveActivityManager: ObservableObject {
                 content: content,
                 pushType: nil
             )
+            activeEventUUID = event.id
             scheduleAutoEnd(for: event)
         } catch {
             print("Failed to start Live Activity: \(error)")
@@ -77,6 +79,7 @@ class LiveActivityManager: ObservableObject {
         }
         
         currentActivity = nil
+        activeEventUUID = nil
     }
     
     private func scheduleAutoEnd(for event: ScheduledEvent) {
