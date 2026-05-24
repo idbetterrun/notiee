@@ -220,7 +220,7 @@ All sensitive API keys are encrypted in the iOS **Keychain**. 所有敏感 API K
 
 ## 📅 Version Status ｜ 版本状态
 
-**Current: v1.0 (MVP)**
+**Current: v1.0.1 (MVP)**
 
 - [x] Native SwiftUI interface with blur materials and dark mode
 - [x] Intelligent schedule matching (`ScheduleMatcher`) and timeline logic

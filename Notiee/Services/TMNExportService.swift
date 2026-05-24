@@ -80,7 +80,7 @@ final class TMNExportService {
             format: "tmn/zip/v1",
             metadata: TMNManifest.Metadata(
                 app: "notiee",
-                appVersion: "1.0.0",
+                appVersion: "1.0.1",
                 createdAt: nowStr,
                 documentId: record.id.uuidString,
                 encrypted: false
