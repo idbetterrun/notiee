@@ -26,14 +26,9 @@ struct CaptureView: View {
             Color.black
                 .ignoresSafeArea()
             
-            CameraControlView(
-                onCapture: { capture() },
-                onZoom: { factor in
-                    let zoomValue = 1.0 + factor * 4.0
-                    currentZoomFactor = zoomValue
-                    viewModel.cameraManager.setZoom(factor: zoomValue)
-                }
-            )
+            CameraControlView {
+                capture()
+            }
 
             VStack(spacing: 0) {
                 topBar
@@ -461,24 +456,16 @@ struct CaptureView: View {
 
 struct CameraControlView: UIViewControllerRepresentable {
     var onCapture: () -> Void
-    var onZoom: ((CGFloat) -> Void)?
     
     func makeUIViewController(context: Context) -> UIViewController {
         let vc = UIViewController()
         #if !targetEnvironment(simulator)
         if #available(iOS 18.0, *) {
             let interaction = AVCaptureEventInteraction { event in
-                switch event.phase {
-                case .began:
-                    if event.type == .press {
-                        DispatchQueue.main.async { onCapture() }
+                if event.phase == .began {
+                    DispatchQueue.main.async {
+                        onCapture()
                     }
-                case .began, .changed:
-                    if event.type == .zoom {
-                        DispatchQueue.main.async { onZoom?(CGFloat(event.zoomFactor)) }
-                    }
-                default:
-                    break
                 }
             }
             vc.view.addInteraction(interaction)

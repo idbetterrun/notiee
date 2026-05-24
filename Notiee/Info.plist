@@ -48,7 +48,5 @@
 	<string>Notiee 需要访问相册以便您能导入图片进行记录。</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Notiee 需要使用语音识别技术将您的语音转换为文本记录。</string>
-	<key>NSCameraControlCaptureEnabled</key>
-	<true/>
 </dict>
 </plist>
