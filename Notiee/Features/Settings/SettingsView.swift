@@ -272,11 +272,7 @@ struct SettingsMainView: View {
                         set: { viewModel.semesterStartDate = $0 }
                     )
                     DatePicker("第一周开始日期", selection: dateBinding, displayedComponents: .date)
-                }
-                if viewModel.showWeekNumbers {
-                    Text("修改第一周开始日期后需要重新启动应用才能生效")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Text("修改第一周开始日期后需要重新启动应用才能生效").font(.caption).foregroundColor(.secondary)
                 }
             }
             .onChange(of: viewModel.showWeekNumbers) { _, _ in viewModel.saveAll() }
