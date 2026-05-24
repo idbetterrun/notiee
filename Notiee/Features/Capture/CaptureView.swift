@@ -88,16 +88,52 @@ struct CaptureView: View {
 
             // Event Selection (Folder)
             Menu {
-                ForEach(viewModel.events) { event in
-                    Button(event.title) {
-                        viewModel.selectedEventID = event.id
+                let deduplicated = deduplicateEvents(viewModel.events)
+                let hasActiveUnselected = viewModel.currentEvent != nil && viewModel.selectedEventID == nil
+                let activeEvent: ScheduledEvent? = hasActiveUnselected ? viewModel.currentEvent : viewModel.events.first(where: { $0.id == viewModel.selectedEventID })
+
+                if let active = activeEvent {
+                    Button {
+                        viewModel.selectedEventID = active.id
+                    } label: {
+                        HStack {
+                            Text(active.title)
+                            Spacer()
+                            if viewModel.selectedEventID == active.id {
+                                Image(systemName: "checkmark")
+                            }
+                        }
                     }
                 }
-                
-                Divider()
-                
-                Button("未分类") {
+
+                Button {
                     viewModel.selectedEventID = nil
+                } label: {
+                    HStack {
+                        Text("未分类")
+                        Spacer()
+                        if viewModel.selectedEventID == nil {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+
+                if !deduplicated.isEmpty {
+                    Divider()
+                }
+
+                ForEach(deduplicated.filter { $0.id != activeEvent?.id }) { event in
+                    Button {
+                        viewModel.selectedEventID = event.id
+                    } label: {
+                        HStack {
+                            Text(event.title)
+                            Spacer()
+                            if viewModel.selectedEventID == event.id {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
                 }
             } label: {
                 Image(systemName: "folder.fill")
@@ -116,6 +152,18 @@ struct CaptureView: View {
         case .off: return "bolt.slash.fill"
         default: return "bolt.badge.a.fill"
         }
+    }
+
+    private func deduplicateEvents(_ events: [ScheduledEvent]) -> [ScheduledEvent] {
+        var seen: Set<String> = []
+        var result: [ScheduledEvent] = []
+        for event in events {
+            if !seen.contains(event.title) {
+                seen.insert(event.title)
+                result.append(event)
+            }
+        }
+        return result
     }
 
     private var infoBannerView: some View {
