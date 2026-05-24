@@ -8,7 +8,8 @@ final class ScheduleMatcherTests: XCTestCase {
             title: "线性代数",
             startDate: date(hour: 8),
             endDate: date(hour: 9),
-            updatedAt: date(hour: 7)
+            updatedAt: date(hour: 7),
+            isAllDay: false
         )
 
         let result = ScheduleMatcher().currentEvent(from: [event], at: now)
@@ -23,7 +24,8 @@ final class ScheduleMatcherTests: XCTestCase {
             startDate: date(hour: 10),
             endDate: date(hour: 11),
             kind: .meeting,
-            updatedAt: date(hour: 9)
+            updatedAt: date(hour: 9),
+            isAllDay: false
         )
 
         let result = ScheduleMatcher().currentEvent(from: [event], at: now)
@@ -37,14 +39,16 @@ final class ScheduleMatcherTests: XCTestCase {
             title: "机器学习",
             startDate: date(hour: 14),
             endDate: date(hour: 15),
-            updatedAt: date(hour: 8)
+            updatedAt: date(hour: 8),
+            isAllDay: false
         )
         let newer = ScheduledEvent(
             title: "项目讨论",
             startDate: date(hour: 14),
             endDate: date(hour: 15),
             kind: .meeting,
-            updatedAt: date(hour: 12)
+            updatedAt: date(hour: 12),
+            isAllDay: false
         )
 
         let result = ScheduleMatcher().currentEvent(from: [older, newer], at: now)

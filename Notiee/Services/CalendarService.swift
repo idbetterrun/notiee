@@ -101,7 +101,8 @@ final class CalendarService: ObservableObject {
                 endDate: ekEvent.endDate,
                 kind: kind,
                 updatedAt: ekEvent.lastModifiedDate ?? Date(),
-                source: .systemCalendar(identifier: ekEvent.eventIdentifier)
+                source: .systemCalendar(identifier: ekEvent.eventIdentifier),
+                isAllDay: ekEvent.isAllDay
             )
         }.sorted { $0.startDate < $1.startDate }
     }

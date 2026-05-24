@@ -196,7 +196,7 @@ struct ImportScheduleView: View {
                 currentEnd = dateFormatter.date(from: raw)
             } else if line.hasPrefix("END:VEVENT") {
                 if let title = currentTitle, let start = currentStart, let end = currentEnd {
-                    let event = ScheduledEvent(title: title, startDate: start, endDate: end, kind: .course)
+                    let event = ScheduledEvent(title: title, startDate: start, endDate: end, kind: .course, isAllDay: false)
                     events.append(event)
                 }
                 currentTitle = nil
@@ -271,7 +271,7 @@ struct ImportScheduleView: View {
                           let endStr = item["endDateTime"],
                           let start = dateFormatter.date(from: startStr),
                           let end = dateFormatter.date(from: endStr) else { continue }
-                    let event = ScheduledEvent(title: title, startDate: start, endDate: end, kind: .course)
+                    let event = ScheduledEvent(title: title, startDate: start, endDate: end, kind: .course, isAllDay: false)
                     events.append(event)
                 }
                 

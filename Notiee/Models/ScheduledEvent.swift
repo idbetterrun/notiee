@@ -29,6 +29,7 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable, Codable {
     var updatedAt: Date
     var source: EventSource
     var notes: String?
+    var isAllDay: Bool
 
     init(
         id: UUID = UUID(),
@@ -39,7 +40,8 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable, Codable {
         tagID: UUID? = nil,
         updatedAt: Date = Date(),
         source: EventSource = .notiee,
-        notes: String? = nil
+        notes: String? = nil,
+        isAllDay: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -50,6 +52,7 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable, Codable {
         self.updatedAt = updatedAt
         self.source = source
         self.notes = notes
+        self.isAllDay = isAllDay
     }
 
     func contains(_ date: Date) -> Bool {

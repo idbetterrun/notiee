@@ -9,7 +9,8 @@ final class RecordDetailViewModelTests: XCTestCase {
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000302")!,
             title: "测试课程",
             startDate: referenceDate.addingTimeInterval(-30 * 60),
-            endDate: referenceDate.addingTimeInterval(30 * 60)
+            endDate: referenceDate.addingTimeInterval(30 * 60),
+            isAllDay: false
         )
         let record = NoteRecord(
             id: recordID,

@@ -10,7 +10,8 @@ final class NotieeStoreTests: XCTestCase {
             title: "测试课程",
             startDate: referenceDate.addingTimeInterval(-10 * 60),
             endDate: referenceDate.addingTimeInterval(50 * 60),
-            updatedAt: referenceDate.addingTimeInterval(-60 * 60)
+            updatedAt: referenceDate.addingTimeInterval(-60 * 60),
+            isAllDay: false
         )
         let store = NotieeStore(
             currentDate: referenceDate,

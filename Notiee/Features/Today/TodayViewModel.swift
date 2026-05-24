@@ -167,7 +167,8 @@ final class TodayViewModel: ObservableObject {
             startDate: currentStart,
             endDate: currentEnd,
             kind: .course,
-            updatedAt: calendar.date(byAdding: .hour, value: -1, to: currentDate)!
+            updatedAt: calendar.date(byAdding: .hour, value: -1, to: currentDate)!,
+            isAllDay: false
         )
 
         let events = [
@@ -176,7 +177,8 @@ final class TodayViewModel: ObservableObject {
                 startDate: earlierStart,
                 endDate: earlierEnd,
                 kind: .course,
-                updatedAt: earlierStart
+                updatedAt: earlierStart,
+                isAllDay: false
             ),
             course,
             ScheduledEvent(
@@ -184,7 +186,8 @@ final class TodayViewModel: ObservableObject {
                 startDate: upcomingStart,
                 endDate: upcomingEnd,
                 kind: .meeting,
-                updatedAt: upcomingStart
+                updatedAt: upcomingStart,
+                isAllDay: false
             )
         ]
 

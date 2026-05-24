@@ -239,7 +239,8 @@ struct CreateItemSheet: View {
                 startDate: startDate,
                 endDate: endDate,
                 kind: .course,
-                tagID: selectedTagID
+                tagID: selectedTagID,
+                isAllDay: false
             )
             store.addEvent(event)
         } else {
@@ -254,7 +255,8 @@ struct CreateItemSheet: View {
                     startDate: eventStart,
                     endDate: eventEnd,
                     kind: .course,
-                    tagID: selectedTagID
+                    tagID: selectedTagID,
+                    isAllDay: false
                 )
                 store.addEvent(event)
             }
