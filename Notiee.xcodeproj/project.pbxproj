@@ -59,6 +59,7 @@
 		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
+		5912A267C9D93191494E0848 /* CaptureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
 		72398F63847C0F6573941445 /* TMNExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50780AC855D14A170154CD6 /* TMNExportService.swift */; };
 		7568F23C0FDBFDF392C370C5 /* ImageSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */; };
@@ -66,6 +67,7 @@
 		88CA43871198658141B9E253 /* HighlightedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82877F4ACD877D140D13DE81 /* HighlightedText.swift */; };
 		94811252E3D82186A10F0595 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */; };
 		9590DC1818F61595BA432B24 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A3896CF3167D274BE7DF3767 /* Localizable.strings */; };
+		96785DDC240E3E97ED68D0EC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E16D916C859E3FB8DD53D5C /* Foundation.framework */; };
 		98DE969CD7EEEFF2C0A1A749 /* TagEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */; };
 		990000000000000000000002 /* AIProcessingState+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000001 /* AIProcessingState+UI.swift */; };
 		990000000000000000000004 /* RecordThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000003 /* RecordThumbnailView.swift */; };
@@ -77,6 +79,7 @@
 		9B69BCDDF3652371666A51F7 /* SystemPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB42779E84C87B7233DEE1BC /* SystemPermissionManager.swift */; };
 		AB823531986DF87DD3E5FF9A /* TMNModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49671163B1FF58DA2562FE75 /* TMNModels.swift */; };
 		B2744530D77786EC783CFEEF /* UIDevice+ModelName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */; };
+		B63E4803E3CDCF62120DBF9D /* NotieeCaptureExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */; };
 		BBF6F8E23A178E6BE8281140 /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		C6388873ADA1EDB1BA724246 /* BackupRestoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480559344177345371C21F7A /* BackupRestoreView.swift */; };
 		C9E505CC0289ABEBE4585D38 /* ScheduledEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */; };
@@ -104,6 +107,13 @@
 			remoteGlobalIDString = 000000000000000000000003;
 			remoteInfo = Notiee;
 		};
+		6F5AD09536CC9D87BC0ACC3C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DD34B6B25D6BFCA3E89EBB5A;
+			remoteInfo = NotieeCaptureExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -116,6 +126,17 @@
 				18B83FE82FC0A058002A7EC9 /* NotieeWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DCEBC3F04349D5D237506EB6 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B63E4803E3CDCF62120DBF9D /* NotieeCaptureExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -164,6 +185,7 @@
 		18B83FDA2FC0A057002A7EC9 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LabFeaturesView.swift; sourceTree = "<group>"; };
+		3E16D916C859E3FB8DD53D5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		40041CD4CF39EED9C31FFF80 /* EventTag.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventTag.swift; sourceTree = "<group>"; };
 		43711194AC983B67E9DDD83D /* AllSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllSchedulesView.swift; sourceTree = "<group>"; };
 		480559344177345371C21F7A /* BackupRestoreView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
@@ -187,6 +209,7 @@
 		99000000000000000000000B /* RealAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealAIProcessingService.swift; sourceTree = "<group>"; };
 		99000000000000000000000D /* AIAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAPIClient.swift; sourceTree = "<group>"; };
 		99000000000000000000000F /* AIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProcessingService.swift; sourceTree = "<group>"; };
+		9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CaptureExtension.swift; path = NotieeCaptureExtension/CaptureExtension.swift; sourceTree = "<group>"; };
 		9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacyAgreementView.swift; sourceTree = "<group>"; };
 		A23E2AC990E0D7427C4D055A /* NotieeCameraIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotieeCameraIntent.swift; sourceTree = "<group>"; };
 		A9AC1257406B758D108B41FD /* EventImportPreviewSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventImportPreviewSheet.swift; sourceTree = "<group>"; };
@@ -194,8 +217,10 @@
 		ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventTagStore.swift; sourceTree = "<group>"; };
 		ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolder.swift; sourceTree = "<group>"; };
+		B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = NotieeCaptureExtension.appex; path = NotieeCaptureExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ICloudSyncService.swift; sourceTree = "<group>"; };
 		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		BCEEAF1F66C49780FE20324C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = NotieeCaptureExtension/Info.plist; sourceTree = "<group>"; };
 		BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TagEditSheet.swift; sourceTree = "<group>"; };
 		C7F441ADF365412A945FE92D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		C86AB113713AB0E8B4FFCBF6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = Notiee/Info.plist; sourceTree = "<group>"; };
@@ -256,6 +281,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DC54B14A3B0D067C68D7A599 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96785DDC240E3E97ED68D0EC /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -270,6 +303,7 @@
 				C86AB113713AB0E8B4FFCBF6 /* Info.plist */,
 				18496E442FC1FCAB00861F50 /* Notiee.icon */,
 				18496E472FC1FCAB00861F50 /* Notiee-iOS.png */,
+				F0510AAA52521C07DC92FF4F /* NotieeCaptureExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -279,6 +313,7 @@
 				000000000000000000000006 /* Notiee.app */,
 				000000000000000000000007 /* NotieeTests.xctest */,
 				18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */,
+				B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -438,8 +473,26 @@
 			children = (
 				18B83FD82FC0A057002A7EC9 /* WidgetKit.framework */,
 				18B83FDA2FC0A057002A7EC9 /* SwiftUI.framework */,
+				DED6EF4608C80260192A5810 /* iOS */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DED6EF4608C80260192A5810 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				3E16D916C859E3FB8DD53D5C /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		F0510AAA52521C07DC92FF4F /* NotieeCaptureExtension */ = {
+			isa = PBXGroup;
+			children = (
+				9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */,
+				BCEEAF1F66C49780FE20324C /* Info.plist */,
+			);
+			name = NotieeCaptureExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -453,11 +506,13 @@
 				300000000000000000000002 /* Frameworks */,
 				300000000000000000000003 /* Resources */,
 				18B83FE92FC0A058002A7EC9 /* Embed Foundation Extensions */,
+				DCEBC3F04349D5D237506EB6 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				18B83FE72FC0A058002A7EC9 /* PBXTargetDependency */,
+				A1BA9B3B6B87DB7E7DE61B6F /* PBXTargetDependency */,
 			);
 			name = Notiee;
 			packageProductDependencies = (
@@ -508,6 +563,23 @@
 			productReference = 18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		DD34B6B25D6BFCA3E89EBB5A /* NotieeCaptureExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7323A890A0A4307968E43AD2 /* Build configuration list for PBXNativeTarget "NotieeCaptureExtension" */;
+			buildPhases = (
+				11EE155B19831EC31BD249A6 /* Sources */,
+				DC54B14A3B0D067C68D7A599 /* Frameworks */,
+				B873D755801A4BA9561D25C0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotieeCaptureExtension;
+			productName = NotieeCaptureExtension;
+			productReference = B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -521,6 +593,9 @@
 					000000000000000000000003 = {
 						CreatedOnToolsVersion = 26.5;
 						SystemCapabilities = {
+							"com.apple.developer.locked-camera-capture" = {
+								enabled = 1;
+							};
 						};
 					};
 					000000000000000000000004 = {
@@ -529,6 +604,13 @@
 					};
 					18B83FD52FC0A057002A7EC9 = {
 						CreatedOnToolsVersion = 26.5;
+					};
+					DD34B6B25D6BFCA3E89EBB5A = {
+						SystemCapabilities = {
+							"com.apple.developer.locked-camera-capture" = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -556,6 +638,7 @@
 				000000000000000000000003 /* Notiee */,
 				000000000000000000000004 /* NotieeTests */,
 				18B83FD52FC0A057002A7EC9 /* NotieeWidgetExtension */,
+				DD34B6B25D6BFCA3E89EBB5A /* NotieeCaptureExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -585,9 +668,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B873D755801A4BA9561D25C0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		11EE155B19831EC31BD249A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5912A267C9D93191494E0848 /* CaptureExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18B83FD22FC0A057002A7EC9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -693,6 +791,12 @@
 			isa = PBXTargetDependency;
 			target = 000000000000000000000003 /* Notiee */;
 			targetProxy = 400000000000000000000002 /* PBXContainerItemProxy */;
+		};
+		A1BA9B3B6B87DB7E7DE61B6F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NotieeCaptureExtension;
+			target = DD34B6B25D6BFCA3E89EBB5A /* NotieeCaptureExtension */;
+			targetProxy = 6F5AD09536CC9D87BC0ACC3C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1005,6 +1109,41 @@
 			};
 			name = Release;
 		};
+		C79A4F867FE601BF7E69D76C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UPZ7VCKGB7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotieeCaptureExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.notiee.app.capture-extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E27733CC84DC3B910FEA6DAC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UPZ7VCKGB7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotieeCaptureExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.notiee.app.capture-extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1040,6 +1179,15 @@
 			buildConfigurations = (
 				600000000000000000000005 /* Debug */,
 				600000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7323A890A0A4307968E43AD2 /* Build configuration list for PBXNativeTarget "NotieeCaptureExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C79A4F867FE601BF7E69D76C /* Release */,
+				E27733CC84DC3B910FEA6DAC /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
