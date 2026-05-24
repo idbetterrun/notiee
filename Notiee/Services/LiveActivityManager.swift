@@ -72,15 +72,8 @@ class LiveActivityManager: ObservableObject {
     func endActivity() {
         guard let activity = currentActivity else { return }
         
-        let finalState = ScheduleActivityAttributes.ContentState(
-            eventTitle: "日程已结束",
-            endTime: Date()
-        )
-        
-        let finalContent = ActivityContent(state: finalState, staleDate: nil)
-        
         Task {
-            await activity.end(finalContent, dismissalPolicy: .default)
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
         
         currentActivity = nil
