@@ -105,4 +105,46 @@ final class CalendarService: ObservableObject {
             )
         }.sorted { $0.startDate < $1.startDate }
     }
+    
+    func holidayOrBirthdayText(for date: Date) -> String? {
+        guard isAuthorized else { return nil }
+        
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return nil }
+        
+        let allowedIDs = selectedCalendarIDs()
+        let filteredCalendars = allowedIDs.isEmpty
+            ? eventStore.calendars(for: .event)
+            : eventStore.calendars(for: .event).filter { allowedIDs.contains($0.calendarIdentifier) }
+        
+        let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: filteredCalendars)
+        let events = eventStore.events(matching: predicate)
+        
+        for ekEvent in events {
+            if ekEvent.calendar?.type == .birthday {
+                if let title = ekEvent.title {
+                    return title
+                }
+            }
+            
+            let calTitle = ekEvent.calendar?.title ?? ""
+            if calTitle.contains("节") || calTitle.contains("假日") || calTitle.contains("Holiday") || calTitle.contains("节日") {
+                if let title = ekEvent.title {
+                    return title
+                }
+            }
+            
+            let eventTitle = ekEvent.title ?? ""
+            if eventTitle.contains("生日") || eventTitle.localizedCaseInsensitiveContains("birthday") {
+                return eventTitle
+            }
+            
+            if eventTitle.contains("节") && eventTitle.count < 20 {
+                return eventTitle
+            }
+        }
+        
+        return nil
+    }
 }

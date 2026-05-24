@@ -7,6 +7,7 @@ struct TodayView: View {
     @State private var upcomingCollapsed = false
     @State private var selectedTodo: NoteTodo?
     @State private var selectedEvent: ScheduledEvent?
+    @State private var holidayText: String?
     @State private var showCreateSheet = false
 
     @MainActor
@@ -109,6 +110,15 @@ struct TodayView: View {
                 Text(viewModel.formattedDateWithWeek)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                
+                if let holiday = holidayText {
+                    Text(holiday)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                }
             }
 
             Spacer()
@@ -120,6 +130,9 @@ struct TodayView: View {
                     .font(.system(size: 30))
                     .foregroundStyle(.blue)
             }
+        }
+        .onAppear {
+            holidayText = CalendarService.shared.holidayOrBirthdayText(for: viewModel.currentDate)
         }
     }
 
@@ -473,9 +486,9 @@ private struct EventDetailSheet: View {
                                     if currentTagID == tag.id {
                                         Image(systemName: "checkmark")
                                             .foregroundStyle(.blue)
-                                    }
-                                }
-                            }
+            }
+        }
+    }
                         }
                     }
                     
