@@ -7,7 +7,7 @@ struct TodayView: View {
     @State private var upcomingCollapsed = false
     @State private var selectedTodo: NoteTodo?
     @State private var selectedEvent: ScheduledEvent?
-    @State private var holidayText: String?
+    @State private var specialEvents: [SpecialDayEvent] = []
     @State private var showCreateSheet = false
 
     @MainActor
@@ -111,13 +111,17 @@ struct TodayView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 
-                if let holiday = holidayText {
-                    Text(holiday)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.orange)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                if !specialEvents.isEmpty {
+                    HStack(spacing: 8) {
+                        ForEach(specialEvents) { event in
+                            Text(event.title)
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(event.color)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(event.color.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
                 }
             }
 
@@ -132,10 +136,10 @@ struct TodayView: View {
             }
         }
         .onAppear {
-            holidayText = CalendarService.shared.holidayOrBirthdayText(for: viewModel.currentDate)
+            specialEvents = CalendarService.shared.specialDayEvents(for: viewModel.currentDate)
         }
         .onChange(of: viewModel.currentDate) { _, newDate in
-            holidayText = CalendarService.shared.holidayOrBirthdayText(for: newDate)
+            specialEvents = CalendarService.shared.specialDayEvents(for: newDate)
         }
     }
 
