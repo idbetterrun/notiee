@@ -134,6 +134,9 @@ struct TodayView: View {
         .onAppear {
             holidayText = CalendarService.shared.holidayOrBirthdayText(for: viewModel.currentDate)
         }
+        .onChange(of: viewModel.currentDate) { _, newDate in
+            holidayText = CalendarService.shared.holidayOrBirthdayText(for: newDate)
+        }
     }
 
     // MARK: - Timeline Status Group
@@ -486,9 +489,9 @@ private struct EventDetailSheet: View {
                                     if currentTagID == tag.id {
                                         Image(systemName: "checkmark")
                                             .foregroundStyle(.blue)
-            }
-        }
-    }
+                                    }
+                                }
+                            }
                         }
                     }
                     
