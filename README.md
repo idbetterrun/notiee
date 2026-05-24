@@ -7,7 +7,7 @@
 <h3 align="center">日程感知 AI 极速随手记</h3>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/Platform-iOS%2017.0+-blue.svg" alt="Platform"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Platform-iOS%2018.0+-blue.svg" alt="Platform"></a>
   <a href="#"><img src="https://img.shields.io/badge/Swift-5.9+-orange.svg" alt="Swift"></a>
   <a href="#"><img src="https://img.shields.io/badge/Xcode-15.0+-blue.svg" alt="Xcode"></a>
   <a href="#"><img src="https://img.shields.io/badge/Tests-28%20passed-success.svg" alt="Tests"></a>
