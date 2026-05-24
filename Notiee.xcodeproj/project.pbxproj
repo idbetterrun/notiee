@@ -81,6 +81,7 @@
 		C6388873ADA1EDB1BA724246 /* BackupRestoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480559344177345371C21F7A /* BackupRestoreView.swift */; };
 		C9E505CC0289ABEBE4585D38 /* ScheduledEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */; };
 		CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C541D6F62CB3492461A94D /* AboutNotieeView.swift */; };
+		DE0C537566909F0A5492B48B /* ICloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */; };
 		ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */; };
 		EDB4C13DCD86B50AC6A3C798 /* TMNImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9498AF5A115D7044C4936431 /* TMNImportService.swift */; };
 		F49F77B59BC31180CA924F0A /* EventImportPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9AC1257406B758D108B41FD /* EventImportPreviewSheet.swift */; };
@@ -193,6 +194,7 @@
 		ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventTagStore.swift; sourceTree = "<group>"; };
 		ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolder.swift; sourceTree = "<group>"; };
+		B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ICloudSyncService.swift; sourceTree = "<group>"; };
 		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
 		BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TagEditSheet.swift; sourceTree = "<group>"; };
 		C7F441ADF365412A945FE92D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
@@ -426,6 +428,7 @@
 				868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */,
 				69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */,
 				AB42779E84C87B7233DEE1BC /* SystemPermissionManager.swift */,
+				B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -657,6 +660,7 @@
 				94811252E3D82186A10F0595 /* WhatsNewView.swift in Sources */,
 				9B69BCDDF3652371666A51F7 /* SystemPermissionManager.swift in Sources */,
 				6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */,
+				DE0C537566909F0A5492B48B /* ICloudSyncService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
