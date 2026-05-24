@@ -321,9 +321,15 @@ private struct EventCard: View {
                     .font(.headline)
                     .lineLimit(1)
 
-                Text(timeRange)
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                if event.isAllDay {
+                    Text("全天")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.purple)
+                } else {
+                    Text(timeRange)
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer(minLength: 4)
