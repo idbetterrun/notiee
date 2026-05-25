@@ -5,34 +5,32 @@ import Charts
 struct MeView: View {
     let settingsStore: AppSettingsPersisting
     @ObservedObject var store: NotieeStore
-    
-    @State private var showLoginAlert = false
-    
+
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Button(action: {
-                        showLoginAlert = true
-                    }) {
+                    NavigationLink {
+                        LoginView()
+                    } label: {
                         HStack(spacing: 16) {
                             Image(systemName: "person.crop.circle.fill")
                                 .resizable()
                                 .frame(width: 50, height: 50)
                                 .foregroundColor(.accentColor)
-                            
+
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("登录您的 TomaGo 账户")
                                     .font(.headline)
                                     .foregroundColor(.primary)
-                                
+
                                 Text("开启多端同步与高级功能")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
-                            
+
                             Spacer()
-                            
+
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.secondary)
                                 .font(.footnote)
@@ -94,11 +92,6 @@ struct MeView: View {
                 }
             }
             .navigationTitle("我")
-            .alert("暂未开放", isPresented: $showLoginAlert) {
-                Button("确定", role: .cancel) { }
-            } message: {
-                Text("暂未开放登录与注册，敬请期待！")
-            }
         }
     }
 }

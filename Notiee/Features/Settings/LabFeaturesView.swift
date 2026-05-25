@@ -11,6 +11,9 @@ struct LabFeaturesView: View {
     @AppStorage("notiee.studentMode") private var studentModeEnabled = false
     @AppStorage("labFullVisionModeEnabled") private var fullVisionModeEnabled = false
     @AppStorage("labDeepAssociationModeEnabled") private var deepAssociationModeEnabled = false
+
+    @State private var showStudentDetail = false
+    @State private var showDeepAssociationDetail = false
     
     var body: some View {
         Form {
@@ -46,7 +49,22 @@ struct LabFeaturesView: View {
                     Label("学生模式", systemImage: "graduationcap.fill")
                 }
             } footer: {
-                Text("专为学生群体设计的功能模式。")
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("面向学生群体的一站式学习辅助模式，包含课程管理、AI 学术增强等功能。")
+                    Button {
+                        withAnimation { showStudentDetail.toggle() }
+                    } label: {
+                        Text(showStudentDetail ? "收起 ▲" : "更多 ▼")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    if showStudentDetail {
+                        Text("开启后：\n• 可在「我的课程」中标记课程日历，拍记时课程优先显示\n• AI 将额外提取知识点和名词解释，公式使用 LaTeX 表达\n• 详情页新增知识点和名词解释卡片")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
+                    }
+                }
             }
 
             if studentModeEnabled {
@@ -83,9 +101,23 @@ struct LabFeaturesView: View {
                 Toggle(isOn: $deepAssociationModeEnabled) {
                     Label("深度联想模式", systemImage: "brain.head.profile.fill")
                 }
-                .disabled(true)
             } footer: {
-                Text("对记录的文本内容进行深度语义联想，自动关联知识图谱和上下文。该功能尚未开放，敬请期待。")
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("在笔记之间发现隐藏的关联，让 Notiee 帮你串联知识。")
+                    Button {
+                        withAnimation { showDeepAssociationDetail.toggle() }
+                    } label: {
+                        Text(showDeepAssociationDetail ? "收起 ▲" : "更多 ▼")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    if showDeepAssociationDetail {
+                        Text("开启后：\n• 笔记续篇检测：同课程相邻时间的笔记自动提示关联\n• 相关内容推荐：详情页底部展示相关历史笔记\n• 后续将支持知识图谱和语义搜索")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.top, 4)
+                    }
+                }
             }
 
             Section {

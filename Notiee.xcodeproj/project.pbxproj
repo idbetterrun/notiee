@@ -70,6 +70,7 @@
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
 		4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */; };
 		CCDDEEFF0011223344556677 /* CourseCalendarSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */; };
+		AABBCCDD1122334455667788 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCCBBAA5544332211770088 /* LoginView.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
 		5912A267C9D93191494E0848 /* CaptureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
@@ -159,6 +160,7 @@
 		0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNImportPreviewSheet.swift; sourceTree = "<group>"; };
 		ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PDFPreviewView.swift; sourceTree = "<group>"; };
 		FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseCalendarSelectionView.swift; sourceTree = "<group>"; };
+		DDCCBBAA5544332211770088 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		100000000000000000000001 /* NotieeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeApp.swift; sourceTree = "<group>"; };
 		100000000000000000000002 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		100000000000000000000003 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
@@ -423,6 +425,7 @@
 				56C541D6F62CB3492461A94D /* AboutNotieeView.swift */,
 				ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */,
 				FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */,
+				DDCCBBAA5544332211770088 /* LoginView.swift */,
 				7F8B25934CD853078C1F734F /* WelcomeView.swift */,
 				1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */,
 			);
@@ -790,6 +793,7 @@
 				CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */,
 				4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */,
 				CCDDEEFF0011223344556677 /* CourseCalendarSelectionView.swift in Sources */,
+				AABBCCDD1122334455667788 /* LoginView.swift in Sources */,
 				7BCB519E902B48AEF17A32D7 /* NotieeCameraIntent.swift in Sources */,
 				24F2845FDFFF93615EC5CF3B /* WelcomeView.swift in Sources */,
 				94811252E3D82186A10F0595 /* WhatsNewView.swift in Sources */,
