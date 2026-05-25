@@ -9,6 +9,8 @@ struct LabFeaturesView: View {
     
     @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
     @AppStorage("notiee.studentMode") private var studentModeEnabled = false
+    @AppStorage("labFullVisionModeEnabled") private var fullVisionModeEnabled = false
+    @AppStorage("labDeepAssociationModeEnabled") private var deepAssociationModeEnabled = false
     
     var body: some View {
         Form {
@@ -48,6 +50,33 @@ struct LabFeaturesView: View {
             }
             
             Section {
+                HStack {
+                    Toggle(isOn: $fullVisionModeEnabled) {
+                        HStack(spacing: 6) {
+                            Label("全功能视觉模式", systemImage: "eye.fill")
+                            Text("Beta")
+                                .font(.caption2.weight(.bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Color.orange.gradient, in: Capsule())
+                        }
+                    }
+                }
+            } footer: {
+                Text("开启后视觉模型将对图片进行全方位描述，包括文字和非文字信息（如物体、场景、图表等），而非仅进行 OCR 提取。")
+            }
+
+            Section {
+                Toggle(isOn: $deepAssociationModeEnabled) {
+                    Label("深度联想模式", systemImage: "brain.head.profile.fill")
+                }
+                .disabled(true)
+            } footer: {
+                Text("对记录的文本内容进行深度语义联想，自动关联知识图谱和上下文。该功能尚未开放，敬请期待。")
+            }
+
+            Section {
                 Button {
                     showingDocumentPicker = true
                 } label: {
@@ -67,82 +96,71 @@ struct LabFeaturesView: View {
                         Label("iCloud 同步", systemImage: "icloud.and.arrow.up")
                         Spacer()
                         if let date = iCloudService.lastSyncDate {
-                            Text("上次同步：" + date.formatted(.relative(presentation: .numeric)))
+                            Text(date.formatted(.relative(presentation: .numeric)))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Menu {
+                            Button {
+                                syncResultMessage = nil
+                                Task {
+                                    do {
+                                        let count = try await iCloudService.uploadAllRecords(store: store)
+                                        syncResultMessage = "✓ 已上传 \(count) 条记录"
+                                    } catch {
+                                        syncResultMessage = error.localizedDescription
+                                    }
+                                }
+                            } label: {
+                                Label("上传同步", systemImage: "arrow.up.doc.fill")
+                            }
+                            Button {
+                                syncResultMessage = nil
+                                Task {
+                                    do {
+                                        let count = try await iCloudService.downloadAndMerge(store: store)
+                                        syncResultMessage = "✓ 已下载合并 \(count) 条记录"
+                                    } catch {
+                                        syncResultMessage = error.localizedDescription
+                                    }
+                                }
+                            } label: {
+                                Label("下载同步", systemImage: "arrow.down.doc.fill")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle.fill")
+                                .foregroundColor(.blue)
+                        }
+                        .disabled(iCloudService.isSyncing)
+                    }
+
+                    if iCloudService.isSyncing {
+                        HStack {
+                            ProgressView()
+                                .padding(.trailing, 6)
+                            Text("同步中...")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
-                    
+
                     if let message = syncResultMessage {
                         Text(message)
                             .font(.caption)
                             .foregroundColor(message.hasPrefix("✓") ? .green : .red)
-                            .padding(.vertical, 4)
                     }
-
-                    Button {
-                        syncResultMessage = nil
-                        Task {
-                            do {
-                                let count = try await iCloudService.uploadAllRecords(store: store)
-                                syncResultMessage = "✓ 成功上传 \(count) 条记录"
-                            } catch {
-                                syncResultMessage = error.localizedDescription
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            if iCloudService.isSyncing {
-                                ProgressView()
-                                    .padding(.trailing, 4)
-                            }
-                            Text("上传同步")
-                            Spacer()
-                            Image(systemName: "arrow.up.doc.fill")
-                        }
-                    }
-                    .disabled(iCloudService.isSyncing)
-
-                    Button {
-                        syncResultMessage = nil
-                        Task {
-                            do {
-                                let count = try await iCloudService.downloadAndMerge(store: store)
-                                syncResultMessage = "✓ 成功下载合并 \(count) 条记录"
-                            } catch {
-                                syncResultMessage = error.localizedDescription
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            if iCloudService.isSyncing {
-                                ProgressView()
-                                    .padding(.trailing, 4)
-                            }
-                            Text("下载同步")
-                            Spacer()
-                            Image(systemName: "arrow.down.doc.fill")
-                        }
-                    }
-                    .disabled(iCloudService.isSyncing)
                 } else {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Label("iCloud 同步不可用", systemImage: "icloud.slash")
-                            Spacer()
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                                .font(.caption)
-                        }
-                        .foregroundColor(.secondary)
-                        
-                        Text("需要 Apple Developer Program 付费账号（$99/年）才能使用 iCloud 同步。请改用「备份与恢复」页面通过 AirDrop 在设备间传输。")
+                    HStack {
+                        Label("iCloud 同步", systemImage: "icloud.slash")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("不可用")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
             } footer: {
-                Text("通过 iCloud Drive 在设备间同步记录。使用 UUID 去重，editedAt 版本比较解决冲突。")
+                Text(iCloudService.isAvailable() ? "通过 iCloud Drive 在设备间同步记录。" : "需要 Apple Developer Program 付费账号才能使用。请改用「备份与恢复」通过 AirDrop 传输。")
             }
         }
         .navigationTitle("实验室")

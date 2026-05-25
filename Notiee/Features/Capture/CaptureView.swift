@@ -9,7 +9,8 @@ struct CaptureView: View {
     @State private var shutterIsPressed = false
     @State private var selectedItem: PhotosPickerItem?
     @State private var presentedRecord: NoteRecord?
-    @State private var currentZoomFactor: CGFloat = 1.0
+    @State private var gestureStartZoom: CGFloat = 1.0
+    @State private var showZoomPresets = false
 
     @MainActor
     init() {
@@ -62,6 +63,11 @@ struct CaptureView: View {
         .onDisappear {
             viewModel.onDisappear()
         }
+        .onChange(of: viewModel.cameraManager.status) { _, newStatus in
+            if newStatus == .ready {
+                gestureStartZoom = viewModel.cameraManager.currentZoomFactor
+            }
+        }
     }
 
     private var topBar: some View {
@@ -96,9 +102,7 @@ struct CaptureView: View {
                     }
                     return nil
                 }()
-                let todaySpecials = CalendarService.shared.specialDayEvents(for: viewModel.currentDate)
-                let todaySpecialTitles = Set(todaySpecials.map { $0.title })
-                
+
                 // 1. 全天事件
                 if let allDay = todayAllDay {
                     Button {
@@ -142,16 +146,13 @@ struct CaptureView: View {
                     }
                 }
                 
-                // Filter remaining: exclude pinned items, exclude holidays/birthdays unless today IS that holiday
+                // Filter remaining: exclude pinned items, exclude holiday/birthday calendar events
                 let pinnedIDs: Set<UUID?> = [todayAllDay?.id, currentNonAllDay?.id]
+                let pinnedTitles = Set([todayAllDay?.title, currentNonAllDay?.title].compactMap { $0 })
                 let remaining = deduplicated.filter { event in
                     guard !pinnedIDs.contains(event.id) else { return false }
-                    // If today IS this special event, allow it below divider too
-                    if todaySpecialTitles.contains(event.title) {
-                        return true
-                    }
-                    // Exclude other special all-day events from the list
-                    return !CalendarService.shared.isSpecialAllDayEvent(event)
+                    guard !pinnedTitles.contains(event.title) else { return false }
+                    return !CalendarService.shared.isHolidayEvent(event)
                 }
                 
                 if !remaining.isEmpty {
@@ -234,11 +235,11 @@ struct CaptureView: View {
                     .gesture(
                         MagnificationGesture()
                             .onChanged { value in
-                                viewModel.cameraManager.setZoom(factor: currentZoomFactor * value)
+                                viewModel.cameraManager.setZoom(factor: gestureStartZoom * value)
                             }
                             .onEnded { value in
-                                currentZoomFactor = max(1.0, currentZoomFactor * value)
-                                viewModel.cameraManager.setZoom(factor: currentZoomFactor)
+                                viewModel.cameraManager.setZoom(factor: gestureStartZoom * value)
+                                gestureStartZoom = viewModel.cameraManager.currentZoomFactor
                             }
                     )
             } else if viewModel.cameraManager.status == .unauthorized {
@@ -282,20 +283,34 @@ struct CaptureView: View {
                 Spacer()
             }
 
-            // Zoom Indicator
+            // Zoom Indicator with Presets Menu
             VStack {
                 Spacer()
-                Button {
-                    currentZoomFactor = 1.0
-                    viewModel.cameraManager.setZoom(factor: 1.0)
+                Menu {
+                    ForEach(viewModel.cameraManager.availableLensPresets, id: \.factor) { preset in
+                        Button {
+                            gestureStartZoom = preset.factor
+                            viewModel.cameraManager.setZoom(factor: preset.factor)
+                        } label: {
+                            HStack {
+                                Text(preset.label)
+                                Spacer()
+                                if abs(viewModel.cameraManager.currentZoomFactor - preset.factor) < 0.1 {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
                 } label: {
-                    let zoomText = currentZoomFactor == 1.0 ? "1x" : String(format: "%.1fx", currentZoomFactor)
-                    Text(zoomText)
+                    let zoom = viewModel.cameraManager.currentZoomFactor
+                    Text(viewModel.cameraManager.lensLabel(for: zoom))
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Color.black.opacity(0.6), in: Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                        .frame(minWidth: 36)
+                        .frame(height: 36)
+                        .padding(.horizontal, 8)
+                        .background(Color.black.opacity(0.6), in: Capsule())
+                        .overlay(Capsule().stroke(Color.white, lineWidth: 1))
                 }
                 .padding(.bottom, 16)
             }

@@ -12,12 +12,53 @@ final class CameraManager: NSObject, ObservableObject {
 
     @Published private(set) var status: Status = .unconfigured
     @Published private(set) var capturedImage: UIImage?
+    @Published private(set) var currentZoomFactor: CGFloat = 1.0
     @Published var flashMode: AVCaptureDevice.FlashMode = .auto
 
     let session = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
     private let sessionQueue = DispatchQueue(label: "com.notiee.camera.session")
     private var videoDevice: AVCaptureDevice?
+
+    struct LensPreset {
+        let factor: CGFloat
+        let label: String
+    }
+
+    var availableLensPresets: [LensPreset] {
+        guard let device = videoDevice else { return [LensPreset(factor: 1.0, label: "1x")] }
+        var presets: [LensPreset] = []
+        let minZoom = device.minAvailableVideoZoomFactor
+        let maxZoom = device.maxAvailableVideoZoomFactor
+
+        if minZoom < 0.9 {
+            presets.append(LensPreset(factor: minZoom * 2, label: "超广角 0.5x"))
+        }
+        presets.append(LensPreset(factor: 1.0, label: "广角 1x"))
+        if maxZoom >= 2.0 {
+            presets.append(LensPreset(factor: 2.0, label: "2x"))
+        }
+        if maxZoom >= 5.0 {
+            presets.append(LensPreset(factor: 5.0, label: "长焦 5x"))
+        } else if maxZoom >= 3.0 {
+            presets.append(LensPreset(factor: 3.0, label: "长焦 3x"))
+        }
+        if maxZoom > (presets.last?.factor ?? 2.0) {
+            let highZoom = min(maxZoom, 10.0)
+            presets.append(LensPreset(factor: highZoom, label: String(format: "%.0fx", highZoom)))
+        }
+        return presets
+    }
+
+    func lensLabel(for factor: CGFloat) -> String {
+        for preset in availableLensPresets {
+            if abs(preset.factor - factor) < 0.1 {
+                return preset.label
+            }
+        }
+        if factor <= 1.05 { return "1x" }
+        return String(format: "%.1fx", factor)
+    }
 
     func checkPermissionsAndConfigure() {
         #if targetEnvironment(simulator)
@@ -94,6 +135,7 @@ final class CameraManager: NSObject, ObservableObject {
 
             Task { @MainActor in
                 self.status = .ready
+                self.syncZoomFactor()
                 self.startSession()
             }
         }
@@ -120,11 +162,18 @@ final class CameraManager: NSObject, ObservableObject {
         guard let device = videoDevice else { return }
         do {
             try device.lockForConfiguration()
-            device.videoZoomFactor = max(device.minAvailableVideoZoomFactor, min(factor, device.maxAvailableVideoZoomFactor))
+            let clamp = max(device.minAvailableVideoZoomFactor, min(factor, device.maxAvailableVideoZoomFactor))
+            device.videoZoomFactor = clamp
             device.unlockForConfiguration()
+            currentZoomFactor = clamp
         } catch {
             print("Failed to set zoom: \(error)")
         }
+    }
+
+    func syncZoomFactor() {
+        guard let device = videoDevice else { return }
+        currentZoomFactor = device.videoZoomFactor
     }
 
     func capturePhoto() {

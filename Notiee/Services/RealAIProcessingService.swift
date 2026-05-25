@@ -70,8 +70,10 @@ struct RealAIProcessingService: AIProcessingService {
     private func callVisionModel(config: AIModelConfiguration, base64Images: [String]) async throws -> (String, Int) {
         let endpoint = config.activeEndpoint
         let protocolType = config.activeProtocol
-        
-        let prompt = Self.localizedVisionPrompt()
+
+        let isFullVision = UserDefaults.standard.bool(forKey: "labFullVisionModeEnabled")
+        let prompt = isFullVision ? Self.localizedFullVisionPrompt() : Self.localizedVisionPrompt()
+        let systemPrompt = isFullVision ? Self.localizedFullVisionSystemPrompt() : Self.localizedVisionSystemPrompt()
         
         var contentArray: [[String: Any]] = []
         for base64 in base64Images {
@@ -90,7 +92,7 @@ struct RealAIProcessingService: AIProcessingService {
         let messages: [[String: Any]] = [
             [
                 "role": "system",
-                "content": Self.localizedVisionSystemPrompt()
+                "content": systemPrompt
             ],
             [
                 "role": "user",
@@ -227,6 +229,28 @@ struct RealAIProcessingService: AIProcessingService {
             return "你是一個課堂筆記整理助手。請分析提供的圖片（可能是連續多張板書/幻燈片），提取文字，總結大綱，並識別出所有任務或待辦事項。多張圖片是按時間順序拍攝的，請綜合考慮它們的內容。以 JSON 格式輸出。"
         } else {
             return "你是一个课堂笔记整理助手。请分析提供的图片（可能是连续多张板书/幻灯片），提取文字，总结大纲，并识别出所有任务或待办事项。多张图片是按时间顺序拍摄的，请综合考虑它们的内容。以 JSON 格式输出。"
+        }
+    }
+
+    static func localizedFullVisionPrompt() -> String {
+        let lang = currentLanguage()
+        if lang == "en" {
+            return "Please describe all content in the images comprehensively, including: text content (blackboard writing, slides, captions, labels), visual elements (objects, people, scenes, charts, diagrams), color scheme, layout structure, and overall atmosphere. Do not just extract text — provide a complete visual understanding of each image. Multiple images are coherent, please integrate them holistically. Do not output any nonsense other than the description."
+        } else if lang == "zh-Hant" {
+            return "請全面描述圖片中的所有內容，包括：文字內容（板書、幻燈片、字幕、標籤等）、視覺元素（物體、人物、場景、圖表、示意圖等）、配色方案、佈局結構以及整體氛圍。不要僅僅提取文字——請提供對每張圖片的完整視覺理解。多張圖片是連貫的，請綜合描述。不要輸出任何除了描述以外的廢話。"
+        } else {
+            return "请全面描述图片中的所有内容，包括：文字内容（板书、幻灯片、字幕、标签等）、视觉元素（物体、人物、场景、图表、示意图等）、配色方案、布局结构以及整体氛围。不要仅仅提取文字——请提供对每张图片的完整视觉理解。多张图片是连贯的，请综合描述。不要输出任何除了描述以外的废话。"
+        }
+    }
+
+    static func localizedFullVisionSystemPrompt() -> String {
+        let lang = currentLanguage()
+        if lang == "en" {
+            return "You are a comprehensive visual analysis assistant. Please examine the provided images in full detail, describing everything you see: all text present, all objects and their spatial relationships, colors, lighting, the overall scene, any charts or diagrams and what they represent, and the mood or atmosphere of the setting. Multiple images are taken chronologically, please consider them as a coherent sequence."
+        } else if lang == "zh-Hant" {
+            return "你是一個全面的視覺分析助手。請詳細審視提供的圖片，描述你所看到的一切：所有文字內容、所有物體及其空間關係、色彩、光影、整體場景、任何圖表或示意圖及其含義、以及場景的氛圍。多張圖片是按時間順序拍攝的，請將它們視為一個連貫的序列來綜合描述。"
+        } else {
+            return "你是一个全面的视觉分析助手。请详细审视提供的图片，描述你所看到的一切：所有文字内容、所有物体及其空间关系、色彩、光影、整体场景、任何图表或示意图及其含义、以及场景的氛围。多张图片是按时间顺序拍摄的，请将它们视为一个连贯的序列来综合描述。"
         }
     }
     

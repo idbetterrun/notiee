@@ -168,6 +168,30 @@ final class CalendarService: ObservableObject {
         return solarTerms.contains(where: { title.contains($0) })
     }
 
+    func isHolidayCalendar(_ calendar: EKCalendar) -> Bool {
+        if calendar.type == .birthday { return true }
+        let title = calendar.title
+        let holidayKeywords = ["节", "假日", "Holiday", "节日", "假期", "節", "祝日", "放假", "休日", "holiday", "Holidays", "节假日"]
+        for kw in holidayKeywords {
+            if title.contains(kw) { return true }
+        }
+        if calendar.type == .subscription {
+            for kw in holidayKeywords {
+                if title.lowercased().contains(kw.lowercased()) { return true }
+            }
+        }
+        return false
+    }
+
+    func isHolidayEvent(_ event: ScheduledEvent) -> Bool {
+        guard event.isAllDay,
+              case .systemCalendar(let identifier) = event.source else { return false }
+
+        guard let ekEvent = eventStore.event(withIdentifier: identifier),
+              let ekCal = ekEvent.calendar else { return false }
+        return isHolidayCalendar(ekCal)
+    }
+
     func holidayOrBirthdayText(for date: Date) -> String? {
         specialDayEvents(for: date).first?.title
     }

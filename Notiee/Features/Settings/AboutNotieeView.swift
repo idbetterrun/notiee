@@ -28,23 +28,13 @@ struct AboutNotieeView: View {
                 // Links Section
                 VStack(spacing: 0) {
                     NavigationLink {
-                        ScrollView {
-                            Text("用户协议内容 (在此处放置完整的用户协议)")
-                                .padding()
-                        }
-                        .navigationTitle("用户协议")
-                        .navigationBarTitleDisplayMode(.inline)
+                        legalPDFView(base: "UserAgreement", title: "用户协议")
                     } label: {
                         ActionRow(title: "用户协议")
                     }
                     Divider().padding(.leading)
                     NavigationLink {
-                        ScrollView {
-                            Text("隐私政策内容 (在此处放置完整的隐私政策)")
-                                .padding()
-                        }
-                        .navigationTitle("隐私政策")
-                        .navigationBarTitleDisplayMode(.inline)
+                        legalPDFView(base: "PrivacyPolicy", title: "隐私政策")
                     } label: {
                         ActionRow(title: "隐私政策")
                     }
@@ -105,6 +95,61 @@ struct AboutNotieeView: View {
         }
 
         return "\(version) (\(build))"
+    }
+
+    private var legalLocaleSuffix: String {
+        let lang = UserDefaults.standard.string(forKey: "notiee.language") ?? "system"
+        switch lang {
+        case "zh-Hans": return "zh-Hans"
+        case "en": return "en"
+        case "zh-Hant":
+            let region = Locale.current.region?.identifier ?? ""
+            if region == "TW" { return "zh-Hant-TW" }
+            return "zh-Hant-HK"
+        default:
+            let current = Locale.current
+            let region = current.region?.identifier ?? ""
+            let langCode = current.language.languageCode?.identifier ?? ""
+            let script = current.language.script?.identifier ?? ""
+
+            if langCode == "zh", script == "Hant" {
+                if region == "TW" { return "zh-Hant-TW" }
+                return "zh-Hant-HK"
+            }
+            if langCode == "zh" { return "zh-Hans" }
+            if langCode == "en" { return "en" }
+            return "zh-Hans"
+        }
+    }
+
+    private func legalPDFURL(base: String) -> URL? {
+        let suffix = legalLocaleSuffix
+        if let url = Bundle.main.url(forResource: "\(base)_\(suffix)", withExtension: "pdf") {
+            return url
+        }
+        if suffix != "zh-Hans",
+           let fallback = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "pdf") {
+            return fallback
+        }
+        return nil
+    }
+
+    private func legalPDFView(base: String, title: String) -> some View {
+        Group {
+            if let url = legalPDFURL(base: base) {
+                PDFPreviewView(url: url)
+                    .ignoresSafeArea(edges: .bottom)
+            } else {
+                ScrollView {
+                    Text("无法加载\(title)")
+                        .foregroundColor(.secondary)
+                        .padding()
+                }
+            }
+        }
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color(uiColor: .systemGroupedBackground))
     }
 }
 

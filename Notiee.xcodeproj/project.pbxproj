@@ -20,6 +20,16 @@
 		18B83FD92FC0A057002A7EC9 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B83FD82FC0A057002A7EC9 /* WidgetKit.framework */; };
 		18B83FDB2FC0A057002A7EC9 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B83FDA2FC0A057002A7EC9 /* SwiftUI.framework */; };
 		18B83FE82FC0A058002A7EC9 /* NotieeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		18E20B0B2FC499F9006F3FCE /* OnboardingKit in Frameworks */ = {isa = PBXBuildFile; productRef = CFB8ABB57A1D5E1E078986D3 /* OnboardingKit */; };
+		18E20B0C2FC499F9006F3FCE /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = FDC1C7CC6F9DE204313FBCB5 /* WhatsNewKit */; };
+		18E20B1F2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-HK.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B192FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-HK.pdf */; };
+		18E20B202FC4A215006F3FCE /* UserAgreement_zh-Hant-TW.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1E2FC4A215006F3FCE /* UserAgreement_zh-Hant-TW.pdf */; };
+		18E20B212FC4A215006F3FCE /* UserAgreement_zh-Hans.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1C2FC4A215006F3FCE /* UserAgreement_zh-Hans.pdf */; };
+		18E20B222FC4A215006F3FCE /* PrivacyPolicy_en.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B172FC4A215006F3FCE /* PrivacyPolicy_en.pdf */; };
+		18E20B232FC4A215006F3FCE /* UserAgreement_en.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1B2FC4A215006F3FCE /* UserAgreement_en.pdf */; };
+		18E20B242FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1D2FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf */; };
+		18E20B252FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1A2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf */; };
+		18E20B262FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B182FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf */; };
 		200000000000000000000001 /* NotieeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000001 /* NotieeApp.swift */; };
 		200000000000000000000002 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000002 /* RootTabView.swift */; };
 		200000000000000000000003 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* TodayView.swift */; };
@@ -58,6 +68,7 @@
 		37F3859728859E02F78A285B /* TMNImportPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */; };
 		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
+		4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
 		5912A267C9D93191494E0848 /* CaptureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
@@ -145,6 +156,7 @@
 		000000000000000000000006 /* Notiee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notiee.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000007 /* NotieeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NotieeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNImportPreviewSheet.swift; sourceTree = "<group>"; };
+		ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PDFPreviewView.swift; sourceTree = "<group>"; };
 		100000000000000000000001 /* NotieeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeApp.swift; sourceTree = "<group>"; };
 		100000000000000000000002 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		100000000000000000000003 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
@@ -183,6 +195,14 @@
 		18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotieeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		18B83FD82FC0A057002A7EC9 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		18B83FDA2FC0A057002A7EC9 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		18E20B172FC4A215006F3FCE /* PrivacyPolicy_en.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = PrivacyPolicy_en.pdf; sourceTree = "<group>"; };
+		18E20B182FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "PrivacyPolicy_zh-Hans.pdf"; sourceTree = "<group>"; };
+		18E20B192FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-HK.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "PrivacyPolicy_zh-Hant-HK.pdf"; sourceTree = "<group>"; };
+		18E20B1A2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "PrivacyPolicy_zh-Hant-TW.pdf"; sourceTree = "<group>"; };
+		18E20B1B2FC4A215006F3FCE /* UserAgreement_en.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = UserAgreement_en.pdf; sourceTree = "<group>"; };
+		18E20B1C2FC4A215006F3FCE /* UserAgreement_zh-Hans.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "UserAgreement_zh-Hans.pdf"; sourceTree = "<group>"; };
+		18E20B1D2FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "UserAgreement_zh-Hant-HK.pdf"; sourceTree = "<group>"; };
+		18E20B1E2FC4A215006F3FCE /* UserAgreement_zh-Hant-TW.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "UserAgreement_zh-Hant-TW.pdf"; sourceTree = "<group>"; };
 		1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LabFeaturesView.swift; sourceTree = "<group>"; };
 		3E16D916C859E3FB8DD53D5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -218,7 +238,7 @@
 		ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventTagStore.swift; sourceTree = "<group>"; };
 		ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolder.swift; sourceTree = "<group>"; };
-		B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = NotieeCaptureExtension.appex; path = NotieeCaptureExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotieeCaptureExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ICloudSyncService.swift; sourceTree = "<group>"; };
 		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
 		BCEEAF1F66C49780FE20324C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = NotieeCaptureExtension/Info.plist; sourceTree = "<group>"; };
@@ -232,7 +252,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		18B83FEC2FC0A058002A7EC9 /* Exceptions for "NotieeWidget" folder in "NotieeWidgetExtension" target */ = {
+		18B83FEC2FC0A058002A7EC9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -242,18 +262,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		18B83FDC2FC0A057002A7EC9 /* NotieeWidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				18B83FEC2FC0A058002A7EC9 /* Exceptions for "NotieeWidget" folder in "NotieeWidgetExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = NotieeWidget;
-			sourceTree = "<group>";
-		};
+		18B83FDC2FC0A057002A7EC9 /* NotieeWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (18B83FEC2FC0A058002A7EC9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = NotieeWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -270,6 +279,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18E20B0C2FC499F9006F3FCE /* WhatsNewKit in Frameworks */,
+				18E20B0B2FC499F9006F3FCE /* OnboardingKit in Frameworks */,
 				18496E392FC1FC8100861F50 /* MarkdownUI in Frameworks */,
 				18496E382FC1FC8100861F50 /* ZIPFoundation in Frameworks */,
 			);
@@ -327,6 +338,14 @@
 				000000000000000000000015 /* Models */,
 				000000000000000000000017 /* Services */,
 				A3896CF3167D274BE7DF3767 /* Localizable.strings */,
+				18E20B172FC4A215006F3FCE /* PrivacyPolicy_en.pdf */,
+				18E20B182FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf */,
+				18E20B192FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-HK.pdf */,
+				18E20B1A2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf */,
+				18E20B1B2FC4A215006F3FCE /* UserAgreement_en.pdf */,
+				18E20B1C2FC4A215006F3FCE /* UserAgreement_zh-Hans.pdf */,
+				18E20B1D2FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf */,
+				18E20B1E2FC4A215006F3FCE /* UserAgreement_zh-Hant-TW.pdf */,
 			);
 			path = Notiee;
 			sourceTree = "<group>";
@@ -400,6 +419,7 @@
 				9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */,
 				480559344177345371C21F7A /* BackupRestoreView.swift */,
 				56C541D6F62CB3492461A94D /* AboutNotieeView.swift */,
+				ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */,
 				7F8B25934CD853078C1F734F /* WelcomeView.swift */,
 				1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */,
 			);
@@ -659,6 +679,14 @@
 			files = (
 				18496E452FC1FCAB00861F50 /* Notiee.icon in Resources */,
 				18496E462FC1FCAB00861F50 /* Notiee-iOS.png in Resources */,
+				18E20B1F2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-HK.pdf in Resources */,
+				18E20B202FC4A215006F3FCE /* UserAgreement_zh-Hant-TW.pdf in Resources */,
+				18E20B212FC4A215006F3FCE /* UserAgreement_zh-Hans.pdf in Resources */,
+				18E20B222FC4A215006F3FCE /* PrivacyPolicy_en.pdf in Resources */,
+				18E20B232FC4A215006F3FCE /* UserAgreement_en.pdf in Resources */,
+				18E20B242FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf in Resources */,
+				18E20B252FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf in Resources */,
+				18E20B262FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf in Resources */,
 				9590DC1818F61595BA432B24 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -757,6 +785,7 @@
 				88CA43871198658141B9E253 /* HighlightedText.swift in Sources */,
 				C6388873ADA1EDB1BA724246 /* BackupRestoreView.swift in Sources */,
 				CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */,
+				4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */,
 				7BCB519E902B48AEF17A32D7 /* NotieeCameraIntent.swift in Sources */,
 				24F2845FDFFF93615EC5CF3B /* WelcomeView.swift in Sources */,
 				94811252E3D82186A10F0595 /* WhatsNewView.swift in Sources */,
