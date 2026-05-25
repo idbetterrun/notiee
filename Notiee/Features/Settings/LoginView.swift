@@ -58,9 +58,34 @@ struct LoginView: View {
                         }
 
                         HStack(spacing: 20) {
-                            thirdPartyButton(icon: "weixin", label: "微信", color: .green)
-                            thirdPartyButton(icon: "apple.logo", label: "Apple", color: .primary)
-                            thirdPartyButton(icon: "g.circle.fill", label: "Google", color: .red)
+                            thirdPartyButton(label: "微信", color: .green) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.green)
+                                        .frame(width: 32, height: 32)
+                                    Text("微")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            thirdPartyButton(label: "Apple", color: .black) {
+                                Image(systemName: "apple.logo")
+                                    .font(.system(size: 22, weight: .medium))
+                                    .foregroundColor(.white)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.black, in: RoundedRectangle(cornerRadius: 8))
+                            }
+                            thirdPartyButton(label: "Google", color: .red) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.white)
+                                        .frame(width: 32, height: 32)
+                                        .shadow(color: .black.opacity(0.1), radius: 1, y: 1)
+                                    Text("G")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.red)
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal, 32)
@@ -150,16 +175,12 @@ struct LoginView: View {
         }
     }
 
-    private func thirdPartyButton(icon: String, label: String, color: Color) -> some View {
+    private func thirdPartyButton(label: String, color: Color, @ViewBuilder icon: () -> some View) -> some View {
         Button {
             attemptLogin()
         } label: {
             VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(color)
-                    .frame(width: 52, height: 52)
-                    .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
+                icon()
                 Text(label)
                     .font(.caption2)
                     .foregroundColor(.secondary)

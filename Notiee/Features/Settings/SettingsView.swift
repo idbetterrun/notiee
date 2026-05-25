@@ -30,10 +30,6 @@ struct MeView: View {
                             }
 
                             Spacer()
-
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                                .font(.footnote)
                         }
                         .padding(.vertical, 8)
                     }
