@@ -115,6 +115,8 @@ struct TMNContent: Codable {
         let summary: String?
         let detailedContent: String?
         let todos: [TodoData]?
+        let keyPoints: [String]?
+        let definitions: [KeyDefinitionData]?
         let modelsUsed: [String]?
         let tokenUsage: Int?
         
@@ -124,9 +126,16 @@ struct TMNContent: Codable {
             case summary
             case detailedContent = "detailed_content"
             case todos
+            case keyPoints = "key_points"
+            case definitions
             case modelsUsed = "models_used"
             case tokenUsage = "token_usage"
         }
+    }
+
+    struct KeyDefinitionData: Codable {
+        let term: String
+        let explanation: String
     }
     
     struct TodoData: Codable {

@@ -41,6 +41,8 @@ struct RealAIProcessingService: AIProcessingService {
             summary: result.summary,
             detailedContent: result.detailedContent,
             todos: result.todos,
+            keyPoints: result.keyPoints,
+            definitions: result.definitions,
             modelsUsed: result.modelsUsed,
             tokenUsage: visionTokens + textTokens
         )
@@ -72,8 +74,14 @@ struct RealAIProcessingService: AIProcessingService {
         let protocolType = config.activeProtocol
 
         let isFullVision = UserDefaults.standard.bool(forKey: "labFullVisionModeEnabled")
-        let prompt = isFullVision ? Self.localizedFullVisionPrompt() : Self.localizedVisionPrompt()
-        let systemPrompt = isFullVision ? Self.localizedFullVisionSystemPrompt() : Self.localizedVisionSystemPrompt()
+        let isStudentMode = UserDefaults.standard.bool(forKey: "notiee.studentMode")
+        var prompt = isFullVision ? Self.localizedFullVisionPrompt() : Self.localizedVisionPrompt()
+        var systemPrompt = isFullVision ? Self.localizedFullVisionSystemPrompt() : Self.localizedVisionSystemPrompt()
+
+        if isStudentMode {
+            prompt += Self.localizedStudentVisionSuffix()
+            systemPrompt += Self.localizedStudentSystemSuffix()
+        }
         
         var contentArray: [[String: Any]] = []
         for base64 in base64Images {
@@ -149,12 +157,14 @@ struct RealAIProcessingService: AIProcessingService {
         let enableSummary = settingsStore.loadBool(forKey: "notiee.aiEnableSummary", defaultValue: true)
         let enableDetailedContent = settingsStore.loadBool(forKey: "notiee.aiEnableDetailedContent", defaultValue: true)
         let enableTodos = settingsStore.loadBool(forKey: "notiee.aiEnableTodos", defaultValue: true)
-        
+        let isStudentMode = settingsStore.loadBool(forKey: "notiee.studentMode", defaultValue: false)
+
         let prompt = Self.localizedTextPrompt(
             ocrText: ocrText,
             enableSummary: enableSummary,
             enableDetailedContent: enableDetailedContent,
-            enableTodos: enableTodos
+            enableTodos: enableTodos,
+            isStudentMode: isStudentMode
         )
         
         let responseJSON: String
@@ -184,6 +194,13 @@ struct RealAIProcessingService: AIProcessingService {
             let summary: String
             let detailedContent: String?
             let todos: [String]
+            let keyPoints: [String]?
+            let definitions: [ParsedDefinition]?
+        }
+
+        struct ParsedDefinition: Decodable {
+            let term: String
+            let explanation: String
         }
         
         do {
@@ -194,6 +211,8 @@ struct RealAIProcessingService: AIProcessingService {
                 summary: parsed.summary,
                 detailedContent: parsed.detailedContent ?? "无详细内容",
                 todos: parsed.todos,
+                keyPoints: parsed.keyPoints ?? [],
+                definitions: (parsed.definitions ?? []).map { KeyDefinition(term: $0.term, explanation: $0.explanation) },
                 modelsUsed: [visionConfig.modelName, config.modelName],
                 tokenUsage: 0
             )
@@ -253,8 +272,30 @@ struct RealAIProcessingService: AIProcessingService {
             return "你是一个全面的视觉分析助手。请详细审视提供的图片，描述你所看到的一切：所有文字内容、所有物体及其空间关系、色彩、光影、整体场景、任何图表或示意图及其含义、以及场景的氛围。多张图片是按时间顺序拍摄的，请将它们视为一个连贯的序列来综合描述。"
         }
     }
+
+    static func localizedStudentVisionSuffix() -> String {
+        let lang = currentLanguage()
+        if lang == "en" {
+            return "\n\nIMPORTANT: Pay special attention to mathematical formulas, theorems, definitions, and data relationships in charts. Express formulas using LaTeX syntax (wrapped with $$ for display or $ for inline)."
+        } else if lang == "zh-Hant" {
+            return "\n\n特別注意：重點關注數學公式、定理、定義以及圖表中的數據關係。對公式使用 LaTeX 語法表達（顯示公式用 $$ 包裹，行內公式用 $ 包裹）。"
+        } else {
+            return "\n\n特别注意：重点关注数学公式、定理、定义以及图表中的数据关系。对公式使用 LaTeX 语法表达（显示公式用 $$ 包裹，行内公式用 $ 包裹）。"
+        }
+    }
+
+    static func localizedStudentSystemSuffix() -> String {
+        let lang = currentLanguage()
+        if lang == "en" {
+            return " When presenting formulas, always use LaTeX notation (e.g., $$E=mc^2$$ for display formulas, $x^2+y^2=r^2$ for inline formulas)."
+        } else if lang == "zh-Hant" {
+            return " 呈現公式時，請始終使用 LaTeX 表示法（例如顯示公式用 $$E=mc^2$$，行內公式用 $x^2+y^2=r^2$）。"
+        } else {
+            return " 呈现公式时，请始终使用 LaTeX 表示法（例如显示公式用 $$E=mc^2$$，行内公式用 $x^2+y^2=r^2$）。"
+        }
+    }
     
-    static func localizedTextPrompt(ocrText: String, enableSummary: Bool, enableDetailedContent: Bool, enableTodos: Bool) -> String {
+    static func localizedTextPrompt(ocrText: String, enableSummary: Bool, enableDetailedContent: Bool, enableTodos: Bool, isStudentMode: Bool) -> String {
         let lang = currentLanguage()
         if lang == "en" {
             return """
@@ -267,6 +308,7 @@ struct RealAIProcessingService: AIProcessingService {
             \(enableSummary ? "2. \"summary\": Extract a brief summary of the content (under 100 words)." : "")
             \(enableDetailedContent ? "3. \"detailedContent\": Reformat the provided OCR text, fix typos, and organize it into coherent, readable detailed content (if it's class notes or meeting minutes, use paragraphs and bullet points for core takeaways). If output is in English, keep it under 2500 characters." : "")
             \(enableTodos ? "4. \"todos\": If the text contains any tasks or action items to execute, extract them as an array of strings (if none, return an empty array [])." : "")
+            \(isStudentMode ? "5. \"keyPoints\": Extract 3-5 core knowledge points or key concepts as an array of strings.\n6. \"definitions\": Extract key terminology and their explanations as [{ \"term\": \"term\", \"explanation\": \"explanation\" }] array (empty array [] if none)." : "")
 
             Here is the extracted text content:
             \(ocrText)
@@ -282,6 +324,7 @@ struct RealAIProcessingService: AIProcessingService {
             \(enableSummary ? "2. \"summary\": 提取出簡短的內容摘要（控制在200字以內）。" : "")
             \(enableDetailedContent ? "3. \"detailedContent\": 將提供的 OCR 文本重新排版，修正錯別字，梳理成連貫且易於閱讀的詳細內容（如果是課堂筆記或會議記錄，請分段落、列出核心要點）。注意：最長不要超過 500 字。" : "")
             \(enableTodos ? "4. \"todos\": 如果文本中包含任何需要執行的任務或待辦事項，請提取為一個字符串數組（如果沒有，則返回空數組 []）。" : "")
+            \(isStudentMode ? "5. \"keyPoints\": 提取文本中的3-5個核心知識點或重點概念，返回字符串數組。\n6. \"definitions\": 提取文本中的關鍵術語及其解釋，返回 [{ \"term\": \"術語\", \"explanation\": \"解釋\" }] 數組（如果沒有則為空數組 []）。" : "")
 
             以下是提取的文字內容：
             \(ocrText)
@@ -297,6 +340,7 @@ struct RealAIProcessingService: AIProcessingService {
             \(enableSummary ? "2. \"summary\": 提取出简短的内容摘要（控制在200字以内）。" : "")
             \(enableDetailedContent ? "3. \"detailedContent\": 将提供的 OCR 文本重新排版，修正错别字，梳理成连贯且易于阅读的详细内容（如果是课堂笔记或会议记录，请分段落、列出核心要点）。注意：最长不要超过 500 字。" : "")
             \(enableTodos ? "4. \"todos\": 如果文本中包含任何需要执行的任务或待办事项，请提取为一个字符串数组（如果没有，则返回空数组 []）。" : "")
+            \(isStudentMode ? "5. \"keyPoints\": 提取文本中的3-5个核心知识点或重点概念，返回字符串数组。\n6. \"definitions\": 提取文本中的关键术语及其解释，返回 [{ \"term\": \"术语\", \"explanation\": \"解释\" }] 数组（如果没有则为空数组 []）。" : "")
 
             以下是提取的文字内容：
             \(ocrText)

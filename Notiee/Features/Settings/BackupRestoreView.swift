@@ -255,6 +255,8 @@ struct BackupImportPreviewSheet: View {
                 summary: data.record.summary,
                 detailedContent: data.record.detailedContent,
                 processingState: data.record.processingState,
+                keyPoints: data.record.keyPoints,
+                definitions: data.record.definitions,
                 isFavorite: data.record.isFavorite,
                 isDeleted: data.record.isDeleted,
                 editedAt: data.record.editedAt,

@@ -192,6 +192,41 @@ final class CalendarService: ObservableObject {
         return isHolidayCalendar(ekCal)
     }
 
+    func courseCalendarIDs() -> Set<String> {
+        guard let data = UserDefaults.standard.data(forKey: "notiee.courseCalendarIdentifiers"),
+              let ids = try? JSONDecoder().decode(Set<String>.self, from: data) else {
+            return []
+        }
+        return ids
+    }
+
+    func saveCourseCalendarIDs(_ ids: Set<String>) {
+        if let data = try? JSONEncoder().encode(ids) {
+            UserDefaults.standard.set(data, forKey: "notiee.courseCalendarIdentifiers")
+        }
+    }
+
+    func isCourseCalendar(_ calendar: EKCalendar) -> Bool {
+        courseCalendarIDs().contains(calendar.calendarIdentifier)
+    }
+
+    func toggleCourseCalendar(_ identifier: String) {
+        var ids = courseCalendarIDs()
+        if ids.contains(identifier) {
+            ids.remove(identifier)
+        } else {
+            ids.insert(identifier)
+        }
+        saveCourseCalendarIDs(ids)
+    }
+
+    func isCourseEvent(_ event: ScheduledEvent) -> Bool {
+        guard case .systemCalendar(let identifier) = event.source,
+              let ekEvent = eventStore.event(withIdentifier: identifier),
+              let ekCal = ekEvent.calendar else { return false }
+        return isCourseCalendar(ekCal)
+    }
+
     func holidayOrBirthdayText(for date: Date) -> String? {
         specialDayEvents(for: date).first?.title
     }

@@ -130,6 +130,8 @@ final class ICloudSyncService: ObservableObject {
                         updated.detailedContent = record.detailedContent
                         updated.processingState = record.processingState
                         updated.editedAt = record.editedAt
+                        updated.keyPoints = record.keyPoints
+                        updated.definitions = record.definitions
                         updated.modelsUsed = record.modelsUsed
                         updated.tokenUsage = record.tokenUsage
                         updated.deviceName = record.deviceName

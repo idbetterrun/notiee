@@ -48,7 +48,7 @@ final class TMNImportService {
         let newRecord = NoteRecord(
             id: UUID(),
             eventID: nil,
-            folderID: nil, // imported records go to uncategorized
+            folderID: nil,
             capturedAt: capturedAt,
             localImagePaths: localImagePaths,
             title: content.title,
@@ -56,6 +56,8 @@ final class TMNImportService {
             summary: aiData?.summary ?? "",
             detailedContent: aiData?.detailedContent ?? "",
             processingState: processingState,
+            keyPoints: aiData?.keyPoints ?? [],
+            definitions: (aiData?.definitions ?? []).map { KeyDefinition(term: $0.term, explanation: $0.explanation) },
             isFavorite: false,
             isDeleted: false,
             editedAt: nil,

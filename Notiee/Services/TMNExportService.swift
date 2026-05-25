@@ -48,6 +48,8 @@ final class TMNExportService {
             summary: record.summary.isEmpty ? nil : record.summary,
             detailedContent: record.detailedContent,
             todos: todos.isEmpty ? nil : todos,
+            keyPoints: record.keyPoints.isEmpty ? nil : record.keyPoints,
+            definitions: record.definitions.isEmpty ? nil : record.definitions.map { TMNContent.KeyDefinitionData(term: $0.term, explanation: $0.explanation) },
             modelsUsed: record.modelsUsed,
             tokenUsage: record.tokenUsage
         )

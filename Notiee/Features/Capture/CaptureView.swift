@@ -154,10 +154,34 @@ struct CaptureView: View {
                     guard !pinnedTitles.contains(event.title) else { return false }
                     return !CalendarService.shared.isHolidayEvent(event)
                 }
-                
-                if !remaining.isEmpty {
-                    Divider()
-                    ForEach(remaining) { event in
+
+                let isStudentMode = UserDefaults.standard.bool(forKey: "notiee.studentMode")
+                let courseEvents = isStudentMode ? remaining.filter { CalendarService.shared.isCourseEvent($0) } : []
+                let otherEvents = isStudentMode ? remaining.filter { !CalendarService.shared.isCourseEvent($0) } : remaining
+
+                if !courseEvents.isEmpty {
+                    if !pinnedIDs.isEmpty { Divider() }
+                    Text("📖 我的课程")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    ForEach(courseEvents) { event in
+                        Button {
+                            viewModel.selectedEventID = event.id
+                        } label: {
+                            HStack {
+                                Text(event.title)
+                                Spacer()
+                                if viewModel.selectedEventID == event.id {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if !otherEvents.isEmpty {
+                    if !pinnedIDs.isEmpty || !courseEvents.isEmpty { Divider() }
+                    ForEach(otherEvents) { event in
                         Button {
                             viewModel.selectedEventID = event.id
                         } label: {

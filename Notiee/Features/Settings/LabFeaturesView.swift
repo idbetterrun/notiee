@@ -48,6 +48,18 @@ struct LabFeaturesView: View {
             } footer: {
                 Text("专为学生群体设计的功能模式。")
             }
+
+            if studentModeEnabled {
+                Section {
+                    NavigationLink {
+                        CourseCalendarSelectionView()
+                    } label: {
+                        Label("我的课程", systemImage: "books.vertical.fill")
+                    }
+                } footer: {
+                    Text("标记课程日历后，拍记时课程日程将优先显示。")
+                }
+            }
             
             Section {
                 HStack {

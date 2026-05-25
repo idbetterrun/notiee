@@ -28,6 +28,10 @@ struct MockAIProcessingService: AIProcessingService {
             summary: "本次课堂整理了核心定义与基本原理，通过典型例题演示了解题思路。",
             detailedContent: "这是一段用于开发调试的详细内容，描述了图片或笔记可能涉及的主要信息和细节。",
             todos: ["整理本次课堂笔记", "完成课后练习"],
+            keyPoints: ["核心定义", "基本原理", "解题思路"],
+            definitions: [
+                KeyDefinition(term: "核心概念", explanation: "本文讨论的基本定义")
+            ],
             modelsUsed: ["Mock Vision Model", "Mock Text Model"],
             tokenUsage: 0
         )

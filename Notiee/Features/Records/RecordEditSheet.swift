@@ -45,6 +45,57 @@ struct RecordEditSheet: View {
                     TextEditor(text: $draft.ocrText)
                         .frame(minHeight: 120)
                 }
+
+                Section("知识点") {
+                    ForEach(Array(draft.keyPoints.enumerated()), id: \.offset) { idx, point in
+                        HStack {
+                            TextField("知识点", text: Binding(
+                                get: { point },
+                                set: { draft.keyPoints[idx] = $0 }
+                            ))
+                            Button {
+                                draft.keyPoints.remove(at: idx)
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                    Button {
+                        draft.keyPoints.append("")
+                    } label: {
+                        Label("添加知识点", systemImage: "plus.circle")
+                    }
+                }
+
+                Section("名词解释") {
+                    ForEach(Array(draft.definitions.enumerated()), id: \.offset) { idx, def in
+                        VStack(alignment: .leading, spacing: 4) {
+                            TextField("术语", text: Binding(
+                                get: { def.term },
+                                set: { draft.definitions[idx].term = $0 }
+                            ))
+                            .font(.body.weight(.semibold))
+                            TextField("解释", text: Binding(
+                                get: { def.explanation },
+                                set: { draft.definitions[idx].explanation = $0 }
+                            ))
+                            .font(.subheadline)
+                        }
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                draft.definitions.remove(at: idx)
+                            } label: {
+                                Label("删除", systemImage: "trash")
+                            }
+                        }
+                    }
+                    Button {
+                        draft.definitions.append(KeyDefinition(term: "", explanation: ""))
+                    } label: {
+                        Label("添加名词解释", systemImage: "plus.circle")
+                    }
+                }
             }
             .navigationTitle("编辑记录")
             .navigationBarTitleDisplayMode(.inline)

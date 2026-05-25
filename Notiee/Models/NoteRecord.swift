@@ -13,6 +13,9 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     var detailedContent: String
     var processingState: AIProcessingState
     
+    var keyPoints: [String]
+    var definitions: [KeyDefinition]
+    
     var isFavorite: Bool
     var isDeleted: Bool
     var editedAt: Date?
@@ -31,6 +34,8 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         summary: String = "",
         detailedContent: String = "",
         processingState: AIProcessingState = .pending,
+        keyPoints: [String] = [],
+        definitions: [KeyDefinition] = [],
         isFavorite: Bool = false,
         isDeleted: Bool = false,
         editedAt: Date? = nil,
@@ -48,6 +53,8 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.summary = summary
         self.detailedContent = detailedContent
         self.processingState = processingState
+        self.keyPoints = keyPoints
+        self.definitions = definitions
         self.isFavorite = isFavorite
         self.isDeleted = isDeleted
         self.editedAt = editedAt
@@ -55,4 +62,9 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.tokenUsage = tokenUsage
         self.deviceName = deviceName
     }
+}
+
+struct KeyDefinition: Equatable, Hashable, Codable, Sendable {
+    var term: String
+    var explanation: String
 }

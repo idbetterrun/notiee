@@ -678,6 +678,8 @@ final class NotieeStore: ObservableObject {
             records[index].ocrText = result.ocrText
             records[index].summary = result.summary
             records[index].detailedContent = result.detailedContent
+            records[index].keyPoints = result.keyPoints
+            records[index].definitions = result.definitions
             records[index].modelsUsed = result.modelsUsed
             records[index].tokenUsage = result.tokenUsage
             records[index].processingState = .completed

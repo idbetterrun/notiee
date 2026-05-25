@@ -29,9 +29,13 @@ struct RecordDetailView: View {
             VStack(alignment: .leading, spacing: 22) {
                 header
                 imagePreview
+                keyPointsSection
+                definitionsSection
                 summarySection
                 detailedContentSection
                 todoSection
+                continuationSection
+                relatedNotesSection
                 ocrSection
             }
             .padding(.horizontal, 20)
@@ -261,6 +265,54 @@ struct RecordDetailView: View {
         }
     }
 
+    private var keyPointsSection: some View {
+        let points = viewModel.record.keyPoints
+        guard !points.isEmpty else { return AnyView(EmptyView()) }
+        return AnyView(
+            DetailSection(title: "📌 知识点", systemImage: "lightbulb.fill", isExpanded: .constant(true)) {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(points.indices, id: \.self) { idx in
+                        HStack(alignment: .top, spacing: 8) {
+                            Text("\(idx + 1).")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(.orange)
+                                .frame(width: 24, alignment: .leading)
+                            Text(points[idx])
+                                .font(.body)
+                                .foregroundStyle(.primary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        )
+    }
+
+    private var definitionsSection: some View {
+        let defs = viewModel.record.definitions
+        guard !defs.isEmpty else { return AnyView(EmptyView()) }
+        return AnyView(
+            DetailSection(title: "📖 名词解释", systemImage: "book.pages.fill", isExpanded: .constant(true)) {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(defs.indices, id: \.self) { idx in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(defs[idx].term)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text(defs[idx].explanation)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        if idx < defs.count - 1 {
+                            Divider()
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        )
+    }
+
     private var summarySection: some View {
         DetailSection(title: "AI 摘要", systemImage: "sparkles", isExpanded: $isSummaryExpanded) {
             Text(viewModel.summaryText)
@@ -327,6 +379,64 @@ struct RecordDetailView: View {
                 }
             }
         }
+    }
+
+    private var continuationSection: some View {
+        guard let previousRecord = viewModel.continuationRecord else { return AnyView(EmptyView()) }
+        return AnyView(
+            NavigationLink {
+                RecordDetailView(viewModel: RecordDetailViewModel(record: previousRecord, store: viewModel.store))
+            } label: {
+                HStack {
+                    Image(systemName: "link")
+                        .foregroundColor(.blue)
+                    Text("可能为上次笔记的续篇 → 查看上篇")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(Color.blue.opacity(0.06))
+                .cornerRadius(10)
+            }
+            .padding(.horizontal)
+        )
+    }
+
+    private var relatedNotesSection: some View {
+        let related = viewModel.relatedRecords
+        guard !related.isEmpty else { return AnyView(EmptyView()) }
+        return AnyView(
+            DetailSection(title: "🔗 相关内容", systemImage: "rectangle.3.group.fill", isExpanded: .constant(true)) {
+                VStack(spacing: 8) {
+                    ForEach(related) { note in
+                        NavigationLink {
+                            RecordDetailView(viewModel: RecordDetailViewModel(record: note, store: viewModel.store))
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(note.title)
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundColor(.primary)
+                                        .lineLimit(1)
+                                    Text(note.capturedAt.formatted(date: .abbreviated, time: .omitted))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+            }
+        )
     }
 
     private var ocrSection: some View {

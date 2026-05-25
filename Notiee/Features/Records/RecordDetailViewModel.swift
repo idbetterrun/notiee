@@ -100,4 +100,36 @@ final class RecordDetailViewModel: ObservableObject {
     var availableFolders: [CustomFolder] {
         store.customFolders
     }
+
+    var continuationRecord: NoteRecord? {
+        guard UserDefaults.standard.bool(forKey: "labDeepAssociationModeEnabled") else { return nil }
+        guard let eventID = record.eventID else { return nil }
+
+        let sameEventRecords = store.records
+            .filter { $0.eventID == eventID && $0.id != record.id && !$0.isDeleted }
+            .sorted { $0.capturedAt > $1.capturedAt }
+
+        guard let previous = sameEventRecords.first else { return nil }
+        let interval = record.capturedAt.timeIntervalSince(previous.capturedAt)
+        guard interval > 0, interval < 172_800 else { return nil } // within 2 days
+
+        return previous
+    }
+
+    var relatedRecords: [NoteRecord] {
+        guard UserDefaults.standard.bool(forKey: "labDeepAssociationModeEnabled") else { return [] }
+
+        let allRecords = store.records.filter { !$0.isDeleted && $0.id != record.id && $0.processingState == .completed }
+
+        let sameEvent = allRecords
+            .filter { $0.eventID == record.eventID }
+            .sorted { $0.capturedAt > $1.capturedAt }
+            .prefix(3)
+
+        let sameTitle = allRecords
+            .filter { $0.title == record.title && $0.eventID != record.eventID }
+            .prefix(2)
+
+        return Array(sameEvent) + Array(sameTitle)
+    }
 }

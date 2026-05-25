@@ -6,6 +6,8 @@ struct AIProcessingResult: Sendable {
     let summary: String
     let detailedContent: String
     let todos: [String]
+    let keyPoints: [String]
+    let definitions: [KeyDefinition]
     let modelsUsed: [String]?
     let tokenUsage: Int
 }
