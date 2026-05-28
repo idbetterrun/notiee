@@ -13,6 +13,8 @@ final class CaptureViewModel: ObservableObject {
     
     @Published var captureMode: CaptureMode = .single
     @Published var batchImagePaths: [String] = []
+    @Published var cameraReady = false
+    @Published var cameraLoadingProgress: CGFloat = 0
     
     let cameraManager = CameraManager()
 
@@ -93,11 +95,18 @@ final class CaptureViewModel: ObservableObject {
     }
 
     func onAppear() {
+        startLoadingAnimation()
         cameraManager.checkPermissionsAndConfigure()
     }
 
     func onDisappear() {
         cameraManager.stopSession()
+        cameraReady = false
+    }
+
+    private func startLoadingAnimation() {
+        cameraReady = false
+        cameraLoadingProgress = 0
     }
 
     func capturePhoto() {

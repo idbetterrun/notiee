@@ -11,30 +11,40 @@ struct RealAIProcessingService: AIProcessingService {
     func process(imagePaths: [String], eventTitle: String?) async throws -> AIProcessingResult {
         let textConfig = settingsStore.loadConfiguration(for: .text)
         let visionConfig = settingsStore.loadConfiguration(for: .vision)
+        let preset = ScenePreset.load()
 
         guard textConfig.isComplete, visionConfig.isComplete else {
             throw AIError.missingConfiguration
         }
 
-        // 1. Process all images
         var base64Images: [String] = []
         for path in imagePaths {
-            guard let image = await MainActor.run(body: { LocalImageStore.shared.loadImage(path: path) }) else { continue }
+            guard let data = LocalImageStore.readImageData(path: path),
+                  let image = UIImage(data: data) else { continue }
             if let data = resizeAndCompress(image: image) {
                 base64Images.append(data.base64EncodedString())
             }
         }
-        
+
         guard !base64Images.isEmpty else {
             throw AIError.imageProcessingFailed
         }
-        
-        // 2. Call Vision model for OCR (sending multiple images)
-        let (ocrText, visionTokens) = try await callVisionModel(config: visionConfig, base64Images: base64Images)
-        
-        // 3. Call Text model for JSON summary
-        let (result, textTokens) = try await callTextModel(config: textConfig, visionConfig: visionConfig, ocrText: ocrText, eventTitle: eventTitle)
-        
+
+        let (ocrText, visionTokens) = try await callVisionModel(
+            config: visionConfig,
+            base64Images: base64Images,
+            imagePaths: imagePaths,
+            preset: preset
+        )
+
+        let (result, textTokens) = try await callTextModel(
+            config: textConfig,
+            visionConfig: visionConfig,
+            ocrText: ocrText,
+            eventTitle: eventTitle,
+            preset: preset
+        )
+
         return AIProcessingResult(
             title: result.title,
             ocrText: result.ocrText,
@@ -61,7 +71,7 @@ struct RealAIProcessingService: AIProcessingService {
                 size.width = maxDimension * ratio
             }
         }
-        
+
         let renderer = UIGraphicsImageRenderer(size: size)
         let resizedImage = renderer.image { _ in
             image.draw(in: CGRect(origin: .zero, size: size))
@@ -69,20 +79,28 @@ struct RealAIProcessingService: AIProcessingService {
         return resizedImage.jpegData(compressionQuality: 0.6)
     }
 
-    private func callVisionModel(config: AIModelConfiguration, base64Images: [String]) async throws -> (String, Int) {
+    private func callVisionModel(config: AIModelConfiguration, base64Images: [String], imagePaths: [String], preset: ScenePreset) async throws -> (String, Int) {
+        let isLowConsumption = UserDefaults.standard.bool(forKey: "labLowConsumptionModeEnabled")
+
+        if isLowConsumption {
+            let localText = try await LocalOCRService.batchRecognize(imagePaths: imagePaths)
+            return (localText, 0)
+        }
+
         let endpoint = config.activeEndpoint
         let protocolType = config.activeProtocol
 
-        let isFullVision = UserDefaults.standard.bool(forKey: "labFullVisionModeEnabled")
-        let isStudentMode = UserDefaults.standard.bool(forKey: "notiee.studentMode")
-        var prompt = isFullVision ? Self.localizedFullVisionPrompt() : Self.localizedVisionPrompt()
-        var systemPrompt = isFullVision ? Self.localizedFullVisionSystemPrompt() : Self.localizedVisionSystemPrompt()
+        let isFullVisionManual = UserDefaults.standard.bool(forKey: "labFullVisionModeEnabled")
+        let useFullVision = preset.visionStrategy == .fullVision || isFullVisionManual
 
-        if isStudentMode {
-            prompt += Self.localizedStudentVisionSuffix()
-            systemPrompt += Self.localizedStudentSystemSuffix()
+        var prompt = useFullVision ? Self.localizedFullVisionPrompt() : Self.localizedVisionPrompt()
+        var systemPrompt = useFullVision ? Self.localizedFullVisionSystemPrompt() : Self.localizedVisionSystemPrompt()
+
+        if preset.enableLaTeX {
+            prompt += Self.localizedLaTeXVisionSuffix()
+            systemPrompt += Self.localizedLaTeXSystemSuffix()
         }
-        
+
         var contentArray: [[String: Any]] = []
         for base64 in base64Images {
             contentArray.append([
@@ -96,7 +114,7 @@ struct RealAIProcessingService: AIProcessingService {
             "type": "text",
             "text": prompt
         ])
-        
+
         let messages: [[String: Any]] = [
             [
                 "role": "system",
@@ -107,19 +125,16 @@ struct RealAIProcessingService: AIProcessingService {
                 "content": contentArray
             ]
         ]
-        
+
         let payload: [String: Any] = [
             "model": config.modelName,
             "messages": messages,
             "max_tokens": 4096
         ]
-        
-        // This is a bit of a hack since OpenAICaller.callVision only took single image before,
-        // we will manually call HTTP here to support multi-image array in the prompt.
-        
+
         var request = URLRequest(url: URL(string: endpoint)!)
         request.httpMethod = "POST"
-        
+
         var apiKeyHeader = "Bearer \(config.apiKey)"
         if protocolType == .anthropic {
             apiKeyHeader = config.apiKey
@@ -129,16 +144,16 @@ struct RealAIProcessingService: AIProcessingService {
             request.setValue(apiKeyHeader, forHTTPHeaderField: "Authorization")
         }
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
-        
+
         let (data, response) = try await URLSession.shared.data(for: request)
-        
+
         guard let httpResp = response as? HTTPURLResponse, httpResp.statusCode == 200 else {
             let errString = String(data: data, encoding: .utf8) ?? "Unknown Error"
             throw AIError.apiError(errString)
         }
-        
+
         if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
            let choices = json["choices"] as? [[String: Any]],
            let message = choices.first?["message"] as? [String: Any],
@@ -146,27 +161,24 @@ struct RealAIProcessingService: AIProcessingService {
             let tokens = (json["usage"] as? [String: Any])?["total_tokens"] as? Int ?? 0
             return (content, tokens)
         }
-        
+
         throw AIError.parsingFailed
     }
 
-    private func callTextModel(config: AIModelConfiguration, visionConfig: AIModelConfiguration, ocrText: String, eventTitle: String?) async throws -> (AIProcessingResult, Int) {
+    private func callTextModel(config: AIModelConfiguration, visionConfig: AIModelConfiguration, ocrText: String, eventTitle: String?, preset: ScenePreset) async throws -> (AIProcessingResult, Int) {
         let endpoint = config.activeEndpoint
         let protocolType = config.activeProtocol
-        
+
         let enableSummary = settingsStore.loadBool(forKey: "notiee.aiEnableSummary", defaultValue: true)
         let enableDetailedContent = settingsStore.loadBool(forKey: "notiee.aiEnableDetailedContent", defaultValue: true)
-        let enableTodos = settingsStore.loadBool(forKey: "notiee.aiEnableTodos", defaultValue: true)
-        let isStudentMode = settingsStore.loadBool(forKey: "notiee.studentMode", defaultValue: false)
 
         let prompt = Self.localizedTextPrompt(
             ocrText: ocrText,
             enableSummary: enableSummary,
             enableDetailedContent: enableDetailedContent,
-            enableTodos: enableTodos,
-            isStudentMode: isStudentMode
+            preset: preset
         )
-        
+
         let responseJSON: String
         let tokens: Int
         if protocolType == .openai {
@@ -178,17 +190,16 @@ struct RealAIProcessingService: AIProcessingService {
             responseJSON = res.0
             tokens = res.1
         }
-        
-        // Clean markdown backticks if any
+
         let cleanedJSON = responseJSON.trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: "```json", with: "")
             .replacingOccurrences(of: "```", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         guard let data = cleanedJSON.data(using: .utf8) else {
             throw AIError.parsingFailed
         }
-        
+
         struct ParsedOutput: Decodable {
             let title: String
             let summary: String
@@ -202,7 +213,7 @@ struct RealAIProcessingService: AIProcessingService {
             let term: String
             let explanation: String
         }
-        
+
         do {
             let parsed = try JSONDecoder().decode(ParsedOutput.self, from: data)
             let result = AIProcessingResult(
@@ -222,13 +233,13 @@ struct RealAIProcessingService: AIProcessingService {
             throw AIError.parsingFailed
         }
     }
-    
+
     // MARK: - Localized Prompts
-    
+
     static func currentLanguage() -> String {
         return UserDefaults.standard.string(forKey: "notiee.language") ?? "system"
     }
-    
+
     static func localizedVisionPrompt() -> String {
         let lang = currentLanguage()
         if lang == "en" {
@@ -239,15 +250,15 @@ struct RealAIProcessingService: AIProcessingService {
             return "请识别图片中的所有文本内容，包含板书、幻灯片等，并尽可能保持原本的结构输出。多张图片是连贯的，请综合提取。除了文本内容外，如果有关键的图表或公式也可以用文字简单描述一下。不要输出任何除了提取内容以外的废话。"
         }
     }
-    
+
     static func localizedVisionSystemPrompt() -> String {
         let lang = currentLanguage()
         if lang == "en" {
-            return "You are a class note organizing assistant. Please analyze the provided images (which may be consecutive blackboard writings or slides), extract text, summarize the outline, and identify all tasks or action items. Multiple images are taken chronologically, please consider their contents comprehensively. Output in JSON format."
+            return "You are a note organizing assistant. Please analyze the provided images, extract text, summarize the outline, and identify all tasks or action items. Multiple images are taken chronologically, please consider their contents comprehensively."
         } else if lang == "zh-Hant" {
-            return "你是一個課堂筆記整理助手。請分析提供的圖片（可能是連續多張板書/幻燈片），提取文字，總結大綱，並識別出所有任務或待辦事項。多張圖片是按時間順序拍攝的，請綜合考慮它們的內容。以 JSON 格式輸出。"
+            return "你是一個筆記整理助手。請分析提供的圖片，提取文字，總結大綱，並識別出所有任務或待辦事項。多張圖片是按時間順序拍攝的，請綜合考慮它們的內容。"
         } else {
-            return "你是一个课堂笔记整理助手。请分析提供的图片（可能是连续多张板书/幻灯片），提取文字，总结大纲，并识别出所有任务或待办事项。多张图片是按时间顺序拍摄的，请综合考虑它们的内容。以 JSON 格式输出。"
+            return "你是一个笔记整理助手。请分析提供的图片，提取文字，总结大纲，并识别出所有任务或待办事项。多张图片是按时间顺序拍摄的，请综合考虑它们的内容。"
         }
     }
 
@@ -273,7 +284,7 @@ struct RealAIProcessingService: AIProcessingService {
         }
     }
 
-    static func localizedStudentVisionSuffix() -> String {
+    static func localizedLaTeXVisionSuffix() -> String {
         let lang = currentLanguage()
         if lang == "en" {
             return "\n\nIMPORTANT: Pay special attention to mathematical formulas, theorems, definitions, and data relationships in charts. Express formulas using LaTeX syntax (wrapped with $$ for display or $ for inline)."
@@ -284,7 +295,7 @@ struct RealAIProcessingService: AIProcessingService {
         }
     }
 
-    static func localizedStudentSystemSuffix() -> String {
+    static func localizedLaTeXSystemSuffix() -> String {
         let lang = currentLanguage()
         if lang == "en" {
             return " When presenting formulas, always use LaTeX notation (e.g., $$E=mc^2$$ for display formulas, $x^2+y^2=r^2$ for inline formulas)."
@@ -294,54 +305,119 @@ struct RealAIProcessingService: AIProcessingService {
             return " 呈现公式时，请始终使用 LaTeX 表示法（例如显示公式用 $$E=mc^2$$，行内公式用 $x^2+y^2=r^2$）。"
         }
     }
-    
-    static func localizedTextPrompt(ocrText: String, enableSummary: Bool, enableDetailedContent: Bool, enableTodos: Bool, isStudentMode: Bool) -> String {
+
+    static func localizedTextPrompt(ocrText: String, enableSummary: Bool, enableDetailedContent: Bool, preset: ScenePreset) -> String {
         let lang = currentLanguage()
+        let hasAdvanced = preset.enableKeyPoints || preset.enableDefinitions
+
         if lang == "en" {
+            var fields = "Fields to extract:\n1. \"title\": Generate a short title based on the content (under 10 words).\n"
+            var fieldNum = 2
+            if enableSummary {
+                fields += "\(fieldNum). \"summary\": Extract a brief summary of the content (under 100 words).\n"
+                fieldNum += 1
+            }
+            if enableDetailedContent {
+                fields += "\(fieldNum). \"detailedContent\": Reformat the provided OCR text, fix typos, and organize it into coherent, readable detailed content (if it's class notes or meeting minutes, use paragraphs and bullet points for core takeaways). If output is in English, keep it under 2500 characters.\n"
+                fieldNum += 1
+            }
+            if preset.enableTodos {
+                fields += "\(fieldNum). \"todos\": If the text contains any tasks or action items to execute, extract them as an array of strings (if none, return an empty array []).\n"
+                fieldNum += 1
+            }
+            if preset.enableKeyPoints {
+                fields += "\(fieldNum). \"keyPoints\": Extract 3-5 core knowledge points or key concepts as an array of strings.\n"
+                fieldNum += 1
+            }
+            if preset.enableDefinitions {
+                fields += "\(fieldNum). \"definitions\": Extract key terminology and their explanations as [{ \"term\": \"term\", \"explanation\": \"explanation\" }] array (empty array [] if none).\n"
+            }
+
+            var extra = ""
+            if hasAdvanced {
+                extra += "\nBecause your user is a \(preset.displayName), focus on extracting structured knowledge and actionable insights."
+            }
+
             return """
             Please carefully analyze the following text extracted from images.
 
             Based on the requirements below, return a strictly formatted JSON object. Do not return any other content (no Markdown code blocks, no explanations).
 
-            Fields to extract:
-            1. "title": Generate a short title based on the content (under 10 words).
-            \(enableSummary ? "2. \"summary\": Extract a brief summary of the content (under 100 words)." : "")
-            \(enableDetailedContent ? "3. \"detailedContent\": Reformat the provided OCR text, fix typos, and organize it into coherent, readable detailed content (if it's class notes or meeting minutes, use paragraphs and bullet points for core takeaways). If output is in English, keep it under 2500 characters." : "")
-            \(enableTodos ? "4. \"todos\": If the text contains any tasks or action items to execute, extract them as an array of strings (if none, return an empty array [])." : "")
-            \(isStudentMode ? "5. \"keyPoints\": Extract 3-5 core knowledge points or key concepts as an array of strings.\n6. \"definitions\": Extract key terminology and their explanations as [{ \"term\": \"term\", \"explanation\": \"explanation\" }] array (empty array [] if none)." : "")
-
+            \(fields)\(extra)
             Here is the extracted text content:
             \(ocrText)
             """
         } else if lang == "zh-Hant" {
+            var fields = "需要提取的字段：\n1. \"title\": 根據內容生成一個簡短的標題（不要超過15個字）。\n"
+            var fieldNum = 2
+            if enableSummary {
+                fields += "\(fieldNum). \"summary\": 提取出簡短的內容摘要（控制在200字以內）。\n"
+                fieldNum += 1
+            }
+            if enableDetailedContent {
+                fields += "\(fieldNum). \"detailedContent\": 將提供的 OCR 文本重新排版，修正錯別字，梳理成連貫且易於閱讀的詳細內容（如果是課堂筆記或會議記錄，請分段落、列出核心要點）。注意：最長不要超過 500 字。\n"
+                fieldNum += 1
+            }
+            if preset.enableTodos {
+                fields += "\(fieldNum). \"todos\": 如果文本中包含任何需要執行的任務或待辦事項，請提取為一個字符串數組（如果沒有，則返回空數組 []）。\n"
+                fieldNum += 1
+            }
+            if preset.enableKeyPoints {
+                fields += "\(fieldNum). \"keyPoints\": 提取文本中的3-5個核心知識點或重點概念，返回字符串數組。\n"
+                fieldNum += 1
+            }
+            if preset.enableDefinitions {
+                fields += "\(fieldNum). \"definitions\": 提取文本中的關鍵術語及其解釋，返回 [{ \"term\": \"術語\", \"explanation\": \"解釋\" }] 數組（如果沒有則為空數組 []）。\n"
+            }
+
+            var extra = ""
+            if hasAdvanced {
+                extra += "\n因為你的使用者是\(preset.displayName)，請專注於提取結構化知識和可執行的洞見。"
+            }
+
             return """
             請仔細分析以下提取自圖片的文字內容。
 
             根據以下要求，返回一個嚴格格式化的 JSON 對象。不要返回任何其他內容（不要帶 Markdown 代碼塊，不要有解釋說明）。
 
-            需要提取的字段：
-            1. "title": 根據內容生成一個簡短的標題（不要超過15個字）。
-            \(enableSummary ? "2. \"summary\": 提取出簡短的內容摘要（控制在200字以內）。" : "")
-            \(enableDetailedContent ? "3. \"detailedContent\": 將提供的 OCR 文本重新排版，修正錯別字，梳理成連貫且易於閱讀的詳細內容（如果是課堂筆記或會議記錄，請分段落、列出核心要點）。注意：最長不要超過 500 字。" : "")
-            \(enableTodos ? "4. \"todos\": 如果文本中包含任何需要執行的任務或待辦事項，請提取為一個字符串數組（如果沒有，則返回空數組 []）。" : "")
-            \(isStudentMode ? "5. \"keyPoints\": 提取文本中的3-5個核心知識點或重點概念，返回字符串數組。\n6. \"definitions\": 提取文本中的關鍵術語及其解釋，返回 [{ \"term\": \"術語\", \"explanation\": \"解釋\" }] 數組（如果沒有則為空數組 []）。" : "")
-
+            \(fields)\(extra)
             以下是提取的文字內容：
             \(ocrText)
             """
         } else {
+            var fields = "需要提取的字段：\n1. \"title\": 根据内容生成一个简短的标题（不要超过15个字）。\n"
+            var fieldNum = 2
+            if enableSummary {
+                fields += "\(fieldNum). \"summary\": 提取出简短的内容摘要（控制在200字以内）。\n"
+                fieldNum += 1
+            }
+            if enableDetailedContent {
+                fields += "\(fieldNum). \"detailedContent\": 将提供的 OCR 文本重新排版，修正错别字，梳理成连贯且易于阅读的详细内容（如果是课堂笔记或会议记录，请分段落、列出核心要点）。注意：最长不要超过 500 字。\n"
+                fieldNum += 1
+            }
+            if preset.enableTodos {
+                fields += "\(fieldNum). \"todos\": 如果文本中包含任何需要执行的任务或待办事项，请提取为一个字符串数组（如果没有，则返回空数组 []）。\n"
+                fieldNum += 1
+            }
+            if preset.enableKeyPoints {
+                fields += "\(fieldNum). \"keyPoints\": 提取文本中的3-5个核心知识点或重点概念，返回字符串数组。\n"
+                fieldNum += 1
+            }
+            if preset.enableDefinitions {
+                fields += "\(fieldNum). \"definitions\": 提取文本中的关键术语及其解释，返回 [{ \"term\": \"术语\", \"explanation\": \"解释\" }] 数组（如果没有则为空数组 []）。\n"
+            }
+
+            var extra = ""
+            if hasAdvanced {
+                extra += "\n因为你的使用者是\(preset.displayName)，请专注于提取结构化知识和可执行的洞见。"
+            }
+
             return """
             请仔细分析以下提取自图片的文字内容。
 
             根据以下要求，返回一个严格格式化的 JSON 对象。不要返回任何其他内容（不要带 Markdown 代码块，不要有解释说明）。
 
-            需要提取的字段：
-            1. "title": 根据内容生成一个简短的标题（不要超过15个字）。
-            \(enableSummary ? "2. \"summary\": 提取出简短的内容摘要（控制在200字以内）。" : "")
-            \(enableDetailedContent ? "3. \"detailedContent\": 将提供的 OCR 文本重新排版，修正错别字，梳理成连贯且易于阅读的详细内容（如果是课堂笔记或会议记录，请分段落、列出核心要点）。注意：最长不要超过 500 字。" : "")
-            \(enableTodos ? "4. \"todos\": 如果文本中包含任何需要执行的任务或待办事项，请提取为一个字符串数组（如果没有，则返回空数组 []）。" : "")
-            \(isStudentMode ? "5. \"keyPoints\": 提取文本中的3-5个核心知识点或重点概念，返回字符串数组。\n6. \"definitions\": 提取文本中的关键术语及其解释，返回 [{ \"term\": \"术语\", \"explanation\": \"解释\" }] 数组（如果没有则为空数组 []）。" : "")
-
+            \(fields)\(extra)
             以下是提取的文字内容：
             \(ocrText)
             """
@@ -354,7 +430,7 @@ enum AIError: LocalizedError {
     case imageProcessingFailed
     case apiError(String)
     case parsingFailed
-    
+
     var errorDescription: String? {
         switch self {
         case .missingConfiguration: return "AI 模型尚未配置完整"

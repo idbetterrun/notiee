@@ -47,7 +47,7 @@ struct AboutNotieeView: View {
                 Link(destination: URL(string: "https://github.com/idbetterrun/TomaNotes")!) {
                     HStack(spacing: 12) {
                         Image(systemName: "desktopcomputer")
-                            .foregroundColor(.blue)
+                            .foregroundColor(NotieeColors.themed(.blue))
                             .frame(width: 24)
 
                         Text("您在用 macOS 吗？来试试 TomaNotes 吧！")
@@ -72,7 +72,7 @@ struct AboutNotieeView: View {
                 VStack(spacing: 8) {
                     Link("ICP备案号: xxx", destination: URL(string: "https://beian.miit.gov.cn/#/home")!)
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .foregroundColor(NotieeColors.themed(.blue))
 
                     Text("Copyright © 2026 Tan Qinghua All Rights Reserved.")
                         .font(.caption2)

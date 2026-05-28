@@ -59,6 +59,18 @@ struct CaptureView: View {
         .animation(.easeOut(duration: 0.1), value: showsCaptureFlash)
         .onAppear {
             viewModel.onAppear()
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(100))
+                viewModel.cameraLoadingProgress = 1
+            }
+            if viewModel.cameraManager.status == .ready {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        viewModel.cameraReady = true
+                    }
+                }
+            }
         }
         .onDisappear {
             viewModel.onDisappear()
@@ -66,6 +78,12 @@ struct CaptureView: View {
         .onChange(of: viewModel.cameraManager.status) { _, newStatus in
             if newStatus == .ready {
                 gestureStartZoom = viewModel.cameraManager.currentZoomFactor
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        viewModel.cameraReady = true
+                    }
+                }
             }
         }
     }
@@ -155,13 +173,13 @@ struct CaptureView: View {
                     return !CalendarService.shared.isHolidayEvent(event)
                 }
 
-                let isStudentMode = UserDefaults.standard.bool(forKey: "notiee.studentMode")
-                let courseEvents = isStudentMode ? remaining.filter { CalendarService.shared.isCourseEvent($0) } : []
-                let otherEvents = isStudentMode ? remaining.filter { !CalendarService.shared.isCourseEvent($0) } : remaining
+                let preset = ScenePreset.load()
+                let courseEvents = preset.enableCourseMode ? remaining.filter { CalendarService.shared.isCourseEvent($0) } : []
+                let otherEvents = preset.enableCourseMode ? remaining.filter { !CalendarService.shared.isCourseEvent($0) } : remaining
 
                 if !courseEvents.isEmpty {
                     if !pinnedIDs.isEmpty { Divider() }
-                    Text("📖 我的课程")
+                    Text("📖 课程日程")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     ForEach(courseEvents) { event in
@@ -218,8 +236,9 @@ struct CaptureView: View {
         var seen: Set<String> = []
         var result: [ScheduledEvent] = []
         for event in events {
-            if !seen.contains(event.title) {
-                seen.insert(event.title)
+            let normalizedTitle = event.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !seen.contains(normalizedTitle) {
+                seen.insert(normalizedTitle)
                 result.append(event)
             }
         }
@@ -254,7 +273,7 @@ struct CaptureView: View {
         ZStack {
             Color(white: 0.05)
 
-            if viewModel.cameraManager.status == .ready {
+            if viewModel.cameraManager.status == .ready && viewModel.cameraReady {
                 CameraPreviewView(session: viewModel.cameraManager.session)
                     .gesture(
                         MagnificationGesture()
@@ -271,11 +290,11 @@ struct CaptureView: View {
                     Image(systemName: "camera.slash")
                         .font(.system(size: 48))
                         .foregroundStyle(.white.opacity(0.6))
-                    
+
                     Text("需要相机权限才能进行拍记")
                         .font(.headline)
                         .foregroundStyle(.white.opacity(0.8))
-                        
+
                     Button {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
                             UIApplication.shared.open(url)
@@ -288,6 +307,26 @@ struct CaptureView: View {
                             .padding(.vertical, 10)
                             .background(.white, in: Capsule())
                     }
+                }
+            } else {
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .stroke(.white.opacity(0.15), lineWidth: 3)
+                            .frame(width: 80, height: 80)
+                        Circle()
+                            .trim(from: 0, to: viewModel.cameraLoadingProgress)
+                            .stroke(.white.opacity(0.7), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                            .frame(width: 80, height: 80)
+                            .rotationEffect(.degrees(-90))
+                            .animation(.linear(duration: 1.5).repeatForever(autoreverses: false), value: viewModel.cameraLoadingProgress)
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                    Text("正在启动相机…")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.6))
                 }
             }
             

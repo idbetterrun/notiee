@@ -132,7 +132,7 @@ struct TodayView: View {
             } label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 30))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(NotieeColors.themed(.blue))
             }
         }
         .onAppear {

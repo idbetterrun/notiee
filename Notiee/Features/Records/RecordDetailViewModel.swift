@@ -90,7 +90,17 @@ final class RecordDetailViewModel: ObservableObject {
     }
 
     var availableEvents: [ScheduledEvent] {
-        store.events
+        var seen: Set<String> = []
+        var result: [ScheduledEvent] = []
+        for event in store.events {
+            let normalized = event.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !CalendarService.shared.isHolidayEvent(event) else { continue }
+            if !seen.contains(normalized) {
+                seen.insert(normalized)
+                result.append(event)
+            }
+        }
+        return result
     }
     
     func reassignFolder(to folderID: UUID?) {

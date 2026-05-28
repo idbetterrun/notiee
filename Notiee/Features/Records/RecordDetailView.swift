@@ -41,6 +41,7 @@ struct RecordDetailView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
             .padding(.bottom, 40)
+            .scrollContentTouchFix()
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("记录详情")
@@ -104,7 +105,8 @@ struct RecordDetailView: View {
             Task.detached(priority: .userInitiated) {
                 var images: [UIImage] = []
                 for path in viewModel.record.localImagePaths {
-                    if let img = await MainActor.run(body: { LocalImageStore.shared.loadImage(path: path) }) {
+                    if let data = LocalImageStore.readImageData(path: path),
+                       let img = UIImage(data: data) {
                         images.append(img)
                     }
                 }
@@ -275,7 +277,7 @@ struct RecordDetailView: View {
                         HStack(alignment: .top, spacing: 8) {
                             Text("\(idx + 1).")
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundColor(.orange)
+                                .foregroundColor(NotieeColors.themed(.orange))
                                 .frame(width: 24, alignment: .leading)
                             Text(points[idx])
                                 .font(.body)
@@ -332,15 +334,15 @@ struct RecordDetailView: View {
                 Group {
                     if content.isEmpty {
                         Text("无详细内容")
+                            .foregroundStyle(.primary)
                     } else if shouldRenderMarkdown {
                         Markdown(content)
+                            .textSelection(.enabled)
                     } else {
                         Text(content)
+                            .textSelection(.enabled)
                     }
                 }
-                .font(.body)
-                .foregroundStyle(.primary)
-                .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -389,10 +391,10 @@ struct RecordDetailView: View {
             } label: {
                 HStack {
                     Image(systemName: "link")
-                        .foregroundColor(.blue)
+                        .foregroundColor(NotieeColors.themed(.blue))
                     Text("可能为上次笔记的续篇 → 查看上篇")
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(NotieeColors.themed(.blue))
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption)
@@ -440,28 +442,12 @@ struct RecordDetailView: View {
     }
 
     private var ocrSection: some View {
-        DetailSection(title: "OCR 原文", systemImage: "text.viewfinder", isExpanded: .constant(true)) {
-            VStack(alignment: .leading, spacing: 8) {
-                Button {
-                    withAnimation { isOCRExpanded.toggle() }
-                } label: {
-                    HStack {
-                        Text(isOCRExpanded ? "收起" : "展开")
-                            .font(.caption.weight(.semibold))
-                        Image(systemName: isOCRExpanded ? "chevron.up" : "chevron.down")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.blue)
-                }
-                
-                if isOCRExpanded {
-                    Text(viewModel.ocrText)
-                        .font(.callout.monospaced())
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
+        DetailSection(title: "OCR 原文", systemImage: "text.viewfinder", isExpanded: $isOCRExpanded) {
+            Text(viewModel.ocrText)
+                .font(.callout.monospaced())
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
@@ -469,6 +455,7 @@ struct RecordDetailView: View {
         NavigationStack {
             List {
                 Section("基础信息") {
+                    LabeledContent("Token 消耗", value: "\(viewModel.record.tokenUsage) tk")
                     if let deviceName = viewModel.record.deviceName {
                         LabeledContent("设备名称", value: deviceName)
                     }
@@ -522,24 +509,37 @@ private struct DetailSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            DisclosureGroup(isExpanded: $isExpanded) {
-                content
-                    .padding(18)
-                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    isExpanded.toggle()
+                }
             } label: {
                 HStack {
                     Label(title, systemImage: systemImage)
                         .font(.headline)
                         .foregroundStyle(.secondary)
-                    
+
                     if showMarkdownIcon {
                         Image(systemName: "m.square")
                             .foregroundStyle(.blue)
                             .font(.subheadline)
                     }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
                 }
             }
-            .tint(.secondary)
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                content
+                    .padding(18)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            }
         }
     }
 }
@@ -669,6 +669,37 @@ struct FullScreenImageView: View {
     let store = NotieeStore.sample()
     return NavigationStack {
         RecordDetailView(viewModel: RecordDetailViewModel(record: store.sortedRecords[0], store: store))
+    }
+}
+
+
+// MARK: - ScrollView Touch Fix
+
+private extension View {
+    func scrollContentTouchFix() -> some View {
+        background(ScrollTouchFixer())
+    }
+}
+
+private struct ScrollTouchFixer: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = false
+        view.isHidden = true
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.async {
+            var parent = uiView.superview
+            while parent != nil {
+                if let scrollView = parent as? UIScrollView {
+                    scrollView.delaysContentTouches = false
+                    break
+                }
+                parent = parent?.superview
+            }
+        }
     }
 }
 

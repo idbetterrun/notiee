@@ -21,6 +21,8 @@ final class SettingsViewModel: ObservableObject {
     @Published var theme: String
     @Published var fontSize: String
     @Published var language: String
+    @Published var scenePreset: ScenePreset
+    @Published var accentColor: String
     
     // AI Toggles
     @Published var aiEnabled: Bool
@@ -33,6 +35,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var notificationEnabled: Bool
     @Published var liveActivityEnabled: Bool
     @Published var notificationAdvanceTime: Int
+    @Published var tokenWarningThreshold: Int
     
     // Calendar Selection
     @Published var availableCalendars: [EKCalendar] = []
@@ -58,6 +61,8 @@ final class SettingsViewModel: ObservableObject {
         theme = settingsStore.loadString(forKey: "notiee.theme", defaultValue: "system")
         fontSize = settingsStore.loadString(forKey: "notiee.fontSize", defaultValue: "medium")
         language = settingsStore.loadString(forKey: "notiee.language", defaultValue: "system")
+        scenePreset = ScenePreset.load()
+        accentColor = settingsStore.loadString(forKey: "notiee.accentColor", defaultValue: "default")
         
         aiEnabled = settingsStore.loadBool(forKey: "notiee.aiEnabled", defaultValue: true)
         aiEnableSummary = settingsStore.loadBool(forKey: "notiee.aiEnableSummary", defaultValue: true)
@@ -68,6 +73,7 @@ final class SettingsViewModel: ObservableObject {
         notificationEnabled = settingsStore.loadBool(forKey: "notiee.notificationEnabled", defaultValue: false)
         liveActivityEnabled = settingsStore.loadBool(forKey: "notiee.liveActivityEnabled", defaultValue: false)
         notificationAdvanceTime = settingsStore.loadInt(forKey: "notiee.notificationAdvanceTime", defaultValue: 5)
+        tokenWarningThreshold = settingsStore.loadInt(forKey: "notiee.tokenWarningThreshold", defaultValue: 0)
         
         customModels = settingsStore.loadCustomModels()
         loadCalendarSelection()
@@ -98,6 +104,8 @@ final class SettingsViewModel: ObservableObject {
         settingsStore.saveString(theme, forKey: "notiee.theme")
         settingsStore.saveString(fontSize, forKey: "notiee.fontSize")
         settingsStore.saveString(language, forKey: "notiee.language")
+        settingsStore.saveString(accentColor, forKey: "notiee.accentColor")
+        scenePreset.save()
         
         if language == "system" {
             UserDefaults.standard.removeObject(forKey: "AppleLanguages")
@@ -116,6 +124,7 @@ final class SettingsViewModel: ObservableObject {
         settingsStore.saveBool(liveActivityEnabled, forKey: "notiee.liveActivityEnabled")
         NotificationCenter.default.post(name: NSNotification.Name("LiveActivitySettingsChanged"), object: nil)
         settingsStore.saveInt(notificationAdvanceTime, forKey: "notiee.notificationAdvanceTime")
+        settingsStore.saveInt(tokenWarningThreshold, forKey: "notiee.tokenWarningThreshold")
         
         settingsStore.saveCustomModels(customModels)
         

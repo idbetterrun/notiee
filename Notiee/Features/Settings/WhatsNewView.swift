@@ -17,10 +17,10 @@ struct WhatsNewContainerView: View {
             tint: .teal
         ),
         WhatsNewHighlight(
-            title: "学生模式增强",
-            subtitle: "实验室中开启后，可识别课表并围绕课程组织学习记录。",
-            systemImage: "graduationcap.fill",
-            tint: .orange
+            title: "多场景预设",
+            subtitle: "设置中可选择职场、大学、中学、创作者四种身份，AI 自动调整解析策略。",
+            systemImage: "person.fill.questionmark",
+            tint: .indigo
         )
     ]
 

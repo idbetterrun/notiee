@@ -34,19 +34,23 @@ final class LocalImageStore {
         return "CapturedImages/\(filename)"
     }
 
-    /// Loads an image from the given relative path.
-    func loadImage(path: String) -> UIImage? {
+    nonisolated static func readImageData(path: String) -> Data? {
         if path.hasPrefix("mock://") {
-            // Future mock handling or fallback
             return nil
         }
-        
+
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentsDirectory.appendingPathComponent(path)
-        guard fileManager.fileExists(atPath: fileURL.path),
+        guard FileManager.default.fileExists(atPath: fileURL.path),
               let data = try? Data(contentsOf: fileURL) else {
             return nil
         }
 
+        return data
+    }
+
+    func loadImage(path: String) -> UIImage? {
+        guard let data = Self.readImageData(path: path) else { return nil }
         return UIImage(data: data)
     }
 }

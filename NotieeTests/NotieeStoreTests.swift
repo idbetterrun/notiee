@@ -15,7 +15,7 @@ final class NotieeStoreTests: XCTestCase {
         )
         let store = NotieeStore(
             currentDate: referenceDate,
-            events: [event],
+            customEvents: [event],
             todos: [],
             records: [],
             recordStore: recordStore

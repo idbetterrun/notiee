@@ -39,7 +39,7 @@ final class RecordDetailViewModelTests: XCTestCase {
         )
         let store = NotieeStore(
             currentDate: referenceDate,
-            events: [event],
+            customEvents: [event],
             todos: [newerTodo, unrelatedTodo, olderTodo],
             records: [record],
             recordStore: JSONNoteRecordStore(fileURL: temporaryFileURL())

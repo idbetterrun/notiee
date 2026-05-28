@@ -40,14 +40,14 @@ struct MeView: View {
                         AllSchedulesView(store: store)
                     } label: {
                         Label("全部日程", systemImage: "calendar")
-                            .foregroundColor(.orange)
+                            .foregroundColor(NotieeColors.themed(.orange))
                     }
                     
                     NavigationLink {
                         ImportScheduleView(store: store)
                     } label: {
                         Label("导入日程", systemImage: "square.and.arrow.down")
-                            .foregroundColor(.green)
+                            .foregroundColor(NotieeColors.themed(.green))
                     }
                 }
                 
@@ -56,7 +56,7 @@ struct MeView: View {
                         ReviewView(store: store)
                     } label: {
                         Label("回顾", systemImage: "chart.pie.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(NotieeColors.themed(.blue))
                     }
                 }
                 
@@ -65,7 +65,7 @@ struct MeView: View {
                         BackupRestoreView(store: store)
                     } label: {
                         Label("备份与恢复", systemImage: "arrow.triangle.2.circlepath.doc.on.clipboard")
-                            .foregroundColor(.blue)
+                            .foregroundColor(NotieeColors.themed(.blue))
                     }
                 }
                 
@@ -74,7 +74,7 @@ struct MeView: View {
                         LabFeaturesView(store: store)
                     } label: {
                         Label("实验室功能", systemImage: "flask.fill")
-                            .foregroundColor(.purple)
+                            .foregroundColor(NotieeColors.themed(.purple))
                     }
                 }
                 
@@ -83,7 +83,7 @@ struct MeView: View {
                         SettingsMainView(settingsStore: settingsStore)
                     } label: {
                         Label("设置", systemImage: "gearshape.fill")
-                            .foregroundColor(.gray)
+                            .foregroundColor(NotieeColors.themed(.gray))
                     }
                 }
             }
@@ -96,7 +96,10 @@ struct MeView: View {
 struct ReviewView: View {
     @ObservedObject var store: NotieeStore
     @State private var selectedRange: TimeRange = .today
-    
+
+    @AppStorage("notiee.tokenWarningThreshold") private var tokenWarningThreshold: Int = 0
+    @AppStorage("notiee.accumulatedDeletedTokens") private var accumulatedDeletedTokens: Int = 0
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -107,68 +110,43 @@ struct ReviewView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
-                
+
                 VStack(spacing: 8) {
                     Text("预估 Token 消耗")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    
-                    Text("\(store.totalTokens(in: selectedRange))")
+
+                    let currentTokens = store.totalTokens(in: selectedRange)
+                    Text("\(currentTokens)")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(.accentColor)
-                    
-                    Text(tokenComparisonText(for: store.totalTokens(in: selectedRange)))
+                        .foregroundColor(currentTokens >= tokenWarningThreshold && tokenWarningThreshold > 0 ? .orange : .accentColor)
+
+                    Text(tokenComparisonText(for: currentTokens))
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
                 .padding(.vertical)
-                
-                let topRecords = topRecordsByToken()
-                if !topRecords.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("最耗 Token 的记录 (Top 5)")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        
-                        ForEach(Array(topRecords.enumerated()), id: \.element.id) { index, record in
-                            HStack {
-                                Text("\(index + 1)")
-                                    .font(.headline)
-                                    .foregroundColor(.secondary)
-                                    .frame(width: 24)
-                                
-                                VStack(alignment: .leading) {
-                                    Text(record.title)
-                                        .font(.subheadline)
-                                        .lineLimit(1)
-                                    Text(record.capturedAt.formatted(date: .abbreviated, time: .omitted))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Text("\(record.tokenUsage) tk")
-                                    .font(.subheadline)
-                                    .foregroundColor(.orange)
-                            }
-                            .padding()
-                            .background(Color(uiColor: .secondarySystemGroupedBackground))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                        }
+
+                if store.totalTokens(in: selectedRange) >= tokenWarningThreshold && tokenWarningThreshold > 0 {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Token 消耗已超提醒阈值 (\(tokenWarningThreshold) tk)")
+                            .font(.caption)
                     }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal)
                 }
-                
+
                 let chartData = tokenDataByEvent()
                 if !chartData.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("按日程消耗占比")
                             .font(.headline)
                             .padding(.horizontal)
-                        
+
                         Chart(chartData) { data in
                             SectorMark(
                                 angle: .value("Tokens", data.tokens),
@@ -184,7 +162,58 @@ struct ReviewView: View {
                         .padding(.horizontal)
                     }
                 }
-                
+
+                let topRecords = topRecordsByToken()
+                if !topRecords.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("最耗 Token 的记录 (Top 5)")
+                            .font(.headline)
+                            .padding(.horizontal)
+
+                        ForEach(Array(topRecords.enumerated()), id: \.element.id) { index, record in
+                            HStack {
+                                Text("\(index + 1)")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 24)
+
+                                VStack(alignment: .leading) {
+                                    Text(record.title)
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                    Text(record.capturedAt.formatted(date: .abbreviated, time: .omitted))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Text("\(record.tokenUsage) tk")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundColor(.orange)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+
+                HStack {
+                    Image(systemName: "trash.fill")
+                        .foregroundColor(.secondary)
+                    Text("已删除记录累计 Token 消耗（含彻底删除）")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(accumulatedDeletedTokens) tk")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+
                 Text("声明：以上 Token 数仅为本地根据返回结果的粗略统计，不保证百分百与最终云端扣费结果一致。")
                     .font(.caption2)
                     .foregroundColor(.secondary)
@@ -196,7 +225,7 @@ struct ReviewView: View {
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle("使用回顾")
     }
-    
+
     private func tokenComparisonText(for tokens: Int) -> String {
         switch tokens {
         case 0:
@@ -213,22 +242,22 @@ struct ReviewView: View {
             return "天哪！这相当于读完了好几本大部头巨著！"
         }
     }
-    
+
     private func topRecordsByToken() -> [NoteRecord] {
         let records = store.records(in: selectedRange)
         return Array(records.sorted(by: { $0.tokenUsage > $1.tokenUsage }).prefix(5))
     }
-    
+
     struct EventTokenData: Identifiable {
         let id = UUID()
         let eventName: String
         let tokens: Int
     }
-    
+
     private func tokenDataByEvent() -> [EventTokenData] {
         let records = store.records(in: selectedRange)
         var dict: [String: Int] = [:]
-        
+
         for record in records {
             let name: String
             if let eventID = record.eventID, let event = store.events.first(where: { $0.id == eventID }) {
@@ -238,7 +267,7 @@ struct ReviewView: View {
             }
             dict[name, default: 0] += record.tokenUsage
         }
-        
+
         return dict.map { EventTokenData(eventName: $0.key, tokens: $0.value) }
             .sorted(by: { $0.tokens > $1.tokens })
     }
@@ -256,6 +285,13 @@ struct SettingsMainView: View {
     var body: some View {
         Form {
             Section("常规") {
+                Picker("使用场景", selection: $viewModel.scenePreset) {
+                    ForEach(ScenePreset.allCases) { preset in
+                        Label(preset.displayName, systemImage: preset.iconName)
+                            .tag(preset)
+                    }
+                }
+
                 Picker("App 启动页", selection: $viewModel.defaultTab) {
                     Text(AppTab.today.titleKey).tag(AppTab.today)
                     Text(AppTab.capture.titleKey).tag(AppTab.capture)
@@ -282,6 +318,12 @@ struct SettingsMainView: View {
                 } label: {
                     Label("系统日历选择", systemImage: "calendar")
                 }
+                
+                NavigationLink {
+                    CourseCalendarSelectionView()
+                } label: {
+                    Label("课程日历标记", systemImage: "books.vertical.fill")
+                }
             }
             
             Section("外观") {
@@ -289,6 +331,17 @@ struct SettingsMainView: View {
                     Text("浅色").tag("light")
                     Text("深色").tag("dark")
                     Text("跟随系统").tag("system")
+                }
+
+                Picker("主题色", selection: $viewModel.accentColor) {
+                    HStack(spacing: 6) {
+                        Circle().fill(.white).frame(width: 14, height: 14).overlay(Circle().stroke(.gray.opacity(0.4), lineWidth: 1))
+                        Text("默认")
+                    }.tag("default")
+                    HStack(spacing: 6) {
+                        Circle().fill(NotieeColors.primary).frame(width: 14, height: 14)
+                        Text("Notiee")
+                    }.tag("notiee")
                 }
                 
                 Picker("字体大小", selection: $viewModel.fontSize) {
@@ -309,6 +362,8 @@ struct SettingsMainView: View {
             .onChange(of: viewModel.theme) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.fontSize) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.language) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.scenePreset) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.accentColor) { _, _ in viewModel.saveAll() }
 
             Section("大模型") {
                 Toggle("启用大模型处理功能", isOn: $viewModel.aiEnabled)
@@ -386,10 +441,19 @@ struct SettingsMainView: View {
                     }
                 }
                 Toggle("启用日程实时活动", isOn: $viewModel.liveActivityEnabled)
+
+                Picker("Token 提醒阈值", selection: $viewModel.tokenWarningThreshold) {
+                    Text("不提醒").tag(0)
+                    Text("1,000").tag(1000)
+                    Text("5,000").tag(5000)
+                    Text("10,000").tag(10000)
+                    Text("50,000").tag(50000)
+                }
             }
             .onChange(of: viewModel.notificationEnabled) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.notificationAdvanceTime) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.liveActivityEnabled) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.tokenWarningThreshold) { _, _ in viewModel.saveAll() }
 
             Section("高级设置") {
                 NavigationLink {
@@ -745,7 +809,7 @@ struct CalendarSelectionView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "calendar.badge.plus")
                         .font(.system(size: 48))
-                        .foregroundColor(.orange)
+                        .foregroundColor(NotieeColors.themed(.orange))
                         .padding(.top, 8)
                     
                     Text("日程读取设置")

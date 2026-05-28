@@ -66,11 +66,11 @@ struct RecordThumbnailView: View {
     
     private func loadImage() {
         Task.detached(priority: .userInitiated) {
-            guard let path = record.localImagePaths.first else { return }
-            if let loadedImage = await MainActor.run(body: { LocalImageStore.shared.loadImage(path: path) }) {
-                await MainActor.run {
-                    self.image = loadedImage
-                }
+            guard let path = record.localImagePaths.first,
+                  let data = LocalImageStore.readImageData(path: path),
+                  let loadedImage = UIImage(data: data) else { return }
+            await MainActor.run {
+                self.image = loadedImage
             }
         }
     }

@@ -20,7 +20,7 @@ struct BackupRestoreView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "arrow.triangle.2.circlepath.doc.on.clipboard")
                         .font(.system(size: 48))
-                        .foregroundColor(.blue)
+                        .foregroundColor(NotieeColors.themed(.blue))
                         .padding(.top, 8)
                     
                     Text("备份与恢复")
