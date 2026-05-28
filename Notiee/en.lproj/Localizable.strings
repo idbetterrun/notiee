@@ -1,3 +1,7 @@
+"Today" = "Today";
+"Snap" = "Snap";
+"Records" = "Records";
+"Me" = "Me";
 "记录" = "Record";
 "设置" = "Settings";
 "我" = "Me";
@@ -52,9 +56,6 @@
 "天" = "day";
 "周" = "week";
 "Today" = "Today";
-"Snap" = "Snap";
-"Records" = "Records";
-"Me" = "Me";
 "登录您的 TomaGo 账户" = "Sign in to TomaGo";
 "开启多端同步与高级功能" = "Unlock multi-device sync and advanced features";
 "全部日程" = "All Events";
