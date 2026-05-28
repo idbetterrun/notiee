@@ -5,22 +5,52 @@ struct WhatsNewContainerView: View {
 
     private let highlights = [
         WhatsNewHighlight(
-            title: "支持相机控制按键",
-            subtitle: "可以把 Notiee 设置为相机控制默认应用，举起手机就开始拍记。",
+            title: "全新登录页",
+            subtitle: "简洁的单按钮登录，协议未勾选时提示会左右抖动提醒你。支持浅色/深色模式。",
+            systemImage: "person.fill.checkmark",
+            tint: .green
+        ),
+        WhatsNewHighlight(
+            title: "主题色切换",
+            subtitle: "设置 > 外观中可选择 Notiee 翠绿配色，菜单图标、按钮统一跟随主题色变化。",
+            systemImage: "paintpalette.fill",
+            tint: .green
+        ),
+        WhatsNewHighlight(
+            title: "相机启动更流畅",
+            subtitle: "进入拍记页先展示旋转环加载动画，相机就绪后平滑切入预览，不再有卡顿感。",
             systemImage: "camera.macro",
             tint: .blue
         ),
         WhatsNewHighlight(
-            title: "记录浏览更清爽",
-            subtitle: "卡片、文件夹和列表细节重新整理，归档内容更容易扫读。",
-            systemImage: "rectangle.grid.2x2.fill",
-            tint: .teal
+            title: "文字框选与复制",
+            subtitle: "记录详情页的 AI 摘要、详细内容、OCR 原文均支持长按选中文字，弹出复制/分享菜单。",
+            systemImage: "selection.pin.in.out",
+            tint: .orange
         ),
         WhatsNewHighlight(
-            title: "多场景预设",
-            subtitle: "设置中可选择职场、大学、中学、创作者四种身份，AI 自动调整解析策略。",
-            systemImage: "person.fill.questionmark",
+            title: "Token 消耗追踪",
+            subtitle: "回顾页展示 Token 消耗 Top 5 记录排行，删除记录自动累计消耗量。详情页右上角可查看单条 Token 数。",
+            systemImage: "chart.pie.fill",
+            tint: .purple
+        ),
+        WhatsNewHighlight(
+            title: "日程路径去重",
+            subtitle: "拍记页和记录页的日程路径列表自动过滤节假日，相同标题只显示一次，不再重复堆叠。",
+            systemImage: "calendar.badge.clock",
             tint: .indigo
+        ),
+        WhatsNewHighlight(
+            title: "学生模式 & 深度联想",
+            subtitle: "大学/中学场景预设可标记课程日历并置顶显示。记录详情页自动推荐相关历史笔记。",
+            systemImage: "brain.head.profile.fill",
+            tint: .pink
+        ),
+        WhatsNewHighlight(
+            title: "Lottie 动效框架",
+            subtitle: "引入 Airbnb Lottie 引擎，后续版本将陆续添加精美动画，敬请期待。",
+            systemImage: "sparkles",
+            tint: .yellow
         )
     ]
 
@@ -54,7 +84,7 @@ struct WhatsNewContainerView: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
 
-                Text("这次主要把拍记入口、记录浏览和学生场景打磨得更顺手。")
+                Text("这次重点打磨了登录体验、主题配色、文字交互和 Token 追踪。")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
@@ -68,13 +98,13 @@ struct WhatsNewContainerView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(versionText)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.green)
 
-                Text("更快开始，更稳归档")
+                Text("更好看，更好用")
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text("围绕「拍下、理解、找回」这条主线整理体验。")
+                Text("从拍到查全链路体验优化。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -83,9 +113,9 @@ struct WhatsNewContainerView: View {
 
             Image(systemName: "sparkles")
                 .font(.system(size: 24, weight: .semibold))
-                .foregroundStyle(.blue)
+                .foregroundStyle(.green)
                 .frame(width: 52, height: 52)
-                .background(Color.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(Color.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .padding(18)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -107,7 +137,7 @@ struct WhatsNewContainerView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(.blue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(NotieeColors.primary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 24)

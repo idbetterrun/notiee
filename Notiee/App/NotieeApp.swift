@@ -17,7 +17,7 @@ struct NotieeApp: App {
     @AppStorage("hasSeenPermissions") private var hasSeenPermissions = false
     @AppStorage("lastAppVersion") private var lastAppVersion = ""
 
-    private let currentAppVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+    private let currentAppVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.2"
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
