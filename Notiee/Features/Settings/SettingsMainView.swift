@@ -55,33 +55,7 @@ struct SettingsMainView: View {
                 }
             }
             
-            Section("外观") {
-                Picker("颜色主题", selection: $viewModel.theme) {
-                    Text("浅色").tag("light")
-                    Text("深色").tag("dark")
-                    Text("跟随系统").tag("system")
-                }
-
-                Picker("主题色", selection: $viewModel.accentColor) {
-                    AccentColorOption(color: .white, label: "默认", isSystemDefault: true).tag("default")
-                    AccentColorOption(color: NotieeColors.primary, label: "Notiee", isSystemDefault: false).tag("notiee")
-                }
-                
-                Picker("字体大小", selection: $viewModel.fontSize) {
-                    Text("小").tag("small")
-                    Text("中 (默认)").tag("medium")
-                    Text("大").tag("large")
-                    Text("超大").tag("extraLarge")
-                }
-                
-                Picker("语言切换", selection: $viewModel.language) {
-                    Text("跟随系统").tag("system")
-                    Text("简体中文").tag("zh-Hans")
-                    Text("繁體中文").tag("zh-Hant")
-                    Text("English").tag("en")
-                }
-                Text("切换语言后需要重新启动应用才能生效").font(.caption).foregroundColor(.secondary)
-            }
+            appearanceSection
             .onChange(of: viewModel.theme) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.fontSize) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.language) { _, _ in viewModel.saveAll() }
@@ -205,5 +179,38 @@ struct SettingsMainView: View {
         }
         .navigationTitle("设置")
     }
+
+    // MARK: - Extracted Sections
+
+    private var appearanceSection: some View {
+        Section("外观") {
+            Picker("颜色主题", selection: $viewModel.theme) {
+                Text("浅色").tag("light")
+                Text("深色").tag("dark")
+                Text("跟随系统").tag("system")
+            }
+
+            Picker("主题色", selection: $viewModel.accentColor) {
+                AccentColorOption(color: .white, label: "默认", isSystemDefault: true).tag("default")
+                AccentColorOption(color: NotieeColors.primary, label: "Notiee", isSystemDefault: false).tag("notiee")
+            }
+
+            Picker("字体大小", selection: $viewModel.fontSize) {
+                Text("小").tag("small")
+                Text("中 (默认)").tag("medium")
+                Text("大").tag("large")
+                Text("超大").tag("extraLarge")
+            }
+
+            Picker("语言切换", selection: $viewModel.language) {
+                Text("跟随系统").tag("system")
+                Text("简体中文").tag("zh-Hans")
+                Text("繁體中文").tag("zh-Hant")
+                Text("English").tag("en")
+            }
+            Text("切换语言后需要重新启动应用才能生效").font(.caption).foregroundColor(.secondary)
+        }
+    }
+
 }
 
