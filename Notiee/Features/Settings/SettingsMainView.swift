@@ -191,7 +191,7 @@ struct SettingsMainView: View {
             }
 
             Picker("主题色", selection: $viewModel.accentColor) {
-                AccentColorOption(color: .white, label: "默认", isSystemDefault: true).tag("default")
+                AccentColorOption(color: Color.white, label: "默认", isSystemDefault: true).tag("default")
                 AccentColorOption(color: NotieeColors.primary, label: "Notiee", isSystemDefault: false).tag("notiee")
             }
 
@@ -214,3 +214,25 @@ struct SettingsMainView: View {
 
 }
 
+
+// MARK: - Helpers
+
+private struct AccentColorOption: View {
+    let color: Color
+    let label: String
+    let isSystemDefault: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(color)
+                .frame(width: 14, height: 14)
+            if isSystemDefault {
+                Circle()
+                    .stroke(.gray.opacity(0.4), lineWidth: 1)
+                    .frame(width: 14, height: 14)
+            }
+            Text(label)
+        }
+    }
+}
