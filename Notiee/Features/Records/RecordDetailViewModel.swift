@@ -26,6 +26,8 @@ final class RecordDetailViewModel: ObservableObject {
             "已生成摘要"
         case .failed:
             "处理失败"
+        case .deadLetter:
+            "已达最大重试次数"
         }
     }
 
@@ -57,6 +59,8 @@ final class RecordDetailViewModel: ObservableObject {
             "这条记录暂时没有摘要。"
         case .failed:
             "处理失败后可以稍后重试。"
+        case .deadLetter:
+            "处理已达最大重试次数，请检查 API 配置后手动重试。"
         }
     }
 

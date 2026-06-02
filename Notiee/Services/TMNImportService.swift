@@ -40,7 +40,8 @@ final class TMNImportService {
         }
         
         let aiData = content.appData?.notiee?.aiProcessing
-        let processingState = AIProcessingState(rawValue: aiData?.state ?? "completed") ?? .completed
+        let stateStr = aiData?.state ?? "completed"
+        let processingState = AIProcessingState(rawValue: stateStr) ?? .completed
         
         let iso8601 = ISO8601DateFormatter()
         let capturedAt = iso8601.date(from: content.createdAt) ?? Date()

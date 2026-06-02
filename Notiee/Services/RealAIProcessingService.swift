@@ -169,7 +169,7 @@ struct RealAIProcessingService: AIProcessingService {
         let enableSummary = settingsStore.loadBool(forKey: UDK.aiEnableSummary, defaultValue: true)
         let enableDetailedContent = settingsStore.loadBool(forKey: UDK.aiEnableDetailedContent, defaultValue: true)
 
-        let prompt = Self.localizedTextPrompt(
+        let prompt = AIPromptProvider.textPrompt(
             ocrText: ocrText,
             enableSummary: enableSummary,
             enableDetailedContent: enableDetailedContent,

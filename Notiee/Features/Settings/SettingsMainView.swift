@@ -63,14 +63,8 @@ struct SettingsMainView: View {
                 }
 
                 Picker("主题色", selection: $viewModel.accentColor) {
-                    HStack(spacing: 6) {
-                        Circle().fill(.white).frame(width: 14, height: 14).overlay(Circle().stroke(.gray.opacity(0.4), lineWidth: 1))
-                        Text("默认")
-                    }.tag("default")
-                    HStack(spacing: 6) {
-                        Circle().fill(NotieeColors.primary).frame(width: 14, height: 14)
-                        Text("Notiee")
-                    }.tag("notiee")
+                    AccentColorOption(color: .white, label: "默认", isSystemDefault: true).tag("default")
+                    AccentColorOption(color: NotieeColors.primary, label: "Notiee", isSystemDefault: false).tag("notiee")
                 }
                 
                 Picker("字体大小", selection: $viewModel.fontSize) {

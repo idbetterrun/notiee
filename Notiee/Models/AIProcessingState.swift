@@ -1,6 +1,6 @@
 import Foundation
 
-enum AIProcessingState: Equatable, Hashable, Codable, Sendable {
+enum AIProcessingState: String, Equatable, Hashable, Codable, Sendable {
     case pending
     case processing
     case completed

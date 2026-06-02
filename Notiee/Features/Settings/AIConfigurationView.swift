@@ -106,7 +106,7 @@ struct AIConfigurationView: View {
 }
 
 // MARK: - Components
-private struct AIConfigurationRow: View {
+struct AIConfigurationRow: View {
     let title: String
     let systemImage: String
     let configuration: AIModelConfiguration
@@ -131,7 +131,7 @@ private struct AIConfigurationRow: View {
     }
 }
 
-private struct ConnectionStatusView: View {
+struct ConnectionStatusView: View {
     let status: AIConnectionTestStatus
 
     var body: some View {
