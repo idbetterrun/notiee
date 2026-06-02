@@ -73,6 +73,7 @@
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
 		4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
+		4FAFAF572727FB4FFFAC2184 /* AIPromptProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */; };
 		5912A267C9D93191494E0848 /* CaptureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */; };
 		679A5EA447D66BA3E46AEDC9 /* NotieeStore+Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF62B44E635A576FE7CA1AAE /* NotieeStore+Pipeline.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
@@ -249,6 +250,7 @@
 		608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIDevice+ModelName.swift"; sourceTree = "<group>"; };
 		612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PastSchedulesView.swift; sourceTree = "<group>"; };
 		69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImageSaver.swift; sourceTree = "<group>"; };
+		6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIPromptProvider.swift; sourceTree = "<group>"; };
 		6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpecialDayEvent.swift; sourceTree = "<group>"; };
 		6E0AFE1B3C5C3986B1B38397 /* NotieeCaptureExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NotieeCaptureExtension.entitlements; sourceTree = "<group>"; };
 		70532E6B568AB1E2C463DC41 /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -558,6 +560,7 @@
 				8D7CE6E8B7700ACE5DD813AA /* NotieeStore+Actions.swift */,
 				DF62B44E635A576FE7CA1AAE /* NotieeStore+Pipeline.swift */,
 				9163A3ED86E9CA4AE31E1A64 /* NotificationManager.swift */,
+				6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -912,6 +915,7 @@
 				9414FC03E041C9386AE5F9BC /* AIConfigurationView.swift in Sources */,
 				8F08036E1FFE02A15B459735 /* CalendarSelectionView.swift in Sources */,
 				9C80A978FE802D9AA29BDEE3 /* OpenSourceAcknowledgmentsView.swift in Sources */,
+				4FAFAF572727FB4FFFAC2184 /* AIPromptProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
