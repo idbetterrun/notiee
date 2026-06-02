@@ -233,6 +233,7 @@ struct RealAIProcessingService: AIProcessingService {
 
     // Prompt strings are now managed by AIPromptProvider.
     // See Notiee/Services/AIPromptProvider.swift for all prompt definitions.
+}
 
 enum AIError: LocalizedError {
     case missingConfiguration
