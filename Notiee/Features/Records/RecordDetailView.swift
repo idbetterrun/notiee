@@ -16,7 +16,7 @@ struct RecordDetailView: View {
     
     @State private var fullScreenItem: FullScreenImageItem?
     
-    @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
+    @AppStorage(UDK.labMarkdownRenderingEnabled) private var markdownRenderingEnabled = false
     
     @Environment(\.dismiss) private var dismiss
 

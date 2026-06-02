@@ -36,7 +36,7 @@ final class ICloudSyncService: ObservableObject {
     }
     
     private init() {
-        if let interval = UserDefaults.standard.object(forKey: "notiee.icloudLastSyncDate") as? TimeInterval {
+        if let interval = UserDefaults.standard.object(forKey: UDK.icloudLastSyncDate) as? TimeInterval {
             lastSyncDate = Date(timeIntervalSince1970: interval)
         }
     }
@@ -176,7 +176,7 @@ final class ICloudSyncService: ObservableObject {
     
     private func persistLastSyncDate() {
         if let date = lastSyncDate {
-            UserDefaults.standard.set(date.timeIntervalSince1970, forKey: "notiee.icloudLastSyncDate")
+            UserDefaults.standard.set(date.timeIntervalSince1970, forKey: UDK.icloudLastSyncDate)
         }
     }
 }

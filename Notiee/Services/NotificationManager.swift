@@ -21,7 +21,7 @@ final class NotificationManager: ObservableObject {
         let center = UNUserNotificationCenter.current()
         center.removeAllPendingNotificationRequests() // Reset all notifications
         
-        guard UserDefaults.standard.bool(forKey: "notiee.notificationEnabled") else { return }
+        guard UserDefaults.standard.bool(forKey: UDK.notificationEnabled) else { return }
         
         for event in events {
             guard event.startDate > Date() else { continue } // Only upcoming

@@ -7,10 +7,10 @@ struct LabFeaturesView: View {
     @State private var previewData: PreviewData?
     @State private var syncResultMessage: String?
     
-    @AppStorage("labMarkdownRenderingEnabled") private var markdownRenderingEnabled = false
-    @AppStorage("labFullVisionModeEnabled") private var fullVisionModeEnabled = false
-    @AppStorage("labDeepAssociationModeEnabled") private var deepAssociationModeEnabled = false
-    @AppStorage("labLowConsumptionModeEnabled") private var lowConsumptionModeEnabled = false
+    @AppStorage(UDK.labMarkdownRenderingEnabled) private var markdownRenderingEnabled = false
+    @AppStorage(UDK.labFullVisionModeEnabled) private var fullVisionModeEnabled = false
+    @AppStorage(UDK.labDeepAssociationModeEnabled) private var deepAssociationModeEnabled = false
+    @AppStorage(UDK.labLowConsumptionModeEnabled) private var lowConsumptionModeEnabled = false
 
     @State private var showDeepAssociationDetail = false
     

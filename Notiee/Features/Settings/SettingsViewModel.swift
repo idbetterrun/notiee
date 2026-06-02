@@ -53,27 +53,27 @@ final class SettingsViewModel: ObservableObject {
         textConfiguration = settingsStore.loadConfiguration(for: .text)
         visionConfiguration = settingsStore.loadConfiguration(for: .vision)
         
-        showWeekNumbers = settingsStore.loadBool(forKey: "notiee.showWeekNumbers", defaultValue: true)
-        firstWeekStartDay = settingsStore.loadInt(forKey: "notiee.firstWeekStartDay", defaultValue: 2)
-        if let timeInterval = UserDefaults.standard.object(forKey: "notiee.semesterStartDate") as? TimeInterval {
+        showWeekNumbers = settingsStore.loadBool(forKey: UDK.showWeekNumbers, defaultValue: true)
+        firstWeekStartDay = settingsStore.loadInt(forKey: UDK.firstWeekStartDay, defaultValue: 2)
+        if let timeInterval = UserDefaults.standard.object(forKey: UDK.semesterStartDate) as? TimeInterval {
             semesterStartDate = Date(timeIntervalSince1970: timeInterval)
         }
-        theme = settingsStore.loadString(forKey: "notiee.theme", defaultValue: "system")
-        fontSize = settingsStore.loadString(forKey: "notiee.fontSize", defaultValue: "medium")
-        language = settingsStore.loadString(forKey: "notiee.language", defaultValue: "system")
+        theme = settingsStore.loadString(forKey: UDK.theme, defaultValue: "system")
+        fontSize = settingsStore.loadString(forKey: UDK.fontSize, defaultValue: "medium")
+        language = settingsStore.loadString(forKey: UDK.language, defaultValue: "system")
         scenePreset = ScenePreset.load()
-        accentColor = settingsStore.loadString(forKey: "notiee.accentColor", defaultValue: "default")
+        accentColor = settingsStore.loadString(forKey: UDK.accentColor, defaultValue: "default")
         
-        aiEnabled = settingsStore.loadBool(forKey: "notiee.aiEnabled", defaultValue: true)
-        aiEnableSummary = settingsStore.loadBool(forKey: "notiee.aiEnableSummary", defaultValue: true)
-        aiEnableDetailedContent = settingsStore.loadBool(forKey: "notiee.aiEnableDetailedContent", defaultValue: true)
-        aiEnableTodos = settingsStore.loadBool(forKey: "notiee.aiEnableTodos", defaultValue: true)
-        autoProcessAfterCapture = settingsStore.loadBool(forKey: "notiee.autoProcessAfterCapture", defaultValue: true)
+        aiEnabled = settingsStore.loadBool(forKey: UDK.aiEnabled, defaultValue: true)
+        aiEnableSummary = settingsStore.loadBool(forKey: UDK.aiEnableSummary, defaultValue: true)
+        aiEnableDetailedContent = settingsStore.loadBool(forKey: UDK.aiEnableDetailedContent, defaultValue: true)
+        aiEnableTodos = settingsStore.loadBool(forKey: UDK.aiEnableTodos, defaultValue: true)
+        autoProcessAfterCapture = settingsStore.loadBool(forKey: UDK.autoProcessAfterCapture, defaultValue: true)
         
-        notificationEnabled = settingsStore.loadBool(forKey: "notiee.notificationEnabled", defaultValue: false)
-        liveActivityEnabled = settingsStore.loadBool(forKey: "notiee.liveActivityEnabled", defaultValue: false)
-        notificationAdvanceTime = settingsStore.loadInt(forKey: "notiee.notificationAdvanceTime", defaultValue: 5)
-        tokenWarningThreshold = settingsStore.loadInt(forKey: "notiee.tokenWarningThreshold", defaultValue: 0)
+        notificationEnabled = settingsStore.loadBool(forKey: UDK.notificationEnabled, defaultValue: false)
+        liveActivityEnabled = settingsStore.loadBool(forKey: UDK.liveActivityEnabled, defaultValue: false)
+        notificationAdvanceTime = settingsStore.loadInt(forKey: UDK.notificationAdvanceTime, defaultValue: 5)
+        tokenWarningThreshold = settingsStore.loadInt(forKey: UDK.tokenWarningThreshold, defaultValue: 0)
         
         customModels = settingsStore.loadCustomModels()
         loadCalendarSelection()
@@ -94,17 +94,17 @@ final class SettingsViewModel: ObservableObject {
     }
     
     func saveAll() {
-        settingsStore.saveBool(showWeekNumbers, forKey: "notiee.showWeekNumbers")
-        settingsStore.saveInt(firstWeekStartDay, forKey: "notiee.firstWeekStartDay")
+        settingsStore.saveBool(showWeekNumbers, forKey: UDK.showWeekNumbers)
+        settingsStore.saveInt(firstWeekStartDay, forKey: UDK.firstWeekStartDay)
         if let date = semesterStartDate {
-            UserDefaults.standard.set(date.timeIntervalSince1970, forKey: "notiee.semesterStartDate")
+            UserDefaults.standard.set(date.timeIntervalSince1970, forKey: UDK.semesterStartDate)
         } else {
-            UserDefaults.standard.removeObject(forKey: "notiee.semesterStartDate")
+            UserDefaults.standard.removeObject(forKey: UDK.semesterStartDate)
         }
-        settingsStore.saveString(theme, forKey: "notiee.theme")
-        settingsStore.saveString(fontSize, forKey: "notiee.fontSize")
-        settingsStore.saveString(language, forKey: "notiee.language")
-        settingsStore.saveString(accentColor, forKey: "notiee.accentColor")
+        settingsStore.saveString(theme, forKey: UDK.theme)
+        settingsStore.saveString(fontSize, forKey: UDK.fontSize)
+        settingsStore.saveString(language, forKey: UDK.language)
+        settingsStore.saveString(accentColor, forKey: UDK.accentColor)
         scenePreset.save()
         
         if language == "system" {
@@ -114,17 +114,17 @@ final class SettingsViewModel: ObservableObject {
         }
         UserDefaults.standard.synchronize()
         
-        settingsStore.saveBool(aiEnabled, forKey: "notiee.aiEnabled")
-        settingsStore.saveBool(aiEnableSummary, forKey: "notiee.aiEnableSummary")
-        settingsStore.saveBool(aiEnableDetailedContent, forKey: "notiee.aiEnableDetailedContent")
-        settingsStore.saveBool(aiEnableTodos, forKey: "notiee.aiEnableTodos")
-        settingsStore.saveBool(autoProcessAfterCapture, forKey: "notiee.autoProcessAfterCapture")
+        settingsStore.saveBool(aiEnabled, forKey: UDK.aiEnabled)
+        settingsStore.saveBool(aiEnableSummary, forKey: UDK.aiEnableSummary)
+        settingsStore.saveBool(aiEnableDetailedContent, forKey: UDK.aiEnableDetailedContent)
+        settingsStore.saveBool(aiEnableTodos, forKey: UDK.aiEnableTodos)
+        settingsStore.saveBool(autoProcessAfterCapture, forKey: UDK.autoProcessAfterCapture)
         
-        settingsStore.saveBool(notificationEnabled, forKey: "notiee.notificationEnabled")
-        settingsStore.saveBool(liveActivityEnabled, forKey: "notiee.liveActivityEnabled")
+        settingsStore.saveBool(notificationEnabled, forKey: UDK.notificationEnabled)
+        settingsStore.saveBool(liveActivityEnabled, forKey: UDK.liveActivityEnabled)
         NotificationCenter.default.post(name: NSNotification.Name("LiveActivitySettingsChanged"), object: nil)
-        settingsStore.saveInt(notificationAdvanceTime, forKey: "notiee.notificationAdvanceTime")
-        settingsStore.saveInt(tokenWarningThreshold, forKey: "notiee.tokenWarningThreshold")
+        settingsStore.saveInt(notificationAdvanceTime, forKey: UDK.notificationAdvanceTime)
+        settingsStore.saveInt(tokenWarningThreshold, forKey: UDK.tokenWarningThreshold)
         
         settingsStore.saveCustomModels(customModels)
         
@@ -134,7 +134,7 @@ final class SettingsViewModel: ObservableObject {
                 if !granted {
                     await MainActor.run {
                         self.notificationEnabled = false
-                        self.settingsStore.saveBool(false, forKey: "notiee.notificationEnabled")
+                        self.settingsStore.saveBool(false, forKey: UDK.notificationEnabled)
                     }
                 }
             }

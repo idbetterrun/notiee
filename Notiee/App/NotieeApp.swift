@@ -7,15 +7,15 @@ import FirebaseCore
 
 @main
 struct NotieeApp: App {
-    @AppStorage("notiee.theme") private var theme: String = "system"
-    @AppStorage("notiee.fontSize") private var fontSize: String = "medium"
-    @AppStorage("notiee.language") private var language: String = "system"
-    @AppStorage("notiee.accentColor") private var accentColor: String = "default"
+    @AppStorage(UDK.theme) private var theme: String = "system"
+    @AppStorage(UDK.fontSize) private var fontSize: String = "medium"
+    @AppStorage(UDK.language) private var language: String = "system"
+    @AppStorage(UDK.accentColor) private var accentColor: String = "default"
 
-    @AppStorage("hasAgreedToPrivacy") private var hasAgreedToPrivacy = false
-    @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
-    @AppStorage("hasSeenPermissions") private var hasSeenPermissions = false
-    @AppStorage("lastAppVersion") private var lastAppVersion = ""
+    @AppStorage(UDK.hasAgreedToPrivacy) private var hasAgreedToPrivacy = false
+    @AppStorage(UDK.hasSeenWelcome) private var hasSeenWelcome = false
+    @AppStorage(UDK.hasSeenPermissions) private var hasSeenPermissions = false
+    @AppStorage(UDK.lastAppVersion) private var lastAppVersion = ""
 
     private let currentAppVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.2"
 

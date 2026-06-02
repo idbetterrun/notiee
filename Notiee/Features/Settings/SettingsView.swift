@@ -97,8 +97,8 @@ struct ReviewView: View {
     @ObservedObject var store: NotieeStore
     @State private var selectedRange: TimeRange = .today
 
-    @AppStorage("notiee.tokenWarningThreshold") private var tokenWarningThreshold: Int = 0
-    @AppStorage("notiee.accumulatedDeletedTokens") private var accumulatedDeletedTokens: Int = 0
+    @AppStorage(UDK.tokenWarningThreshold) private var tokenWarningThreshold: Int = 0
+    @AppStorage(UDK.accumulatedDeletedTokens) private var accumulatedDeletedTokens: Int = 0
 
     var body: some View {
         ScrollView {

@@ -24,7 +24,7 @@ extension NotieeStore {
     // MARK: - Live Activity
 
     func updateLiveActivity() async {
-        let isEnabled = UserDefaults.standard.bool(forKey: "notiee.liveActivityEnabled")
+        let isEnabled = UserDefaults.standard.bool(forKey: UDK.liveActivityEnabled)
         guard isEnabled else {
             LiveActivityManager.shared.endActivity()
             return
@@ -55,7 +55,7 @@ extension NotieeStore {
             LiveActivityManager.shared.endActivity()
         }
         if let data = try? JSONEncoder().encode(liveActivityDisabledEventIDs) {
-            UserDefaults.standard.set(data, forKey: "notiee.liveActivityDisabledEventIDs")
+            UserDefaults.standard.set(data, forKey: UDK.liveActivityDisabledEventIDs)
         }
         Task { await updateLiveActivity() }
     }

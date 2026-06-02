@@ -116,8 +116,8 @@ extension NotieeStore {
     }
 
     private func accumulateDeletedTokens(_ tokens: Int) {
-        let current = UserDefaults.standard.integer(forKey: "notiee.accumulatedDeletedTokens")
-        UserDefaults.standard.set(current + tokens, forKey: "notiee.accumulatedDeletedTokens")
+        let current = UserDefaults.standard.integer(forKey: UDK.accumulatedDeletedTokens)
+        UserDefaults.standard.set(current + tokens, forKey: UDK.accumulatedDeletedTokens)
     }
 
     func addTodo(_ todo: NoteTodo) {
@@ -273,7 +273,7 @@ extension NotieeStore {
 
     func persistIgnoredKeys() {
         if let data = try? JSONEncoder().encode(ignoredCalendarEventKeys) {
-            UserDefaults.standard.set(data, forKey: "notiee.ignoredCalendarEventKeys")
+            UserDefaults.standard.set(data, forKey: UDK.ignoredCalendarEventKeys)
         }
     }
 
@@ -295,7 +295,7 @@ extension NotieeStore {
         self.allEvents = all
         self.events = all.filter { !isEventIgnored($0) }
 
-        let advanceTime = UserDefaults.standard.integer(forKey: "notiee.notificationAdvanceTime")
+        let advanceTime = UserDefaults.standard.integer(forKey: UDK.notificationAdvanceTime)
         NotificationManager.shared.scheduleNotifications(for: self.events, advanceTimeMinutes: advanceTime)
         Task { await updateLiveActivity() }
     }

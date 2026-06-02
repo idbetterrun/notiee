@@ -31,7 +31,7 @@ final class CalendarService: ObservableObject {
     }
     
     func selectedCalendarIDs() -> Set<String> {
-        guard let data = UserDefaults.standard.data(forKey: "notiee.selectedCalendarIdentifiers"),
+        guard let data = UserDefaults.standard.data(forKey: UDK.selectedCalendarIdentifiers),
               let ids = try? JSONDecoder().decode(Set<String>.self, from: data) else {
             return Set(availableCalendars.map { $0.calendarIdentifier })
         }
@@ -40,7 +40,7 @@ final class CalendarService: ObservableObject {
     
     func saveSelectedCalendarIDs(_ ids: Set<String>) {
         if let data = try? JSONEncoder().encode(ids) {
-            UserDefaults.standard.set(data, forKey: "notiee.selectedCalendarIdentifiers")
+            UserDefaults.standard.set(data, forKey: UDK.selectedCalendarIdentifiers)
         }
     }
     
@@ -193,7 +193,7 @@ final class CalendarService: ObservableObject {
     }
 
     func courseCalendarIDs() -> Set<String> {
-        guard let data = UserDefaults.standard.data(forKey: "notiee.courseCalendarIdentifiers"),
+        guard let data = UserDefaults.standard.data(forKey: UDK.courseCalendarIdentifiers),
               let ids = try? JSONDecoder().decode(Set<String>.self, from: data) else {
             return []
         }
@@ -202,7 +202,7 @@ final class CalendarService: ObservableObject {
 
     func saveCourseCalendarIDs(_ ids: Set<String>) {
         if let data = try? JSONEncoder().encode(ids) {
-            UserDefaults.standard.set(data, forKey: "notiee.courseCalendarIdentifiers")
+            UserDefaults.standard.set(data, forKey: UDK.courseCalendarIdentifiers)
         }
     }
 

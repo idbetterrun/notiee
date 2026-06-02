@@ -98,7 +98,7 @@ struct AboutNotieeView: View {
     }
 
     private var legalLocaleSuffix: String {
-        let lang = UserDefaults.standard.string(forKey: "notiee.language") ?? "system"
+        let lang = UserDefaults.standard.string(forKey: UDK.language) ?? "system"
         switch lang {
         case "zh-Hans": return "zh-Hans"
         case "en": return "en"

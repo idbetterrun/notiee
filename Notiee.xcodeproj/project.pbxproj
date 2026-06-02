@@ -30,6 +30,7 @@
 		18E20B242FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1D2FC4A215006F3FCE /* UserAgreement_zh-Hant-HK.pdf */; };
 		18E20B252FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1A2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf */; };
 		18E20B262FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B182FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf */; };
+		1C100501D4B43F9FC9EC1BFE /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */; };
 		200000000000000000000001 /* NotieeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000001 /* NotieeApp.swift */; };
 		200000000000000000000002 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000002 /* RootTabView.swift */; };
 		200000000000000000000003 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* TodayView.swift */; };
@@ -221,6 +222,7 @@
 		480559344177345371C21F7A /* BackupRestoreView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
 		56C541D6F62CB3492461A94D /* AboutNotieeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutNotieeView.swift; sourceTree = "<group>"; };
+		59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
 		5F6D173C754CEF3505112591 /* FeatureHintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureHintView.swift; sourceTree = "<group>"; };
 		608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIDevice+ModelName.swift"; sourceTree = "<group>"; };
 		612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PastSchedulesView.swift; sourceTree = "<group>"; };
@@ -272,7 +274,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		18B83FEC2FC0A058002A7EC9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		18B83FEC2FC0A058002A7EC9 /* Exceptions for "NotieeWidget" folder in "NotieeWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -282,7 +284,18 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		18B83FDC2FC0A057002A7EC9 /* NotieeWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (18B83FEC2FC0A058002A7EC9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = NotieeWidget; sourceTree = "<group>"; };
+		18B83FDC2FC0A057002A7EC9 /* NotieeWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				18B83FEC2FC0A058002A7EC9 /* Exceptions for "NotieeWidget" folder in "NotieeWidgetExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NotieeWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -559,6 +572,7 @@
 			children = (
 				70532E6B568AB1E2C463DC41 /* Logger.swift */,
 				88784320EF16FC6225923813 /* NotieeColors.swift */,
+				59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -849,6 +863,7 @@
 				C5C0AAAB46567881AB8A3746 /* Logger.swift in Sources */,
 				6A6B481651E79E00EBA96444 /* NotieeColors.swift in Sources */,
 				F9EA39691258F8B4EE0DCF2E /* NotificationManager.swift in Sources */,
+				1C100501D4B43F9FC9EC1BFE /* UserDefaultsKeys.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

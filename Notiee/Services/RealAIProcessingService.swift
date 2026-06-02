@@ -80,7 +80,7 @@ struct RealAIProcessingService: AIProcessingService {
     }
 
     private func callVisionModel(config: AIModelConfiguration, base64Images: [String], imagePaths: [String], preset: ScenePreset) async throws -> (String, Int) {
-        let isLowConsumption = UserDefaults.standard.bool(forKey: "labLowConsumptionModeEnabled")
+        let isLowConsumption = UserDefaults.standard.bool(forKey: UDK.labLowConsumptionModeEnabled)
 
         if isLowConsumption {
             let localText = try await LocalOCRService.batchRecognize(imagePaths: imagePaths)
@@ -90,7 +90,7 @@ struct RealAIProcessingService: AIProcessingService {
         let endpoint = config.activeEndpoint
         let protocolType = config.activeProtocol
 
-        let isFullVisionManual = UserDefaults.standard.bool(forKey: "labFullVisionModeEnabled")
+        let isFullVisionManual = UserDefaults.standard.bool(forKey: UDK.labFullVisionModeEnabled)
         let useFullVision = preset.visionStrategy == .fullVision || isFullVisionManual
 
         var prompt = useFullVision ? Self.localizedFullVisionPrompt() : Self.localizedVisionPrompt()
@@ -169,8 +169,8 @@ struct RealAIProcessingService: AIProcessingService {
         let endpoint = config.activeEndpoint
         let protocolType = config.activeProtocol
 
-        let enableSummary = settingsStore.loadBool(forKey: "notiee.aiEnableSummary", defaultValue: true)
-        let enableDetailedContent = settingsStore.loadBool(forKey: "notiee.aiEnableDetailedContent", defaultValue: true)
+        let enableSummary = settingsStore.loadBool(forKey: UDK.aiEnableSummary, defaultValue: true)
+        let enableDetailedContent = settingsStore.loadBool(forKey: UDK.aiEnableDetailedContent, defaultValue: true)
 
         let prompt = Self.localizedTextPrompt(
             ocrText: ocrText,
@@ -237,7 +237,7 @@ struct RealAIProcessingService: AIProcessingService {
     // MARK: - Localized Prompts
 
     static func currentLanguage() -> String {
-        return UserDefaults.standard.string(forKey: "notiee.language") ?? "system"
+        return UserDefaults.standard.string(forKey: UDK.language) ?? "system"
     }
 
     static func localizedVisionPrompt() -> String {

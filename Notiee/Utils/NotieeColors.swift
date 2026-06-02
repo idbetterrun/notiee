@@ -5,6 +5,6 @@ enum NotieeColors {
     static let secondary = Color(red: 0.204, green: 0.149, blue: 0.149)
 
     static func themed(_ defaultColor: Color) -> Color {
-        UserDefaults.standard.string(forKey: "notiee.accentColor") == "notiee" ? Self.primary : defaultColor
+        UserDefaults.standard.string(forKey: UDK.accentColor) == "notiee" ? Self.primary : defaultColor
     }
 }

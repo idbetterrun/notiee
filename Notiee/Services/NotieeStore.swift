@@ -33,25 +33,25 @@ final class NotieeStore: ObservableObject {
     @Published internal(set) var liveActivityDisabledEventIDs: Set<UUID> = []
 
     var aiEnabled: Bool {
-        settingsStore.loadBool(forKey: "notiee.aiEnabled", defaultValue: true)
+        settingsStore.loadBool(forKey: UDK.aiEnabled, defaultValue: true)
     }
 
     var autoProcessAfterCapture: Bool {
-        settingsStore.loadBool(forKey: "notiee.autoProcessAfterCapture", defaultValue: true)
+        settingsStore.loadBool(forKey: UDK.autoProcessAfterCapture, defaultValue: true)
     }
 
     var semesterStartDate: Date? {
-        guard let timeInterval = UserDefaults.standard.object(forKey: "notiee.semesterStartDate") as? TimeInterval else {
+        guard let timeInterval = UserDefaults.standard.object(forKey: UDK.semesterStartDate) as? TimeInterval else {
             return nil
         }
         return Date(timeIntervalSince1970: timeInterval)
     }
 
     var showWeekNumbers: Bool {
-        if UserDefaults.standard.object(forKey: "notiee.showWeekNumbers") == nil {
+        if UserDefaults.standard.object(forKey: UDK.showWeekNumbers) == nil {
             return true
         }
-        return UserDefaults.standard.bool(forKey: "notiee.showWeekNumbers")
+        return UserDefaults.standard.bool(forKey: UDK.showWeekNumbers)
     }
 
     func formattedDateWithWeek(for date: Date) -> String {
@@ -107,12 +107,12 @@ final class NotieeStore: ObservableObject {
         self.settingsStore = settingsStore
         self.autoProcess = autoProcess
 
-        if let data = UserDefaults.standard.data(forKey: "notiee.ignoredCalendarEventKeys"),
+        if let data = UserDefaults.standard.data(forKey: UDK.ignoredCalendarEventKeys),
            let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) {
             self.ignoredCalendarEventKeys = decoded
         }
 
-        if let data = UserDefaults.standard.data(forKey: "notiee.liveActivityDisabledEventIDs"),
+        if let data = UserDefaults.standard.data(forKey: UDK.liveActivityDisabledEventIDs),
            let decoded = try? JSONDecoder().decode(Set<UUID>.self, from: data) {
             self.liveActivityDisabledEventIDs = decoded
         }

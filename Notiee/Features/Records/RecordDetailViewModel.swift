@@ -112,7 +112,7 @@ final class RecordDetailViewModel: ObservableObject {
     }
 
     var continuationRecord: NoteRecord? {
-        guard UserDefaults.standard.bool(forKey: "labDeepAssociationModeEnabled") else { return nil }
+        guard UserDefaults.standard.bool(forKey: UDK.labDeepAssociationModeEnabled) else { return nil }
         guard let eventID = record.eventID else { return nil }
 
         let sameEventRecords = store.records
@@ -127,7 +127,7 @@ final class RecordDetailViewModel: ObservableObject {
     }
 
     var relatedRecords: [NoteRecord] {
-        guard UserDefaults.standard.bool(forKey: "labDeepAssociationModeEnabled") else { return [] }
+        guard UserDefaults.standard.bool(forKey: UDK.labDeepAssociationModeEnabled) else { return [] }
 
         let allRecords = store.records.filter { !$0.isDeleted && $0.id != record.id && $0.processingState == .completed }
 

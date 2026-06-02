@@ -120,7 +120,7 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
     }
 
     func loadCustomModels() -> [CustomAIModel] {
-        guard let data = userDefaults.data(forKey: "notiee.customModels"),
+        guard let data = userDefaults.data(forKey: UDK.customModels),
               let models = try? JSONDecoder().decode([CustomAIModel].self, from: data) else {
             return []
         }
@@ -129,7 +129,7 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
 
     func saveCustomModels(_ models: [CustomAIModel]) {
         if let data = try? JSONEncoder().encode(models) {
-            userDefaults.set(data, forKey: "notiee.customModels")
+            userDefaults.set(data, forKey: UDK.customModels)
         }
     }
 }
@@ -204,25 +204,25 @@ enum SecretStoreError: LocalizedError {
 }
 
 private enum Keys {
-    static let defaultTab = "notiee.defaultTab"
+    static let defaultTab = UDK.defaultTab
 
     static func providerType(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).providerType"
+        UDK.aiProviderType(for: kind)
     }
 
     static func customEndpoint(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).customEndpoint"
+        UDK.aiCustomEndpoint(for: kind)
     }
 
     static func customProtocol(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).customProtocol"
+        UDK.aiCustomProtocol(for: kind)
     }
 
     static func modelName(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).modelName"
+        UDK.aiModelName(for: kind)
     }
 
     static func apiKey(for kind: AIModelKind) -> String {
-        "notiee.ai.\(kind.rawValue).apiKey"
+        UDK.aiApiKey(for: kind)
     }
 }

@@ -112,7 +112,7 @@ enum ScenePreset: String, CaseIterable, Codable, Identifiable, Sendable {
     static var `default`: ScenePreset { .professional }
 
     static func load() -> ScenePreset {
-        guard let rawValue = UserDefaults.standard.string(forKey: "notiee.scenePreset"),
+        guard let rawValue = UserDefaults.standard.string(forKey: UDK.scenePreset),
               let preset = ScenePreset(rawValue: rawValue) else {
             return .default
         }
@@ -120,6 +120,6 @@ enum ScenePreset: String, CaseIterable, Codable, Identifiable, Sendable {
     }
 
     func save() {
-        UserDefaults.standard.set(rawValue, forKey: "notiee.scenePreset")
+        UserDefaults.standard.set(rawValue, forKey: UDK.scenePreset)
     }
 }
