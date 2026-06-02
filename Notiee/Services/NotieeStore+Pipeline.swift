@@ -65,9 +65,10 @@ extension NotieeStore {
     func retryAIProcessing(for recordID: UUID) {
         guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
         var record = records[index]
-        guard record.processingState == .failed else { return }
+        guard record.processingState == .failed || record.processingState == .deadLetter else { return }
 
         record.processingState = .pending
+        record.aiRetryCount = 0
         records[index] = record
         persistRecords()
 
@@ -85,9 +86,25 @@ extension NotieeStore {
     internal func enqueueProcessing(for record: NoteRecord) {
         guard aiEnabled else { return }
         let recordID = record.id
+        let retryCount = record.aiRetryCount
         let service = aiService
 
+        let maxRetries = 4
+        let delaySeconds: UInt64 = {
+            switch retryCount {
+            case 0: return 0
+            case 1: return 2_000_000_000
+            case 2: return 4_000_000_000
+            case 3: return 8_000_000_000
+            default: return 0
+            }
+        }()
+
         Task {
+            if delaySeconds > 0 {
+                try? await Task.sleep(nanoseconds: delaySeconds)
+            }
+
             await MainActor.run { self.setProcessingState(.processing, for: recordID) }
 
             do {
@@ -97,11 +114,25 @@ extension NotieeStore {
                 await MainActor.run { self.applyAIResult(result, to: recordID) }
             } catch {
                 await MainActor.run {
-                    self.setProcessingState(.failed, for: recordID)
-                    print("AI Processing failed: \(error.localizedDescription)")
+                    let nextRetry = retryCount + 1
+                    if nextRetry >= maxRetries {
+                        self.setProcessingState(.deadLetter, for: recordID)
+                        print("AI Processing dead letter after \(maxRetries) retries: \(error.localizedDescription)")
+                    } else {
+                        self.incrementRetryCount(for: recordID)
+                        self.setProcessingState(.failed, for: recordID)
+                        self.enqueueProcessing(for: self.records.first(where: { $0.id == recordID })!)
+                        print("AI Processing failed (retry \(nextRetry)/\(maxRetries)): \(error.localizedDescription)")
+                    }
                 }
             }
         }
+    }
+
+    private func incrementRetryCount(for recordID: UUID) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
+        records[index].aiRetryCount += 1
+        persistRecords()
     }
 
     private func setProcessingState(_ state: AIProcessingState, for recordID: UUID) {

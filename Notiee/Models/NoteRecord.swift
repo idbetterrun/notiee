@@ -21,6 +21,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     var editedAt: Date?
     var modelsUsed: [String]?
     var tokenUsage: Int
+    var aiRetryCount: Int
     var deviceName: String?
 
     init(
@@ -41,6 +42,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         editedAt: Date? = nil,
         modelsUsed: [String]? = nil,
         tokenUsage: Int = 0,
+        aiRetryCount: Int = 0,
         deviceName: String? = UIDevice.current.modelName
     ) {
         self.id = id
@@ -60,6 +62,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.editedAt = editedAt
         self.modelsUsed = modelsUsed
         self.tokenUsage = tokenUsage
+        self.aiRetryCount = aiRetryCount
         self.deviceName = deviceName
     }
 }

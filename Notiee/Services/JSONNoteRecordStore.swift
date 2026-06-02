@@ -28,7 +28,22 @@ struct JSONNoteRecordStore: NoteRecordPersisting {
             return []
         }
 
-        return try JSONDecoder().decode([NoteRecord].self, from: data)
+        // Try v1 envelope first: { "version": 1, "records": [...] }
+        if let envelope = try? JSONDecoder().decode(RecordEnvelope.self, from: data) {
+            let records = envelope.records
+            if envelope.version < RecordMigrator.currentVersion {
+                let migrated = RecordMigrator.migrate(records: records, from: envelope.version)
+                try saveRecords(migrated)
+                return migrated
+            }
+            return records
+        }
+
+        // Legacy v0: raw [NoteRecord] array
+        let records = try JSONDecoder().decode([NoteRecord].self, from: data)
+        let migrated = RecordMigrator.migrate(records: records, from: 0)
+        try saveRecords(migrated)
+        return migrated
     }
 
     func saveRecords(_ records: [NoteRecord]) throws {
@@ -36,7 +51,14 @@ struct JSONNoteRecordStore: NoteRecordPersisting {
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        let data = try JSONEncoder().encode(records)
+        let envelope = RecordEnvelope(version: RecordMigrator.currentVersion, records: records)
+        let data = try JSONEncoder().encode(envelope)
         try data.write(to: fileURL, options: [.atomic])
     }
+}
+
+/// Versioned JSON envelope for records storage.
+private struct RecordEnvelope: Codable {
+    let version: Int
+    let records: [NoteRecord]
 }
