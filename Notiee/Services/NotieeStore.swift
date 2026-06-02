@@ -4,72 +4,74 @@ import UIKit
 
 @MainActor
 final class NotieeStore: ObservableObject {
-    @Published internal(set) var events: [ScheduledEvent]
-    @Published internal(set) var allEvents: [ScheduledEvent]
-    @Published internal(set) var todos: [NoteTodo]
-    @Published internal(set) var records: [NoteRecord]
-    @Published internal(set) var customFolders: [CustomFolder]
-    @Published internal(set) var customTags: [EventTag]
-    @Published internal(set) var eventTagMapping: [String: UUID]
-    @Published internal(set) var lastPersistenceError: String?
+    // MARK: - @Published Properties (mirrored from Managers via Combine)
 
+    @Published var events: [ScheduledEvent] = []
+    @Published var allEvents: [ScheduledEvent] = []
+    @Published var todos: [NoteTodo] = []
+    @Published var records: [NoteRecord] = []
+    @Published var customFolders: [CustomFolder] = []
+    @Published var customTags: [EventTag] = []
+    @Published var eventTagMapping: [String: UUID] = [:]
+    @Published var lastPersistenceError: String?
     @Published var currentDate: Date
-    private var timerCancellable: AnyCancellable?
+    @Published var ignoredCalendarEventKeys: Set<String> = []
+    @Published var liveActivityDisabledEventIDs: Set<UUID> = []
 
-    internal let calendar: Calendar
-    internal let recordStore: NoteRecordPersisting
-    internal let folderStore: CustomFolderPersisting
-    internal let tagStore: EventTagPersisting
-    internal let eventStore: ScheduledEventPersisting
-    internal let scheduleMatcher: ScheduleMatcher
-    internal let aiService: any AIProcessingService
-    internal let autoProcess: Bool
+    // MARK: - Managers
+
+    let recordManager: RecordManager
+    let calendarManager: CalendarManager
+    let folderTagManager: FolderTagManager
+    let aiPipelineManager: AIPipelineManager
+
     let settingsStore: AppSettingsPersisting
+    let autoProcess: Bool
+    let calendar: Calendar
 
-    internal var customEvents: [ScheduledEvent] = []
-    internal var calendarEvents: [ScheduledEvent] = []
+    private var cancellables = Set<AnyCancellable>()
 
-    @Published internal(set) var ignoredCalendarEventKeys: Set<String> = []
-    @Published internal(set) var liveActivityDisabledEventIDs: Set<UUID> = []
-
-    var aiEnabled: Bool {
-        settingsStore.loadBool(forKey: UDK.aiEnabled, defaultValue: true)
-    }
-
-    var autoProcessAfterCapture: Bool {
-        settingsStore.loadBool(forKey: UDK.autoProcessAfterCapture, defaultValue: true)
-    }
-
-    var semesterStartDate: Date? {
-        guard let timeInterval = UserDefaults.standard.object(forKey: UDK.semesterStartDate) as? TimeInterval else {
-            return nil
-        }
-        return Date(timeIntervalSince1970: timeInterval)
-    }
-
-    var showWeekNumbers: Bool {
-        if UserDefaults.standard.object(forKey: UDK.showWeekNumbers) == nil {
-            return true
-        }
-        return UserDefaults.standard.bool(forKey: UDK.showWeekNumbers)
-    }
-
-    func formattedDateWithWeek(for date: Date) -> String {
-        let dateString = date.formatted(.dateTime.year().month(.defaultDigits).day().locale(Locale(identifier: "zh_CN")))
-        if showWeekNumbers {
-            if let semesterStart = semesterStartDate {
-                let daysSinceStart = calendar.dateComponents([.day], from: semesterStart, to: date).day ?? 0
-                let weekNumber = max(1, (daysSinceStart / 7) + 1)
-                return "\(dateString) 第\(weekNumber)周"
-            } else {
-                let weekOfYear = calendar.component(.weekOfYear, from: date)
-                return "\(dateString) 第\(weekOfYear)周"
-            }
-        }
-        return dateString
-    }
+    // MARK: - Initializer (Manager-based, used by live())
 
     init(
+        recordManager: RecordManager,
+        calendarManager: CalendarManager,
+        folderTagManager: FolderTagManager,
+        aiPipelineManager: AIPipelineManager,
+        settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
+        autoProcess: Bool = false,
+        calendar: Calendar = .current
+    ) {
+        self.recordManager = recordManager
+        self.calendarManager = calendarManager
+        self.folderTagManager = folderTagManager
+        self.aiPipelineManager = aiPipelineManager
+        self.settingsStore = settingsStore
+        self.autoProcess = autoProcess
+        self.calendar = calendar
+
+        // Set initial values from Managers
+        self.currentDate = calendarManager.currentDate
+        self.records = recordManager.records
+        self.todos = recordManager.todos
+        self.lastPersistenceError = recordManager.lastPersistenceError
+        self.events = calendarManager.events
+        self.allEvents = calendarManager.allEvents
+        self.ignoredCalendarEventKeys = calendarManager.ignoredCalendarEventKeys
+        self.liveActivityDisabledEventIDs = calendarManager.liveActivityDisabledEventIDs
+        self.customFolders = folderTagManager.customFolders
+        self.customTags = folderTagManager.customTags
+        self.eventTagMapping = folderTagManager.eventTagMapping
+
+        setupSubscriptions()
+
+        // Wire pipeline record access to self
+        aiPipelineManager.recordAccess = self
+    }
+
+    // MARK: - Backward-compatible Convenience Init
+
+    convenience init(
         currentDate: Date = Date(),
         calendar: Calendar = .current,
         events: [ScheduledEvent] = [],
@@ -88,221 +90,274 @@ final class NotieeStore: ObservableObject {
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
         autoProcess: Bool = false
     ) {
-        self.currentDate = currentDate
-        self.calendar = calendar
-        self.events = events
-        self.allEvents = events
-        self.customEvents = customEvents
-        self.todos = todos
-        self.records = records
-        self.customFolders = customFolders
-        self.customTags = customTags
-        self.eventTagMapping = eventTagMapping
-        self.recordStore = recordStore
-        self.folderStore = folderStore
-        self.tagStore = tagStore
-        self.eventStore = eventStore
-        self.scheduleMatcher = scheduleMatcher
-        self.aiService = aiService
-        self.settingsStore = settingsStore
-        self.autoProcess = autoProcess
-
-        if let data = UserDefaults.standard.data(forKey: UDK.ignoredCalendarEventKeys),
-           let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) {
-            self.ignoredCalendarEventKeys = decoded
-        }
-
-        if let data = UserDefaults.standard.data(forKey: UDK.liveActivityDisabledEventIDs),
-           let decoded = try? JSONDecoder().decode(Set<UUID>.self, from: data) {
-            self.liveActivityDisabledEventIDs = decoded
-        }
-
-        Task { await updateLiveActivity() }
-
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("LiveActivitySettingsChanged"), object: nil, queue: .main) { [weak self] _ in
-            Task { await self?.updateLiveActivity() }
-        }
-
-        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { @MainActor in
-                self?.currentDate = Date()
-                await self?.updateLiveActivity()
-            }
-        }
-
-        NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.objectWillChange.send()
-        }
-
-        setupTimeRefresh()
-        updateEventsList()
+        let recordMgr = RecordManager(
+            records: records,
+            todos: todos,
+            recordStore: recordStore,
+            calendar: calendar
+        )
+        let folderTagMgr = FolderTagManager(
+            customFolders: customFolders,
+            customTags: customTags,
+            eventTagMapping: eventTagMapping,
+            folderStore: folderStore,
+            tagStore: tagStore
+        )
+        let aiPipelineMgr = AIPipelineManager(
+            aiService: aiService,
+            settingsStore: settingsStore
+        )
+        let calendarMgr = CalendarManager(
+            currentDate: currentDate,
+            calendar: calendar,
+            customEvents: customEvents,
+            eventStore: eventStore,
+            scheduleMatcher: scheduleMatcher,
+            persistedRecordsProvider: { [weak recordMgr] in recordMgr?.records ?? [] }
+        )
+        self.init(
+            recordManager: recordMgr,
+            calendarManager: calendarMgr,
+            folderTagManager: folderTagMgr,
+            aiPipelineManager: aiPipelineMgr,
+            settingsStore: settingsStore,
+            autoProcess: autoProcess,
+            calendar: calendar
+        )
     }
 
-    private func setupTimeRefresh() {
-        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
+    // MARK: - Combine Sync
 
-        timerCancellable = Timer.publish(every: 60, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.refreshTimeState()
-            }
+    private func setupSubscriptions() {
+        // RecordManager → Store
+        recordManager.$records.sink { [weak self] in self?.records = $0 }.store(in: &cancellables)
+        recordManager.$todos.sink { [weak self] in self?.todos = $0 }.store(in: &cancellables)
+        recordManager.$lastPersistenceError.sink { [weak self] in self?.lastPersistenceError = $0 }.store(in: &cancellables)
+        recordManager.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }.store(in: &cancellables)
+
+        // CalendarManager → Store
+        calendarManager.$events.sink { [weak self] in self?.events = $0 }.store(in: &cancellables)
+        calendarManager.$allEvents.sink { [weak self] in self?.allEvents = $0 }.store(in: &cancellables)
+        calendarManager.$currentDate.sink { [weak self] in self?.currentDate = $0 }.store(in: &cancellables)
+        calendarManager.$ignoredCalendarEventKeys.sink { [weak self] in self?.ignoredCalendarEventKeys = $0 }.store(in: &cancellables)
+        calendarManager.$liveActivityDisabledEventIDs.sink { [weak self] in self?.liveActivityDisabledEventIDs = $0 }.store(in: &cancellables)
+        calendarManager.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }.store(in: &cancellables)
+
+        // FolderTagManager → Store
+        folderTagManager.$customFolders.sink { [weak self] in self?.customFolders = $0 }.store(in: &cancellables)
+        folderTagManager.$customTags.sink { [weak self] in self?.customTags = $0 }.store(in: &cancellables)
+        folderTagManager.$eventTagMapping.sink { [weak self] in self?.eventTagMapping = $0 }.store(in: &cancellables)
+        folderTagManager.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }.store(in: &cancellables)
     }
 
-    private func refreshTimeState() {
-        self.currentDate = Date()
-        Task { await updateLiveActivity() }
+    // MARK: - Settings Convenience
+
+    var aiEnabled: Bool {
+        settingsStore.loadBool(forKey: UDK.aiEnabled, defaultValue: true)
     }
 
-    var currentEvent: ScheduledEvent? {
-        scheduleMatcher.currentEvent(from: events, at: currentDate)
+    var autoProcessAfterCapture: Bool {
+        settingsStore.loadBool(forKey: UDK.autoProcessAfterCapture, defaultValue: true)
     }
 
-    var sortedRecords: [NoteRecord] {
-        records.filter { !$0.isDeleted }.sorted { lhs, rhs in
-            lhs.capturedAt > rhs.capturedAt
-        }
-    }
+    // MARK: - Record Queries (delegated to RecordManager)
 
-    var favoriteRecords: [NoteRecord] {
-        sortedRecords.filter { $0.isFavorite }
-    }
-
-    var deletedRecords: [NoteRecord] {
-        records.filter { $0.isDeleted }.sorted { lhs, rhs in
-            lhs.capturedAt > rhs.capturedAt
-        }
-    }
-
-    var uncategorizedCount: Int {
-        sortedRecords.filter { $0.eventID == nil }.count
-    }
-
-    var todayRecordCount: Int {
-        todayRecords.count
-    }
-
-    var todayRecords: [NoteRecord] {
-        sortedRecords.filter { calendar.isDate($0.capturedAt, inSameDayAs: currentDate) }
-    }
+    var sortedRecords: [NoteRecord] { recordManager.sortedRecords }
+    var favoriteRecords: [NoteRecord] { recordManager.favoriteRecords }
+    var deletedRecords: [NoteRecord] { recordManager.deletedRecords }
+    var uncategorizedCount: Int { recordManager.uncategorizedCount }
+    var todayRecordCount: Int { recordManager.todayRecordCount(relativeTo: currentDate) }
+    var todayRecords: [NoteRecord] { recordManager.todayRecords(relativeTo: currentDate) }
+    var pendingRecordsCount: Int { recordManager.pendingRecordsCount }
 
     func records(in range: TimeRange) -> [NoteRecord] {
-        let now = Date()
-        return sortedRecords.filter { record in
-            switch range {
-            case .today:
-                return calendar.isDate(record.capturedAt, inSameDayAs: now)
-            case .last7Days:
-                guard let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: now) else { return false }
-                return record.capturedAt >= sevenDaysAgo
-            case .thisMonth:
-                return calendar.isDate(record.capturedAt, equalTo: now, toGranularity: .month)
-            case .halfYear:
-                guard let halfYearAgo = calendar.date(byAdding: .month, value: -6, to: now) else { return false }
-                return record.capturedAt >= halfYearAgo
-            case .oneYear:
-                guard let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: now) else { return false }
-                return record.capturedAt >= oneYearAgo
-            }
-        }
+        recordManager.records(in: range, relativeTo: currentDate)
     }
 
     func totalTokens(in range: TimeRange) -> Int {
-        records(in: range).reduce(0) { $0 + $1.tokenUsage }
+        recordManager.totalTokens(in: range, relativeTo: currentDate)
     }
 
     func totalTokens(in range: TimeRange, includeDeleted: Bool) -> Int {
-        if includeDeleted {
-            return records(in: range).reduce(0) { $0 + $1.tokenUsage }
-                + deletedRecords(in: range).reduce(0) { $0 + $1.tokenUsage }
-        }
-        return totalTokens(in: range)
+        recordManager.totalTokens(in: range, includeDeleted: includeDeleted, relativeTo: currentDate)
     }
 
     func allRecords(in range: TimeRange, includeDeleted: Bool) -> [NoteRecord] {
-        if includeDeleted {
-            return records(in: range) + deletedRecords(in: range)
-        }
-        return records(in: range)
+        recordManager.allRecords(in: range, includeDeleted: includeDeleted, relativeTo: currentDate)
     }
 
     func deletedRecords(in range: TimeRange) -> [NoteRecord] {
-        let now = Date()
-        return deletedRecords.filter { record in
-            switch range {
-            case .today:
-                return calendar.isDate(record.capturedAt, inSameDayAs: now)
-            case .last7Days:
-                guard let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: now) else { return false }
-                return record.capturedAt >= sevenDaysAgo
-            case .thisMonth:
-                return calendar.isDate(record.capturedAt, equalTo: now, toGranularity: .month)
-            case .halfYear:
-                guard let halfYearAgo = calendar.date(byAdding: .month, value: -6, to: now) else { return false }
-                return record.capturedAt >= halfYearAgo
-            case .oneYear:
-                guard let oneYearAgo = calendar.date(byAdding: .year, value: -1, to: now) else { return false }
-                return record.capturedAt >= oneYearAgo
-            }
-        }
+        recordManager.deletedRecords(in: range, relativeTo: currentDate)
     }
 
     func deletedTokens(in range: TimeRange) -> Int {
-        deletedRecords(in: range).reduce(0) { $0 + $1.tokenUsage }
+        recordManager.deletedTokens(in: range, relativeTo: currentDate)
     }
 
     func topRecordsByToken(in range: TimeRange, limit: Int = 5) -> [NoteRecord] {
-        Array(records(in: range).sorted(by: { $0.tokenUsage > $1.tokenUsage }).prefix(limit))
-    }
-
-    var pendingRecordsCount: Int {
-        sortedRecords.filter { $0.processingState == .pending }.count
-    }
-
-    var eventsWithRecords: [ScheduledEvent] {
-        let eventIDs = Set(sortedRecords.compactMap { $0.eventID })
-        let matchedEvents = events.filter { eventIDs.contains($0.id) && !CalendarService.shared.isHolidayEvent($0) }
-
-        var seenTitles: Set<String> = []
-        var deduped: [ScheduledEvent] = []
-        for event in matchedEvents {
-            let normalizedTitle = event.title.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !seenTitles.contains(normalizedTitle) {
-                seenTitles.insert(normalizedTitle)
-                deduped.append(event)
-            }
-        }
-        return deduped
+        recordManager.topRecordsByToken(in: range, limit: limit, relativeTo: currentDate)
     }
 
     func records(matching query: String) -> [NoteRecord] {
-        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !normalizedQuery.isEmpty else {
-            return sortedRecords
-        }
-
-        return sortedRecords.filter { record in
-            record.title.localizedCaseInsensitiveContains(normalizedQuery)
-                || record.summary.localizedCaseInsensitiveContains(normalizedQuery)
-                || record.ocrText.localizedCaseInsensitiveContains(normalizedQuery)
-                || record.detailedContent.localizedCaseInsensitiveContains(normalizedQuery)
-        }
-    }
-
-    func eventTitle(for record: NoteRecord) -> String? {
-        guard let eventID = record.eventID else {
-            return nil
-        }
-
-        return events.first { $0.id == eventID }?.title
+        recordManager.records(matching: query)
     }
 
     func todos(for record: NoteRecord) -> [NoteTodo] {
-        todos
-            .filter { $0.recordID == record.id }
-            .sorted { lhs, rhs in
-                lhs.createdAt < rhs.createdAt
-            }
+        recordManager.todos(for: record)
     }
+
+    // MARK: - Calendar Queries (delegated to CalendarManager)
+
+    var currentEvent: ScheduledEvent? { calendarManager.currentEvent }
+    var semesterStartDate: Date? { calendarManager.semesterStartDate }
+    var showWeekNumbers: Bool { calendarManager.showWeekNumbers }
+    var eventsWithRecords: [ScheduledEvent] { calendarManager.eventsWithRecords }
+
+    func formattedDateWithWeek(for date: Date) -> String {
+        calendarManager.formattedDateWithWeek(for: date)
+    }
+
+    func eventTitle(for record: NoteRecord) -> String? {
+        calendarManager.eventTitle(for: record)
+    }
+
+    // MARK: - Record Mutations (delegated to RecordManager)
+
+    @discardableResult
+    func capturePhoto(localImagePaths: [String]? = nil, eventID: UUID? = nil) -> NoteRecord {
+        let resolvedEventID = eventID ?? currentEvent?.id
+        let resolvedEventTitle: String? = {
+            if let id = resolvedEventID {
+                return events.first(where: { $0.id == id })?.title
+            }
+            return currentEvent?.title
+        }()
+
+        let record = recordManager.capturePhoto(
+            localImagePaths: localImagePaths,
+            eventID: resolvedEventID,
+            eventTitle: resolvedEventTitle,
+            capturedAt: currentDate
+        )
+
+        if autoProcess && aiEnabled && autoProcessAfterCapture {
+            let title = eventTitle(for: record)
+            aiPipelineManager.enqueueProcessing(
+                recordID: record.id,
+                localImagePaths: record.localImagePaths,
+                eventTitle: title,
+                retryCount: 0
+            )
+        }
+
+        return record
+    }
+
+    func processRecord(_ record: NoteRecord) {
+        guard aiEnabled else { return }
+        let title = eventTitle(for: record)
+        aiPipelineManager.enqueueProcessing(
+            recordID: record.id,
+            localImagePaths: record.localImagePaths,
+            eventTitle: title,
+            retryCount: 0
+        )
+    }
+
+    func addRecord(_ record: NoteRecord) { recordManager.addRecord(record) }
+    func updateRecord(_ updated: NoteRecord) { recordManager.updateRecord(updated) }
+    func toggleFavorite(id: UUID) { recordManager.toggleFavorite(id: id) }
+    func toggleDeleted(id: UUID) { recordManager.toggleDeleted(id: id) }
+    func permanentlyDelete(id: UUID) { recordManager.permanentlyDelete(id: id) }
+    func toggleDeletedMultiple(ids: Set<UUID>, isDeleted: Bool) {
+        recordManager.toggleDeletedMultiple(ids: ids, isDeleted: isDeleted)
+    }
+    func permanentlyDeleteMultiple(ids: Set<UUID>) {
+        recordManager.permanentlyDeleteMultiple(ids: ids)
+    }
+
+    // MARK: - Todo Mutations
+
+    func addTodo(_ todo: NoteTodo) { recordManager.addTodo(todo) }
+    func replaceTodos(for recordID: UUID, with newTodos: [NoteTodo]) {
+        recordManager.replaceTodos(for: recordID, with: newTodos)
+    }
+    func deleteTodo(id: UUID) { recordManager.deleteTodo(id: id) }
+    func toggleTodo(id: UUID) { recordManager.toggleTodo(id: id) }
+    func updateTodoContent(id: UUID, newContent: String) {
+        recordManager.updateTodoContent(id: id, newContent: newContent)
+    }
+    func addStandaloneTodo(content: String, dueDate: Date?, hasReminder: Bool) {
+        recordManager.addStandaloneTodo(content: content, dueDate: dueDate, hasReminder: hasReminder)
+    }
+
+    // MARK: - Folder Mutations
+
+    func createFolder(name: String) { folderTagManager.createFolder(name: name) }
+    func renameFolder(id: UUID, newName: String) { folderTagManager.renameFolder(id: id, newName: newName) }
+    func deleteFolder(id: UUID) {
+        folderTagManager.deleteFolder(id: id)
+        recordManager.clearFolderReferences(for: id)
+    }
+    func assignRecordToFolder(recordID: UUID, folderID: UUID?) {
+        recordManager.assignRecordToFolder(recordID: recordID, folderID: folderID)
+    }
+    func createImportedFolder() -> UUID { folderTagManager.createImportedFolder() }
+
+    // MARK: - Tag Mutations
+
+    func createTag(name: String, colorHex: String) { folderTagManager.createTag(name: name, colorHex: colorHex) }
+    func updateTag(id: UUID, name: String, colorHex: String) {
+        folderTagManager.updateTag(id: id, name: name, colorHex: colorHex)
+    }
+    func deleteTag(id: UUID) {
+        folderTagManager.deleteTag(id: id)
+        calendarManager.clearTagReferences(for: id)
+    }
+    func assignTagToEvent(eventID: UUID, tagID: UUID?) {
+        // Resolve event title for mapping
+        if let event = events.first(where: { $0.id == eventID }) {
+            folderTagManager.assignTagToEvent(eventTitle: event.title, tagID: tagID)
+        }
+        calendarManager.updateEventTag(eventID: eventID, tagID: tagID)
+    }
+
+    // MARK: - Event Mutations
+
+    func addEvent(_ event: ScheduledEvent) { calendarManager.addEvent(event) }
+    func deleteEvent(id: UUID) { calendarManager.deleteEvent(id: id) }
+    func ignoreCalendarEvent(identifier: String, date: Date, future: Bool) {
+        calendarManager.ignoreCalendarEvent(identifier: identifier, date: date, future: future)
+    }
+    func restoreCalendarEvent(identifier: String) {
+        calendarManager.restoreCalendarEvent(identifier: identifier)
+    }
+
+    // MARK: - Calendar Sync & Live Activity
+
+    func syncCalendar() {
+        calendarManager.syncCalendar(eventTagMapping: folderTagManager.eventTagMapping)
+    }
+
+    func toggleLiveActivityForEvent(_ eventID: UUID) {
+        calendarManager.toggleLiveActivityForEvent(eventID)
+    }
+
+    // MARK: - AI Pipeline
+
+    func retryAIProcessing(for recordID: UUID) {
+        guard let record = recordManager.record(id: recordID) else { return }
+        guard record.processingState == .failed || record.processingState == .deadLetter else { return }
+        recordManager.setProcessingState(.pending, for: recordID)
+        let title = eventTitle(for: record)
+        aiPipelineManager.retryAndEnqueue(recordID: recordID, eventTitle: title)
+    }
+
+    func updateRecordEvent(recordID: UUID, newEventID: UUID?) {
+        recordManager.updateRecordEvent(recordID: recordID, newEventID: newEventID)
+    }
+
+    // MARK: - Sample / Live
 
     static func sample(currentDate: Date = Date()) -> NotieeStore {
         let today = TodayViewModel.sample(currentDate: currentDate)
@@ -311,8 +366,7 @@ final class NotieeStore: ObservableObject {
             events: today.events,
             customEvents: today.events,
             todos: today.todos,
-            records: today.records,
-            customFolders: []
+            records: today.records
         )
     }
 
@@ -338,24 +392,66 @@ final class NotieeStore: ObservableObject {
         let finalTags = EventTag.systemTags + customTags
         let customEvents = (try? eventJSONStore.loadEvents()) ?? []
 
-        return NotieeStore(
-            currentDate: currentDate,
-            events: [],
-            customEvents: customEvents,
-            todos: [],
+        let recordMgr = RecordManager(
             records: persistedRecords,
+            todos: [],
+            recordStore: recordJSONStore
+        )
+        let folderTagMgr = FolderTagManager(
             customFolders: persistedFolders,
             customTags: finalTags,
             eventTagMapping: mapping,
-            recordStore: recordJSONStore,
             folderStore: folderJSONStore,
-            tagStore: tagJSONStore,
+            tagStore: tagJSONStore
+        )
+        let aiPipelineMgr = AIPipelineManager(
+            aiService: RealAIProcessingService(),
+            settingsStore: settingsStore
+        )
+        let calendarMgr = CalendarManager(
+            currentDate: currentDate,
+            calendar: .current,
+            customEvents: customEvents,
             eventStore: eventJSONStore,
+            persistedRecordsProvider: { [weak recordMgr] in recordMgr?.records ?? [] }
+        )
+
+        return NotieeStore(
+            recordManager: recordMgr,
+            calendarManager: calendarMgr,
+            folderTagManager: folderTagMgr,
+            aiPipelineManager: aiPipelineMgr,
             settingsStore: settingsStore,
             autoProcess: true
         )
     }
 }
+
+// MARK: - AIPipelineRecordAccess
+
+extension NotieeStore: AIPipelineRecordAccess {
+    func record(id: UUID) -> NoteRecord? {
+        recordManager.record(id: id)
+    }
+
+    func setProcessingState(_ state: AIProcessingState, for recordID: UUID) {
+        recordManager.setProcessingState(state, for: recordID)
+    }
+
+    func incrementRetryCount(for recordID: UUID) {
+        recordManager.incrementRetryCount(for: recordID)
+    }
+
+    func applyAIResult(_ result: AIProcessingResult, to recordID: UUID) {
+        recordManager.applyAIResult(result, to: recordID)
+    }
+
+    func persistRecords() {
+        recordManager.persistRecords()
+    }
+}
+
+// MARK: - TimeRange (defined alongside Store for backward compatibility)
 
 enum TimeRange: String, CaseIterable, Identifiable {
     case today = "今日"
