@@ -80,9 +80,6 @@ final class SparkViewModel: ObservableObject {
 
     func sendQuestion(_ q: String) { inputText = q; sendMessage() }
 
-    /// Called by exyte/Chat's didSendMessage closure with a DraftMessage.
-    }
-
     private func processQuestion(_ q: String, _ userMsg: ChatMessage) async {
         if !NetworkMonitor.shared.isConnected {
             messages.append(ChatMessage(role: .assistant, content: "网络不可用，无法进行 AI 问答。请检查网络后重试。"))

@@ -39,18 +39,18 @@ final class SparkAIService: Sendable {
                     .prefix(maxRecordsInPrompt)
                 let prompt = buildPrompt(question: question, records: Array(activeRecords))
 
-                let stream: AsyncThrowingStream<String, Error>
-                if textConfig.activeProtocol == .openai {
-                    stream = OpenAICaller.streamText(
-                        endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                        apiKey: textConfig.apiKey, prompt: prompt, temperature: 0.95)
-                } else {
-                    stream = AnthropicCaller.streamText(
-                        endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                        apiKey: textConfig.apiKey, prompt: prompt, temperature: 0.95)
-                }
                 do {
-                    for try await chunk in stream { continuation.yield(chunk) }
+                    let result: (text: String, tokens: Int)
+                    if textConfig.activeProtocol == .openai {
+                        result = try await OpenAICaller.callText(
+                            endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                            apiKey: textConfig.apiKey, prompt: prompt)
+                    } else {
+                        result = try await AnthropicCaller.callText(
+                            endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                            apiKey: textConfig.apiKey, prompt: prompt)
+                    }
+                    continuation.yield(result.text)
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
