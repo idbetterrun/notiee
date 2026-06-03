@@ -5,7 +5,7 @@ enum AppTab: String, CaseIterable, Codable, Identifiable, Sendable {
     case today
     case capture
     case records
-    case settings
+    case spark
 
     var id: String {
         rawValue
@@ -19,8 +19,8 @@ enum AppTab: String, CaseIterable, Codable, Identifiable, Sendable {
             return "Snap"
         case .records:
             return "Records"
-        case .settings:
-            return "Me"
+        case .spark:
+            return "Spark"
         }
     }
 
@@ -32,8 +32,8 @@ enum AppTab: String, CaseIterable, Codable, Identifiable, Sendable {
             "camera.viewfinder"
         case .records:
             "book.closed"
-        case .settings:
-            "person.crop.circle"
+        case .spark:
+            "sparkles"
         }
     }
 

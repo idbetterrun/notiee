@@ -39,11 +39,11 @@ struct RootTabView: View {
                 }
                 .tag(AppTab.records)
 
-            MeView(settingsStore: settingsStore, store: store)
+            SparkView(store: store)
                 .tabItem {
-                    Label(AppTab.settings.titleKey, systemImage: AppTab.settings.systemImage)
+                    Label(AppTab.spark.titleKey, systemImage: AppTab.spark.systemImage)
                 }
-                .tag(AppTab.settings)
+                .tag(AppTab.spark)
         }
         .background {
             CameraControlOverlayView(onCapture: {

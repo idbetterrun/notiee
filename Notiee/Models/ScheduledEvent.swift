@@ -66,5 +66,4 @@ struct ScheduledEvent: Identifiable, Equatable, Sendable, Codable {
 
         return date < startDate ? .upcoming : .completed
     }
-
-
+}
