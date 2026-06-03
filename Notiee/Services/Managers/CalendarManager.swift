@@ -18,6 +18,8 @@ final class CalendarManager: ObservableObject {
     internal var customEvents: [ScheduledEvent]
     internal var calendarEvents: [ScheduledEvent] = []
 
+    private static let recordTitleSuffix = " 拍记"
+
     private var timerCancellable: AnyCancellable?
 
     init(
@@ -105,16 +107,56 @@ final class CalendarManager: ObservableObject {
     }
 
     var eventsWithRecords: [ScheduledEvent] {
-        let records = persistedRecordsProvider()
-        let eventIDs = Set(records.filter { !$0.isDeleted }.compactMap { $0.eventID })
-        let matchedEvents = events.filter { eventIDs.contains($0.id) && !CalendarService.shared.isHolidayEvent($0) }
+        let records = persistedRecordsProvider().filter { !$0.isDeleted }
+        let recordsWithEventID = records.filter { $0.eventID != nil }
+        let directEventIDs = Set(recordsWithEventID.compactMap { $0.eventID })
 
-        var seenTitles: Set<String> = []
+        // Tier 1: UUID直接匹配
+        var matchedByID = events.filter { directEventIDs.contains($0.id) && !CalendarService.shared.isHolidayEvent($0) }
+        var matchedIDs = Set(matchedByID.map { $0.id })
+
+        // Orphan records: UUID匹配失败的记录
+        let orphans = recordsWithEventID.filter { record in
+            guard let eid = record.eventID else { return false }
+            return !matchedIDs.contains(eid)
+        }
+
+        // Tier 2: Date proximity — record.capturedAt 落在 event 时间窗口内 且 标题匹配
+        var tier2MatchedRecordIDs = Set<UUID>()
+        for record in orphans {
+            let recordTitle = record.title.replacingOccurrences(of: Self.recordTitleSuffix, with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !recordTitle.isEmpty else { continue }
+            if let match = events.first(where: { event in
+                !matchedIDs.contains(event.id)
+                && event.contains(record.capturedAt)
+                && event.title == recordTitle
+                && !CalendarService.shared.isHolidayEvent(event)
+            }) {
+                matchedByID.append(match)
+                matchedIDs.insert(match.id)
+                tier2MatchedRecordIDs.insert(record.id)
+            }
+        }
+
+        // Tier 3: Title-only match 作为最后回退
+        let tier3Orphans = orphans.filter { !tier2MatchedRecordIDs.contains($0.id) }
+        let orphanEventTitles = Set(tier3Orphans.map {
+            $0.title.replacingOccurrences(of: Self.recordTitleSuffix, with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        }.filter { !$0.isEmpty })
+        let matchedByTitle = events.filter { event in
+            !matchedIDs.contains(event.id)
+            && orphanEventTitles.contains(event.title)
+            && !CalendarService.shared.isHolidayEvent(event)
+        }
+
+        matchedByID.append(contentsOf: matchedByTitle)
+
+        // Dedup by event ID (not title)
+        var seenIDs: Set<UUID> = []
         var deduped: [ScheduledEvent] = []
-        for event in matchedEvents {
-            let normalizedTitle = event.title.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !seenTitles.contains(normalizedTitle) {
-                seenTitles.insert(normalizedTitle)
+        for event in matchedByID {
+            if !seenIDs.contains(event.id) {
+                seenIDs.insert(event.id)
                 deduped.append(event)
             }
         }
@@ -154,7 +196,18 @@ final class CalendarManager: ObservableObject {
         guard let eventID = record.eventID else {
             return nil
         }
-        return events.first { $0.id == eventID }?.title
+        // Tier 1: UUID直接匹配
+        if let match = events.first(where: { $0.id == eventID && !CalendarService.shared.isHolidayEvent($0) }) {
+            return match.title
+        }
+        // Tier 2: Date proximity + 标题匹配
+        let recordTitle = record.title.replacingOccurrences(of: Self.recordTitleSuffix, with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !recordTitle.isEmpty else { return nil }
+        if let match = events.first(where: { $0.contains(record.capturedAt) && $0.title == recordTitle && !CalendarService.shared.isHolidayEvent($0) }) {
+            return match.title
+        }
+        // Tier 3: Title-only match 作为最后回退
+        return events.first { $0.title == recordTitle && !CalendarService.shared.isHolidayEvent($0) }?.title
     }
 
     // MARK: - Event Mutations
