@@ -19,13 +19,17 @@ enum OpenAICaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
 
-    static func callText(endpoint: String, model: String, apiKey: String, prompt: String) async throws -> (String, Int) {
+    static func callText(endpoint: String, model: String, apiKey: String, systemPrompt: String, userPrompt: String) async throws -> (String, Int) {
+        var messages: [[String: Any]] = []
+        if !systemPrompt.isEmpty {
+            messages.append(["role": "system", "content": systemPrompt])
+        }
+        messages.append(["role": "user", "content": userPrompt])
+
         let payload: [String: Any] = [
             "model": model,
-            "messages": [
-                ["role": "user", "content": prompt]
-            ],
-            "max_tokens": 1000
+            "messages": messages,
+            "max_tokens": 2000
         ]
         
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
@@ -96,14 +100,17 @@ enum AnthropicCaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
 
-    static func callText(endpoint: String, model: String, apiKey: String, prompt: String) async throws -> (String, Int) {
-        let payload: [String: Any] = [
+    static func callText(endpoint: String, model: String, apiKey: String, systemPrompt: String, userPrompt: String) async throws -> (String, Int) {
+        var payload: [String: Any] = [
             "model": model,
-            "max_tokens": 1000,
+            "max_tokens": 2000,
             "messages": [
-                ["role": "user", "content": prompt]
+                ["role": "user", "content": userPrompt]
             ]
         ]
+        if !systemPrompt.isEmpty {
+            payload["system"] = systemPrompt
+        }
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
     

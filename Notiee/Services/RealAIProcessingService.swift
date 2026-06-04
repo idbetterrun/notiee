@@ -169,8 +169,11 @@ struct RealAIProcessingService: AIProcessingService {
         let enableSummary = settingsStore.loadBool(forKey: UDK.aiEnableSummary, defaultValue: true)
         let enableDetailedContent = settingsStore.loadBool(forKey: UDK.aiEnableDetailedContent, defaultValue: true)
 
+        let maxOCRChars = preset.visionStrategy == .fullVision ? 4000 : 6000
+        let truncatedOCR = String(ocrText.prefix(maxOCRChars))
+
         let prompt = AIPromptProvider.textPrompt(
-            ocrText: ocrText,
+            ocrText: truncatedOCR,
             enableSummary: enableSummary,
             enableDetailedContent: enableDetailedContent,
             preset: preset
@@ -179,21 +182,19 @@ struct RealAIProcessingService: AIProcessingService {
         let responseJSON: String
         let tokens: Int
         if protocolType == .openai {
-            let res = try await OpenAICaller.callText(endpoint: endpoint, model: config.modelName, apiKey: config.apiKey, prompt: prompt)
+            let res = try await OpenAICaller.callText(endpoint: endpoint, model: config.modelName, apiKey: config.apiKey, systemPrompt: "", userPrompt: prompt)
             responseJSON = res.0
             tokens = res.1
         } else {
-            let res = try await AnthropicCaller.callText(endpoint: endpoint, model: config.modelName, apiKey: config.apiKey, prompt: prompt)
+            let res = try await AnthropicCaller.callText(endpoint: endpoint, model: config.modelName, apiKey: config.apiKey, systemPrompt: "", userPrompt: prompt)
             responseJSON = res.0
             tokens = res.1
         }
 
-        let cleanedJSON = responseJSON.trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let extractedJSON = extractJSONObject(from: responseJSON)
 
-        guard let data = cleanedJSON.data(using: .utf8) else {
+        guard let data = extractedJSON.data(using: .utf8) else {
+            print("Failed to convert cleaned JSON to data. Raw: \(String(responseJSON.prefix(200)))")
             throw AIError.parsingFailed
         }
 
@@ -226,9 +227,28 @@ struct RealAIProcessingService: AIProcessingService {
             )
             return (result, tokens)
         } catch {
-            print("Failed to decode JSON: \(error)")
+            print("Failed to decode JSON: \(error). Cleaned JSON: \(String(extractedJSON.prefix(300)))")
             throw AIError.parsingFailed
         }
+    }
+
+    private func extractJSONObject(from text: String) -> String {
+        var cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let range = cleaned.range(of: "```json") {
+            cleaned = String(cleaned[range.upperBound...])
+        } else if let range = cleaned.range(of: "```") {
+            cleaned = String(cleaned[range.upperBound...])
+        }
+        if let range = cleaned.range(of: "```", options: .backwards) {
+            cleaned = String(cleaned[..<range.lowerBound])
+        }
+        cleaned = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let startIdx = cleaned.firstIndex(of: "{"),
+              let endIdx = cleaned.lastIndex(of: "}") else {
+            return cleaned
+        }
+        return String(cleaned[startIdx...endIdx])
     }
 
     // Prompt strings are now managed by AIPromptProvider.

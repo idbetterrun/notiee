@@ -211,9 +211,9 @@ final class SettingsViewModel: ObservableObject {
     private func callTextPing(config: AIModelConfiguration) async throws -> String {
         let prompt = "Hi, this is a connection test. Please reply with 'OK' and nothing else."
         if config.activeProtocol == .openai {
-            return try await OpenAICaller.callText(endpoint: config.activeEndpoint, model: config.modelName, apiKey: config.apiKey, prompt: prompt).0
+            return try await OpenAICaller.callText(endpoint: config.activeEndpoint, model: config.modelName, apiKey: config.apiKey, systemPrompt: "", userPrompt: prompt).0
         } else {
-            return try await AnthropicCaller.callText(endpoint: config.activeEndpoint, model: config.modelName, apiKey: config.apiKey, prompt: prompt).0
+            return try await AnthropicCaller.callText(endpoint: config.activeEndpoint, model: config.modelName, apiKey: config.apiKey, systemPrompt: "", userPrompt: prompt).0
         }
     }
     

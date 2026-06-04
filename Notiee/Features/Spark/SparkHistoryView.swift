@@ -1,5 +1,24 @@
 import SwiftUI
 
+// MARK: - Date Group
+
+struct DateGroup: Identifiable {
+    let id = UUID()
+    let date: Date
+    let conversations: [SavedConversation]
+    var label: String {
+        let cal = Calendar.current
+        if cal.isDateInToday(date) { return "今天" }
+        if cal.isDateInYesterday(date) { return "昨天" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.dateFormat = "M月d日"
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - History View
+
 struct SparkHistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = HistoryViewModel()
@@ -21,23 +40,27 @@ struct SparkHistoryView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List(selection: $selectedIDs) {
-                        if store.conversations.isEmpty {
+                        if store.groups.isEmpty {
                             emptyView
                         }
-                        ForEach(store.conversations) { conv in
-                            Button {
-                                if editMode == .active { return }
-                                onSelect(conv)
-                                dismiss()
-                            } label: {
-                                conversationRow(conv)
-                            }
-                            .buttonStyle(.plain)
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    store.delete([conv.id])
-                                } label: {
-                                    Label("删除", systemImage: "trash")
+                        ForEach(store.groups) { group in
+                            Section(group.label) {
+                                ForEach(group.conversations) { conv in
+                                    Button {
+                                        if editMode == .active { return }
+                                        onSelect(conv)
+                                        dismiss()
+                                    } label: {
+                                        conversationRow(conv)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            store.delete([conv.id])
+                                        } label: {
+                                            Label("删除", systemImage: "trash")
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -116,7 +139,7 @@ struct SparkHistoryView: View {
                 .foregroundStyle(.primary)
                 .lineLimit(1)
             HStack {
-                Text(conv.lastMessageAt.formatted(date: .abbreviated, time: .shortened))
+                Text(conv.lastMessageAt.formatted(date: .omitted, time: .shortened))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text("·")
@@ -135,6 +158,7 @@ struct SparkHistoryView: View {
 @MainActor
 final class HistoryViewModel: ObservableObject {
     @Published var conversations: [SavedConversation] = []
+    @Published var groups: [DateGroup] = []
     @Published var isLoading = false
     private let store = SparkHistoryStore.live
 
@@ -145,6 +169,7 @@ final class HistoryViewModel: ObservableObject {
             let result = (try? store.loadConversations()) ?? []
             await MainActor.run {
                 self.conversations = result
+                self.groups = Self.groupByDate(result)
                 self.isLoading = false
             }
         }
@@ -152,7 +177,18 @@ final class HistoryViewModel: ObservableObject {
 
     func delete(_ ids: Set<UUID>) {
         conversations.removeAll { ids.contains($0.id) }
+        groups = Self.groupByDate(conversations)
         try? store.saveConversations(conversations)
+    }
+
+    private static func groupByDate(_ conversations: [SavedConversation]) -> [DateGroup] {
+        let cal = Calendar.current
+        let dict = Dictionary(grouping: conversations) { conv in
+            cal.startOfDay(for: conv.lastMessageAt)
+        }
+        return dict
+            .map { DateGroup(date: $0.key, conversations: $0.value.sorted { $0.lastMessageAt > $1.lastMessageAt }) }
+            .sorted { $0.date > $1.date }
     }
 }
 

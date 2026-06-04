@@ -11,6 +11,8 @@ final class SparkViewModel: ObservableObject {
     @Published var currentQuestions: [String] = randomQuestions()
     @Published var currentTitle: String = "Spark"
     @Published var isGeneratingTitle: Bool = false
+    @Published var injectionWarning: String?
+    @Published var memoryActionText: String?
 
     let aiService: SparkAIService
     let conversationStore: SparkConversationPersisting
@@ -20,6 +22,8 @@ final class SparkViewModel: ObservableObject {
     var recordsProvider: (() -> [NoteRecord])?
     private var loadedFromHistoryID: UUID?
     private var currentConversationId: UUID = UUID()
+    private var roundCount: Int { messages.count / 2 }
+    private var titleGenerated = false
 
     init(
         aiService: SparkAIService = SparkAIService(),
@@ -31,9 +35,46 @@ final class SparkViewModel: ObservableObject {
         self.conversationStore = conversationStore
         self.historyStore = historyStore
         self.settingsStore = settingsStore
-        loadHistory()
+        migrateConversationToHistory()
         checkPrivacyNotice()
         loadGreeting()
+    }
+
+    private func migrateConversationToHistory() {
+        guard let rounds = try? conversationStore.loadConversations(), !rounds.isEmpty else { return }
+        var msgs: [ChatMessage] = []
+        for r in rounds { msgs.append(r.userMessage); msgs.append(r.assistantMessage) }
+
+        let savedConvID: UUID? = {
+            guard let str = UserDefaults.standard.string(forKey: UDK.sparkCurrentConversationId),
+                  let id = UUID(uuidString: str) else { return nil }
+            return id
+        }()
+
+        if let savedID = savedConvID,
+           var hist = try? historyStore.loadConversations(),
+           let idx = hist.firstIndex(where: { $0.id == savedID }) {
+            hist[idx].messages = msgs
+            hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
+            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
+            try? historyStore.saveConversations(hist)
+        } else {
+            let title = String(msgs.first?.content.prefix(15) ?? "Spark").trimmingCharacters(in: .whitespaces)
+            let saved = SavedConversation(
+                id: savedConvID ?? UUID(),
+                title: title.isEmpty ? "Spark" : title,
+                createdAt: msgs.first?.timestamp ?? Date(),
+                lastMessageAt: msgs.last?.timestamp ?? Date(),
+                messages: msgs
+            )
+            var hist = (try? historyStore.loadConversations()) ?? []
+            hist.append(saved)
+            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
+            try? historyStore.saveConversations(hist)
+        }
+
+        UserDefaults.standard.removeObject(forKey: UDK.sparkCurrentConversationId)
+        try? conversationStore.saveConversations([])
     }
 
     private func checkPrivacyNotice() {
@@ -64,23 +105,18 @@ final class SparkViewModel: ObservableObject {
     var greetingEmoji: String { settingsStore.loadString(forKey: "spark_greeting_emoji", defaultValue: "👋") }
     var greetingText: String { settingsStore.loadString(forKey: "spark_greeting_text", defaultValue: "嗨") }
 
-    private func loadHistory() {
-        guard let rounds = try? conversationStore.loadConversations() else { return }
-        var msgs: [ChatMessage] = []
-        for r in rounds { msgs.append(r.userMessage); msgs.append(r.assistantMessage) }
-        self.messages = msgs
-        if msgs.isEmpty {
-            currentQuestions = randomQuestions()
-            currentTitle = "Spark"
-        } else {
-            let t = msgs.first(where: { $0.role == .user })?.content ?? "Spark"
-            currentTitle = String(t.prefix(15)).trimmingCharacters(in: .whitespaces)
-        }
-    }
+    // MARK: - Send Message
 
     func sendMessage() {
         let t = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !t.isEmpty, state != .loading else { return }
+
+        if SparkAIService.containsInjectionPattern(t) {
+            injectionWarning = "输入包含不安全的指令，请修改后重试"
+            return
+        }
+        injectionWarning = nil
+
         inputText = ""; state = .loading
         let userMsg = ChatMessage(role: .user, content: t)
         messages.append(userMsg)
@@ -98,7 +134,8 @@ final class SparkViewModel: ObservableObject {
         messages.append(ChatMessage(id: aid, role: .assistant, content: ""))
         do {
             let allRecs = recordsProvider?() ?? []
-            let stream = aiService.askStreaming(question: q, with: allRecs)
+            let recentRounds = buildRecentRounds()
+            let stream = aiService.askStreaming(question: q, with: allRecs, recentRounds: recentRounds)
             var full = ""
             for try await chunk in stream {
                 full += chunk
@@ -106,8 +143,21 @@ final class SparkViewModel: ObservableObject {
                     messages[idx] = ChatMessage(id: aid, role: .assistant, content: full)
                 }
             }
-            let (clean, newMem) = aiService.extractMemory(from: full)
-            for (k, v) in newMem { let ms = SparkMemoryStore.live; ms.set(k, value: v) }
+            let (clean, ops) = aiService.extractMemory(from: full)
+            let ms = SparkMemoryStore.live
+            var memoryCount = 0
+            for (k, v) in ops.toSet { ms.set(k, value: v); memoryCount += 1 }
+            for (k, v) in ops.toUpdate { ms.set(k, value: v); memoryCount += 1 }
+            for k in ops.toDelete { ms.delete(k); memoryCount += 1 }
+            if memoryCount > 0 {
+                withAnimation(.easeInOut) { memoryActionText = "✓ 已记忆" }
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                    withAnimation(.easeInOut) {
+                        if memoryActionText == "✓ 已记忆" { memoryActionText = nil }
+                    }
+                }
+            }
             let all = allRecs.filter{!$0.isDeleted}.sorted{$0.capturedAt>$1.capturedAt}
             let cIdx = aiService.extractCitations(from: clean, recordCount: all.count)
             let cits: [Citation] = cIdx.compactMap { idx in
@@ -122,6 +172,8 @@ final class SparkViewModel: ObservableObject {
             if loadedFromHistoryID == nil {
                 Task { await generateAndSyncTitle(); saveToHistory() }
             }
+
+            triggerMemoryCompressionIfNeeded()
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == aid }) { messages.remove(at: idx) }
             messages.append(ChatMessage(role: .assistant, content: "抱歉，出错了：\(error.localizedDescription)"))
@@ -145,16 +197,74 @@ final class SparkViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Memory Compression
+
+    private func buildRecentRounds() -> [ConversationRound] {
+        var rounds: [ConversationRound] = []
+        var i = 0
+        let msgs = messages
+        while i + 1 < msgs.count {
+            if msgs[i].role == .user, msgs[i+1].role == .assistant {
+                rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i+1]))
+                i += 2
+            } else { i += 1 }
+        }
+        return rounds
+    }
+
+    private func triggerMemoryCompressionIfNeeded() {
+        guard roundCount >= SparkAIService.memoryTriggerRoundCount else { return }
+        let msgs = messages
+        let service = aiService
+        let store = conversationStore
+        Task.detached(priority: .background) {
+            let rounds = await Self.buildRounds(from: msgs)
+            let lastCompressed = UserDefaults.standard.integer(forKey: UDK.sparkLastMemoryCompressionRounds)
+            guard rounds.count > lastCompressed else { return }
+            await service.compressMemory(from: rounds)
+            UserDefaults.standard.set(rounds.count, forKey: UDK.sparkLastMemoryCompressionRounds)
+        }
+    }
+
+    private static func buildRounds(from msgs: [ChatMessage]) -> [ConversationRound] {
+        var rounds: [ConversationRound] = []; var i = 0
+        while i + 1 < msgs.count {
+            if msgs[i].role == .user, msgs[i+1].role == .assistant {
+                rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i+1]))
+                i += 2
+            } else { i += 1 }
+        }
+        return rounds
+    }
+
+    // MARK: - Title
+
+    private static let modelNameKeywords: Set<String> = [
+        "deepseek", "qwen", "gpt", "claude", "chatgpt", "openai", "anthropic",
+        "minimax", "glm", "ernie", "spark", "doubao", "gemini", "llama",
+        "通义", "千问", "文心", "一言", "智谱", "豆包", "星火",
+    ]
+
     private func generateAndSyncTitle() async {
+        guard !titleGenerated else { return }
+        titleGenerated = true
         guard let first = messages.first(where: { $0.role == .user })?.content,
               !first.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         isGeneratingTitle = true
+
+        if let neutralTitle = clientSideTitle(from: first) {
+            currentTitle = neutralTitle
+            isGeneratingTitle = false
+            return
+        }
+
         do {
             let title = try await aiService.generateTitle(for: first)
-            if !title.isEmpty {
-                currentTitle = title
-            } else {
+            let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty || containsModelName(trimmed) {
                 fallbackTitle(from: first)
+            } else {
+                currentTitle = trimmed
             }
         } catch {
             fallbackTitle(from: first)
@@ -162,9 +272,28 @@ final class SparkViewModel: ObservableObject {
         isGeneratingTitle = false
     }
 
+    private func containsModelName(_ title: String) -> Bool {
+        let lower = title.lowercased()
+        return Self.modelNameKeywords.contains { lower.contains($0) }
+    }
+
+    private func clientSideTitle(from message: String) -> String? {
+        let t = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lower = t.lowercased()
+        let greetingPatterns = ["你好", "hi", "hello", "嗨", "hey", "在吗", "在么", "早上好", "下午好", "晚上好"]
+        let identityPatterns = ["你是谁", "你叫什么", "你是谁呀", "你的名字", "你叫什么名字", "who are you", "what's your name", "what is your name"]
+        if greetingPatterns.contains(where: { lower.contains($0.lowercased()) }) {
+            return "用户问候"
+        }
+        if identityPatterns.contains(where: { lower.contains($0.lowercased()) }) {
+            return "用户询问身份"
+        }
+        return nil
+    }
+
     private func fallbackTitle(from firstMessage: String) {
-        let t = String(firstMessage.prefix(10)).trimmingCharacters(in: .whitespaces)
-        if !t.isEmpty { currentTitle = t }
+        let t = String(firstMessage.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
+        currentTitle = t.isEmpty ? "新对话" : t
     }
 
     private func saveToHistory() {
@@ -172,6 +301,7 @@ final class SparkViewModel: ObservableObject {
         let msgs = messages
         let id = currentConversationId
         let title = currentTitle
+        UserDefaults.standard.set(id.uuidString, forKey: UDK.sparkCurrentConversationId)
         Task.detached(priority: .background) {
             var hist = (try? SparkHistoryStore.live.loadConversations()) ?? []
             if let idx = hist.firstIndex(where: { $0.id == id }) {
@@ -199,6 +329,15 @@ final class SparkViewModel: ObservableObject {
     // MARK: - History management
 
     func newConversation() {
+        if roundCount >= SparkAIService.memoryTriggerRoundCount {
+            let msgs = messages
+            let service = aiService
+            Task.detached(priority: .background) {
+                let rounds = await Self.buildRounds(from: msgs)
+                await service.compressMemory(from: rounds)
+            }
+        }
+
         guard !messages.isEmpty else { currentQuestions = randomQuestions(); return }
         let msgs = messages
         let wasLoadedFromHistory = loadedFromHistoryID != nil
@@ -228,6 +367,7 @@ final class SparkViewModel: ObservableObject {
         refreshGreeting()
         currentTitle = "Spark"
         isGeneratingTitle = false
+        titleGenerated = false
         loadedFromHistoryID = nil
         currentConversationId = UUID()
     }
@@ -239,6 +379,7 @@ final class SparkViewModel: ObservableObject {
         self.loadedFromHistoryID = saved.id
         self.currentTitle = saved.title
         self.currentConversationId = saved.id
+        self.titleGenerated = true
         isGeneratingTitle = false
         saveCurrentConversation()
     }

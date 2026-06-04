@@ -3,11 +3,12 @@ import SwiftUI
 struct SparkCitationRow: View {
     let citation: Citation
     let store: NotieeStore
+    let onTap: ((UUID) -> Void)?
 
     var body: some View {
         if let record = store.records.first(where: { $0.id == citation.recordID }) {
-            NavigationLink {
-                RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+            Button {
+                onTap?(record.id)
             } label: {
                 contentView
             }
@@ -32,5 +33,6 @@ struct SparkCitationRow: View {
         }
         .padding(.horizontal, 12).padding(.vertical, 10)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray5)))
+        .contentShape(Rectangle())
     }
 }

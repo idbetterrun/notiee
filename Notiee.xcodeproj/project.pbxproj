@@ -75,6 +75,9 @@
 		37F3859728859E02F78A285B /* TMNImportPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */; };
 		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
+		B208EB091BB4420BBB3BF191 /* SparkStyleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */; };
+		DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
+		77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* SparkMemoryView.swift */; };
 		4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
 		4D5AAF4C87304E0631C4BEF2 /* RecordManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9469DF6F1FBDEDAF986815A0 /* RecordManagerTests.swift */; };
@@ -257,6 +260,7 @@
 		26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManagerTests.swift; sourceTree = "<group>"; };
 		2700A7B251C6870995C7849B /* MeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
 		36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LabFeaturesView.swift; sourceTree = "<group>"; };
+		B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkStyleSettingsView.swift; sourceTree = "<group>"; };
 		3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventDetailSheetView.swift; sourceTree = "<group>"; };
 		3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomModelsListView.swift; sourceTree = "<group>"; };
 		3E16D916C859E3FB8DD53D5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -269,6 +273,8 @@
 		48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryStore.swift; path = SparkHistoryStore.swift; sourceTree = "<group>"; };
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
 		4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigurationView.swift; sourceTree = "<group>"; };
+		E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIFeatureSettingsView.swift; sourceTree = "<group>"; };
+		B7E620797C134376A9E304BE /* SparkMemoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkMemoryView.swift; sourceTree = "<group>"; };
 		54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenSourceAcknowledgmentsView.swift; sourceTree = "<group>"; };
 		56C541D6F62CB3492461A94D /* AboutNotieeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutNotieeView.swift; sourceTree = "<group>"; };
 		59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
@@ -517,6 +523,7 @@
 				100000000000000000000036 /* ImportScheduleView.swift */,
 				43711194AC983B67E9DDD83D /* AllSchedulesView.swift */,
 				36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */,
+				B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */,
 				0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */,
 				A9AC1257406B758D108B41FD /* EventImportPreviewSheet.swift */,
 				612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */,
@@ -533,6 +540,8 @@
 				B72552C09CF292FA6C3C36EE /* SettingsMainView.swift */,
 				3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */,
 				4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */,
+				E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */,
+				B7E620797C134376A9E304BE /* SparkMemoryView.swift */,
 				1342A65366ED31A59C9A520E /* CalendarSelectionView.swift */,
 				54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */,
 			);
@@ -951,6 +960,9 @@
 				72398F63847C0F6573941445 /* TMNExportService.swift in Sources */,
 				AB823531986DF87DD3E5FF9A /* TMNModels.swift in Sources */,
 				45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */,
+				B208EB091BB4420BBB3BF191 /* SparkStyleSettingsView.swift in Sources */,
+				DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */,
+				77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */,
 				C9E505CC0289ABEBE4585D38 /* ScheduledEventStore.swift in Sources */,
 				7568F23C0FDBFDF392C370C5 /* ImageSaver.swift in Sources */,
 				37F3859728859E02F78A285B /* TMNImportPreviewSheet.swift in Sources */,

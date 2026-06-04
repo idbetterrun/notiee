@@ -66,9 +66,11 @@ struct SettingsMainView: View {
                 Toggle("启用大模型处理功能", isOn: $viewModel.aiEnabled)
                 
                 if viewModel.aiEnabled {
-                    Toggle("摘要 (较低消耗)", isOn: $viewModel.aiEnableSummary)
-                    Toggle("详细内容 (极高消耗)", isOn: $viewModel.aiEnableDetailedContent)
-                    Toggle("待办事项 (较低消耗)", isOn: $viewModel.aiEnableTodos)
+                    NavigationLink {
+                        AIFeatureSettingsView(viewModel: viewModel)
+                    } label: {
+                        Label("大模型功能", systemImage: "gearshape.2")
+                    }
                     
                     Toggle("拍记完后立即分析", isOn: $viewModel.autoProcessAfterCapture)
                     
@@ -90,6 +92,18 @@ struct SettingsMainView: View {
                             systemImage: "eye",
                             configuration: viewModel.visionConfiguration
                         )
+                    }
+
+                    NavigationLink {
+                        SparkStyleSettingsView()
+                    } label: {
+                        Label("AI 聊天风格", systemImage: "theatermasks")
+                    }
+
+                    NavigationLink {
+                        SparkMemoryView()
+                    } label: {
+                        Label("记忆", systemImage: "brain.head.profile")
                     }
                     
                     Button("测试双端连接") {

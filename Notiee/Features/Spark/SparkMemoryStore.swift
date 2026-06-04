@@ -7,6 +7,7 @@ protocol SparkMemoryPersisting {
     func save(_ dict: [String: String]) throws
     func set(_ key: String, value: String)
     func get(_ key: String) -> String?
+    func delete(_ key: String)
 }
 
 // MARK: - JSON Store
@@ -45,5 +46,11 @@ final class SparkMemoryStore: SparkMemoryPersisting {
 
     func get(_ key: String) -> String? {
         (try? load())?[key]
+    }
+
+    func delete(_ key: String) {
+        var dict = (try? load()) ?? [:]
+        dict.removeValue(forKey: key)
+        try? save(dict)
     }
 }

@@ -5,6 +5,7 @@ struct SparkView: View {
     let store: NotieeStore
     @State private var showHistory = false
     @State private var showPrivacy = false
+    @State private var selectedRecord: NoteRecord?
     @FocusState private var isFocused: Bool
 
     init(store: NotieeStore) {
@@ -31,6 +32,28 @@ struct SparkView: View {
                     chatScrollView
                 }
 
+                if let warning = viewModel.injectionWarning {
+                    Text(warning)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 4)
+                        .transition(.opacity)
+                }
+
+                if let memText = viewModel.memoryActionText {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 12))
+                        Text(memText)
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.green)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 4)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
                 SparkInputBar(
                     text: $viewModel.inputText,
                     isLoading: viewModel.state == .loading,
@@ -53,6 +76,11 @@ struct SparkView: View {
         }
         .sheet(isPresented: $showPrivacy) {
             SparkPrivacySheet(onAgree: { viewModel.markPrivacyNoticeSeen(); showPrivacy = false })
+        }
+        .sheet(item: $selectedRecord) { record in
+            NavigationStack {
+                RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+            }
         }
         .onAppear {
             if !viewModel.hasSeenPrivacyNotice {
@@ -155,7 +183,11 @@ struct SparkView: View {
                         SparkChatBubble(
                             message: message,
                             store: store,
-                            onCitationTap: nil
+                            onCitationTap: { recordID in
+                                if let record = store.records.first(where: { $0.id == recordID }) {
+                                    selectedRecord = record
+                                }
+                            }
                         )
                         .id(message.id)
                     }
