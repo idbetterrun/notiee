@@ -59,27 +59,11 @@ final class AIPipelineManager {
     ) {
         guard aiEnabled, let access = recordAccess else { return }
 
-        let actualRetryCount = retryCount ?? 0
-        let maxRetries = 4
-        let delaySeconds: UInt64 = {
-            switch actualRetryCount {
-            case 0: return 0
-            case 1: return 2_000_000_000
-            case 2: return 4_000_000_000
-            case 3: return 8_000_000_000
-            default: return 0
-            }
-        }()
-
         let service = aiService
         let resolvedTitle = eventTitle
 
         Task { [weak self, weak access] in
             guard let self else { return }
-
-            if delaySeconds > 0 {
-                try? await Task.sleep(nanoseconds: delaySeconds)
-            }
 
             await MainActor.run {
                 access?.setProcessingState(.processing, for: recordID)
@@ -96,28 +80,10 @@ final class AIPipelineManager {
                     access?.persistRecords()
                 }
             } catch {
-                let nextRetry = actualRetryCount + 1
                 await MainActor.run {
-                    if nextRetry >= maxRetries {
-                        access?.setProcessingState(.deadLetter, for: recordID)
-                        access?.persistRecords()
-                        print("AI Processing dead letter after \(maxRetries) retries: \(error.localizedDescription)")
-                    } else {
-                        access?.incrementRetryCount(for: recordID)
-                        access?.setProcessingState(.failed, for: recordID)
-                        access?.persistRecords()
-                        print("AI Processing failed (retry \(nextRetry)/\(maxRetries)): \(error.localizedDescription)")
-
-                        // Re-trigger pipeline with incremented count
-                        Task { @MainActor [weak self] in
-                            self?.enqueueProcessing(
-                                recordID: recordID,
-                                localImagePaths: localImagePaths,
-                                eventTitle: resolvedTitle,
-                                retryCount: nextRetry
-                            )
-                        }
-                    }
+                    access?.setProcessingState(.failed, for: recordID)
+                    access?.persistRecords()
+                    print("AI Processing failed: \(error.localizedDescription)")
                 }
             }
         }
