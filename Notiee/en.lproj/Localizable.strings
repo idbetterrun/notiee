@@ -415,3 +415,78 @@
 "NSMicrophoneUsageDescription" = "Notiee needs microphone access for voice recording.";
 "NSPhotoLibraryUsageDescription" = "Notiee needs photo library access to import images for note-taking.";
 "NSSpeechRecognitionUsageDescription" = "Notiee uses speech recognition to convert your voice to text notes.";
+"Spark聊天风格" = "Spark Chat Style";
+"设置 Spark 伴侣的聊天风格和语气。留空则使用默认风格。" = "Configure Spark's chat tone and style. Leave blank to use the default style.";
+"Spark 耗费Token估计" = "Spark Token Estimate";
+
+/* Spark - ViewModel */
+"嗨" = "Hey there";
+"输入包含不安全的指令，请修改后重试" = "Your message contains unsafe instructions. Please revise and try again.";
+"网络不可用，无法进行 AI 问答。请检查网络后重试。" = "Network unavailable. AI chat requires an internet connection. Please check and try again.";
+"✓ 已记忆" = "✓ Remembered";
+"抱歉，出错了：%@" = "Sorry, something went wrong: %@";
+"用户问候" = "Greeting";
+"用户询问身份" = "Identity Inquiry";
+"新对话" = "New Chat";
+
+/* Spark - Greetings */
+"嗨，又见面了" = "Hey, nice to see you again";
+"有什么想聊的？" = "What would you like to talk about?";
+"今天是个适合整理知识的好日子" = "A perfect day to organize your thoughts";
+"有什么灵感需要记录的吗" = "Any inspiration worth capturing?";
+"翻翻最近的拍记吧" = "Want to browse recent captures?";
+"今天过得怎么样？" = "How's your day going?";
+"随时准备好帮你回顾笔记" = "Always ready to help review your notes";
+"我帮你理一理思路" = "Let me help you sort things out";
+
+/* Spark - Question Pool */
+"最近一周我拍了哪些内容？" = "What did I capture this week?";
+"帮我总结最近的会议要点。" = "Summarize my recent meeting notes.";
+"我有哪些还没完成的待办？" = "What tasks do I still have pending?";
+"最近拍的笔记里提到过什么重要日期？" = "Any important dates in my recent captures?";
+"帮我回顾一下上个月的记录。" = "Review my notes from last month.";
+"有哪些关于 SwiftUI 的笔记？" = "Show me notes about SwiftUI.";
+"最近拍的图片里写了什么？" = "What's in my recent captures?";
+"整理一下我的学习进度。" = "Help me organize my study progress.";
+"有什么值得回顾的灵感？" = "Any inspiration worth reviewing?";
+"帮我找找关于项目规划的内容。" = "Find notes about project planning.";
+"今天有什么好心情吗？" = "Anything exciting today?";
+"回顾一下这周拍的所有板书。" = "Review all this week's lecture captures.";
+
+/* Spark - ChatBubble */
+"复制" = "Copy";
+"参考来源" = "Sources";
+
+/* Spark - InputBar */
+"向 Spark 提问..." = "Ask Spark...";
+
+/* Spark - History */
+"今天" = "Today";
+"昨天" = "Yesterday";
+"加载中..." = "Loading...";
+"历史对话" = "Chat History";
+"全选" = "Select All";
+"删除 (%d)" = "Delete (%d)";
+"选择" = "Select";
+"删除所选" = "Delete Selected";
+"暂无历史对话" = "No Chat History";
+"%lld 条消息" = "%lld messages";
+
+/* Spark - View Footer */
+"内容由AI生成，Notiee不会把拍记内容用于任何模型训练" = "Content is AI-generated. Notiee does not use captured content for any model training.";
+
+/* SparkStyle - Presets */
+"温柔知心" = "Gentle & Caring";
+"犀利毒舌" = "Sharp & Witty";
+"简洁高效" = "Concise & Efficient";
+"幽默风趣" = "Humorous & Fun";
+"学究严谨" = "Scholarly & Precise";
+
+/* SparkStyle - UI */
+"预设风格" = "Preset Styles";
+"自定义风格" = "Custom Styles";
+"新建风格" = "New Style";
+"风格指令" = "Style Prompt";
+"描述 AI 应该如何回复…" = "Describe how the AI should respond...";
+"例如：温柔知心" = "e.g. Gentle & Caring";
+"暂无自定义风格，点击右上角 + 添加" = "No custom styles. Tap + to add one.";

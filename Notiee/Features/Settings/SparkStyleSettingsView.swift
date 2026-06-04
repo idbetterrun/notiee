@@ -15,6 +15,8 @@ struct SparkStyleSettingsView: View {
 
         var id: String { rawValue }
 
+        var displayName: String { String(localized: String.LocalizationValue(rawValue)) }
+
         var promptTemplate: String {
             switch self {
             case .defaultPreset:
@@ -36,7 +38,7 @@ struct SparkStyleSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Text("设置 AI 伴侣的聊天风格和语气。留空则使用默认风格。")
+                Text("设置 Spark 伴侣的聊天风格和语气。留空则使用默认风格。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -54,7 +56,7 @@ struct SparkStyleSettingsView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(preset.rawValue)
+                                Text(preset.displayName)
                                     .foregroundStyle(.primary)
                                 if !preset.promptTemplate.isEmpty {
                                     Text(preset.promptTemplate)
@@ -110,7 +112,7 @@ struct SparkStyleSettingsView: View {
                 }
             }
         }
-        .navigationTitle("AI 聊天风格")
+        .navigationTitle("Spark聊天风格")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

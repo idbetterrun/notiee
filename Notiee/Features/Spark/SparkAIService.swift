@@ -109,6 +109,7 @@ final class SparkAIService: Sendable {
                             apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
                     }
                     continuation.yield(result.text)
+                    accumulateTokens(result.tokens)
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
@@ -140,6 +141,7 @@ final class SparkAIService: Sendable {
                 apiKey: textConfig.apiKey, systemPrompt: "", userPrompt: userPrompt)
         }
         return String(result.text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
+            accumulateTokens(result.tokens)
     }
 
     // MARK: - Memory Operations
@@ -235,6 +237,7 @@ final class SparkAIService: Sendable {
                     apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
             }
             let (_, ops) = extractMemory(from: result.text)
+            accumulateTokens(result.tokens)
             for (k, v) in ops.toSet { memoryStore.set(k, value: v) }
             for (k, v) in ops.toUpdate { memoryStore.set(k, value: v) }
             for k in ops.toDelete { memoryStore.delete(k) }
@@ -387,5 +390,10 @@ final class SparkAIService: Sendable {
 
     private func trunc(_ text: String, _ max: Int) -> String {
         text.count <= max ? text : String(text.prefix(max)) + "..."
+    }
+
+    private func accumulateTokens(_ tokens: Int) {
+        let current = UserDefaults.standard.integer(forKey: UDK.sparkAccumulatedTokens)
+        UserDefaults.standard.set(current + tokens, forKey: UDK.sparkAccumulatedTokens)
     }
 }

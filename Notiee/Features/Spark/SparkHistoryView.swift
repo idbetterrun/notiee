@@ -8,11 +8,12 @@ struct DateGroup: Identifiable {
     let conversations: [SavedConversation]
     var label: String {
         let cal = Calendar.current
-        if cal.isDateInToday(date) { return "今天" }
-        if cal.isDateInYesterday(date) { return "昨天" }
+        if cal.isDateInToday(date) { return String(localized: "今天") }
+        if cal.isDateInYesterday(date) { return String(localized: "昨天") }
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "M月d日"
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        formatter.doesRelativeDateFormatting = false
         return formatter.string(from: date)
     }
 }
@@ -144,7 +145,7 @@ struct SparkHistoryView: View {
                     .foregroundStyle(.secondary)
                 Text("·")
                     .foregroundStyle(.tertiary)
-                Text("\(conv.messageCount) 条消息")
+                Text(String(format: String(localized: "%lld 条消息"), conv.messageCount))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

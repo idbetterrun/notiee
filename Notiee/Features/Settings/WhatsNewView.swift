@@ -5,52 +5,52 @@ struct WhatsNewContainerView: View {
 
     private let highlights = [
         WhatsNewHighlight(
-            title: "全新登录页",
-            subtitle: "简洁的单按钮登录，协议未勾选时提示会左右抖动提醒你。支持浅色/深色模式。",
-            systemImage: "person.fill.checkmark",
-            tint: .green
-        ),
-        WhatsNewHighlight(
-            title: "主题色切换",
-            subtitle: "设置 > 外观中可选择 Notiee 翠绿配色，菜单图标、按钮统一跟随主题色变化。",
-            systemImage: "paintpalette.fill",
-            tint: .green
-        ),
-        WhatsNewHighlight(
-            title: "相机启动更流畅",
-            subtitle: "进入拍记页先展示旋转环加载动画，相机就绪后平滑切入预览，不再有卡顿感。",
-            systemImage: "camera.macro",
-            tint: .blue
-        ),
-        WhatsNewHighlight(
-            title: "文字框选与复制",
-            subtitle: "记录详情页的 AI 摘要、详细内容、OCR 原文均支持长按选中文字，弹出复制/分享菜单。",
-            systemImage: "selection.pin.in.out",
+            title: "Spark AI 伴侣",
+            subtitle: "全新第四标签页，智能 AI 助手帮你回顾笔记、回答问题，支持对话历史与自动记忆。",
+            systemImage: "sparkles",
             tint: .orange
         ),
         WhatsNewHighlight(
-            title: "Token 消耗追踪",
-            subtitle: "回顾页展示 Token 消耗 Top 5 记录排行，删除记录自动累计消耗量。详情页右上角可查看单条 Token 数。",
-            systemImage: "chart.pie.fill",
+            title: "Spark 风格自定义",
+            subtitle: "6 种预设聊天风格（温柔知心、犀利毒舌等），还支持自定义风格指令，打造专属 AI 伴侣。",
+            systemImage: "theatermasks",
             tint: .purple
         ),
         WhatsNewHighlight(
-            title: "日程路径去重",
-            subtitle: "拍记页和记录页的日程路径列表自动过滤节假日，相同标题只显示一次，不再重复堆叠。",
-            systemImage: "calendar.badge.clock",
-            tint: .indigo
-        ),
-        WhatsNewHighlight(
-            title: "学生模式 & 深度联想",
-            subtitle: "大学/中学场景预设可标记课程日历并置顶显示。记录详情页自动推荐相关历史笔记。",
+            title: "智能记忆系统",
+            subtitle: "Spark 会自动记住你的名字、偏好和习惯，下次聊天时自然提起，越聊越懂你。",
             systemImage: "brain.head.profile.fill",
             tint: .pink
         ),
         WhatsNewHighlight(
-            title: "Lottie 动效框架",
-            subtitle: "引入 Airbnb Lottie 引擎，后续版本将陆续添加精美动画，敬请期待。",
-            systemImage: "sparkles",
-            tint: .yellow
+            title: "Spark Token 追踪",
+            subtitle: "回顾页新增 Spark 耗费Token估计，独立统计 AI 对话消耗，与拍记 Token 分开显示。",
+            systemImage: "chart.pie.fill",
+            tint: .blue
+        ),
+        WhatsNewHighlight(
+            title: "多语言全面适配",
+            subtitle: "完善繁体中文与 English 的全界面翻译，覆盖 Spark、设置、回顾等全部页面，告别机翻感。",
+            systemImage: "globe",
+            tint: .indigo
+        ),
+        WhatsNewHighlight(
+            title: "架构与性能优化",
+            subtitle: "管理架构重组、设置页拆分、Key 集中化，代码更规范，页面加载速度大幅提升。",
+            systemImage: "gearshape.2.fill",
+            tint: .gray
+        ),
+        WhatsNewHighlight(
+            title: "AI Pipeline 修复",
+            subtitle: "移除无限重试循环，引入指数退避机制，网络异常时快速返回错误不再卡死。",
+            systemImage: "arrow.triangle.merge",
+            tint: .green
+        ),
+        WhatsNewHighlight(
+            title: "日程匹配增强",
+            subtitle: "修复系统日历事件 ID 重启后变化导致丢失关联的问题，日程追踪更稳定。",
+            systemImage: "calendar.badge.clock",
+            tint: .teal
         )
     ]
 
@@ -84,7 +84,7 @@ struct WhatsNewContainerView: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
 
-                Text("这次重点打磨了登录体验、主题配色、文字交互和 Token 追踪。")
+                Text("这次重磅推出 Spark AI 伴侣，并完成了全面的多语言适配与性能优化。")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
@@ -100,11 +100,11 @@ struct WhatsNewContainerView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.green)
 
-                Text("更好看，更好用")
+                Text("你的 AI 伴侣来了")
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text("从拍到查全链路体验优化。")
+                Text("Spark 正式登场，多语言全面适配。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -113,9 +113,9 @@ struct WhatsNewContainerView: View {
 
             Image(systemName: "sparkles")
                 .font(.system(size: 24, weight: .semibold))
-                .foregroundStyle(.green)
+                .foregroundStyle(.orange)
                 .frame(width: 52, height: 52)
-                .background(Color.green.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .padding(18)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))

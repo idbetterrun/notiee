@@ -67,6 +67,10 @@ enum UDK {
     // MARK: - iCloud
     static let icloudLastSyncDate = "notiee.icloudLastSyncDate"
 
+    // MARK: - Spark Token Tracking
+    static let sparkAccumulatedTokens = "notiee.sparkAccumulatedTokens"
+
+
     // MARK: - Spark
     static let sparkCustomStyle = "spark_custom_style"
     static let sparkCustomStyles = "spark_custom_styles"

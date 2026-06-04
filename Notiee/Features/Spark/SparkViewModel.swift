@@ -103,7 +103,10 @@ final class SparkViewModel: ObservableObject {
     }
 
     var greetingEmoji: String { settingsStore.loadString(forKey: "spark_greeting_emoji", defaultValue: "👋") }
-    var greetingText: String { settingsStore.loadString(forKey: "spark_greeting_text", defaultValue: "嗨") }
+    var greetingText: String {
+        let saved = settingsStore.loadString(forKey: "spark_greeting_text", defaultValue: "")
+        return saved.isEmpty ? String(localized: "嗨") : saved
+    }
 
     // MARK: - Send Message
 
@@ -112,7 +115,7 @@ final class SparkViewModel: ObservableObject {
         guard !t.isEmpty, state != .loading else { return }
 
         if SparkAIService.containsInjectionPattern(t) {
-            injectionWarning = "输入包含不安全的指令，请修改后重试"
+            injectionWarning = String(localized: "输入包含不安全的指令，请修改后重试")
             return
         }
         injectionWarning = nil
@@ -127,7 +130,7 @@ final class SparkViewModel: ObservableObject {
 
     private func processQuestion(_ q: String, _ userMsg: ChatMessage) async {
         if !NetworkMonitor.shared.isConnected {
-            messages.append(ChatMessage(role: .assistant, content: "网络不可用，无法进行 AI 问答。请检查网络后重试。"))
+            messages.append(ChatMessage(role: .assistant, content: String(localized: "网络不可用，无法进行 AI 问答。请检查网络后重试。")))
             state = .offline; saveCurrentConversation(); return
         }
         let aid = UUID()
@@ -150,11 +153,11 @@ final class SparkViewModel: ObservableObject {
             for (k, v) in ops.toUpdate { ms.set(k, value: v); memoryCount += 1 }
             for k in ops.toDelete { ms.delete(k); memoryCount += 1 }
             if memoryCount > 0 {
-                withAnimation(.easeInOut) { memoryActionText = "✓ 已记忆" }
+                withAnimation(.easeInOut) { memoryActionText = String(localized: "✓ 已记忆") }
                 Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 2_500_000_000)
                     withAnimation(.easeInOut) {
-                        if memoryActionText == "✓ 已记忆" { memoryActionText = nil }
+                        if memoryActionText == String(localized: "✓ 已记忆") { memoryActionText = nil }
                     }
                 }
             }
@@ -283,17 +286,17 @@ final class SparkViewModel: ObservableObject {
         let greetingPatterns = ["你好", "hi", "hello", "嗨", "hey", "在吗", "在么", "早上好", "下午好", "晚上好"]
         let identityPatterns = ["你是谁", "你叫什么", "你是谁呀", "你的名字", "你叫什么名字", "who are you", "what's your name", "what is your name"]
         if greetingPatterns.contains(where: { lower.contains($0.lowercased()) }) {
-            return "用户问候"
+            return String(localized: "用户问候")
         }
         if identityPatterns.contains(where: { lower.contains($0.lowercased()) }) {
-            return "用户询问身份"
+            return String(localized: "用户询问身份")
         }
         return nil
     }
 
     private func fallbackTitle(from firstMessage: String) {
         let t = String(firstMessage.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
-        currentTitle = t.isEmpty ? "新对话" : t
+        currentTitle = t.isEmpty ? String(localized: "新对话") : t
     }
 
     private func saveToHistory() {

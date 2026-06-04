@@ -9,6 +9,7 @@ struct ReviewView: View {
 
     @AppStorage(UDK.tokenWarningThreshold) private var tokenWarningThreshold: Int = 0
     @AppStorage(UDK.accumulatedDeletedTokens) private var accumulatedDeletedTokens: Int = 0
+    @AppStorage(UDK.sparkAccumulatedTokens) private var sparkAccumulatedTokens: Int = 0
 
     var body: some View {
         ScrollView {
@@ -43,7 +44,7 @@ struct ReviewView: View {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.orange)
-                        Text("Token 消耗已超提醒阈值 (\(tokenWarningThreshold) tk)")
+                        Text(String(format: String(localized: "Token 消耗已超提醒阈值 (%lld tk)"), tokenWarningThreshold))
                             .font(.caption)
                     }
                     .foregroundColor(.orange)
@@ -72,6 +73,8 @@ struct ReviewView: View {
                         .padding(.horizontal)
                     }
                 }
+
+
 
                 let topRecords = topRecordsByToken()
                 if !topRecords.isEmpty {
@@ -111,6 +114,21 @@ struct ReviewView: View {
                     }
                 }
 
+                // Spark Token Estimation
+                HStack {
+                    Image(systemName: "sparkles")
+                        .foregroundColor(.accentColor)
+                    Text(String(localized: "Spark 耗费Token估计"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(sparkAccumulatedTokens) tk")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+
+
                 HStack {
                     Image(systemName: "trash.fill")
                         .foregroundColor(.secondary)
@@ -139,17 +157,17 @@ struct ReviewView: View {
     private func tokenComparisonText(for tokens: Int) -> String {
         switch tokens {
         case 0:
-            return "还没有消耗 Token 哦，快去拍记吧！"
+            return String(localized: "还没有消耗 Token 哦，快去拍记吧！")
         case 1..<10_000:
-            return "大约相当于写了一篇小短文的数量。"
+            return String(localized: "大约相当于写了一篇小短文的数量。")
         case 10_000..<100_000:
-            return "大约相当于读完了一本薄薄的杂志。"
+            return String(localized: "大约相当于读完了一本薄薄的杂志。")
         case 100_000..<500_000:
-            return "大约相当于一两部中篇小说的字数啦！"
+            return String(localized: "大约相当于一两部中篇小说的字数啦！")
         case 500_000..<1_000_000:
-            return "大概花了一本《西游记》的 Token 数咯！"
+            return String(localized: "大概花了一本《西游记》的 Token 数咯！")
         default:
-            return "天哪！这相当于读完了好几本大部头巨著！"
+            return String(localized: "天哪！这相当于读完了好几本大部头巨著！")
         }
     }
 

@@ -122,7 +122,14 @@ func randomQuestions() -> [String] {
 
 struct GreetingPhrase: Sendable {
     let emoji: String
-    let text: String
+    private let rawText: String
+
+    var text: String { NSLocalizedString(rawText, comment: "") }
+
+    init(emoji: String, text: String) {
+        self.emoji = emoji
+        self.rawText = text
+    }
 
     static let pool: [GreetingPhrase] = [
         GreetingPhrase(emoji: "\u{1F44B}", text: "嗨，又见面了"),

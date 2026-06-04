@@ -97,7 +97,7 @@ struct SettingsMainView: View {
                     NavigationLink {
                         SparkStyleSettingsView()
                     } label: {
-                        Label("AI 聊天风格", systemImage: "theatermasks")
+                        Label("Spark聊天风格", systemImage: "theatermasks")
                     }
 
                     NavigationLink {

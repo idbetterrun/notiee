@@ -10,7 +10,7 @@
   <a href="#"><img src="https://img.shields.io/badge/Platform-iOS%2018.0+-blue.svg" alt="Platform"></a>
   <a href="#"><img src="https://img.shields.io/badge/Swift-6.0+-orange.svg" alt="Swift"></a>
   <a href="#"><img src="https://img.shields.io/badge/Xcode-16.0+-blue.svg" alt="Xcode"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-1.0.2-green.svg" alt="Version"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-1.0.3-green.svg" alt="Version"></a>
   <a href="#"><img src="https://img.shields.io/badge/License-Proprietary-red.svg" alt="License"></a>
 </p>
 
@@ -139,7 +139,7 @@ API keys encrypted in iOS **Keychain**.
 
 ## Version
 
-**v1.0.2** — Current
+**v1.0.3** — Current
 
 - [x] Theme color system with Notiee green accent
 - [x] Scene presets (Professional / College / High School / Creator)
