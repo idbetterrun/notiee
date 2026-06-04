@@ -59,6 +59,29 @@ final class SparkAIService: Sendable {
         }
     }
 
+    func generateTitle(for message: String) async throws -> String {
+        let textConfig = settingsStore.loadConfiguration(for: .text)
+        guard textConfig.isComplete else { throw SparkAIError.missingConfiguration }
+
+        let prompt = """
+        你是一个标题生成助手。用不超过10个字总结下面这句话的核心内容，只返回总结文本，不要加引号或其他修饰。
+
+        用户说：\(String(message.prefix(200)))
+        """
+
+        let result: (text: String, tokens: Int)
+        if textConfig.activeProtocol == .openai {
+            result = try await OpenAICaller.callText(
+                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                apiKey: textConfig.apiKey, prompt: prompt)
+        } else {
+            result = try await AnthropicCaller.callText(
+                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                apiKey: textConfig.apiKey, prompt: prompt)
+        }
+        return String(result.text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(10))
+    }
+
     func extractMemory(from text: String) -> (cleanText: String, newMemories: [String: String]) {
         let pattern = "\\[记忆\\](.*?)\\[/记忆\\]"
         guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {

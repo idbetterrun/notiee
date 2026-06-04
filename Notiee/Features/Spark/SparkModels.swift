@@ -65,7 +65,7 @@ struct ConversationRound: Identifiable, Equatable, Codable, Sendable {
 
 struct SavedConversation: Identifiable, Equatable, Codable, Sendable {
     let id: UUID
-    let title: String
+    var title: String
     let createdAt: Date
     var lastMessageAt: Date
     var messages: [ChatMessage]

@@ -9,6 +9,8 @@ final class SparkViewModel: ObservableObject {
     @Published var isInputFocused: Bool = false
     @Published var hasSeenPrivacyNotice: Bool = false
     @Published var currentQuestions: [String] = randomQuestions()
+    @Published var currentTitle: String = "Spark"
+    @Published var isGeneratingTitle: Bool = false
 
     let aiService: SparkAIService
     let conversationStore: SparkConversationPersisting
@@ -17,6 +19,7 @@ final class SparkViewModel: ObservableObject {
 
     var recordsProvider: (() -> [NoteRecord])?
     private var loadedFromHistoryID: UUID?
+    private var currentConversationId: UUID = UUID()
 
     init(
         aiService: SparkAIService = SparkAIService(),
@@ -66,7 +69,13 @@ final class SparkViewModel: ObservableObject {
         var msgs: [ChatMessage] = []
         for r in rounds { msgs.append(r.userMessage); msgs.append(r.assistantMessage) }
         self.messages = msgs
-        if msgs.isEmpty { currentQuestions = randomQuestions() }
+        if msgs.isEmpty {
+            currentQuestions = randomQuestions()
+            currentTitle = "Spark"
+        } else {
+            let t = msgs.first(where: { $0.role == .user })?.content ?? "Spark"
+            currentTitle = String(t.prefix(15)).trimmingCharacters(in: .whitespaces)
+        }
     }
 
     func sendMessage() {
@@ -86,7 +95,6 @@ final class SparkViewModel: ObservableObject {
             state = .offline; saveCurrentConversation(); return
         }
         let aid = UUID()
-        // Empty content triggers "thinking..." animation in SparkChatBubble
         messages.append(ChatMessage(id: aid, role: .assistant, content: ""))
         do {
             let allRecs = recordsProvider?() ?? []
@@ -110,7 +118,10 @@ final class SparkViewModel: ObservableObject {
                 messages[idx] = ChatMessage(id: aid, role: .assistant, content: clean, citations: cits)
             }
             state = .loaded
-            updateTitle()
+
+            if loadedFromHistoryID == nil {
+                Task { await generateAndSyncTitle(); saveToHistory() }
+            }
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == aid }) { messages.remove(at: idx) }
             messages.append(ChatMessage(role: .assistant, content: "抱歉，出错了：\(error.localizedDescription)"))
@@ -120,64 +131,116 @@ final class SparkViewModel: ObservableObject {
     }
 
     private func saveCurrentConversation() {
-        var rounds: [ConversationRound] = []; var i = 0
-        while i + 1 < messages.count {
-            if messages[i].role == .user, messages[i+1].role == .assistant {
-                rounds.append(ConversationRound(userMessage: messages[i], assistantMessage: messages[i+1]))
-                i += 2
-            } else { i += 1 }
+        let msgs = messages
+        let store = conversationStore
+        Task.detached(priority: .background) {
+            var rounds: [ConversationRound] = []; var i = 0
+            while i + 1 < msgs.count {
+                if msgs[i].role == .user, msgs[i+1].role == .assistant {
+                    rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i+1]))
+                    i += 2
+                } else { i += 1 }
+            }
+            try? store.saveConversations(rounds)
         }
-        try? conversationStore.saveConversations(rounds)
     }
 
-    private func updateTitle() {
-        guard let first = messages.first(where: {$0.role == .user}) else {
-            settingsStore.saveString("Spark", forKey: "spark_current_title")
-            return
+    private func generateAndSyncTitle() async {
+        guard let first = messages.first(where: { $0.role == .user })?.content,
+              !first.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        isGeneratingTitle = true
+        do {
+            let title = try await aiService.generateTitle(for: first)
+            if !title.isEmpty {
+                currentTitle = title
+            } else {
+                fallbackTitle(from: first)
+            }
+        } catch {
+            fallbackTitle(from: first)
         }
-        let t = String(first.content.prefix(15)).trimmingCharacters(in: .whitespaces)
-        guard !t.isEmpty else { return }
-        settingsStore.saveString(t, forKey: "spark_current_title")
+        isGeneratingTitle = false
     }
 
-    var currentTitle: String {
-        messages.isEmpty ? "Spark" : settingsStore.loadString(forKey: "spark_current_title", defaultValue: "Spark")
+    private func fallbackTitle(from firstMessage: String) {
+        let t = String(firstMessage.prefix(10)).trimmingCharacters(in: .whitespaces)
+        if !t.isEmpty { currentTitle = t }
     }
 
-    // MARK: - History management (performance optimized)
+    private func saveToHistory() {
+        guard loadedFromHistoryID == nil else { return }
+        let msgs = messages
+        let id = currentConversationId
+        let title = currentTitle
+        Task.detached(priority: .background) {
+            var hist = (try? SparkHistoryStore.live.loadConversations()) ?? []
+            if let idx = hist.firstIndex(where: { $0.id == id }) {
+                hist[idx].messages = msgs
+                hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
+                if !title.isEmpty && title != "Spark" {
+                    hist[idx].title = title
+                }
+            } else {
+                guard let firstMsg = msgs.first else { return }
+                let s = SavedConversation(
+                    id: id,
+                    title: title,
+                    createdAt: firstMsg.timestamp,
+                    lastMessageAt: msgs.last?.timestamp ?? Date(),
+                    messages: msgs
+                )
+                hist.append(s)
+            }
+            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
+            try? SparkHistoryStore.live.saveConversations(hist)
+        }
+    }
+
+    // MARK: - History management
 
     func newConversation() {
         guard !messages.isEmpty else { currentQuestions = randomQuestions(); return }
         let msgs = messages
-        // Only save to history if this conversation wasn't loaded from history
         let wasLoadedFromHistory = loadedFromHistoryID != nil
+        let title = currentTitle
+        let convId = currentConversationId
         Task.detached(priority: .background) { [wasLoadedFromHistory] in
             guard !wasLoadedFromHistory else { return }
-            let title = msgs.first(where: { $0.role == .user })?.content ?? "对话"
-            let s = SavedConversation(title: String(title.prefix(30)), createdAt: msgs.first?.timestamp ?? Date(), lastMessageAt: msgs.last?.timestamp ?? Date(), messages: msgs)
+            let s = SavedConversation(
+                id: convId,
+                title: title,
+                createdAt: msgs.first?.timestamp ?? Date(),
+                lastMessageAt: msgs.last?.timestamp ?? Date(),
+                messages: msgs
+            )
             var hist = (try? SparkHistoryStore.live.loadConversations()) ?? []
-            hist.append(s); try? SparkHistoryStore.live.saveConversations(hist)
+            if let idx = hist.firstIndex(where: { $0.id == convId }) {
+                hist[idx] = s
+            } else {
+                hist.append(s)
+            }
+            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
+            try? SparkHistoryStore.live.saveConversations(hist)
         }
         messages = []; try? conversationStore.saveConversations([])
         state = .idle; inputText = ""
         currentQuestions = randomQuestions()
         refreshGreeting()
-        settingsStore.saveString("Spark", forKey: "spark_current_title")
+        currentTitle = "Spark"
+        isGeneratingTitle = false
         loadedFromHistoryID = nil
+        currentConversationId = UUID()
     }
 
     func loadConversation(_ saved: SavedConversation) {
-        state = .loading
         let msgs = saved.messages
-        Task {
-            await MainActor.run {
-                self.messages = msgs
-                self.state = .idle
-                self.loadedFromHistoryID = saved.id
-                self.updateTitle()
-            }
-            saveCurrentConversation()
-        }
+        self.messages = msgs
+        self.state = .idle
+        self.loadedFromHistoryID = saved.id
+        self.currentTitle = saved.title
+        self.currentConversationId = saved.id
+        isGeneratingTitle = false
+        saveCurrentConversation()
     }
 
     func deleteConversations(_ ids: Set<UUID>) {

@@ -38,7 +38,12 @@ struct SparkView: View {
                     onFocusChange: { _ in }
                 )
                 .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+
+                Text("内容由AI生成，Notiee不会把拍记内容用于任何模型训练")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .padding(.top, 4)
+                    .padding(.bottom, 8)
             }
         }
         .sheet(isPresented: $showHistory) {
@@ -59,7 +64,28 @@ struct SparkView: View {
     // MARK: - Header
 
     private var headerView: some View {
-        HStack {
+        HStack(spacing: 0) {
+            HStack(spacing: 6) {
+                Text(viewModel.currentTitle)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                if viewModel.messages.isEmpty {
+                    Text("beta")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.secondary.opacity(0.15))
+                        )
+                } else if viewModel.isGeneratingTitle {
+                    ProgressView()
+                        .scaleEffect(0.6)
+                }
+            }
+
             Spacer()
 
             Button {
