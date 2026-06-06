@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class NoteGetDetailTool: AgentTool {
     let name = "note_get_detail"
     let description = "获取单条拍记的完整内容，包括标题、详细内容、摘要和创建时间"

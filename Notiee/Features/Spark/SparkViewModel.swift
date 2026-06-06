@@ -13,10 +13,15 @@ final class SparkViewModel: ObservableObject {
     @Published var isGeneratingTitle: Bool = false
     @Published var injectionWarning: String?
     @Published var memoryActionText: String?
+    @Published var isAgentModeEnabled: Bool = false
+    @Published var currentToolName: String?
+    @Published var agentActions: [AgentAction] = []
 
     let aiService: any SparkAIServing
     let repository: any SparkConversationCoordinating
     let settingsStore: AppSettingsPersisting
+    let recordManager: RecordManager?
+    let calendarManager: CalendarManager?
 
     var recordsProvider: (() -> [NoteRecord])?
     private var loadedFromHistoryID: UUID?
@@ -27,11 +32,15 @@ final class SparkViewModel: ObservableObject {
     init(
         aiService: any SparkAIServing = SparkAIService(),
         repository: any SparkConversationCoordinating = SparkConversationRepository.live,
-        settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live
+        settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
+        recordManager: RecordManager? = nil,
+        calendarManager: CalendarManager? = nil
     ) {
         self.aiService = aiService
         self.repository = repository
         self.settingsStore = settingsStore
+        self.recordManager = recordManager
+        self.calendarManager = calendarManager
         checkPrivacyNotice()
         loadGreeting()
         restoreCurrentConversationIfNeeded()
@@ -384,6 +393,92 @@ final class SparkViewModel: ObservableObject {
     func deleteConversations(_ ids: Set<UUID>) {
         Task.detached(priority: .utility) { [repository] in
             try? repository.deleteFromHistory(ids)
+        }
+    }
+
+    // MARK: - Agent Mode
+
+    func sendOrRun() {
+        if isAgentModeEnabled {
+            runAgent()
+        } else {
+            sendMessage()
+        }
+    }
+
+    func runAgent() {
+        let t = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty, state != .loading else { return }
+
+        if SparkAIService.containsInjectionPattern(t) {
+            injectionWarning = String(localized: "输入包含不安全的指令，请修改后重试")
+            return
+        }
+        injectionWarning = nil
+
+        inputText = ""; state = .loading
+        let userMsg = ChatMessage(role: .user, content: t)
+        messages.append(userMsg)
+        agentActions = []
+
+        Task { await executeAgentPipeline(t) }
+    }
+
+    private func makeAgentExecutor() -> AgentExecutor? {
+        guard let recordManager, let calendarManager else { return nil }
+        let tools: [any AgentTool] = [
+            NoteSearchTool(recordManager: recordManager),
+            NoteGetDetailTool(recordManager: recordManager),
+            NoteCreateTool(recordManager: recordManager),
+            NoteUpdateTool(recordManager: recordManager),
+            TodoListTool(recordManager: recordManager),
+            TodoCreateTool(recordManager: recordManager),
+            TodoCompleteTool(recordManager: recordManager),
+            CalendarQueryTool(calendarManager: calendarManager),
+            MemoryManageTool(memoryStore: SparkMemoryStore.live)
+        ]
+        let registry = AgentToolRegistry(tools: tools)
+        let trustManager = AgentTrustManager(settingsStore: settingsStore)
+        let actionStore = AgentActionStore()
+        return AgentExecutor(aiService: aiService, toolRegistry: registry, actionStore: actionStore, trustManager: trustManager)
+    }
+
+    private func executeAgentPipeline(_ question: String) async {
+        guard NetworkMonitor.shared.isConnected else {
+            messages.append(ChatMessage(role: .assistant, content: String(localized: "网络不可用，无法进行 AI 问答。")))
+            state = .offline; saveCurrentDraft(); return
+        }
+
+        guard let executor = makeAgentExecutor() else {
+            messages.append(ChatMessage(role: .assistant, content: "Agent 模式需要完整的数据访问权限，请检查设置。"))
+            state = .error("Agent initialization failed"); saveCurrentDraft(); return
+        }
+
+        do {
+            let (text, summary, _) = try await executor.run(
+                userMessage: question,
+                conversationHistory: messages,
+                onToolCallStart: { [weak self] toolName in
+                    Task { @MainActor in self?.currentToolName = toolName }
+                },
+                onToolCallEnd: { [weak self] action in
+                    Task { @MainActor in self?.agentActions.append(action) }
+                }
+            )
+
+            var finalText = text
+            if !summary.isEmpty {
+                finalText += "\n\n---\n\(summary)"
+            }
+            messages.append(ChatMessage(role: .assistant, content: finalText))
+            state = .loaded
+            saveCurrentDraft()
+            Task { saveToHistory() }
+
+        } catch {
+            messages.append(ChatMessage(role: .assistant, content: "Agent 执行出错：\(error.localizedDescription)"))
+            state = .error(error.localizedDescription)
+            saveCurrentDraft()
         }
     }
 }

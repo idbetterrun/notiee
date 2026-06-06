@@ -15,13 +15,15 @@ enum SparkSheet: Identifiable {
 }
 
 struct SparkView: View {
-    @StateObject private var viewModel = SparkViewModel()
+    @StateObject private var viewModel: SparkViewModel
     let store: NotieeStore
     @State private var activeSheet: SparkSheet?
     @FocusState private var isFocused: Bool
 
     init(store: NotieeStore) {
         self.store = store
+        let vm = SparkViewModel(recordManager: store.recordManager, calendarManager: store.calendarManager)
+        _viewModel = StateObject(wrappedValue: vm)
     }
 
     var body: some View {
@@ -66,7 +68,7 @@ struct SparkView: View {
                 SparkInputBar(
                     text: $viewModel.inputText,
                     isLoading: viewModel.state == .loading,
-                    onSubmit: { viewModel.sendMessage() },
+                    onSubmit: { viewModel.sendOrRun() },
                     onFocusChange: { _ in }
                 )
                 .padding(.horizontal, 16)
@@ -143,6 +145,18 @@ struct SparkView: View {
             Spacer()
 
             Button {
+                viewModel.isAgentModeEnabled.toggle()
+            } label: {
+                Text("Agent")
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(viewModel.isAgentModeEnabled ? Color.purple : Color.gray.opacity(0.3))
+                    .foregroundStyle(viewModel.isAgentModeEnabled ? .white : .secondary)
+                    .clipShape(Capsule())
+            }
+
+            Button {
                 viewModel.newConversation()
             } label: {
                 Image(systemName: "square.and.pencil")
@@ -216,6 +230,34 @@ struct SparkView: View {
                             }
                         )
                         .id(message.id)
+                    }
+
+                    if let toolName = viewModel.currentToolName {
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text("Agent 正在执行: \(toolName)...")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.horizontal, 16)
+                    }
+
+                    if !viewModel.agentActions.isEmpty && viewModel.state == .loading {
+                        ForEach(viewModel.agentActions) { action in
+                            HStack {
+                                Image(systemName: action.result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                    .foregroundStyle(action.result.success ? .green : .red)
+                                Text(action.toolName)
+                                    .font(.caption)
+                                Text(action.result.message)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 4)
+                        }
                     }
                 }
                 .padding(.horizontal, 16)

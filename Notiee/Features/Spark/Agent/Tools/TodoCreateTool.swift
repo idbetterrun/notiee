@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class TodoCreateTool: AgentTool {
     let name = "todo_create"
     let description = "创建一条新的待办事项"

@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class NoteCreateTool: AgentTool {
     let name = "note_create"
     let description = "创建一条新的拍记。用于记录新的笔记、想法或信息。"
@@ -28,11 +29,11 @@ final class NoteCreateTool: AgentTool {
         let eventID = (parameters["event_id"] as? String).flatMap(UUID.init(uuidString:))
 
         let newRecord = NoteRecord(
+            eventID: eventID,
             localImagePaths: [],
             title: title,
             summary: String(content.prefix(400)),
-            detailedContent: content,
-            eventID: eventID
+            detailedContent: content
         )
         recordManager.addRecord(newRecord)
 

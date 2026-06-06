@@ -20,11 +20,18 @@ struct AgentToolParametersSchema: Sendable {
     let required: [String]
 }
 
-struct AgentToolProperty: Sendable {
+final class AgentToolProperty: @unchecked Sendable {
     let type: String
     let description: String
     let enumValues: [String]?
     let items: AgentToolProperty?
+
+    init(type: String, description: String, enumValues: [String]? = nil, items: AgentToolProperty? = nil) {
+        self.type = type
+        self.description = description
+        self.enumValues = enumValues
+        self.items = items
+    }
 }
 
 struct AgentToolResult: Sendable {

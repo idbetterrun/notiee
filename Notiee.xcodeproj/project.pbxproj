@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F441ADF365412A945FE92D /* CameraManager.swift */; };
 		00BCBB65A18DFBD97B683924 /* CustomFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */; };
+		061AAF65967B5A895B5130BD /* TodoCompleteTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */; };
+		0A479BA5770AF5130E713ABF /* CalendarQueryTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */; };
 		103D91F09BC4B73710A19414 /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		1207A77A443EB00192205A9B /* AllSchedulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43711194AC983B67E9DDD83D /* AllSchedulesView.swift */; };
 		15E40FC86415382712272655 /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40041CD4CF39EED9C31FFF80 /* EventTag.swift */; };
@@ -31,7 +33,9 @@
 		18E20B252FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B1A2FC4A215006F3FCE /* PrivacyPolicy_zh-Hant-TW.pdf */; };
 		18E20B262FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 18E20B182FC4A215006F3FCE /* PrivacyPolicy_zh-Hans.pdf */; };
 		1AC220ACD789258E119ADE8C /* RecordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84233399EB935792F9A2F7BA /* RecordManager.swift */; };
+		1AC2F4182578FB592A9E6BB2 /* AgentActionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1819D48A4E95513AC98EC908 /* AgentActionStore.swift */; };
 		1C100501D4B43F9FC9EC1BFE /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */; };
+		1D8EA4FCDC7C4817C8D3F6E6 /* NoteCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C65354C2999D0C5C2B00F7 /* NoteCreateTool.swift */; };
 		200000000000000000000001 /* NotieeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000001 /* NotieeApp.swift */; };
 		200000000000000000000002 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000002 /* RootTabView.swift */; };
 		200000000000000000000003 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* TodayView.swift */; };
@@ -62,8 +66,6 @@
 		200000000000000000000028 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000028 /* SettingsViewModel.swift */; };
 		200000000000000000000029 /* MockAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000029 /* MockAIProcessingService.swift */; };
 		200000000000000000000030 /* MockAIProcessingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000030 /* MockAIProcessingServiceTests.swift */; };
-		C0DEDEADBEEFCAFE00000004 /* SparkConversationRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */; };
-		C0DEDEADBEEFCAFE00000006 /* SparkViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */; };
 		200000000000000000000035 /* CreateItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000035 /* CreateItemSheet.swift */; };
 		200000000000000000000036 /* ImportScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000036 /* ImportScheduleView.swift */; };
 		2397324939A5F592DC35ABF2 /* PrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */; };
@@ -75,11 +77,11 @@
 		2F34EAABC30415ECF92A7A1F /* RecordCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46A87EBD51FEEA3F9347B0D9 /* RecordCardView.swift */; };
 		37BF789A142B245459373530 /* SparkCitationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7220C7898CD80E70D5812F6 /* SparkCitationRow.swift */; };
 		37F3859728859E02F78A285B /* TMNImportPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */; };
+		39035A566E52AD18F8521913 /* TodoCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8FE1F6E3F10ED05723F798 /* TodoCreateTool.swift */; };
+		3A519807D85FF7F0FE814297 /* AgentExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1871CE6EA78DE4CE6B3228B5 /* AgentExecutor.swift */; };
 		3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */; };
+		3D5F62BE12010CF87B169B27 /* NoteGetDetailTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6932A7AB2B4C28E0C6725414 /* NoteGetDetailTool.swift */; };
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
-		B208EB091BB4420BBB3BF191 /* SparkStyleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */; };
-		DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
-		77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* SparkMemoryView.swift */; };
 		4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
 		4D5AAF4C87304E0631C4BEF2 /* RecordManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9469DF6F1FBDEDAF986815A0 /* RecordManagerTests.swift */; };
@@ -88,6 +90,8 @@
 		5912A267C9D93191494E0848 /* CaptureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */; };
 		59691F6C242A13293928B152 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E555B84B89970B1E6511440D /* CalendarManager.swift */; };
 		5B878F3C88A6EF0DEC0562B8 /* SparkHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */; };
+		5EE3C366D173A176CDDAE8AB /* AgentToolRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72E53801E091F5B2CB2FDF5C /* AgentToolRegistry.swift */; };
+		5F2338B67E12B8BF8344CBAD /* MemoryManageTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */; };
 		651E739CD247600EE7816C96 /* SparkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE516C2778B82D7C50D438C /* SparkViewModel.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
 		6A6B481651E79E00EBA96444 /* NotieeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88784320EF16FC6225923813 /* NotieeColors.swift */; };
@@ -95,9 +99,9 @@
 		711C659FF150BE3831073ABC /* FeatureHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D173C754CEF3505112591 /* FeatureHintView.swift */; };
 		72398F63847C0F6573941445 /* TMNExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50780AC855D14A170154CD6 /* TMNExportService.swift */; };
 		7568F23C0FDBFDF392C370C5 /* ImageSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */; };
+		77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* SparkMemoryView.swift */; };
 		7BCB519E902B48AEF17A32D7 /* NotieeCameraIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23E2AC990E0D7427C4D055A /* NotieeCameraIntent.swift */; };
 		843DF9A146CEAD56FA63E462 /* SparkConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */; };
-		C0DEDEADBEEFCAFE00000001 /* SparkConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */; };
 		88CA43871198658141B9E253 /* HighlightedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82877F4ACD877D140D13DE81 /* HighlightedText.swift */; };
 		88FE8511C00D6740483676E5 /* AIPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 809810EE943DED7F3FB0382C /* AIPipelineManager.swift */; };
 		8C4C152AA7CF86B41897B82A /* EventDetailSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */; };
@@ -109,7 +113,9 @@
 		9483D401B6BE29A10B6CB518 /* SparkMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADCB9A01D16F3542265C00F /* SparkMemoryStore.swift */; };
 		9590DC1818F61595BA432B24 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A3896CF3167D274BE7DF3767 /* Localizable.strings */; };
 		96785DDC240E3E97ED68D0EC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E16D916C859E3FB8DD53D5C /* Foundation.framework */; };
+		97277802715E0DD9D0DBB69B /* TodoListTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E735DDADB4B58539D7A13 /* TodoListTool.swift */; };
 		97DB604531B09F41BFF519A1 /* RecordMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E673E48D14130377F7CEC12 /* RecordMigrator.swift */; };
+		985578E2087FC4044FC0521F /* AgentTrustManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5081ABAC78255979139309 /* AgentTrustManager.swift */; };
 		98DE969CD7EEEFF2C0A1A749 /* TagEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */; };
 		990000000000000000000002 /* AIProcessingState+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000001 /* AIProcessingState+UI.swift */; };
 		990000000000000000000004 /* RecordThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000003 /* RecordThumbnailView.swift */; };
@@ -118,6 +124,7 @@
 		99000000000000000000000C /* RealAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000B /* RealAIProcessingService.swift */; };
 		99000000000000000000000E /* AIAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000D /* AIAPIClient.swift */; };
 		990000000000000000000010 /* AIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000F /* AIProcessingService.swift */; };
+		9A4ACBFF84A18E863B82A900 /* NoteUpdateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716D25BBAE5952F2A204A2E1 /* NoteUpdateTool.swift */; };
 		9B69BCDDF3652371666A51F7 /* SystemPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB42779E84C87B7233DEE1BC /* SystemPermissionManager.swift */; };
 		9C80A978FE802D9AA29BDEE3 /* OpenSourceAcknowledgmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */; };
 		9CF2DFEBDA29397F63878DEA /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2700A7B251C6870995C7849B /* MeView.swift */; };
@@ -126,10 +133,16 @@
 		AABBCCDD1122334455667788 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCCBBAA5544332211770088 /* LoginView.swift */; };
 		AB823531986DF87DD3E5FF9A /* TMNModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49671163B1FF58DA2562FE75 /* TMNModels.swift */; };
 		ADE6F7B445EB85B518614CDC /* SparkAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */; };
+		AF10F688D903E23D7B58B4DE /* AgentToolProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */; };
+		B0266189A0BC69E4AB5B30F4 /* NoteSearchTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF9B8179789C6EF88FFB42 /* NoteSearchTool.swift */; };
+		B208EB091BB4420BBB3BF191 /* SparkStyleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */; };
 		B2744530D77786EC783CFEEF /* UIDevice+ModelName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */; };
 		B63E4803E3CDCF62120DBF9D /* NotieeCaptureExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B5534312C44BD028EF45F485 /* NotieeCaptureExtension.appex */; };
 		BBF6F8E23A178E6BE8281140 /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		BDCBD51B2CBD6BD6901BAE1F /* FolderTagManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165793786621B5B583311051 /* FolderTagManagerTests.swift */; };
+		C0DEDEADBEEFCAFE00000001 /* SparkConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */; };
+		C0DEDEADBEEFCAFE00000004 /* SparkConversationRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */; };
+		C0DEDEADBEEFCAFE00000006 /* SparkViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */; };
 		C5C0AAAB46567881AB8A3746 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70532E6B568AB1E2C463DC41 /* Logger.swift */; };
 		C6388873ADA1EDB1BA724246 /* BackupRestoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480559344177345371C21F7A /* BackupRestoreView.swift */; };
 		C9706BD39B3E8129A5EA7465 /* CalendarManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */; };
@@ -141,10 +154,12 @@
 		D8FC4EF5B5823FE100560D4F /* FolderTagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */; };
 		DB5CEC2D14D92D2B092E3359 /* SparkPrivacySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */; };
 		DE0C537566909F0A5492B48B /* ICloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */; };
+		DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
 		DFBE0815F70A2516BB7CC745 /* CustomModelsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */; };
 		E2224F389C980FED466E2AA8 /* LocalOCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C23EF23D8944E5A0E6D009 /* LocalOCRService.swift */; };
 		E287718A1BE69BFCBCD8A597 /* ScenePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C3C0E8C8898B8DAD12DB4A /* ScenePreset.swift */; };
 		E2D822957F190C422D07C2B0 /* SyncQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA37C8BEE05770A01BB243BC /* SyncQueue.swift */; };
+		E57232A5C6D7EE93F69463CC /* AgentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95CAEAA335CF398CFDC0F5 /* AgentModels.swift */; };
 		ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */; };
 		EDB4C13DCD86B50AC6A3C798 /* TMNImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9498AF5A115D7044C4936431 /* TMNImportService.swift */; };
 		EF2473F7C9C5434A180AB8B0 /* SparkHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE25D10BF81E21044A271C1 /* SparkHistoryView.swift */; };
@@ -240,15 +255,15 @@
 		100000000000000000000028 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		100000000000000000000029 /* MockAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingService.swift; sourceTree = "<group>"; };
 		100000000000000000000030 /* MockAIProcessingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingServiceTests.swift; sourceTree = "<group>"; };
-		C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkConversationRepositoryTests.swift; sourceTree = "<group>"; };
-		C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkViewModelTests.swift; sourceTree = "<group>"; };
 		100000000000000000000035 /* CreateItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateItemSheet.swift; sourceTree = "<group>"; };
 		100000000000000000000036 /* ImportScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportScheduleView.swift; sourceTree = "<group>"; };
 		1342A65366ED31A59C9A520E /* CalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarSelectionView.swift; sourceTree = "<group>"; };
 		15A0EB3637FD6B8FAB72859B /* zh-Hans */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		165793786621B5B583311051 /* FolderTagManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderTagManagerTests.swift; sourceTree = "<group>"; };
+		1819D48A4E95513AC98EC908 /* AgentActionStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentActionStore.swift; sourceTree = "<group>"; };
 		18496E442FC1FCAB00861F50 /* Notiee.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Notiee.icon; sourceTree = "<group>"; };
 		18496E472FC1FCAB00861F50 /* Notiee-iOS.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Notiee-iOS.png"; sourceTree = "<group>"; };
+		1871CE6EA78DE4CE6B3228B5 /* AgentExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentExecutor.swift; sourceTree = "<group>"; };
 		188416259E85118DAA654838 /* TodoDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoDetailSheetView.swift; sourceTree = "<group>"; };
 		18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotieeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		18B83FD82FC0A057002A7EC9 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -264,9 +279,10 @@
 		1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManagerTests.swift; sourceTree = "<group>"; };
 		2700A7B251C6870995C7849B /* MeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
+		2DFF9B8179789C6EF88FFB42 /* NoteSearchTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteSearchTool.swift; sourceTree = "<group>"; };
 		36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LabFeaturesView.swift; sourceTree = "<group>"; };
-		B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkStyleSettingsView.swift; sourceTree = "<group>"; };
 		3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventDetailSheetView.swift; sourceTree = "<group>"; };
+		3C9E735DDADB4B58539D7A13 /* TodoListTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoListTool.swift; sourceTree = "<group>"; };
 		3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomModelsListView.swift; sourceTree = "<group>"; };
 		3E16D916C859E3FB8DD53D5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkAIService.swift; path = SparkAIService.swift; sourceTree = "<group>"; };
@@ -277,21 +293,24 @@
 		480559344177345371C21F7A /* BackupRestoreView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
 		48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryStore.swift; path = SparkHistoryStore.swift; sourceTree = "<group>"; };
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
+		4C5081ABAC78255979139309 /* AgentTrustManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentTrustManager.swift; sourceTree = "<group>"; };
 		4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigurationView.swift; sourceTree = "<group>"; };
-		E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIFeatureSettingsView.swift; sourceTree = "<group>"; };
-		B7E620797C134376A9E304BE /* SparkMemoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkMemoryView.swift; sourceTree = "<group>"; };
 		54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenSourceAcknowledgmentsView.swift; sourceTree = "<group>"; };
 		56C541D6F62CB3492461A94D /* AboutNotieeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutNotieeView.swift; sourceTree = "<group>"; };
 		59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
+		5D8FE1F6E3F10ED05723F798 /* TodoCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCreateTool.swift; sourceTree = "<group>"; };
 		5F6D173C754CEF3505112591 /* FeatureHintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureHintView.swift; sourceTree = "<group>"; };
 		608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIDevice+ModelName.swift"; sourceTree = "<group>"; };
 		612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PastSchedulesView.swift; sourceTree = "<group>"; };
+		6932A7AB2B4C28E0C6725414 /* NoteGetDetailTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteGetDetailTool.swift; sourceTree = "<group>"; };
 		69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImageSaver.swift; sourceTree = "<group>"; };
 		6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIPromptProvider.swift; sourceTree = "<group>"; };
 		6AE25D10BF81E21044A271C1 /* SparkHistoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryView.swift; path = SparkHistoryView.swift; sourceTree = "<group>"; };
 		6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpecialDayEvent.swift; sourceTree = "<group>"; };
 		6E0AFE1B3C5C3986B1B38397 /* NotieeCaptureExtension.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NotieeCaptureExtension.entitlements; sourceTree = "<group>"; };
 		70532E6B568AB1E2C463DC41 /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		716D25BBAE5952F2A204A2E1 /* NoteUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteUpdateTool.swift; sourceTree = "<group>"; };
+		72E53801E091F5B2CB2FDF5C /* AgentToolRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolRegistry.swift; sourceTree = "<group>"; };
 		7F8B25934CD853078C1F734F /* WelcomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		809810EE943DED7F3FB0382C /* AIPipelineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/AIPipelineManager.swift; sourceTree = "<group>"; };
 		82877F4ACD877D140D13DE81 /* HighlightedText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HighlightedText.swift; sourceTree = "<group>"; };
@@ -313,8 +332,10 @@
 		99000000000000000000000D /* AIAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAPIClient.swift; sourceTree = "<group>"; };
 		99000000000000000000000F /* AIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProcessingService.swift; sourceTree = "<group>"; };
 		9BB27B8B105BA273A73E84BA /* CaptureExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CaptureExtension.swift; path = NotieeCaptureExtension/CaptureExtension.swift; sourceTree = "<group>"; };
+		9C95CAEAA335CF398CFDC0F5 /* AgentModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentModels.swift; sourceTree = "<group>"; };
 		9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacyAgreementView.swift; sourceTree = "<group>"; };
 		9E673E48D14130377F7CEC12 /* RecordMigrator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordMigrator.swift; sourceTree = "<group>"; };
+		A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolProtocol.swift; sourceTree = "<group>"; };
 		A23E2AC990E0D7427C4D055A /* NotieeCameraIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotieeCameraIntent.swift; sourceTree = "<group>"; };
 		A9AC1257406B758D108B41FD /* EventImportPreviewSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventImportPreviewSheet.swift; sourceTree = "<group>"; };
 		AB42779E84C87B7233DEE1BC /* SystemPermissionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SystemPermissionManager.swift; sourceTree = "<group>"; };
@@ -327,27 +348,36 @@
 		B7220C7898CD80E70D5812F6 /* SparkCitationRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkCitationRow.swift; path = SparkCitationRow.swift; sourceTree = "<group>"; };
 		B72552C09CF292FA6C3C36EE /* SettingsMainView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsMainView.swift; sourceTree = "<group>"; };
 		B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkPrivacySheet.swift; path = SparkPrivacySheet.swift; sourceTree = "<group>"; };
+		B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkStyleSettingsView.swift; sourceTree = "<group>"; };
+		B7E620797C134376A9E304BE /* SparkMemoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkMemoryView.swift; sourceTree = "<group>"; };
 		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
 		BCEEAF1F66C49780FE20324C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = NotieeCaptureExtension/Info.plist; sourceTree = "<group>"; };
 		BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TagEditSheet.swift; sourceTree = "<group>"; };
 		C0042F63F4A1CFF675CA5D6D /* SparkBackgroundView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkBackgroundView.swift; path = SparkBackgroundView.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationRepository.swift; path = SparkConversationRepository.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkConversationRepositoryTests.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkViewModelTests.swift; sourceTree = "<group>"; };
 		C7F441ADF365412A945FE92D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		C86AB113713AB0E8B4FFCBF6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = Notiee/Info.plist; sourceTree = "<group>"; };
 		D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
 		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationStore.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
-		C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationRepository.swift; path = SparkConversationRepository.swift; sourceTree = "<group>"; };
 		D395AC82E97090501EA8D180 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D50780AC855D14A170154CD6 /* TMNExportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNExportService.swift; sourceTree = "<group>"; };
 		D6C23EF23D8944E5A0E6D009 /* LocalOCRService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalOCRService.swift; sourceTree = "<group>"; };
+		D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MemoryManageTool.swift; sourceTree = "<group>"; };
 		DBE516C2778B82D7C50D438C /* SparkViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkViewModel.swift; path = SparkViewModel.swift; sourceTree = "<group>"; };
+		DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCompleteTool.swift; sourceTree = "<group>"; };
 		DDCCBBAA5544332211770088 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		E07B50625730EE33FF521449 /* SparkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkView.swift; path = SparkView.swift; sourceTree = "<group>"; };
 		E382FAEB20AB862699A7CFFA /* CustomFolderStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolderStore.swift; sourceTree = "<group>"; };
 		E555B84B89970B1E6511440D /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CalendarManager.swift; sourceTree = "<group>"; };
+		E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIFeatureSettingsView.swift; sourceTree = "<group>"; };
 		EADCB9A01D16F3542265C00F /* SparkMemoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkMemoryStore.swift; path = SparkMemoryStore.swift; sourceTree = "<group>"; };
 		EFB5DBCCB1BD85E56C6BE9CA /* TodoRowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoRowView.swift; sourceTree = "<group>"; };
+		F1C65354C2999D0C5C2B00F7 /* NoteCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteCreateTool.swift; sourceTree = "<group>"; };
 		F1E88675E4C25EA430257B7D /* zh-Hant */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		F1F90E8BA746E85124483B23 /* NetworkMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarQueryTool.swift; sourceTree = "<group>"; };
 		FA37C8BEE05770A01BB243BC /* SyncQueue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncQueue.swift; sourceTree = "<group>"; };
 		FF966F65697B0EC727F3655D /* SparkChatBubble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkChatBubble.swift; path = SparkChatBubble.swift; sourceTree = "<group>"; };
 		FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseCalendarSelectionView.swift; sourceTree = "<group>"; };
@@ -660,9 +690,27 @@
 				B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */,
 				E07B50625730EE33FF521449 /* SparkView.swift */,
 				DBE516C2778B82D7C50D438C /* SparkViewModel.swift */,
+				A7326FFABA0C07BB0B1902A5 /* Agent */,
 			);
 			name = Spark;
 			path = Spark;
+			sourceTree = "<group>";
+		};
+		760331194FED43CF224A9614 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				2DFF9B8179789C6EF88FFB42 /* NoteSearchTool.swift */,
+				6932A7AB2B4C28E0C6725414 /* NoteGetDetailTool.swift */,
+				F1C65354C2999D0C5C2B00F7 /* NoteCreateTool.swift */,
+				716D25BBAE5952F2A204A2E1 /* NoteUpdateTool.swift */,
+				3C9E735DDADB4B58539D7A13 /* TodoListTool.swift */,
+				5D8FE1F6E3F10ED05723F798 /* TodoCreateTool.swift */,
+				DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */,
+				F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */,
+				D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */,
+			);
+			name = Tools;
+			path = Tools;
 			sourceTree = "<group>";
 		};
 		A72C5454A6582DF99A27C78C /* Components */ = {
@@ -676,6 +724,21 @@
 				3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		A7326FFABA0C07BB0B1902A5 /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				760331194FED43CF224A9614 /* Tools */,
+				1871CE6EA78DE4CE6B3228B5 /* AgentExecutor.swift */,
+				72E53801E091F5B2CB2FDF5C /* AgentToolRegistry.swift */,
+				4C5081ABAC78255979139309 /* AgentTrustManager.swift */,
+				1819D48A4E95513AC98EC908 /* AgentActionStore.swift */,
+				9C95CAEAA335CF398CFDC0F5 /* AgentModels.swift */,
+				A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */,
+			);
+			name = Agent;
+			path = Agent;
 			sourceTree = "<group>";
 		};
 		DED6EF4608C80260192A5810 /* iOS */ = {
@@ -1028,6 +1091,21 @@
 				DB5CEC2D14D92D2B092E3359 /* SparkPrivacySheet.swift in Sources */,
 				8FEB4F50442D74F858390C0A /* SparkView.swift in Sources */,
 				651E739CD247600EE7816C96 /* SparkViewModel.swift in Sources */,
+				3A519807D85FF7F0FE814297 /* AgentExecutor.swift in Sources */,
+				5EE3C366D173A176CDDAE8AB /* AgentToolRegistry.swift in Sources */,
+				985578E2087FC4044FC0521F /* AgentTrustManager.swift in Sources */,
+				1AC2F4182578FB592A9E6BB2 /* AgentActionStore.swift in Sources */,
+				E57232A5C6D7EE93F69463CC /* AgentModels.swift in Sources */,
+				AF10F688D903E23D7B58B4DE /* AgentToolProtocol.swift in Sources */,
+				B0266189A0BC69E4AB5B30F4 /* NoteSearchTool.swift in Sources */,
+				3D5F62BE12010CF87B169B27 /* NoteGetDetailTool.swift in Sources */,
+				1D8EA4FCDC7C4817C8D3F6E6 /* NoteCreateTool.swift in Sources */,
+				9A4ACBFF84A18E863B82A900 /* NoteUpdateTool.swift in Sources */,
+				97277802715E0DD9D0DBB69B /* TodoListTool.swift in Sources */,
+				39035A566E52AD18F8521913 /* TodoCreateTool.swift in Sources */,
+				061AAF65967B5A895B5130BD /* TodoCompleteTool.swift in Sources */,
+				0A479BA5770AF5130E713ABF /* CalendarQueryTool.swift in Sources */,
+				5F2338B67E12B8BF8344CBAD /* MemoryManageTool.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

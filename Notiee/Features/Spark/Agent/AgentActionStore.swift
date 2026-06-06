@@ -16,7 +16,8 @@ final class AgentActionStore: @unchecked Sendable {
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("Notiee", isDirectory: true)
         self.fileURL = fileURL ?? base.appendingPathComponent("AgentActions.json")
-        self.snapshotsDir = snapshotsDir ?? base.appendingPathComponent("AgentSnapshots", isDirectory: true)
+        let snapshotsDir = snapshotsDir ?? base.appendingPathComponent("AgentSnapshots", isDirectory: true)
+        self.snapshotsDir = snapshotsDir
         try? FileManager.default.createDirectory(at: snapshotsDir, withIntermediateDirectories: true)
     }
 

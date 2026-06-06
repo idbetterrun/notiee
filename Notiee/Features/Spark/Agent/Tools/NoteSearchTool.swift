@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class NoteSearchTool: AgentTool {
     let name = "note_search"
     let description = "在用户的所有拍记中搜索相关内容。支持关键词检索。返回匹配的记录列表及其摘要。"

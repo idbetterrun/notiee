@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class NoteUpdateTool: AgentTool {
     let name = "note_update"
     let description = "修改已有拍记的内容，如标题、详细内容或摘要"

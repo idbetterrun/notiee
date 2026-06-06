@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class MemoryManageTool: AgentTool {
     let name = "memory_get"
     let description = "获取 Spark 关于用户的记忆信息，如偏好、习惯等"

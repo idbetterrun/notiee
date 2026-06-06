@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class TodoCompleteTool: AgentTool {
     let name = "todo_complete"
     let description = "完成或取消完成一条待办事项"

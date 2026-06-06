@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class TodoListTool: AgentTool {
     let name = "todo_list"
     let description = "列出用户的待办事项，可按状态筛选"

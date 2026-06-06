@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class CalendarQueryTool: AgentTool {
     let name = "calendar_query"
     let description = "查询用户的日程安排，支持按时间范围和关键词筛选"
@@ -60,8 +61,8 @@ final class CalendarQueryTool: AgentTool {
         }
 
         let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .abbreviated
-        dateFormatter.timeStyle = .omitted
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .none
 
         let message = events.isEmpty
             ? "从 \(dateFormatter.string(from: start)) 到 \(dateFormatter.string(from: end)) 没有日程。"
