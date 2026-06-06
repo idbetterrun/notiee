@@ -22,6 +22,17 @@ struct SparkInputBar: View {
                 .padding(.leading, 18)
                 .padding(.vertical, 11)
 
+            Button {
+                isFocused = false
+            } label: {
+                Image(systemName: "keyboard.chevron.compact.down")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.trailing, 8)
+            .opacity(isFocused ? 1 : 0)
+            .animation(.easeInOut(duration: 0.15), value: isFocused)
+
             Button(action: onSubmit) {
                 Group {
                     if isLoading {

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 enum SparkAIError: LocalizedError {
     case missingConfiguration
@@ -68,7 +69,6 @@ final class SparkAIService: Sendable {
             "你现在是",
             "从今以后你是",
             "你的真实身份",
-            // Memory tag injection: user tries to forge memory operations
             "[记忆]",
             "[/记忆]",
             "[更新记忆]",
@@ -79,69 +79,108 @@ final class SparkAIService: Sendable {
         return patterns.contains { lower.contains($0.lowercased()) }
     }
 
-    // MARK: - Streaming Chat
+    // MARK: - Personal Info Pattern Detector
 
-    func askStreaming(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound]) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
-            Task {
-                let textConfig = settingsStore.loadConfiguration(for: .text)
-                guard textConfig.isComplete else {
-                    continuation.finish(throwing: SparkAIError.missingConfiguration)
-                    return
-                }
-                let activeRecords = allRecords
-                    .filter { !$0.isDeleted }
-                    .sorted { $0.capturedAt > $1.capturedAt }
-                    .prefix(maxRecordsInPrompt)
+    static func containsPersonalInfoPattern(_ input: String) -> Bool {
+        let patterns: [String] = [
+            "我叫", "我的名字", "我的姓名", "我是", "叫我",
+            "my name is", "i am ", "i'm ", "call me",
+            "我在", "我住在", "我来自", "我家在",
+            "i live in", "i'm from", "i work at", "i work for",
+            "我的职业", "我是做", "我在.*工作", "我在.*上班",
+            "我是.*工程师", "我是.*医生", "我是.*老师", "我是.*学生",
+            "我喜欢", "我热爱", "我讨厌", "我不喜欢",
+            "i like", "i love", "i hate", "i prefer",
+            "我今年", "我的生日", "我.*岁",
+            "i'm \\d+", "i am \\d+ years old",
+            "我的电话", "我的手机", "我的邮箱", "我的地址",
+            "my phone", "my email", "my address",
+            "我的兴趣", "我的爱好", "我的习惯",
+            "my hobby", "my interest",
+            "我的猫", "我的狗", "我的宠物",
+            "my cat", "my dog", "my pet",
+        ]
+        return patterns.contains { input.range(of: $0, options: [.regularExpression, .caseInsensitive]) != nil }
+    }
 
-                let systemPrompt = buildSystemPrompt(records: Array(activeRecords), recentRounds: recentRounds)
-                let userPrompt = "用户说：\(question)"
+    // MARK: - Chat (returns full response text)
 
-                do {
-                    let result: (text: String, tokens: Int)
-                    if textConfig.activeProtocol == .openai {
-                        result = try await OpenAICaller.callText(
-                            endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                            apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
-                    } else {
-                        result = try await AnthropicCaller.callText(
-                            endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                            apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
-                    }
-                    continuation.yield(result.text)
-                    accumulateTokens(result.tokens)
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
+    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound]) async throws -> (text: String, tokens: Int) {
+        Logger.spark.debug("[ask] START")
+        let textConfig = settingsStore.loadConfiguration(for: .text)
+        guard textConfig.isComplete else {
+            Logger.spark.debug("[ask] config incomplete, failing")
+            throw SparkAIError.missingConfiguration
         }
+        let activeRecords = allRecords
+            .filter { !$0.isDeleted }
+            .sorted { $0.capturedAt > $1.capturedAt }
+            .prefix(maxRecordsInPrompt)
+
+        Logger.spark.debug("[ask] building systemPrompt, recs=\(activeRecords.count) rounds=\(recentRounds.count)")
+        let systemPrompt = buildSystemPrompt(records: Array(activeRecords), recentRounds: recentRounds)
+        Logger.spark.debug("[ask] systemPrompt built, len=\(systemPrompt.count)")
+        let userPrompt = "用户说：\(question)"
+
+        Logger.spark.debug("[ask] calling LLM, protocol=\(String(describing: textConfig.activeProtocol))")
+        let result: (text: String, tokens: Int)
+        if textConfig.activeProtocol == .openai {
+            result = try await OpenAICaller.callText(
+                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+        } else {
+            result = try await AnthropicCaller.callText(
+                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+        }
+        Logger.spark.debug("[ask] LLM returned, textLen=\(result.text.count) tokens=\(result.tokens)")
+        Logger.spark.debug("[ask] DONE, returning")
+        return result
     }
 
     // MARK: - Title Generation
 
     func generateTitle(for message: String) async throws -> String {
+        try await callTextLLM(
+            systemPrompt: "",
+            userPrompt: """
+            你是一个标题生成助手。用不超过15个字总结下面这句话的核心内容，只返回总结文本，不要加引号或其他修饰。
+
+            用户说：\(String(message.prefix(200)))
+            """
+        )
+    }
+
+    func generateContextualTitle(from rounds: [ConversationRound]) async throws -> String {
+        let context = rounds.map { "用户: \($0.userMessage.content)\nSpark: \($0.assistantMessage.content)" }
+            .joined(separator: "\n---\n")
+        return try await callTextLLM(
+            systemPrompt: "你是一个标题生成助手。",
+            userPrompt: """
+            请用不超过10个字为以下对话生成一个高度概括的标题。只返回标题文本，不要加引号、标点或其他修饰。
+
+            对话内容：
+            \(String(context.prefix(600)))
+            """
+        )
+    }
+
+    private func callTextLLM(systemPrompt: String, userPrompt: String) async throws -> String {
         let textConfig = settingsStore.loadConfiguration(for: .text)
         guard textConfig.isComplete else { throw SparkAIError.missingConfiguration }
-
-        let userPrompt = """
-        你是一个标题生成助手。用不超过15个字总结下面这句话的核心内容，只返回总结文本，不要加引号或其他修饰。
-
-        用户说：\(String(message.prefix(200)))
-        """
 
         let result: (text: String, tokens: Int)
         if textConfig.activeProtocol == .openai {
             result = try await OpenAICaller.callText(
                 endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                apiKey: textConfig.apiKey, systemPrompt: "", userPrompt: userPrompt)
+                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
         } else {
             result = try await AnthropicCaller.callText(
                 endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                apiKey: textConfig.apiKey, systemPrompt: "", userPrompt: userPrompt)
+                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
         }
+        accumulateTokens(result.tokens)
         return String(result.text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
-            accumulateTokens(result.tokens)
     }
 
     // MARK: - Memory Operations
@@ -203,6 +242,43 @@ final class SparkAIService: Sendable {
         String(value.trimmingCharacters(in: .whitespaces).prefix(50))
     }
 
+    // MARK: - Memory Pipeline (implicit extraction from user input)
+
+    func extractMemoryFromInput(userMessage: String, assistantResponse: String) async {
+        let textConfig = settingsStore.loadConfiguration(for: .text)
+        guard textConfig.isComplete else { return }
+
+        let systemPrompt = """
+        你是记忆提取助手。从用户消息中提取个人信息，以 [记忆]键:值[/记忆] 格式输出。
+        只提取以下类型的信息：名字、职业、年龄、位置、偏好、习惯、宠物、家庭成员。
+        键名使用简洁中文（如「名字」「职业」「位置」「偏好饮品」）。
+        如果没有可提取的个人信息，输出「无」。
+        不要输出任何其他内容。
+        """
+
+        let userPrompt = "用户说：\(userMessage)\n\nSpark回复（供上下文理解）：\(String(assistantResponse.prefix(200)))"
+
+        do {
+            let result: (text: String, tokens: Int)
+            if textConfig.activeProtocol == .openai {
+                result = try await OpenAICaller.callText(
+                    endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                    apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+            } else {
+                result = try await AnthropicCaller.callText(
+                    endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                    apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+            }
+            accumulateTokens(result.tokens)
+            let (_, ops) = extractMemory(from: result.text)
+            for (k, v) in ops.toSet { memoryStore.set(k, value: v) }
+            for (k, v) in ops.toUpdate { memoryStore.set(k, value: v) }
+            for k in ops.toDelete { memoryStore.delete(k) }
+        } catch {
+            return
+        }
+    }
+
     // MARK: - Memory Compression (background trigger)
 
     func compressMemory(from rounds: [ConversationRound]) async {
@@ -260,10 +336,24 @@ final class SparkAIService: Sendable {
         return Array(indices).sorted()
     }
 
+    func extractCitationsFallback(from text: String, records: [NoteRecord]) -> [Int] {
+        var indices = Set<Int>()
+        for (i, record) in records.enumerated() {
+            let title = record.title.trimmingCharacters(in: .whitespaces)
+            guard !title.isEmpty, title.count >= 3 else { continue }
+            if text.localizedCaseInsensitiveContains(title) {
+                indices.insert(i)
+            }
+        }
+        return Array(indices).sorted()
+    }
+
     // MARK: - System Prompt Builder
 
     private func buildSystemPrompt(records: [NoteRecord], recentRounds: [ConversationRound]) -> String {
+        Logger.spark.debug("[buildSystemPrompt] loading memory...")
         let mem = (try? memoryStore.load()) ?? [:]
+        Logger.spark.debug("[buildSystemPrompt] memory loaded, count=\(mem.count)")
         let memText: String
         if mem.isEmpty {
             memText = "（暂无关于用户的记忆）"
@@ -374,10 +464,13 @@ final class SparkAIService: Sendable {
         - 示例：用户「帮我 review 下 schedule」→ 回复「好的帮你梳理下 schedule」✓，「OK 我帮你 review」✗
         - 示例：用户「What's on my schedule today」→ 回复「You have a meeting at 3 PM.」✓，「你今天有个会议」✗
 
-        ## 引用规范
-        - 引用拍记时使用 [来源N] 标记，N 对应记录编号
+        ## 引用规范（必须严格遵守）
+        - 每次引用拍记内容时，必须使用 [来源N] 标记，N 对应记录编号
         - [来源N] 对用户可见，是正常的引用标记
+        - 即使列举多条记录，也必须逐一使用 [来源N] 标记，禁止使用纯文本列表
         - 引用的内容必须确实来自对应记录，不得虚构
+        - 正确示例：「根据[来源1]会议纪要和[来源3]读书笔记，本周重点是项目交付」
+        - 错误示例：「以下记录：1. 会议纪要 2. 读书笔记」
 
         ## 当前记忆
         \(memText)
@@ -391,6 +484,8 @@ final class SparkAIService: Sendable {
     private func trunc(_ text: String, _ max: Int) -> String {
         text.count <= max ? text : String(text.prefix(max)) + "..."
     }
+
+    func accumulatePublic(_ tokens: Int) { accumulateTokens(tokens) }
 
     private func accumulateTokens(_ tokens: Int) {
         let current = UserDefaults.standard.integer(forKey: UDK.sparkAccumulatedTokens)

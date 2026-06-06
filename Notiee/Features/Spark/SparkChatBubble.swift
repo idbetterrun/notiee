@@ -83,11 +83,9 @@ struct SparkChatBubble: View {
                 Label("复制", systemImage: "doc.on.doc")
             }
         }
-        .onAppear {
+        .task {
             if message.content.isEmpty && message.role == .assistant {
-                withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
-                    thinkingPhase = 1.0
-                }
+                thinkingPhase = 1.0
             }
         }
     }
@@ -115,6 +113,7 @@ struct SparkChatBubble: View {
                     }
                 }
                 .padding(.horizontal, 16).padding(.vertical, 12)
+                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: thinkingPhase)
             } else {
                 renderedMarkdown
                     .foregroundStyle(.primary)

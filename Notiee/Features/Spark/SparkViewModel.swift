@@ -25,6 +25,8 @@ final class SparkViewModel: ObservableObject {
     private var roundCount: Int { messages.count / 2 }
     private var titleGenerated = false
 
+    private static let historyOpQueue = DispatchQueue(label: "com.notiee.history.ops.serial", qos: .utility)
+
     init(
         aiService: SparkAIService = SparkAIService(),
         conversationStore: SparkConversationPersisting = SparkConversationStore.live,
@@ -51,30 +53,36 @@ final class SparkViewModel: ObservableObject {
             return id
         }()
 
-        if let savedID = savedConvID,
-           var hist = try? historyStore.loadConversations(),
-           let idx = hist.firstIndex(where: { $0.id == savedID }) {
-            hist[idx].messages = msgs
-            hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
-            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-            try? historyStore.saveConversations(hist)
-        } else {
-            let title = String(msgs.first?.content.prefix(15) ?? "Spark").trimmingCharacters(in: .whitespaces)
-            let saved = SavedConversation(
-                id: savedConvID ?? UUID(),
-                title: title.isEmpty ? "Spark" : title,
-                createdAt: msgs.first?.timestamp ?? Date(),
-                lastMessageAt: msgs.last?.timestamp ?? Date(),
-                messages: msgs
-            )
-            var hist = (try? historyStore.loadConversations()) ?? []
-            hist.append(saved)
-            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-            try? historyStore.saveConversations(hist)
-        }
-
         UserDefaults.standard.removeObject(forKey: UDK.sparkCurrentConversationId)
         try? conversationStore.saveConversations([])
+
+        let fallbackConvID = currentConversationId
+        Self.historyOpQueue.async {
+            try? SparkHistoryStore.live.atomicUpdate { hist in
+                let hc = hist.count
+                Logger.spark.debug("[migrate] histCount=\(hc) savedConvID=\(String(describing: savedConvID))")
+                if let savedID = savedConvID, let idx = hist.firstIndex(where: { $0.id == savedID }) {
+                    Logger.spark.debug("[migrate] FOUND at idx=\(idx), updating msgCount=\(msgs.count)")
+                    hist[idx].messages = msgs
+                    hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
+                } else {
+                    let newID = savedConvID ?? fallbackConvID
+                    Logger.spark.debug("[migrate] NOT FOUND, creating new. id=\(newID)")
+                    let title = String(msgs.first?.content.prefix(15) ?? "Spark").trimmingCharacters(in: .whitespaces)
+                    let saved = SavedConversation(
+                        id: newID,
+                        title: title.isEmpty ? "Spark" : title,
+                        createdAt: msgs.first?.timestamp ?? Date(),
+                        lastMessageAt: msgs.last?.timestamp ?? Date(),
+                        messages: msgs
+                    )
+                    hist.append(saved)
+                    let nhc = hist.count
+                    Logger.spark.debug("[migrate] appended, new histCount=\(nhc)")
+                }
+                hist.sort { $0.lastMessageAt > $1.lastMessageAt }
+            }
+        }
     }
 
     private func checkPrivacyNotice() {
@@ -129,7 +137,9 @@ final class SparkViewModel: ObservableObject {
     func sendQuestion(_ q: String) { inputText = q; sendMessage() }
 
     private func processQuestion(_ q: String, _ userMsg: ChatMessage) async {
+        Logger.spark.debug("[processQuestion] START round=\(self.roundCount) msgCount=\(self.messages.count)")
         if !NetworkMonitor.shared.isConnected {
+            Logger.spark.debug("[processQuestion] OFFLINE, aborting")
             messages.append(ChatMessage(role: .assistant, content: String(localized: "网络不可用，无法进行 AI 问答。请检查网络后重试。")))
             state = .offline; saveCurrentConversation(); return
         }
@@ -138,21 +148,42 @@ final class SparkViewModel: ObservableObject {
         do {
             let allRecs = recordsProvider?() ?? []
             let recentRounds = buildRecentRounds()
-            let stream = aiService.askStreaming(question: q, with: allRecs, recentRounds: recentRounds)
-            var full = ""
-            for try await chunk in stream {
-                full += chunk
-                if let idx = messages.firstIndex(where: { $0.id == aid }) {
-                    messages[idx] = ChatMessage(id: aid, role: .assistant, content: full)
+            Logger.spark.debug("[processQuestion] asking LLM via continuation+detached...")
+            let (full, tokens) = try await withCheckedThrowingContinuation { cont in
+                let service = aiService
+                let recs = allRecs
+                let rounds = recentRounds
+                let question = q
+                Task.detached {
+                    do {
+                        let result = try await service.ask(question: question, with: recs, recentRounds: rounds)
+                        Logger.spark.debug("[detached] ask returned, calling cont.resume")
+                        cont.resume(returning: result)
+                        Logger.spark.debug("[detached] cont.resume called")
+                    } catch {
+                        Logger.spark.debug("[detached] ask threw, calling cont.resume(throwing:)")
+                        cont.resume(throwing: error)
+                        Logger.spark.debug("[detached] cont.resume(throwing:) called")
+                    }
                 }
             }
+            Logger.spark.debug("[processQuestion] STEP1 ask returned, len=\(full.count) tokens=\(tokens)")
+            aiService.accumulatePublic(tokens)
+
+            Logger.spark.debug("[processQuestion] STEP2 calling extractMemory...")
             let (clean, ops) = aiService.extractMemory(from: full)
+            Logger.spark.debug("[processQuestion] STEP2 done, s=\(ops.toSet.count) u=\(ops.toUpdate.count) d=\(ops.toDelete.count)")
+
             let ms = SparkMemoryStore.live
+            Logger.spark.debug("[processQuestion] STEP3 memory ops loop start")
             var memoryCount = 0
             for (k, v) in ops.toSet { ms.set(k, value: v); memoryCount += 1 }
             for (k, v) in ops.toUpdate { ms.set(k, value: v); memoryCount += 1 }
             for k in ops.toDelete { ms.delete(k); memoryCount += 1 }
+            Logger.spark.debug("[processQuestion] STEP3 memory ops done count=\(memoryCount)")
+
             if memoryCount > 0 {
+                Logger.spark.debug("[processQuestion] STEP4 showing memory toast")
                 withAnimation(.easeInOut) { memoryActionText = String(localized: "✓ 已记忆") }
                 Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 2_500_000_000)
@@ -161,33 +192,66 @@ final class SparkViewModel: ObservableObject {
                     }
                 }
             }
+
+            Logger.spark.debug("[processQuestion] STEP5 filter+sort records")
             let all = allRecs.filter{!$0.isDeleted}.sorted{$0.capturedAt>$1.capturedAt}
-            let cIdx = aiService.extractCitations(from: clean, recordCount: all.count)
+            Logger.spark.debug("[processQuestion] STEP5 done recs=\(all.count)")
+
+            Logger.spark.debug("[processQuestion] STEP6 extractCitations regex")
+            var cIdx = aiService.extractCitations(from: clean, recordCount: all.count)
+
+            if cIdx.isEmpty {
+                Logger.spark.debug("[processQuestion] STEP6 fallback fuzzy match")
+                cIdx = aiService.extractCitationsFallback(from: clean, records: all)
+            }
+            Logger.spark.debug("[processQuestion] STEP6 done cIdx=\(cIdx.count)")
+
+            Logger.spark.debug("[processQuestion] STEP7 build Citation array")
             let cits: [Citation] = cIdx.compactMap { idx in
                 guard idx < all.count else { return nil }
                 let r = all[idx]; return Citation(recordID: r.id, title: r.title, capturedAt: r.capturedAt)
             }
+            Logger.spark.debug("[processQuestion] STEP7 done citCount=\(cits.count)")
+
+            Logger.spark.debug("[processQuestion] STEP8 messages[idx] = ChatMessage with citations...")
             if let idx = messages.firstIndex(where: { $0.id == aid }) {
                 messages[idx] = ChatMessage(id: aid, role: .assistant, content: clean, citations: cits)
+                Logger.spark.debug("[processQuestion] STEP8 message updated OK, cit=\(cits.count)")
             }
+            Logger.spark.debug("[processQuestion] STEP9 state = .loaded")
             state = .loaded
+            Logger.spark.debug("[processQuestion] STEP9 done")
 
             if loadedFromHistoryID == nil {
-                Task { await generateAndSyncTitle(); saveToHistory() }
+                Logger.spark.debug("[processQuestion] STEP10 dispatching title+save task")
+                Task {
+                    await generateAndSyncTitle()
+                    saveToHistory()
+                }
             }
 
+            Logger.spark.debug("[processQuestion] STEP11 memory compression check")
             triggerMemoryCompressionIfNeeded()
+
+            Logger.spark.debug("[processQuestion] STEP12 personal info check")
+            if SparkAIService.containsPersonalInfoPattern(q) {
+                Logger.spark.debug("[processQuestion] STEP12 triggered memory pipeline")
+                triggerMemoryPipeline(userMessage: q, assistantResponse: clean)
+            }
+            Logger.spark.debug("[processQuestion] STEP13 DONE exiting do block")
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == aid }) { messages.remove(at: idx) }
             messages.append(ChatMessage(role: .assistant, content: "抱歉，出错了：\(error.localizedDescription)"))
             state = .error(error.localizedDescription)
         }
+        Logger.spark.debug("[processQuestion] STEP14 saveCurrentConversation dispatching")
         saveCurrentConversation()
+        Logger.spark.debug("[processQuestion] EXIT method")
     }
 
     private func saveCurrentConversation() {
         let msgs = messages
-        let store = conversationStore
+        Logger.spark.debug("[saveCurrentConversation] dispatching detached task, msgCount=\(msgs.count)")
         Task.detached(priority: .background) {
             var rounds: [ConversationRound] = []; var i = 0
             while i + 1 < msgs.count {
@@ -196,7 +260,16 @@ final class SparkViewModel: ObservableObject {
                     i += 2
                 } else { i += 1 }
             }
-            try? store.saveConversations(rounds)
+            try? SparkConversationStore.live.saveConversations(rounds)
+        }
+    }
+
+    // MARK: - Memory Pipeline (implicit extraction via lightweight LLM)
+
+    private func triggerMemoryPipeline(userMessage: String, assistantResponse: String) {
+        let service = aiService
+        Task.detached(priority: .background) {
+            await service.extractMemoryFromInput(userMessage: userMessage, assistantResponse: assistantResponse)
         }
     }
 
@@ -219,7 +292,6 @@ final class SparkViewModel: ObservableObject {
         guard roundCount >= SparkAIService.memoryTriggerRoundCount else { return }
         let msgs = messages
         let service = aiService
-        let store = conversationStore
         Task.detached(priority: .background) {
             let rounds = await Self.buildRounds(from: msgs)
             let lastCompressed = UserDefaults.standard.integer(forKey: UDK.sparkLastMemoryCompressionRounds)
@@ -248,29 +320,34 @@ final class SparkViewModel: ObservableObject {
         "通义", "千问", "文心", "一言", "智谱", "豆包", "星火",
     ]
 
+    private static let titleTriggerRoundCount = 3
+
     private func generateAndSyncTitle() async {
         guard !titleGenerated else { return }
-        titleGenerated = true
         guard let first = messages.first(where: { $0.role == .user })?.content,
               !first.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        isGeneratingTitle = true
 
-        if let neutralTitle = clientSideTitle(from: first) {
-            currentTitle = neutralTitle
-            isGeneratingTitle = false
-            return
+        if currentTitle == "Spark" || currentTitle == String(localized: "新对话") {
+            if let neutralTitle = clientSideTitle(from: first) {
+                currentTitle = neutralTitle
+            } else {
+                fallbackTitle(from: first)
+            }
         }
 
+        guard roundCount >= Self.titleTriggerRoundCount else { return }
+        titleGenerated = true
+        isGeneratingTitle = true
+
+        let rounds = buildRecentRounds()
         do {
-            let title = try await aiService.generateTitle(for: first)
+            let title = try await aiService.generateContextualTitle(from: Array(rounds.suffix(3)))
             let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.isEmpty || containsModelName(trimmed) {
-                fallbackTitle(from: first)
-            } else {
+            if !trimmed.isEmpty && !containsModelName(trimmed) {
                 currentTitle = trimmed
             }
         } catch {
-            fallbackTitle(from: first)
+            // keep current fallback title
         }
         isGeneratingTitle = false
     }
@@ -300,32 +377,44 @@ final class SparkViewModel: ObservableObject {
     }
 
     private func saveToHistory() {
-        guard loadedFromHistoryID == nil else { return }
+        guard loadedFromHistoryID == nil else { Logger.spark.debug("[saveToHistory] skipped (loaded from history)"); return }
         let msgs = messages
         let id = currentConversationId
         let title = currentTitle
+        Logger.spark.debug("[saveToHistory] dispatching via historyOpQueue, id=\(id) msgCount=\(msgs.count) title=\(title)")
         UserDefaults.standard.set(id.uuidString, forKey: UDK.sparkCurrentConversationId)
-        Task.detached(priority: .background) {
-            var hist = (try? SparkHistoryStore.live.loadConversations()) ?? []
-            if let idx = hist.firstIndex(where: { $0.id == id }) {
-                hist[idx].messages = msgs
-                hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
-                if !title.isEmpty && title != "Spark" {
-                    hist[idx].title = title
+
+        Self.historyOpQueue.async {
+            try? SparkHistoryStore.live.atomicUpdate { hist in
+                let hc = hist.count
+                Logger.spark.debug("[saveToHistory] histCount=\(hc) searching for id=\(id)")
+                if let idx = hist.firstIndex(where: { $0.id == id }) {
+                    Logger.spark.debug("[saveToHistory] FOUND at idx=\(idx), updating msgCount=\(msgs.count)")
+                    hist[idx].messages = msgs
+                    hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
+                    if !title.isEmpty && title != "Spark" {
+                        hist[idx].title = title
+                    }
+                } else {
+                    Logger.spark.debug("[saveToHistory] NOT FOUND, creating new entry. id=\(id)")
+                    for (i, entry) in hist.enumerated() {
+                        Logger.spark.debug("[saveToHistory]   hist[\(i)].id=\(entry.id) title=\(entry.title)")
+                    }
+                    guard let firstMsg = msgs.first else { return }
+                    let s = SavedConversation(
+                        id: id,
+                        title: title,
+                        createdAt: firstMsg.timestamp,
+                        lastMessageAt: msgs.last?.timestamp ?? Date(),
+                        messages: msgs
+                    )
+                    hist.append(s)
+                    let nhc = hist.count
+                    Logger.spark.debug("[saveToHistory] appended new entry, new histCount=\(nhc)")
                 }
-            } else {
-                guard let firstMsg = msgs.first else { return }
-                let s = SavedConversation(
-                    id: id,
-                    title: title,
-                    createdAt: firstMsg.timestamp,
-                    lastMessageAt: msgs.last?.timestamp ?? Date(),
-                    messages: msgs
-                )
-                hist.append(s)
+                hist.sort { $0.lastMessageAt > $1.lastMessageAt }
             }
-            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-            try? SparkHistoryStore.live.saveConversations(hist)
+            Logger.spark.debug("[saveToHistory] historyOpQueue COMPLETE, id=\(id)")
         }
     }
 
@@ -346,24 +435,27 @@ final class SparkViewModel: ObservableObject {
         let wasLoadedFromHistory = loadedFromHistoryID != nil
         let title = currentTitle
         let convId = currentConversationId
-        Task.detached(priority: .background) { [wasLoadedFromHistory] in
-            guard !wasLoadedFromHistory else { return }
-            let s = SavedConversation(
-                id: convId,
-                title: title,
-                createdAt: msgs.first?.timestamp ?? Date(),
-                lastMessageAt: msgs.last?.timestamp ?? Date(),
-                messages: msgs
-            )
-            var hist = (try? SparkHistoryStore.live.loadConversations()) ?? []
-            if let idx = hist.firstIndex(where: { $0.id == convId }) {
-                hist[idx] = s
-            } else {
-                hist.append(s)
+
+        if !wasLoadedFromHistory {
+            Self.historyOpQueue.async {
+                try? SparkHistoryStore.live.atomicUpdate { hist in
+                    let s = SavedConversation(
+                        id: convId,
+                        title: title,
+                        createdAt: msgs.first?.timestamp ?? Date(),
+                        lastMessageAt: msgs.last?.timestamp ?? Date(),
+                        messages: msgs
+                    )
+                    if let idx = hist.firstIndex(where: { $0.id == convId }) {
+                        hist[idx] = s
+                    } else {
+                        hist.append(s)
+                    }
+                    hist.sort { $0.lastMessageAt > $1.lastMessageAt }
+                }
             }
-            hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-            try? SparkHistoryStore.live.saveConversations(hist)
         }
+
         messages = []; try? conversationStore.saveConversations([])
         state = .idle; inputText = ""
         currentQuestions = randomQuestions()
@@ -386,10 +478,11 @@ final class SparkViewModel: ObservableObject {
         isGeneratingTitle = false
         saveCurrentConversation()
     }
-
     func deleteConversations(_ ids: Set<UUID>) {
-        var hist = (try? historyStore.loadConversations()) ?? []
-        hist.removeAll { ids.contains($0.id) }
-        try? historyStore.saveConversations(hist)
+        Self.historyOpQueue.async {
+            try? SparkHistoryStore.live.atomicUpdate { hist in
+                hist.removeAll { ids.contains($0.id) }
+            }
+        }
     }
 }

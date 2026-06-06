@@ -1,12 +1,15 @@
 import Foundation
+import OSLog
 
 protocol SparkHistoryPersisting {
     func loadConversations() throws -> [SavedConversation]
     func saveConversations(_ conversations: [SavedConversation]) throws
+    func atomicUpdate(_ block: @escaping (inout [SavedConversation]) -> Void) throws
 }
 
-final class SparkHistoryStore: SparkHistoryPersisting {
+final class SparkHistoryStore: SparkHistoryPersisting, @unchecked Sendable {
     private let fileURL: URL
+    private static let queue = DispatchQueue(label: "com.notiee.history.serial", qos: .utility)
 
     static var live: SparkHistoryStore {
         let baseDirectory = FileManager.default.urls(
@@ -24,13 +27,35 @@ final class SparkHistoryStore: SparkHistoryPersisting {
     }
 
     func loadConversations() throws -> [SavedConversation] {
+        try Self.queue.sync {
+            try loadUnsynchronized()
+        }
+    }
+
+    func saveConversations(_ conversations: [SavedConversation]) throws {
+        try Self.queue.sync {
+            try saveUnsynchronized(conversations)
+        }
+    }
+
+    func atomicUpdate(_ block: @escaping (inout [SavedConversation]) -> Void) throws {
+        try Self.queue.sync {
+            var list = try loadUnsynchronized()
+            Logger.logDebug("[history atomicUpdate] load done, count=\(list.count)", category: Logger.spark)
+            block(&list)
+            try saveUnsynchronized(list)
+            Logger.logDebug("[history atomicUpdate] save done, finalCount=\(list.count)", category: Logger.spark)
+        }
+    }
+
+    private func loadUnsynchronized() throws -> [SavedConversation] {
         guard FileManager.default.fileExists(atPath: fileURL.path) else { return [] }
         let data = try Data(contentsOf: fileURL)
         guard !data.isEmpty else { return [] }
         return try JSONDecoder().decode([SavedConversation].self, from: data)
     }
 
-    func saveConversations(_ conversations: [SavedConversation]) throws {
+    private func saveUnsynchronized(_ conversations: [SavedConversation]) throws {
         try FileManager.default.createDirectory(
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
