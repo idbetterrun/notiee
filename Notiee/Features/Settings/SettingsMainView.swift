@@ -174,6 +174,21 @@ struct SettingsMainView: View {
                 }
             }
             
+            Section("Agent 设置") {
+                Toggle("Agent 模式", isOn: $viewModel.agentEnabled)
+                Picker("信任级别", selection: $viewModel.agentTrustLevel) {
+                    Text("谨慎").tag("cautious")
+                    Text("标准").tag("standard")
+                    Text("完全信任").tag("full")
+                }
+                Stepper("回路最大轮数: \(viewModel.agentMaxIterations)", value: $viewModel.agentMaxIterations, in: 1...10)
+                Stepper("单轮工具上限: \(viewModel.agentMaxToolsPerRound)", value: $viewModel.agentMaxToolsPerRound, in: 1...5)
+            }
+            .onChange(of: viewModel.agentEnabled) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.agentTrustLevel) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.agentMaxIterations) { _, _ in viewModel.saveAll() }
+            .onChange(of: viewModel.agentMaxToolsPerRound) { _, _ in viewModel.saveAll() }
+            
             Section("关于") {
                 NavigationLink {
                     AboutNotieeView()
