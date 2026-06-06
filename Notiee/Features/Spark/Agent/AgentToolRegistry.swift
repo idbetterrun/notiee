@@ -21,7 +21,7 @@ final class AgentToolRegistry: @unchecked Sendable {
 
     func openAITools(for trustLevel: AgentTrustLevel) -> [[String: Any]] {
         allTools(for: trustLevel).map { tool in
-            var funcDef: [String: Any] = [
+            let funcDef: [String: Any] = [
                 "name": tool.name,
                 "description": tool.description,
                 "parameters": Self.buildJSONSchema(from: tool.parametersSchema)
