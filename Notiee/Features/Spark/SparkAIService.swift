@@ -15,6 +15,24 @@ enum SparkAIError: LocalizedError {
     }
 }
 
+// MARK: - Agent Models
+
+struct AgentChatResponse: Sendable {
+    let text: String
+    let toolCalls: [AgentToolCall]
+    let tokensUsed: Int
+}
+
+struct AgentToolCall: Sendable {
+    let id: String
+    let name: String
+    let parameters: [String: Any]
+
+    var isValid: Bool {
+        (try? JSONSerialization.data(withJSONObject: parameters)) != nil
+    }
+}
+
 // MARK: - AI Service Protocol
 
 protocol SparkAIServing: AnyObject, Sendable {
@@ -27,6 +45,7 @@ protocol SparkAIServing: AnyObject, Sendable {
     func generateContextualTitle(from rounds: [ConversationRound]) async throws -> String
     func compressMemory(from rounds: [ConversationRound]) async
     func extractMemoryFromInput(userMessage: String, assistantResponse: String) async
+    func agentChat(messages: [[String: Any]], tools: [[String: Any]]) async throws -> AgentChatResponse
 }
 
 final class SparkAIService: SparkAIServing, @unchecked Sendable {
@@ -504,5 +523,42 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     private func accumulateTokens(_ tokens: Int) {
         let current = UserDefaults.standard.integer(forKey: UDK.sparkAccumulatedTokens)
         UserDefaults.standard.set(current + tokens, forKey: UDK.sparkAccumulatedTokens)
+    }
+
+    func agentChat(messages: [[String: Any]], tools: [[String: Any]]) async throws -> AgentChatResponse {
+        let textConfig = settingsStore.loadConfiguration(for: .text)
+        guard textConfig.isComplete else { throw SparkAIError.missingConfiguration }
+
+        let result: (text: String, toolCalls: [[String: Any]], tokens: Int)
+        if textConfig.activeProtocol == .openai {
+            result = try await OpenAICaller.callAgent(
+                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                apiKey: textConfig.apiKey, messages: messages, tools: tools)
+        } else {
+            result = try await AnthropicCaller.callAgent(
+                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                apiKey: textConfig.apiKey, messages: messages, tools: tools)
+        }
+
+        accumulateTokens(result.tokens)
+
+        let toolCalls: [AgentToolCall] = result.toolCalls.compactMap { tc in
+            if tc["input"] != nil {
+                guard let id = tc["id"] as? String,
+                      let name = tc["name"] as? String,
+                      let input = tc["input"] as? [String: Any] else { return nil }
+                return AgentToolCall(id: id, name: name, parameters: input)
+            } else {
+                guard let id = tc["id"] as? String,
+                      let funcInfo = tc["function"] as? [String: Any],
+                      let name = funcInfo["name"] as? String,
+                      let argsStr = funcInfo["arguments"] as? String,
+                      let argsData = argsStr.data(using: .utf8),
+                      let params = try? JSONSerialization.jsonObject(with: argsData) as? [String: Any] else { return nil }
+                return AgentToolCall(id: id, name: name, parameters: params)
+            }
+        }
+
+        return AgentChatResponse(text: result.text, toolCalls: toolCalls, tokensUsed: result.tokens)
     }
 }
