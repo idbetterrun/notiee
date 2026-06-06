@@ -35,8 +35,8 @@ final class AgentTrustManager: ObservableObject {
     }
 
     private func loadSavedSettings() {
-        if let raw = settingsStore.loadString(forKey: UserDefaultsKeys.sparkAgentTrustLevel),
-           let level = AgentTrustLevel(rawValue: raw) {
+        let raw = settingsStore.loadString(forKey: UserDefaultsKeys.sparkAgentTrustLevel, defaultValue: AgentTrustLevel.standard.rawValue)
+        if let level = AgentTrustLevel(rawValue: raw) {
             currentLevel = level
         }
     }
