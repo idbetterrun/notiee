@@ -6,7 +6,7 @@ enum AgentActionStoreError: Error {
     case toolNotFound
 }
 
-final class AgentActionStore {
+final class AgentActionStore: @unchecked Sendable {
     private let fileURL: URL
     private let snapshotsDir: URL
     private let queue = DispatchQueue(label: "com.notiee.agent.action.store")
@@ -41,19 +41,23 @@ final class AgentActionStore {
     }
 
     func writeSnapshot(id: UUID, data: Data) throws -> String {
-        let path = snapshotsDir.appendingPathComponent("\(id.uuidString).json")
-        try data.write(to: path, options: .atomic)
-        let fd = open(path.path, O_WRONLY)
-        if fd != -1 { fcntl(fd, F_FULLFSYNC); close(fd) }
-        return path.path
+        try queue.sync {
+            let path = snapshotsDir.appendingPathComponent("\(id.uuidString).json")
+            try data.write(to: path, options: .atomic)
+            return path.path
+        }
     }
 
     func readSnapshot(path: String) throws -> Data {
-        try Data(contentsOf: URL(fileURLWithPath: path))
+        try queue.sync {
+            try Data(contentsOf: URL(fileURLWithPath: path))
+        }
     }
 
     func deleteSnapshot(path: String) throws {
-        try FileManager.default.removeItem(at: URL(fileURLWithPath: path))
+        try queue.sync {
+            try FileManager.default.removeItem(at: URL(fileURLWithPath: path))
+        }
     }
 
     func purgeExpiredSnapshots(ttlMinutes: Int) {
