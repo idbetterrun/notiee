@@ -63,7 +63,7 @@ final class AgentExecutor {
                 currentActions.append(action)
                 actionStore.save(action)
 
-                if action.result.message.contains("stop_agent") {
+                if action.result.shouldTerminate {
                     return (response.text, buildActionSummary(), currentActions.map { $0.id })
                 }
             }
@@ -79,7 +79,7 @@ final class AgentExecutor {
             return AgentAction(
                 toolName: call.name,
                 parameters: call.parameters,
-                result: AgentToolResultData(success: false, message: "未知工具: \(call.name)", undoAction: nil)
+                result: AgentToolResultData(success: false, message: "未知工具: \(call.name)", shouldTerminate: false, undoAction: nil)
             )
         }
 
@@ -87,7 +87,7 @@ final class AgentExecutor {
             return AgentAction(
                 toolName: call.name,
                 parameters: call.parameters,
-                result: AgentToolResultData(success: false, message: "权限不足：操作 \(call.name) 需要更高信任级别", undoAction: nil)
+                result: AgentToolResultData(success: false, message: "权限不足：操作 \(call.name) 需要更高信任级别", shouldTerminate: true, undoAction: nil)
             )
         }
 
@@ -103,16 +103,17 @@ final class AgentExecutor {
                     snapshotPath: undo.snapshotPath
                 )
             }()
+            let shouldTerminate = (result.data?["stop_agent"] as? Bool) ?? false
             return AgentAction(
                 toolName: call.name,
                 parameters: call.parameters,
-                result: AgentToolResultData(success: result.success, message: result.message, undoAction: undoData)
+                result: AgentToolResultData(success: result.success, message: result.message, shouldTerminate: shouldTerminate, undoAction: undoData)
             )
         } catch {
             return AgentAction(
                 toolName: call.name,
                 parameters: call.parameters,
-                result: AgentToolResultData(success: false, message: "工具执行失败: \(error.localizedDescription)", undoAction: nil)
+                result: AgentToolResultData(success: false, message: "工具执行失败: \(error.localizedDescription)", shouldTerminate: false, undoAction: nil)
             )
         }
     }
@@ -137,8 +138,6 @@ final class AgentExecutor {
             if let data = try? JSONSerialization.data(withJSONObject: call.parameters),
                let args = String(data: data, encoding: .utf8) {
                 funcDef["arguments"] = args
-            } else {
-                funcDef["arguments"] = "{}"
             }
             return ["id": call.id, "type": "function", "function": funcDef]
         }

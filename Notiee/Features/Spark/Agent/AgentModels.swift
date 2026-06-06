@@ -3,6 +3,7 @@ import Foundation
 struct AgentToolResultData: Equatable, Codable, Sendable {
     let success: Bool
     let message: String
+    let shouldTerminate: Bool
     let undoAction: AgentUndoActionData?
 }
 
