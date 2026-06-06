@@ -65,6 +65,10 @@ final class SparkMemoryStore: SparkMemoryPersisting, @unchecked Sendable {
         }
     }
 
+    func allEntries() async -> [MemoryEntry] {
+        (try? load())?.map { MemoryEntry(key: $0.key, value: $0.value) } ?? []
+    }
+
     private static func loadFrom(_ url: URL) throws -> [String: String] {
         guard FileManager.default.fileExists(atPath: url.path) else { return [:] }
         let data = try Data(contentsOf: url)
