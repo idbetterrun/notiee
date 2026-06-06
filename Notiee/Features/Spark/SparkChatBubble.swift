@@ -1,5 +1,17 @@
 import SwiftUI
 
+// MARK: - Regex Cache
+
+private let boldRegex = try! NSRegularExpression(pattern: "\\*\\*(.+?)\\*\\*")
+private let italicRegex = try! NSRegularExpression(pattern: "\\*(.+?)\\*")
+private let codeRegex = try! NSRegularExpression(pattern: "`(.+?)`")
+private let numberedRegex = try! NSRegularExpression(pattern: "^(\\d+)\\. ")
+
+// MARK: - Markdown Parse Cache
+
+private var markdownCache: [String: [MarkdownLine]] = [:]
+private let markdownCacheLock = NSLock()
+
 // MARK: - Markdown Parser
 
 private enum MarkdownLine: Equatable {
@@ -16,6 +28,13 @@ private enum MarkdownLine: Equatable {
 
 private struct MarkdownParser {
     static func parse(_ text: String) -> [MarkdownLine] {
+        markdownCacheLock.lock()
+        if let cached = markdownCache[text] {
+            markdownCacheLock.unlock()
+            return cached
+        }
+        markdownCacheLock.unlock()
+
         var lines: [MarkdownLine] = []
         var inCodeBlock = false
         for raw in text.components(separatedBy: "\n") {
@@ -41,7 +60,7 @@ private struct MarkdownParser {
             } else if line.hasPrefix("- ") || line.hasPrefix("* ") || line.hasPrefix("-") || line.hasPrefix("*") {
                 let drop = line.hasPrefix("- ") || line.hasPrefix("* ") ? 2 : 1
                 lines.append(.bullet(String(line.dropFirst(drop)).trimmingCharacters(in: .whitespaces)))
-            } else if let match = try? NSRegularExpression(pattern: "^(\\d+)\\. ").firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+            } else if let match = numberedRegex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
                       let r = Range(match.range(at: 1), in: line),
                       let num = Int(line[r]) {
                 let content = String(line[Range(match.range, in: line)!.upperBound...]).trimmingCharacters(in: .whitespaces)
@@ -50,6 +69,11 @@ private struct MarkdownParser {
                 lines.append(.plain(raw))
             }
         }
+
+        markdownCacheLock.lock()
+        markdownCache[text] = lines
+        markdownCacheLock.unlock()
+
         return lines
     }
 }
@@ -76,13 +100,6 @@ struct SparkChatBubble: View {
                 userContent
             }
         }
-        .contextMenu {
-            Button {
-                UIPasteboard.general.string = message.content
-            } label: {
-                Label("复制", systemImage: "doc.on.doc")
-            }
-        }
         .task {
             if message.content.isEmpty && message.role == .assistant {
                 thinkingPhase = 1.0
@@ -99,6 +116,13 @@ struct SparkChatBubble: View {
                 RoundedRectangle(cornerRadius: 18)
                     .fill(accentColor)
             )
+            .contextMenu {
+                Button {
+                    UIPasteboard.general.string = message.content
+                } label: {
+                    Label("复制", systemImage: "doc.on.doc")
+                }
+            }
     }
 
     private var assistantContent: some View {
@@ -118,6 +142,13 @@ struct SparkChatBubble: View {
                 renderedMarkdown
                     .foregroundStyle(.primary)
                     .padding(.horizontal, 16).padding(.vertical, 8)
+                    .contextMenu {
+                        Button {
+                            UIPasteboard.general.string = message.content
+                        } label: {
+                            Label("复制", systemImage: "doc.on.doc")
+                        }
+                    }
 
                 if !message.citations.isEmpty {
                     citationsSection
@@ -208,7 +239,7 @@ struct SparkChatBubble: View {
         var result = Text("")
         var remaining = text
         while !remaining.isEmpty {
-            if let match = try? NSRegularExpression(pattern: "\\*\\*(.+?)\\*\\*").firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
+            if let match = boldRegex.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
                let fullR = Range(match.range, in: remaining),
                let innerR = Range(match.range(at: 1), in: remaining) {
                 if fullR.lowerBound > remaining.startIndex {
@@ -216,7 +247,7 @@ struct SparkChatBubble: View {
                 }
                 result = result + Text(String(remaining[innerR])).bold()
                 remaining = String(remaining[fullR.upperBound...])
-            } else if let match = try? NSRegularExpression(pattern: "\\*(.+?)\\*").firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
+            } else if let match = italicRegex.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
                       let fullR = Range(match.range, in: remaining),
                       let innerR = Range(match.range(at: 1), in: remaining) {
                 if fullR.lowerBound > remaining.startIndex {
@@ -224,7 +255,7 @@ struct SparkChatBubble: View {
                 }
                 result = result + Text(String(remaining[innerR])).italic()
                 remaining = String(remaining[fullR.upperBound...])
-            } else if let match = try? NSRegularExpression(pattern: "`(.+?)`").firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
+            } else if let match = codeRegex.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
                       let fullR = Range(match.range, in: remaining),
                       let innerR = Range(match.range(at: 1), in: remaining) {
                 if fullR.lowerBound > remaining.startIndex {
@@ -291,4 +322,3 @@ struct SparkChatBubble: View {
     }
     .padding()
 }
-

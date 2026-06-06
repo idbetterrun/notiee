@@ -1,18 +1,27 @@
 import SwiftUI
 
+enum SparkSheet: Identifiable {
+    case history
+    case privacy
+    case record(NoteRecord)
+
+    var id: String {
+        switch self {
+        case .history: return "history"
+        case .privacy: return "privacy"
+        case .record(let r): return "record-\(r.id.uuidString)"
+        }
+    }
+}
+
 struct SparkView: View {
-    @StateObject private var viewModel: SparkViewModel
+    @StateObject private var viewModel = SparkViewModel()
     let store: NotieeStore
-    @State private var showHistory = false
-    @State private var showPrivacy = false
-    @State private var selectedRecord: NoteRecord?
+    @State private var activeSheet: SparkSheet?
     @FocusState private var isFocused: Bool
 
     init(store: NotieeStore) {
         self.store = store
-        let vm = SparkViewModel()
-        vm.recordsProvider = { [weak store] in store?.records ?? [] }
-        _viewModel = StateObject(wrappedValue: vm)
     }
 
     var body: some View {
@@ -69,22 +78,30 @@ struct SparkView: View {
                     .padding(.bottom, 8)
             }
         }
-        .sheet(isPresented: $showHistory) {
-            NavigationStack {
-                SparkHistoryView(onSelect: { saved in viewModel.loadConversation(saved); showHistory = false })
-            }
-        }
-        .sheet(isPresented: $showPrivacy) {
-            SparkPrivacySheet(onAgree: { viewModel.markPrivacyNoticeSeen(); showPrivacy = false })
-        }
-        .sheet(item: $selectedRecord) { record in
-            NavigationStack {
-                RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .history:
+                NavigationStack {
+                    SparkHistoryView(onSelect: { saved in
+                        viewModel.loadConversation(saved)
+                        activeSheet = nil
+                    })
+                }
+            case .privacy:
+                SparkPrivacySheet(onAgree: {
+                    viewModel.markPrivacyNoticeSeen()
+                    activeSheet = nil
+                })
+            case .record(let record):
+                NavigationStack {
+                    RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
+                }
             }
         }
         .onAppear {
+            viewModel.recordsProvider = { [weak store] in store?.records ?? [] }
             if !viewModel.hasSeenPrivacyNotice {
-                showPrivacy = true
+                activeSheet = .privacy
             }
         }
     }
@@ -134,7 +151,7 @@ struct SparkView: View {
             }
 
             Button {
-                showHistory = true
+                activeSheet = .history
             } label: {
                 Image(systemName: "clock.arrow.circlepath")
                     .font(.system(size: 17, weight: .medium))
@@ -194,7 +211,7 @@ struct SparkView: View {
                             store: store,
                             onCitationTap: { recordID in
                                 if let record = store.records.first(where: { $0.id == recordID }) {
-                                    selectedRecord = record
+                                    activeSheet = .record(record)
                                 }
                             }
                         )

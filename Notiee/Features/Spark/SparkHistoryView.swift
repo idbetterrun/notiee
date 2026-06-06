@@ -179,7 +179,7 @@ final class HistoryViewModel: ObservableObject {
     func delete(_ ids: Set<UUID>) {
         conversations.removeAll { ids.contains($0.id) }
         groups = Self.groupByDate(conversations)
-        try? store.saveConversations(conversations)
+        try? SparkConversationRepository.live.deleteFromHistory(ids)
     }
 
     private static func groupByDate(_ conversations: [SavedConversation]) -> [DateGroup] {

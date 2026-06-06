@@ -76,6 +76,7 @@ struct NotieeApp: App {
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        try? SparkConversationRepository.live.clearDraft()
         #if canImport(FirebaseCore)
         FirebaseApp.configure()
         #endif

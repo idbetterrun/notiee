@@ -14,9 +14,8 @@ final class SparkViewModel: ObservableObject {
     @Published var injectionWarning: String?
     @Published var memoryActionText: String?
 
-    let aiService: SparkAIService
-    let conversationStore: SparkConversationPersisting
-    let historyStore: SparkHistoryPersisting
+    let aiService: any SparkAIServing
+    let repository: any SparkConversationCoordinating
     let settingsStore: AppSettingsPersisting
 
     var recordsProvider: (() -> [NoteRecord])?
@@ -25,65 +24,36 @@ final class SparkViewModel: ObservableObject {
     private var roundCount: Int { messages.count / 2 }
     private var titleGenerated = false
 
-    private static let historyOpQueue = DispatchQueue(label: "com.notiee.history.ops.serial", qos: .utility)
-
     init(
-        aiService: SparkAIService = SparkAIService(),
-        conversationStore: SparkConversationPersisting = SparkConversationStore.live,
-        historyStore: SparkHistoryPersisting = SparkHistoryStore.live,
+        aiService: any SparkAIServing = SparkAIService(),
+        repository: any SparkConversationCoordinating = SparkConversationRepository.live,
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live
     ) {
         self.aiService = aiService
-        self.conversationStore = conversationStore
-        self.historyStore = historyStore
+        self.repository = repository
         self.settingsStore = settingsStore
-        migrateConversationToHistory()
         checkPrivacyNotice()
         loadGreeting()
+        restoreCurrentConversationIfNeeded()
     }
 
-    private func migrateConversationToHistory() {
-        guard let rounds = try? conversationStore.loadConversations(), !rounds.isEmpty else { return }
-        var msgs: [ChatMessage] = []
-        for r in rounds { msgs.append(r.userMessage); msgs.append(r.assistantMessage) }
+    // MARK: - Init: restore draft only (no history migration)
 
-        let savedConvID: UUID? = {
-            guard let str = UserDefaults.standard.string(forKey: UDK.sparkCurrentConversationId),
-                  let id = UUID(uuidString: str) else { return nil }
-            return id
-        }()
-
-        UserDefaults.standard.removeObject(forKey: UDK.sparkCurrentConversationId)
-        try? conversationStore.saveConversations([])
-
-        let fallbackConvID = currentConversationId
-        Self.historyOpQueue.async {
-            try? SparkHistoryStore.live.atomicUpdate { hist in
-                let hc = hist.count
-                Logger.spark.debug("[migrate] histCount=\(hc) savedConvID=\(String(describing: savedConvID))")
-                if let savedID = savedConvID, let idx = hist.firstIndex(where: { $0.id == savedID }) {
-                    Logger.spark.debug("[migrate] FOUND at idx=\(idx), updating msgCount=\(msgs.count)")
-                    hist[idx].messages = msgs
-                    hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
-                } else {
-                    let newID = savedConvID ?? fallbackConvID
-                    Logger.spark.debug("[migrate] NOT FOUND, creating new. id=\(newID)")
-                    let title = String(msgs.first?.content.prefix(15) ?? "Spark").trimmingCharacters(in: .whitespaces)
-                    let saved = SavedConversation(
-                        id: newID,
-                        title: title.isEmpty ? "Spark" : title,
-                        createdAt: msgs.first?.timestamp ?? Date(),
-                        lastMessageAt: msgs.last?.timestamp ?? Date(),
-                        messages: msgs
-                    )
-                    hist.append(saved)
-                    let nhc = hist.count
-                    Logger.spark.debug("[migrate] appended, new histCount=\(nhc)")
-                }
-                hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-            }
+    private func restoreCurrentConversationIfNeeded() {
+        guard let draft = try? repository.restoreDraft() else { return }
+        messages = draft.messages
+        currentConversationId = draft.id
+        loadedFromHistoryID = draft.id
+        if !draft.title.isEmpty {
+            currentTitle = draft.title
+            titleGenerated = true
+        }
+        if !messages.isEmpty {
+            state = .idle
         }
     }
+
+    // MARK: - Privacy
 
     private func checkPrivacyNotice() {
         hasSeenPrivacyNotice = settingsStore.loadBool(forKey: "spark_privacy_notice_seen", defaultValue: false)
@@ -137,18 +107,20 @@ final class SparkViewModel: ObservableObject {
     func sendQuestion(_ q: String) { inputText = q; sendMessage() }
 
     private func processQuestion(_ q: String, _ userMsg: ChatMessage) async {
-        Logger.spark.debug("[processQuestion] START round=\(self.roundCount) msgCount=\(self.messages.count)")
         if !NetworkMonitor.shared.isConnected {
-            Logger.spark.debug("[processQuestion] OFFLINE, aborting")
             messages.append(ChatMessage(role: .assistant, content: String(localized: "网络不可用，无法进行 AI 问答。请检查网络后重试。")))
-            state = .offline; saveCurrentConversation(); return
+            state = .offline
+            saveCurrentDraft()
+            return
         }
+
         let aid = UUID()
         messages.append(ChatMessage(id: aid, role: .assistant, content: ""))
+
         do {
             let allRecs = recordsProvider?() ?? []
             let recentRounds = buildRecentRounds()
-            Logger.spark.debug("[processQuestion] asking LLM via continuation+detached...")
+
             let (full, tokens) = try await withCheckedThrowingContinuation { cont in
                 let service = aiService
                 let recs = allRecs
@@ -157,33 +129,44 @@ final class SparkViewModel: ObservableObject {
                 Task.detached {
                     do {
                         let result = try await service.ask(question: question, with: recs, recentRounds: rounds)
-                        Logger.spark.debug("[detached] ask returned, calling cont.resume")
                         cont.resume(returning: result)
-                        Logger.spark.debug("[detached] cont.resume called")
                     } catch {
-                        Logger.spark.debug("[detached] ask threw, calling cont.resume(throwing:)")
                         cont.resume(throwing: error)
-                        Logger.spark.debug("[detached] cont.resume(throwing:) called")
                     }
                 }
             }
-            Logger.spark.debug("[processQuestion] STEP1 ask returned, len=\(full.count) tokens=\(tokens)")
             aiService.accumulatePublic(tokens)
 
-            Logger.spark.debug("[processQuestion] STEP2 calling extractMemory...")
-            let (clean, ops) = aiService.extractMemory(from: full)
-            Logger.spark.debug("[processQuestion] STEP2 done, s=\(ops.toSet.count) u=\(ops.toUpdate.count) d=\(ops.toDelete.count)")
+            // Offload post-processing to background
+            let service = aiService
+            let all = allRecs.filter { !$0.isDeleted }.sorted { $0.capturedAt > $1.capturedAt }
+            let (clean, ops, cits) = await Task.detached {
+                let (clean, ops) = service.extractMemory(from: full)
+                var cIdx = service.extractCitations(from: clean, recordCount: all.count)
+                if cIdx.isEmpty {
+                    cIdx = service.extractCitationsFallback(from: clean, records: all)
+                }
+                let cits: [Citation] = cIdx.compactMap { idx in
+                    guard idx < all.count else { return nil }
+                    let r = all[idx]
+                    return Citation(recordID: r.id, title: r.title, capturedAt: r.capturedAt)
+                }
+                return (clean, ops, cits)
+            }.value
 
+            // Update UI
+            if let idx = messages.firstIndex(where: { $0.id == aid }) {
+                messages[idx] = ChatMessage(id: aid, role: .assistant, content: clean, citations: cits)
+            }
+            state = .loaded
+
+            // Memory operations
             let ms = SparkMemoryStore.live
-            Logger.spark.debug("[processQuestion] STEP3 memory ops loop start")
             var memoryCount = 0
             for (k, v) in ops.toSet { ms.set(k, value: v); memoryCount += 1 }
             for (k, v) in ops.toUpdate { ms.set(k, value: v); memoryCount += 1 }
             for k in ops.toDelete { ms.delete(k); memoryCount += 1 }
-            Logger.spark.debug("[processQuestion] STEP3 memory ops done count=\(memoryCount)")
-
             if memoryCount > 0 {
-                Logger.spark.debug("[processQuestion] STEP4 showing memory toast")
                 withAnimation(.easeInOut) { memoryActionText = String(localized: "✓ 已记忆") }
                 Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 2_500_000_000)
@@ -193,78 +176,49 @@ final class SparkViewModel: ObservableObject {
                 }
             }
 
-            Logger.spark.debug("[processQuestion] STEP5 filter+sort records")
-            let all = allRecs.filter{!$0.isDeleted}.sorted{$0.capturedAt>$1.capturedAt}
-            Logger.spark.debug("[processQuestion] STEP5 done recs=\(all.count)")
-
-            Logger.spark.debug("[processQuestion] STEP6 extractCitations regex")
-            var cIdx = aiService.extractCitations(from: clean, recordCount: all.count)
-
-            if cIdx.isEmpty {
-                Logger.spark.debug("[processQuestion] STEP6 fallback fuzzy match")
-                cIdx = aiService.extractCitationsFallback(from: clean, records: all)
-            }
-            Logger.spark.debug("[processQuestion] STEP6 done cIdx=\(cIdx.count)")
-
-            Logger.spark.debug("[processQuestion] STEP7 build Citation array")
-            let cits: [Citation] = cIdx.compactMap { idx in
-                guard idx < all.count else { return nil }
-                let r = all[idx]; return Citation(recordID: r.id, title: r.title, capturedAt: r.capturedAt)
-            }
-            Logger.spark.debug("[processQuestion] STEP7 done citCount=\(cits.count)")
-
-            Logger.spark.debug("[processQuestion] STEP8 messages[idx] = ChatMessage with citations...")
-            if let idx = messages.firstIndex(where: { $0.id == aid }) {
-                messages[idx] = ChatMessage(id: aid, role: .assistant, content: clean, citations: cits)
-                Logger.spark.debug("[processQuestion] STEP8 message updated OK, cit=\(cits.count)")
-            }
-            Logger.spark.debug("[processQuestion] STEP9 state = .loaded")
-            state = .loaded
-            Logger.spark.debug("[processQuestion] STEP9 done")
-
-            if loadedFromHistoryID == nil {
-                Logger.spark.debug("[processQuestion] STEP10 dispatching title+save task")
-                Task {
-                    await generateAndSyncTitle()
-                    saveToHistory()
-                }
+            // Title + save (always upsert, no loadedFromHistoryID guard)
+            Task {
+                await generateAndSyncTitle()
+                saveToHistory()
             }
 
-            Logger.spark.debug("[processQuestion] STEP11 memory compression check")
             triggerMemoryCompressionIfNeeded()
 
-            Logger.spark.debug("[processQuestion] STEP12 personal info check")
             if SparkAIService.containsPersonalInfoPattern(q) {
-                Logger.spark.debug("[processQuestion] STEP12 triggered memory pipeline")
                 triggerMemoryPipeline(userMessage: q, assistantResponse: clean)
             }
-            Logger.spark.debug("[processQuestion] STEP13 DONE exiting do block")
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == aid }) { messages.remove(at: idx) }
             messages.append(ChatMessage(role: .assistant, content: "抱歉，出错了：\(error.localizedDescription)"))
             state = .error(error.localizedDescription)
         }
-        Logger.spark.debug("[processQuestion] STEP14 saveCurrentConversation dispatching")
-        saveCurrentConversation()
-        Logger.spark.debug("[processQuestion] EXIT method")
+
+        saveCurrentDraft()
     }
 
-    private func saveCurrentConversation() {
+    // MARK: - Draft persistence
+
+    private func saveCurrentDraft() {
+        let draft = SparkConversationDraft(
+            id: currentConversationId,
+            title: currentTitle,
+            messages: messages
+        )
+        try? repository.saveDraft(draft)
+    }
+
+    // MARK: - History persistence (always upsert)
+
+    private func saveToHistory() {
         let msgs = messages
-        Logger.spark.debug("[saveCurrentConversation] dispatching detached task, msgCount=\(msgs.count)")
-        Task.detached(priority: .background) {
-            var rounds: [ConversationRound] = []; var i = 0
-            while i + 1 < msgs.count {
-                if msgs[i].role == .user, msgs[i+1].role == .assistant {
-                    rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i+1]))
-                    i += 2
-                } else { i += 1 }
-            }
-            try? SparkConversationStore.live.saveConversations(rounds)
+        let id = currentConversationId
+        let title = currentTitle
+        Task.detached(priority: .utility) { [repository] in
+            try? repository.upsertHistory(from: msgs, id: id, title: title)
         }
     }
 
-    // MARK: - Memory Pipeline (implicit extraction via lightweight LLM)
+    // MARK: - Memory Pipeline
 
     private func triggerMemoryPipeline(userMessage: String, assistantResponse: String) {
         let service = aiService
@@ -279,9 +233,15 @@ final class SparkViewModel: ObservableObject {
         var rounds: [ConversationRound] = []
         var i = 0
         let msgs = messages
-        while i + 1 < msgs.count {
-            if msgs[i].role == .user, msgs[i+1].role == .assistant {
-                rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i+1]))
+        let endIndex: Int = {
+            if let last = msgs.last, last.role == .assistant, last.content.isEmpty {
+                return msgs.count - 1
+            }
+            return msgs.count
+        }()
+        while i + 1 < endIndex {
+            if msgs[i].role == .user, msgs[i + 1].role == .assistant {
+                rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i + 1]))
                 i += 2
             } else { i += 1 }
         }
@@ -301,11 +261,11 @@ final class SparkViewModel: ObservableObject {
         }
     }
 
-    private static func buildRounds(from msgs: [ChatMessage]) -> [ConversationRound] {
+    private static nonisolated func buildRounds(from msgs: [ChatMessage]) -> [ConversationRound] {
         var rounds: [ConversationRound] = []; var i = 0
         while i + 1 < msgs.count {
-            if msgs[i].role == .user, msgs[i+1].role == .assistant {
-                rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i+1]))
+            if msgs[i].role == .user, msgs[i + 1].role == .assistant {
+                rounds.append(ConversationRound(userMessage: msgs[i], assistantMessage: msgs[i + 1]))
                 i += 2
             } else { i += 1 }
         }
@@ -346,9 +306,7 @@ final class SparkViewModel: ObservableObject {
             if !trimmed.isEmpty && !containsModelName(trimmed) {
                 currentTitle = trimmed
             }
-        } catch {
-            // keep current fallback title
-        }
+        } catch { }
         isGeneratingTitle = false
     }
 
@@ -376,48 +334,6 @@ final class SparkViewModel: ObservableObject {
         currentTitle = t.isEmpty ? String(localized: "新对话") : t
     }
 
-    private func saveToHistory() {
-        guard loadedFromHistoryID == nil else { Logger.spark.debug("[saveToHistory] skipped (loaded from history)"); return }
-        let msgs = messages
-        let id = currentConversationId
-        let title = currentTitle
-        Logger.spark.debug("[saveToHistory] dispatching via historyOpQueue, id=\(id) msgCount=\(msgs.count) title=\(title)")
-        UserDefaults.standard.set(id.uuidString, forKey: UDK.sparkCurrentConversationId)
-
-        Self.historyOpQueue.async {
-            try? SparkHistoryStore.live.atomicUpdate { hist in
-                let hc = hist.count
-                Logger.spark.debug("[saveToHistory] histCount=\(hc) searching for id=\(id)")
-                if let idx = hist.firstIndex(where: { $0.id == id }) {
-                    Logger.spark.debug("[saveToHistory] FOUND at idx=\(idx), updating msgCount=\(msgs.count)")
-                    hist[idx].messages = msgs
-                    hist[idx].lastMessageAt = msgs.last?.timestamp ?? Date()
-                    if !title.isEmpty && title != "Spark" {
-                        hist[idx].title = title
-                    }
-                } else {
-                    Logger.spark.debug("[saveToHistory] NOT FOUND, creating new entry. id=\(id)")
-                    for (i, entry) in hist.enumerated() {
-                        Logger.spark.debug("[saveToHistory]   hist[\(i)].id=\(entry.id) title=\(entry.title)")
-                    }
-                    guard let firstMsg = msgs.first else { return }
-                    let s = SavedConversation(
-                        id: id,
-                        title: title,
-                        createdAt: firstMsg.timestamp,
-                        lastMessageAt: msgs.last?.timestamp ?? Date(),
-                        messages: msgs
-                    )
-                    hist.append(s)
-                    let nhc = hist.count
-                    Logger.spark.debug("[saveToHistory] appended new entry, new histCount=\(nhc)")
-                }
-                hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-            }
-            Logger.spark.debug("[saveToHistory] historyOpQueue COMPLETE, id=\(id)")
-        }
-    }
-
     // MARK: - History management
 
     func newConversation() {
@@ -431,32 +347,17 @@ final class SparkViewModel: ObservableObject {
         }
 
         guard !messages.isEmpty else { currentQuestions = randomQuestions(); return }
+
         let msgs = messages
-        let wasLoadedFromHistory = loadedFromHistoryID != nil
         let title = currentTitle
         let convId = currentConversationId
 
-        if !wasLoadedFromHistory {
-            Self.historyOpQueue.async {
-                try? SparkHistoryStore.live.atomicUpdate { hist in
-                    let s = SavedConversation(
-                        id: convId,
-                        title: title,
-                        createdAt: msgs.first?.timestamp ?? Date(),
-                        lastMessageAt: msgs.last?.timestamp ?? Date(),
-                        messages: msgs
-                    )
-                    if let idx = hist.firstIndex(where: { $0.id == convId }) {
-                        hist[idx] = s
-                    } else {
-                        hist.append(s)
-                    }
-                    hist.sort { $0.lastMessageAt > $1.lastMessageAt }
-                }
-            }
+        Task.detached(priority: .utility) { [repository] in
+            try? repository.upsertHistory(from: msgs, id: convId, title: title)
         }
 
-        messages = []; try? conversationStore.saveConversations([])
+        messages = []
+        try? repository.clearDraft()
         state = .idle; inputText = ""
         currentQuestions = randomQuestions()
         refreshGreeting()
@@ -468,21 +369,21 @@ final class SparkViewModel: ObservableObject {
     }
 
     func loadConversation(_ saved: SavedConversation) {
-        let msgs = saved.messages
-        self.messages = msgs
-        self.state = .idle
-        self.loadedFromHistoryID = saved.id
-        self.currentTitle = saved.title
-        self.currentConversationId = saved.id
-        self.titleGenerated = true
+        messages = saved.messages
+        state = .idle
+        loadedFromHistoryID = saved.id
+        currentTitle = saved.title
+        currentConversationId = saved.id
+        titleGenerated = true
         isGeneratingTitle = false
-        saveCurrentConversation()
+
+        let draft = SparkConversationDraft(id: saved.id, title: saved.title, messages: saved.messages)
+        try? repository.saveDraft(draft)
     }
+
     func deleteConversations(_ ids: Set<UUID>) {
-        Self.historyOpQueue.async {
-            try? SparkHistoryStore.live.atomicUpdate { hist in
-                hist.removeAll { ids.contains($0.id) }
-            }
+        Task.detached(priority: .utility) { [repository] in
+            try? repository.deleteFromHistory(ids)
         }
     }
 }

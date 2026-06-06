@@ -62,6 +62,8 @@
 		200000000000000000000028 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000028 /* SettingsViewModel.swift */; };
 		200000000000000000000029 /* MockAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000029 /* MockAIProcessingService.swift */; };
 		200000000000000000000030 /* MockAIProcessingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000030 /* MockAIProcessingServiceTests.swift */; };
+		C0DEDEADBEEFCAFE00000004 /* SparkConversationRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */; };
+		C0DEDEADBEEFCAFE00000006 /* SparkViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */; };
 		200000000000000000000035 /* CreateItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000035 /* CreateItemSheet.swift */; };
 		200000000000000000000036 /* ImportScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000036 /* ImportScheduleView.swift */; };
 		2397324939A5F592DC35ABF2 /* PrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */; };
@@ -95,6 +97,7 @@
 		7568F23C0FDBFDF392C370C5 /* ImageSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */; };
 		7BCB519E902B48AEF17A32D7 /* NotieeCameraIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23E2AC990E0D7427C4D055A /* NotieeCameraIntent.swift */; };
 		843DF9A146CEAD56FA63E462 /* SparkConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */; };
+		C0DEDEADBEEFCAFE00000001 /* SparkConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */; };
 		88CA43871198658141B9E253 /* HighlightedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82877F4ACD877D140D13DE81 /* HighlightedText.swift */; };
 		88FE8511C00D6740483676E5 /* AIPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 809810EE943DED7F3FB0382C /* AIPipelineManager.swift */; };
 		8C4C152AA7CF86B41897B82A /* EventDetailSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */; };
@@ -237,6 +240,8 @@
 		100000000000000000000028 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		100000000000000000000029 /* MockAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingService.swift; sourceTree = "<group>"; };
 		100000000000000000000030 /* MockAIProcessingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingServiceTests.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkConversationRepositoryTests.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkViewModelTests.swift; sourceTree = "<group>"; };
 		100000000000000000000035 /* CreateItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateItemSheet.swift; sourceTree = "<group>"; };
 		100000000000000000000036 /* ImportScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportScheduleView.swift; sourceTree = "<group>"; };
 		1342A65366ED31A59C9A520E /* CalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarSelectionView.swift; sourceTree = "<group>"; };
@@ -330,6 +335,7 @@
 		C86AB113713AB0E8B4FFCBF6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = Notiee/Info.plist; sourceTree = "<group>"; };
 		D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
 		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationStore.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationRepository.swift; path = SparkConversationRepository.swift; sourceTree = "<group>"; };
 		D395AC82E97090501EA8D180 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D50780AC855D14A170154CD6 /* TMNExportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNExportService.swift; sourceTree = "<group>"; };
 		D6C23EF23D8944E5A0E6D009 /* LocalOCRService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalOCRService.swift; sourceTree = "<group>"; };
@@ -584,6 +590,8 @@
 				100000000000000000000021 /* RecordDetailViewModelTests.swift */,
 				100000000000000000000024 /* SettingsViewModelTests.swift */,
 				100000000000000000000030 /* MockAIProcessingServiceTests.swift */,
+				C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */,
+				C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = "<group>";
@@ -643,6 +651,7 @@
 				FF966F65697B0EC727F3655D /* SparkChatBubble.swift */,
 				B7220C7898CD80E70D5812F6 /* SparkCitationRow.swift */,
 				D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */,
+				C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */,
 				48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */,
 				6AE25D10BF81E21044A271C1 /* SparkHistoryView.swift */,
 				0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */,
@@ -1010,6 +1019,7 @@
 				55CDB316557B1786E77FB2BA /* SparkChatBubble.swift in Sources */,
 				37BF789A142B245459373530 /* SparkCitationRow.swift in Sources */,
 				843DF9A146CEAD56FA63E462 /* SparkConversationStore.swift in Sources */,
+				C0DEDEADBEEFCAFE00000001 /* SparkConversationRepository.swift in Sources */,
 				5B878F3C88A6EF0DEC0562B8 /* SparkHistoryStore.swift in Sources */,
 				EF2473F7C9C5434A180AB8B0 /* SparkHistoryView.swift in Sources */,
 				27D3351E759BC5F0C33BC3D0 /* SparkInputBar.swift in Sources */,
@@ -1036,6 +1046,8 @@
 				200000000000000000000021 /* RecordDetailViewModelTests.swift in Sources */,
 				200000000000000000000024 /* SettingsViewModelTests.swift in Sources */,
 				200000000000000000000030 /* MockAIProcessingServiceTests.swift in Sources */,
+				C0DEDEADBEEFCAFE00000004 /* SparkConversationRepositoryTests.swift in Sources */,
+				C0DEDEADBEEFCAFE00000006 /* SparkViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

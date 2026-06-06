@@ -15,7 +15,21 @@ enum SparkAIError: LocalizedError {
     }
 }
 
-final class SparkAIService: Sendable {
+// MARK: - AI Service Protocol
+
+protocol SparkAIServing: AnyObject, Sendable {
+    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound]) async throws -> (text: String, tokens: Int)
+    func accumulatePublic(_ tokens: Int)
+    func extractMemory(from text: String) -> (cleanText: String, ops: SparkAIService.MemoryOperations)
+    func extractCitations(from text: String, recordCount: Int) -> [Int]
+    func extractCitationsFallback(from text: String, records: [NoteRecord]) -> [Int]
+    func generateTitle(for message: String) async throws -> String
+    func generateContextualTitle(from rounds: [ConversationRound]) async throws -> String
+    func compressMemory(from rounds: [ConversationRound]) async
+    func extractMemoryFromInput(userMessage: String, assistantResponse: String) async
+}
+
+final class SparkAIService: SparkAIServing, @unchecked Sendable {
     private let settingsStore: AppSettingsPersisting
     private let memoryStore: SparkMemoryPersisting
     private let maxRecordsInPrompt = 150
@@ -185,7 +199,7 @@ final class SparkAIService: Sendable {
 
     // MARK: - Memory Operations
 
-    struct MemoryOperations {
+    struct MemoryOperations: Sendable {
         var toSet: [String: String] = [:]
         var toUpdate: [String: String] = [:]
         var toDelete: Set<String> = []

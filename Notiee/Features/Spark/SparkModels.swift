@@ -87,6 +87,27 @@ struct SavedConversation: Identifiable, Equatable, Codable, Sendable {
     var messageCount: Int { messages.count }
 }
 
+// MARK: - Conversation Draft (for current session persistence)
+
+struct SparkConversationDraft: Codable, Sendable {
+    var id: UUID
+    var title: String
+    var messages: [ChatMessage]
+    var updatedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        title: String = "",
+        messages: [ChatMessage] = [],
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.title = title
+        self.messages = messages
+        self.updatedAt = updatedAt
+    }
+}
+
 // MARK: - Spark State
 
 enum SparkState: Equatable, Sendable {
