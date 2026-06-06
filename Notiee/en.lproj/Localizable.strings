@@ -490,3 +490,18 @@
 "描述 AI 应该如何回复…" = "Describe how the AI should respond...";
 "例如：温柔知心" = "e.g. Gentle & Caring";
 "暂无自定义风格，点击右上角 + 添加" = "No custom styles. Tap + to add one.";
+
+/* Agent */
+"Agent" = "Agent";
+"agent_mode" = "Agent";
+"agent_trust_level" = "Trust Level";
+"agent_max_iterations" = "Max Loop Rounds";
+"agent_max_tools_per_round" = "Max Tools Per Round";
+"agent_settings" = "Agent Settings";
+"agent_undo" = "Undo";
+"agent_undo_all" = "Undo This Operation";
+"agent_executing" = "Agent is executing...";
+"agent_tool_failed" = "Execution failed";
+"agent_permission_denied" = "Insufficient permissions";
+"agent_too_many_iterations" = "Agent reached max iterations, generating summary...";
+"agent_init_failed" = "Agent mode requires full data access. Please check settings.";

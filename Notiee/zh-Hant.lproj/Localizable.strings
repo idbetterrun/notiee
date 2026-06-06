@@ -490,3 +490,17 @@
 "描述 AI 应该如何回复…" = "描述 AI 應該如何回覆…";
 "例如：温柔知心" = "例如：溫柔知心";
 "暂无自定义风格，点击右上角 + 添加" = "暫無自訂風格，點擊右上角 + 新增";
+
+/* Agent */
+"agent_mode" = "Agent";
+"agent_trust_level" = "信任級別";
+"agent_max_iterations" = "迴路最大輪數";
+"agent_max_tools_per_round" = "單輪工具上限";
+"agent_settings" = "Agent 設定";
+"agent_undo" = "撤銷";
+"agent_undo_all" = "撤銷本次操作";
+"agent_executing" = "Agent 正在執行...";
+"agent_tool_failed" = "執行失敗";
+"agent_permission_denied" = "權限不足";
+"agent_too_many_iterations" = "達到最大輪數，正在生成總結...";
+"agent_init_failed" = "Agent 模式需要完整的數據訪問權限，請檢查設定。";
