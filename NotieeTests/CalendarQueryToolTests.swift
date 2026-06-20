@@ -36,4 +36,13 @@ final class CalendarQueryToolTests: XCTestCase {
         let r = CalendarQueryTool.resolveDateRange(timeRange: "garbage", startDate: nil, endDate: nil, now: baseNow(), calendar: cal)
         XCTAssertEqual(cal.component(.day, from: r.start), 20)
     }
+
+    func testParseDate_acceptsCommonDateTimeFormats() {
+        XCTAssertNotNil(CalendarQueryTool.parseDate("2026-06-21"))
+        XCTAssertNotNil(CalendarQueryTool.parseDate("2026-06-21 10:00"))
+        XCTAssertNotNil(CalendarQueryTool.parseDate("2026-06-21T10:00"))
+        XCTAssertNotNil(CalendarQueryTool.parseDate("2026-06-21T10:00:00"))
+        XCTAssertNil(CalendarQueryTool.parseDate("not a date"))
+        XCTAssertNil(CalendarQueryTool.parseDate(nil))
+    }
 }

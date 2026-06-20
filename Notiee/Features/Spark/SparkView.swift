@@ -139,14 +139,7 @@ struct SparkView: View {
                         .scaleEffect(0.6)
                 }
 
-                Circle()
-                    .fill(viewModel.state == .loading ? Color.orange : Color.green)
-                    .frame(width: 6, height: 6)
-                    .phaseAnimator([1.0, 1.3]) { view, phase in
-                        view.scaleEffect(phase)
-                    } animation: { _ in
-                        .easeInOut(duration: 0.8).repeatForever(autoreverses: true)
-                    }
+
             }
 
             Spacer()

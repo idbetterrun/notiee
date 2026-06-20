@@ -156,6 +156,37 @@ private extension MarkdownUI.Theme {
                     .padding(.leading, 10)
             }
         }
+        .table { configuration in
+            configuration.label
+                .markdownTableBorderStyle(
+                    TableBorderStyle(
+                        .insideHorizontalBorders,
+                        color: Color.secondary.opacity(0.2),
+                        width: 0.5
+                    )
+                )
+                .markdownTableBackgroundStyle(
+                    TableBackgroundStyle { row, _ in
+                        row == 0 ? Color.secondary.opacity(0.08) : Color.clear
+                    }
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 0.5)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .tableCell { configuration in
+            configuration.label
+                .markdownTextStyle {
+                    if configuration.row == 0 {
+                        FontWeight(.semibold)
+                    }
+                    FontSize(16)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+        }
 }
 
 #Preview {

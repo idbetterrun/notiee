@@ -478,7 +478,7 @@ final class SparkViewModel: ObservableObject {
         }
 
         do {
-            let (text, summary, _) = try await executor.run(
+            let (text, _, _) = try await executor.run(
                 userMessage: question,
                 conversationHistory: messages,
                 onToolCallStart: { [weak self] toolName in
@@ -489,11 +489,7 @@ final class SparkViewModel: ObservableObject {
                 }
             )
 
-            var finalText = text
-            if !summary.isEmpty {
-                finalText += "\n\n---\n\(summary)"
-            }
-            messages.append(ChatMessage(role: .assistant, content: finalText))
+            messages.append(ChatMessage(role: .assistant, content: text))
             state = .loaded
             saveCurrentDraft()
             Task { saveToHistory() }

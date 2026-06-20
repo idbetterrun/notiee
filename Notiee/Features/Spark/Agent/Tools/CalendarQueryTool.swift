@@ -51,14 +51,25 @@ final class CalendarQueryTool: AgentTool {
         }
     }
 
-    /// 宽松日期解析：先试 ISO8601，再试 yyyy-MM-dd。
+    /// 宽松日期解析：先试 ISO8601，再依次试常见格式。
     nonisolated static func parseDate(_ raw: String?) -> Date? {
         guard let raw, !raw.isEmpty else { return nil }
         if let d = ISO8601DateFormatter().date(from: raw) { return d }
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd'T'HH:mm",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd HH:mm",
+            "yyyy-MM-dd",
+        ]
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "en_US_POSIX")
-        fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.date(from: raw)
+        for format in formats {
+            fmt.dateFormat = format
+            if let d = fmt.date(from: raw) { return d }
+        }
+        return nil
     }
 
     func execute(parameters: [String: Any]) async throws -> AgentToolResult {
