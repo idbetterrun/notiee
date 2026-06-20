@@ -1,5 +1,6 @@
 import Foundation
 import EventKit
+import CryptoKit
 
 @MainActor
 final class CalendarService: ObservableObject {
@@ -13,7 +14,20 @@ final class CalendarService: ObservableObject {
     private init() {
         checkAuthorizationStatus()
     }
-    
+
+    /// 由系统事件的稳定标识 + 起始日期，确定性地派生一个稳定 UUID。
+    /// 用于让系统日历事件在多次抓取间保持同一个 id，从而让拍记的 eventID 持续命中。
+    /// 重复性事件的不同场次用 startDate 区分。eventIdentifier 缺失时退回随机 UUID。
+    nonisolated static func stableEventID(eventIdentifier: String?, startDate: Date) -> UUID {
+        guard let eid = eventIdentifier, !eid.isEmpty else { return UUID() }
+        let seed = "\(eid)|\(Int(startDate.timeIntervalSinceReferenceDate))"
+        let digest = SHA256.hash(data: Data(seed.utf8))
+        let b = Array(digest.prefix(16))
+        let bytes: uuid_t = (b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
+                             b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15])
+        return UUID(uuid: bytes)
+    }
+
     private func checkAuthorizationStatus() {
         let status = EKEventStore.authorizationStatus(for: .event)
         if #available(iOS 17.0, *) {
@@ -95,7 +109,7 @@ final class CalendarService: ObservableObject {
             }
             
             return ScheduledEvent(
-                id: UUID(),
+                id: Self.stableEventID(eventIdentifier: ekEvent.eventIdentifier, startDate: ekEvent.startDate),
                 title: title,
                 startDate: ekEvent.startDate,
                 endDate: ekEvent.endDate,

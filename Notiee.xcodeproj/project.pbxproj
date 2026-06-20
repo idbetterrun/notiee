@@ -150,6 +150,7 @@
 		C9706BD39B3E8129A5EA7465 /* CalendarManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */; };
 		CAFE000000001111AAAA0001 /* CalendarQueryToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000001111AAAA0002 /* CalendarQueryToolTests.swift */; };
 		CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */; };
+		CAFE0000000AABB1CCDD0001 /* CalendarServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */; };
 		CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */; };
 		CAFE000000005555EEEE0001 /* SparkAgentChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000005555EEEE0002 /* SparkAgentChip.swift */; };
 		CAFE0000000088880001AAAA /* SparkAgentTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */; };
@@ -294,6 +295,7 @@
 		26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManagerTests.swift; sourceTree = "<group>"; };
 		CAFE000000001111AAAA0002 /* CalendarQueryToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarQueryToolTests.swift; sourceTree = "<group>"; };
 		CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolErrorTests.swift; sourceTree = "<group>"; };
+		CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarServiceTests.swift; sourceTree = "<group>"; };
 		CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkIntentDetector.swift; sourceTree = "<group>"; };
 		CAFE000000005555EEEE0002 /* SparkAgentChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentChip.swift; sourceTree = "<group>"; };
 		CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentTimelineView.swift; sourceTree = "<group>"; };
@@ -645,6 +647,7 @@
 				26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */,
 				CAFE000000001111AAAA0002 /* CalendarQueryToolTests.swift */,
 				CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */,
+				CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */,
 				CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */,
 				CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */,
 				100000000000000000000021 /* RecordDetailViewModelTests.swift */,
@@ -1168,6 +1171,7 @@
 				C9706BD39B3E8129A5EA7465 /* CalendarManagerTests.swift in Sources */,
 				CAFE000000001111AAAA0001 /* CalendarQueryToolTests.swift in Sources */,
 				CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */,
+				CAFE0000000AABB1CCDD0001 /* CalendarServiceTests.swift in Sources */,
 				CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */,
 				CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */,
 				200000000000000000000021 /* RecordDetailViewModelTests.swift in Sources */,
