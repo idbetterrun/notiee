@@ -144,22 +144,27 @@ struct SparkView: View {
 
             Spacer()
 
-            Button {
-                viewModel.newConversation()
-            } label: {
-                Image(systemName: "square.and.pencil")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(NotieeColors.themed(.blue))
-            }
+            AdaptiveGlassContainer {
+                HStack(spacing: 12) {
+                    Button {
+                        viewModel.newConversation()
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(NotieeColors.themed(.blue))
+                    }
+                    .glassIconButton()
 
-            Button {
-                activeSheet = .history
-            } label: {
-                Image(systemName: "clock.arrow.circlepath")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(NotieeColors.themed(.blue))
+                    Button {
+                        activeSheet = .history
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(NotieeColors.themed(.blue))
+                    }
+                    .glassIconButton()
+                }
             }
-            .padding(.leading, 16)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 8)
