@@ -230,6 +230,31 @@ struct SparkView: View {
                             }
                         )
                         .id(message.id)
+
+                        if viewModel.agentSuggestionMessageID == message.id {
+                            HStack {
+                                Button {
+                                    viewModel.acceptAgentSuggestion()
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "bolt.fill")
+                                        Text("用 Agent 模式重试")
+                                    }
+                                    .font(.caption.weight(.medium))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 7)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .fill(Color.purple.opacity(0.12))
+                                    )
+                                    .foregroundStyle(Color.purple)
+                                }
+                                .buttonStyle(.plain)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .transition(.opacity)
+                        }
                     }
 
                     if let toolName = viewModel.currentToolName {
