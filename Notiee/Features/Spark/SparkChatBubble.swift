@@ -157,24 +157,26 @@ private extension MarkdownUI.Theme {
             }
         }
         .table { configuration in
-            configuration.label
-                .markdownTableBorderStyle(
-                    TableBorderStyle(
-                        .insideHorizontalBorders,
-                        color: Color.secondary.opacity(0.2),
-                        width: 0.5
+            ScrollView(.horizontal, showsIndicators: false) {
+                configuration.label
+                    .markdownTableBorderStyle(
+                        TableBorderStyle(
+                            .insideHorizontalBorders,
+                            color: Color.secondary.opacity(0.2),
+                            width: 0.5
+                        )
                     )
-                )
-                .markdownTableBackgroundStyle(
-                    TableBackgroundStyle { row, _ in
-                        row == 0 ? Color.secondary.opacity(0.08) : Color.clear
-                    }
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 0.5)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .markdownTableBackgroundStyle(
+                        TableBackgroundStyle { row, _ in
+                            row == 0 ? Color.secondary.opacity(0.08) : Color.clear
+                        }
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.secondary.opacity(0.2), lineWidth: 0.5)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
         }
         .tableCell { configuration in
             configuration.label
@@ -182,10 +184,10 @@ private extension MarkdownUI.Theme {
                     if configuration.row == 0 {
                         FontWeight(.semibold)
                     }
-                    FontSize(16)
+                    FontSize(15)
                 }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .padding(.horizontal, 10)
         }
 }
 
@@ -210,6 +212,10 @@ private extension MarkdownUI.Theme {
             | 功能 | 说明 |
             |------|------|
             | 搜索 | 关键词检索 |
+
+            | Mon | Tue | Wed | Thu | Fri | Sat | Sun |
+            |-----|-----|-----|-----|-----|-----|-----|
+            | A | B | C | D | E | F | G |
 
             ---
             正文继续。
