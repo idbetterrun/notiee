@@ -150,6 +150,8 @@
 		C9706BD39B3E8129A5EA7465 /* CalendarManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */; };
 		CAFE000000001111AAAA0001 /* CalendarQueryToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000001111AAAA0002 /* CalendarQueryToolTests.swift */; };
 		CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */; };
+		CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */; };
+		CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */; };
 		CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */; };
 		CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */; };
 		C9E505CC0289ABEBE4585D38 /* ScheduledEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */; };
@@ -287,6 +289,8 @@
 		26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManagerTests.swift; sourceTree = "<group>"; };
 		CAFE000000001111AAAA0002 /* CalendarQueryToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarQueryToolTests.swift; sourceTree = "<group>"; };
 		CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolErrorTests.swift; sourceTree = "<group>"; };
+		CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkIntentDetector.swift; sourceTree = "<group>"; };
+		CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkIntentDetectorTests.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleCreateTool.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCreateToolTests.swift; sourceTree = "<group>"; };
 		2700A7B251C6870995C7849B /* MeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
@@ -638,6 +642,7 @@
 				C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */,
 				C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */,
 				D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */,
+				CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = "<group>";
@@ -706,6 +711,7 @@
 				B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */,
 				E07B50625730EE33FF521449 /* SparkView.swift */,
 				DBE516C2778B82D7C50D438C /* SparkViewModel.swift */,
+				CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */,
 				A7326FFABA0C07BB0B1902A5 /* Agent */,
 				0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */,
 			);
@@ -1126,6 +1132,7 @@
 				CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */,
 				5F2338B67E12B8BF8344CBAD /* MemoryManageTool.swift in Sources */,
 				5F5EEACB80C89EFECC8DFE98 /* SparkPromptFragments.swift in Sources */,
+				CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1150,6 +1157,7 @@
 				C0DEDEADBEEFCAFE00000004 /* SparkConversationRepositoryTests.swift in Sources */,
 				C0DEDEADBEEFCAFE00000006 /* SparkViewModelTests.swift in Sources */,
 				376C1900597625E431D7E5A1 /* SparkPromptFragmentsTests.swift in Sources */,
+				CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
