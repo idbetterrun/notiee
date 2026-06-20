@@ -33,6 +33,7 @@ struct SparkInputBar: View {
             .opacity(isFocused ? 1 : 0)
             .animation(.easeInOut(duration: 0.15), value: isFocused)
 
+            let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             Button(action: onSubmit) {
                 Group {
                     if isLoading {
@@ -47,22 +48,13 @@ struct SparkInputBar: View {
                 }
                 .foregroundStyle(.white)
                 .frame(width: 34, height: 34)
-                .background(
-                    Circle()
-                        .fill(
-                            text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                ? Color(.systemGray4)
-                                : accentColor
-                        )
-                )
+                .background(isEmpty ? Color(.systemGray4) : Color.clear, in: Circle())
             }
-            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+            .glassIconButton(prominent: !isEmpty)
+            .disabled(isEmpty || isLoading)
             .padding(.trailing, 6)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 26)
-                .fill(.ultraThinMaterial)
-        )
+        .glassSurface(in: RoundedRectangle(cornerRadius: 26))
         .overlay(
             RoundedRectangle(cornerRadius: 26)
                 .stroke(Color(.separator).opacity(0.12), lineWidth: 0.5)
