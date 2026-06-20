@@ -25,6 +25,9 @@ extension View {
             } else {
                 self.glassEffect(.regular, in: shape)
             }
+        } else if prominent {
+            // 回退：prominent 用 accent 填充，保持「主操作/开启」态对比度（与 iOS 26 的 accent 着色玻璃一致）
+            self.background(Color.accentColor, in: shape)
         } else {
             self.background(.ultraThinMaterial, in: shape)
         }
