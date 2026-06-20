@@ -252,32 +252,11 @@ struct SparkView: View {
                         }
                     }
 
-                    if let toolName = viewModel.currentToolName {
-                        HStack {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                            Text("Agent 正在执行: \(toolName)...")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.horizontal, 16)
-                    }
-
-                    if !viewModel.agentActions.isEmpty && viewModel.state == .loading {
-                        ForEach(viewModel.agentActions) { action in
-                            HStack {
-                                Image(systemName: action.result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                    .foregroundStyle(action.result.success ? .green : .red)
-                                Text(action.toolName)
-                                    .font(.caption)
-                                Text(action.result.message)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 4)
-                        }
+                    if viewModel.state == .loading && (viewModel.currentToolName != nil || !viewModel.agentActions.isEmpty) {
+                        SparkAgentTimelineView(
+                            actions: viewModel.agentActions,
+                            runningToolName: viewModel.currentToolName
+                        )
                     }
                 }
                 .padding(.horizontal, 16)
