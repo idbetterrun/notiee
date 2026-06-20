@@ -488,14 +488,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         - 删除后回复中自然确认（如「好的，已经把相关信息移除了」）
         - 不要在无上下文时突兀列出所有记忆
 
-        ## 语言规范
-        严格遵守以下语言匹配规则：
-        - 用户全英文输入 → 你必须全英文回复
-        - 用户全中文输入 → 你必须全中文回复（简体/繁体与用户保持一致）
-        - 用户中英混杂 → 先判定主语言（看句式结构，不是看英文词多不多），以主语言回复，自然复用用户已用的英文专有名词，但不得引入额外英文词
-        - 禁止用户用英文而你用中文回复，反之亦然
-        - 示例：用户「帮我 review 下 schedule」→ 回复「好的帮你梳理下 schedule」✓，「OK 我帮你 review」✗
-        - 示例：用户「What's on my schedule today」→ 回复「You have a meeting at 3 PM.」✓，「你今天有个会议」✗
+        \(SparkPromptFragments.languageRule)
 
         ## 引用规范（必须严格遵守）
         - 每次引用拍记内容时，必须使用 [来源N] 标记，N 对应记录编号
