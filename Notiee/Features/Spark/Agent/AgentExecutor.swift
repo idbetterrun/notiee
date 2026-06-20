@@ -103,7 +103,7 @@ final class AgentExecutor {
                     snapshotPath: undo.snapshotPath
                 )
             }()
-            let shouldTerminate = (result.data?["stop_agent"] as? Bool) ?? false
+            let shouldTerminate = result.shouldTerminate
             return AgentAction(
                 toolName: call.name,
                 parameters: call.parameters,

@@ -39,6 +39,16 @@ struct AgentToolResult: Sendable {
     let message: String
     let data: [String: Any]?
     let undoAction: AgentUndoAction?
+    let shouldTerminate: Bool
+
+    init(success: Bool, message: String, data: [String: Any]?,
+         undoAction: AgentUndoAction?, shouldTerminate: Bool = false) {
+        self.success = success
+        self.message = message
+        self.data = data
+        self.undoAction = undoAction
+        self.shouldTerminate = shouldTerminate
+    }
 }
 
 struct AgentUndoAction: Sendable {
