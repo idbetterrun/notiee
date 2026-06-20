@@ -127,22 +127,27 @@ struct TodayView: View {
 
             Spacer()
 
-            if let store = viewModel.store {
-                NavigationLink {
-                    MeView(settingsStore: UserDefaultsAppSettingsStore.live, store: store)
-                } label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: 30))
-                        .foregroundStyle(NotieeColors.themed(.blue))
-                }
-            }
+            AdaptiveGlassContainer {
+                HStack(spacing: 12) {
+                    if let store = viewModel.store {
+                        NavigationLink {
+                            MeView(settingsStore: UserDefaultsAppSettingsStore.live, store: store)
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: 26))
+                                .foregroundStyle(NotieeColors.themed(.blue))
+                        }
+                        .glassIconButton()
+                    }
 
-            Button {
-                showCreateSheet = true
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 30))
-                    .foregroundStyle(NotieeColors.themed(.blue))
+                    Button {
+                        showCreateSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .semibold))
+                    }
+                    .glassIconButton(prominent: true)
+                }
             }
         }
         .onAppear {
