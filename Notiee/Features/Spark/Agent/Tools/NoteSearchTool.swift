@@ -78,7 +78,14 @@ final class NoteSearchTool: AgentTool {
     }
 }
 
-enum AgentToolError: Error {
+enum AgentToolError: LocalizedError {
     case missingParameter(String)
     case snapshotWriteFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .missingParameter(let name): return "缺少必要参数：\(name)"
+        case .snapshotWriteFailed: return "保存快照失败"
+        }
+    }
 }
