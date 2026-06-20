@@ -16,6 +16,8 @@ final class SparkViewModel: ObservableObject {
     @Published var isAgentModeEnabled: Bool = false
     @Published var currentToolName: String?
     @Published var agentActions: [AgentAction] = []
+    @Published var agentSuggestionMessageID: UUID?
+    private var lastUserQuestion: String = ""
 
     let aiService: any SparkAIServing
     let repository: any SparkConversationCoordinating
@@ -168,6 +170,13 @@ final class SparkViewModel: ObservableObject {
                 messages[idx] = ChatMessage(id: aid, role: .assistant, content: clean, citations: cits)
             }
             state = .loaded
+
+            if !isAgentModeEnabled, SparkIntentDetector.looksLikeActionRequest(q) {
+                agentSuggestionMessageID = aid
+                lastUserQuestion = q
+            } else {
+                agentSuggestionMessageID = nil
+            }
 
             // Memory operations
             let ms = SparkMemoryStore.live
@@ -397,6 +406,15 @@ final class SparkViewModel: ObservableObject {
     }
 
     // MARK: - Agent Mode
+
+    func acceptAgentSuggestion() {
+        let q = lastUserQuestion
+        agentSuggestionMessageID = nil
+        isAgentModeEnabled = true
+        guard !q.isEmpty else { return }
+        inputText = q
+        runAgent()
+    }
 
     func sendOrRun() {
         if isAgentModeEnabled {

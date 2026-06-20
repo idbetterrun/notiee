@@ -211,4 +211,48 @@ final class SparkViewModelTests: XCTestCase {
         XCTAssertEqual(mockRepo.deleteCalls.count, 1)
         XCTAssertEqual(mockRepo.deleteCalls.first, ids)
     }
+
+    func testActionRequest_setsAgentSuggestion() async throws {
+        let mockAI = MockAIService()
+        let mockRepo = MockRepository()
+        let vm = SparkViewModel(aiService: mockAI, repository: mockRepo)
+        vm.recordsProvider = { [] }
+
+        vm.inputText = "帮我创建一个明天的日程"
+        vm.sendMessage()
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        XCTAssertNotNil(vm.agentSuggestionMessageID, "动作请求回复后应建议切 Agent")
+        XCTAssertEqual(vm.agentSuggestionMessageID, vm.messages.last?.id)
+    }
+
+    func testPlainQuestion_noAgentSuggestion() async throws {
+        let mockAI = MockAIService()
+        let mockRepo = MockRepository()
+        let vm = SparkViewModel(aiService: mockAI, repository: mockRepo)
+        vm.recordsProvider = { [] }
+
+        vm.inputText = "今天天气怎么样"
+        vm.sendMessage()
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        XCTAssertNil(vm.agentSuggestionMessageID)
+    }
+
+    func testAcceptAgentSuggestion_enablesAgentAndReruns() async throws {
+        let mockAI = MockAIService()
+        let mockRepo = MockRepository()
+        let vm = SparkViewModel(aiService: mockAI, repository: mockRepo,
+                                recordManager: nil, calendarManager: nil)
+        vm.recordsProvider = { [] }
+
+        vm.inputText = "帮我创建一个明天的日程"
+        vm.sendMessage()
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        XCTAssertNotNil(vm.agentSuggestionMessageID)
+
+        vm.acceptAgentSuggestion()
+        XCTAssertTrue(vm.isAgentModeEnabled, "接受建议应开启 Agent 模式")
+        XCTAssertNil(vm.agentSuggestionMessageID, "接受后应清除建议")
+    }
 }
