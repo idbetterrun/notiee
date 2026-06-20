@@ -357,6 +357,15 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         }
     }
 
+    // MARK: - Citation Marker Stripping
+
+    /// 移除正文中的 [来源N] 引用标记（引用改为只在底部卡片展示）。
+    static func stripCitationMarkers(_ text: String) -> String {
+        let stripped = text.replacingOccurrences(
+            of: "\\s*\\[来源\\d+\\]", with: "", options: .regularExpression)
+        return stripped.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     // MARK: - Citation Extraction
 
     func extractCitations(from text: String, recordCount: Int) -> [Int] {

@@ -162,7 +162,9 @@ final class SparkViewModel: ObservableObject {
                     let r = all[idx]
                     return Citation(recordID: r.id, title: r.title, capturedAt: r.capturedAt)
                 }
-                return (clean, ops, cits)
+                // Strip inline [来源N] markers AFTER extraction so citations are still parsed correctly.
+                let cleanStripped = SparkAIService.stripCitationMarkers(clean)
+                return (cleanStripped, ops, cits)
             }.value
 
             // Update UI

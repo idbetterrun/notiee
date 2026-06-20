@@ -158,6 +158,7 @@
 		CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */; };
 		CAFE000000006666FFFF0001 /* AgentToolPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000006666FFFF0002 /* AgentToolPresentation.swift */; };
 		CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */; };
+		CAFE0000000099990001BBBB /* SparkCitationStripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */; };
 		C9E505CC0289ABEBE4585D38 /* ScheduledEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */; };
 		CCDDEEFF0011223344556677 /* CourseCalendarSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */; };
 		CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C541D6F62CB3492461A94D /* AboutNotieeView.swift */; };
@@ -301,6 +302,7 @@
 		CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCreateToolTests.swift; sourceTree = "<group>"; };
 		CAFE000000006666FFFF0002 /* AgentToolPresentation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolPresentation.swift; sourceTree = "<group>"; };
 		CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolPresentationTests.swift; sourceTree = "<group>"; };
+		CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkCitationStripTests.swift; sourceTree = "<group>"; };
 		2700A7B251C6870995C7849B /* MeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
 		2DFF9B8179789C6EF88FFB42 /* NoteSearchTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteSearchTool.swift; sourceTree = "<group>"; };
 		36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LabFeaturesView.swift; sourceTree = "<group>"; };
@@ -652,6 +654,7 @@
 				C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */,
 				D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */,
 				CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */,
+				CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = "<group>";
@@ -1174,6 +1177,7 @@
 				C0DEDEADBEEFCAFE00000006 /* SparkViewModelTests.swift in Sources */,
 				376C1900597625E431D7E5A1 /* SparkPromptFragmentsTests.swift in Sources */,
 				CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */,
+				CAFE0000000099990001BBBB /* SparkCitationStripTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
