@@ -505,3 +505,28 @@
 "agent_permission_denied" = "Insufficient permissions";
 "agent_too_many_iterations" = "Agent reached max iterations, generating summary...";
 "agent_init_failed" = "Agent mode requires full data access. Please check settings.";
+
+/* Spark Agent timeline (Task 15) */
+"用 Agent 模式重试" = "Retry in Agent mode";
+"执行了 %lld 步" = "Ran %lld step(s)";
+"搜索拍记" = "Search notes";
+"查看拍记" = "View note";
+"创建拍记" = "Create note";
+"修改拍记" = "Edit note";
+"查看待办" = "View to-dos";
+"创建待办" = "Create to-do";
+"完成待办" = "Complete to-do";
+"查询日程" = "Query schedule";
+"创建日程" = "Create event";
+"查看记忆" = "View memory";
+"正在搜索拍记…" = "Searching notes…";
+"正在查看拍记…" = "Loading note…";
+"正在创建拍记…" = "Creating note…";
+"正在修改拍记…" = "Editing note…";
+"正在查看待办…" = "Loading to-dos…";
+"正在创建待办…" = "Creating to-do…";
+"正在更新待办…" = "Updating to-do…";
+"正在查询日程…" = "Querying schedule…";
+"正在创建日程…" = "Creating event…";
+"正在查看记忆…" = "Loading memory…";
+"正在执行…" = "Working…";

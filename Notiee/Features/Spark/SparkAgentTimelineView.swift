@@ -12,7 +12,7 @@ struct SparkAgentTimelineView: View {
                 HStack(spacing: 8) {
                     ProgressView().scaleEffect(0.7)
                     Image(systemName: p.icon).font(.system(size: 12)).foregroundStyle(.secondary)
-                    Text(p.runningText).font(.caption).foregroundStyle(.secondary)
+                    Text(LocalizedStringKey(p.runningText)).font(.caption).foregroundStyle(.secondary)
                 }
             }
 
@@ -40,7 +40,7 @@ struct SparkAgentTimelineView: View {
                                 VStack(alignment: .leading, spacing: 1) {
                                     HStack(spacing: 5) {
                                         Image(systemName: p.icon).font(.caption2).foregroundStyle(.secondary)
-                                        Text(p.displayName).font(.caption.weight(.medium))
+                                        Text(LocalizedStringKey(p.displayName)).font(.caption.weight(.medium))
                                     }
                                     Text(action.result.message)
                                         .font(.caption2).foregroundStyle(.secondary)
