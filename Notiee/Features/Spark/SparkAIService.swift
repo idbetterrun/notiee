@@ -190,7 +190,9 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         return try await callTextLLM(
             systemPrompt: "你是一个标题生成助手。",
             userPrompt: """
-            请用不超过10个字为以下对话生成一个高度概括的标题。只返回标题文本，不要加引号、标点或其他修饰。
+            为以下对话生成一个高度概括的简短标题。
+            语言要求：标题必须与用户使用的语言一致（用户说英文就用英文标题，说中文就用中文标题）。
+            长度：不超过 20 个字符。只返回标题文本，不要加引号、标点或其他修饰。
 
             对话内容：
             \(String(context.prefix(600)))
@@ -213,7 +215,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
                 apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
         }
         accumulateTokens(result.tokens)
-        return String(result.text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
+        return String(result.text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(20))
     }
 
     // MARK: - Memory Operations

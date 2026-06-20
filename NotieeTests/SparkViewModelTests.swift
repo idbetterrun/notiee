@@ -255,4 +255,17 @@ final class SparkViewModelTests: XCTestCase {
         XCTAssertTrue(vm.isAgentModeEnabled, "接受建议应开启 Agent 模式")
         XCTAssertNil(vm.agentSuggestionMessageID, "接受后应清除建议")
     }
+
+    func testTitle_generatedAfterFirstRound() async throws {
+        let mockAI = MockAIService()
+        let mockRepo = MockRepository()
+        let vm = SparkViewModel(aiService: mockAI, repository: mockRepo)
+        vm.recordsProvider = { [] }
+
+        vm.inputText = "Help me plan my week"
+        vm.sendMessage()
+        try await Task.sleep(nanoseconds: 1_200_000_000)
+
+        XCTAssertEqual(vm.currentTitle, "Test Title", "首轮结束后应已用上下文标题，而非裸裁首句")
+    }
 }

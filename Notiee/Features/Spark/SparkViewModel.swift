@@ -298,7 +298,7 @@ final class SparkViewModel: ObservableObject {
         "通义", "千问", "文心", "一言", "智谱", "豆包", "星火",
     ]
 
-    private static let titleTriggerRoundCount = 3
+    private static let titleTriggerRoundCount = 1
 
     private func generateAndSyncTitle() async {
         guard !titleGenerated else { return }
@@ -348,7 +348,11 @@ final class SparkViewModel: ObservableObject {
     }
 
     private func fallbackTitle(from firstMessage: String) {
-        let t = String(firstMessage.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
+        let trimmed = firstMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        // 取首句（到第一个句末标点），再限长，避免裸裁产生碎片
+        let firstSentence = trimmed.components(separatedBy: CharacterSet(charactersIn: "。！？.!?\n"))
+            .first?.trimmingCharacters(in: .whitespaces) ?? trimmed
+        let t = String(firstSentence.prefix(20))
         currentTitle = t.isEmpty ? String(localized: "新对话") : t
     }
 
