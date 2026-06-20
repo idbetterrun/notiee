@@ -65,6 +65,13 @@ struct SparkView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
+                HStack {
+                    SparkAgentChip(isOn: $viewModel.isAgentModeEnabled)
+                    Spacer()
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 2)
+
                 SparkInputBar(
                     text: $viewModel.inputText,
                     isLoading: viewModel.state == .loading,
@@ -143,18 +150,6 @@ struct SparkView: View {
             }
 
             Spacer()
-
-            Button {
-                viewModel.isAgentModeEnabled.toggle()
-            } label: {
-                Text("Agent")
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(viewModel.isAgentModeEnabled ? Color.purple : Color.gray.opacity(0.3))
-                    .foregroundStyle(viewModel.isAgentModeEnabled ? .white : .secondary)
-                    .clipShape(Capsule())
-            }
 
             Button {
                 viewModel.newConversation()
