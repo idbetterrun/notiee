@@ -16,10 +16,7 @@ struct SparkAgentChip: View {
             .padding(.horizontal, 11)
             .padding(.vertical, 6)
             .foregroundStyle(isOn ? Color.white : Color.secondary)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isOn ? Color.purple : Color.gray.opacity(0.15))
-            )
+            .glassSurface(in: RoundedRectangle(cornerRadius: 12), prominent: isOn)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(isOn ? Color.clear : Color.secondary.opacity(0.25), lineWidth: 0.5)

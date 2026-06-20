@@ -236,10 +236,7 @@ struct SparkView: View {
                                     .font(.caption.weight(.medium))
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 7)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .fill(Color.purple.opacity(0.12))
-                                    )
+                                    .glassSurface(in: RoundedRectangle(cornerRadius: 14))
                                     .foregroundStyle(Color.purple)
                                 }
                                 .buttonStyle(.plain)
