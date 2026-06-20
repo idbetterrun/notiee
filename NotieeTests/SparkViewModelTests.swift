@@ -23,6 +23,9 @@ private final class MockAIService: SparkAIServing {
     func generateContextualTitle(from rounds: [ConversationRound]) async throws -> String { "Test Title" }
     func compressMemory(from rounds: [ConversationRound]) async {}
     func extractMemoryFromInput(userMessage: String, assistantResponse: String) async {}
+    func agentChat(messages: [[String: Any]], tools: [[String: Any]]) async throws -> AgentChatResponse {
+        AgentChatResponse(text: responseText, toolCalls: [], tokensUsed: responseTokens)
+    }
 }
 
 // MARK: - Mock Stores
