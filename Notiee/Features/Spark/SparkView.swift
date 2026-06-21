@@ -31,61 +31,19 @@ struct SparkView: View {
             SparkBackgroundView(state: viewModel.state, isInputFocused: isFocused, keyboardHeight: 0)
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                headerView
-                    .padding(.top, 8)
-
-                if viewModel.messages.isEmpty {
-                    Spacer()
-                    greetingView
-                    Spacer()
-                } else {
-                    chatScrollView
+            contentView
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    headerView
+                        .padding(.top, 8)
+                        .background {
+                            Rectangle()
+                                .fill(.ultraThinMaterial)
+                                .ignoresSafeArea(edges: .top)
+                        }
                 }
-
-                if let warning = viewModel.injectionWarning {
-                    Text(warning)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 4)
-                        .transition(.opacity)
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    bottomBar
                 }
-
-                if let memText = viewModel.memoryActionText {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 12))
-                        Text(memText)
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.green)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 4)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
-                HStack {
-                    SparkAgentChip(isOn: $viewModel.isAgentModeEnabled)
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 2)
-
-                SparkInputBar(
-                    text: $viewModel.inputText,
-                    isLoading: viewModel.state == .loading,
-                    onSubmit: { viewModel.sendOrRun() },
-                    onFocusChange: { _ in }
-                )
-                .padding(.horizontal, 16)
-
-                Text("内容由AI生成，Notiee不会把拍记内容用于任何模型训练")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 4)
-                    .padding(.bottom, 8)
-            }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -112,6 +70,71 @@ struct SparkView: View {
             if !viewModel.hasSeenPrivacyNotice {
                 activeSheet = .privacy
             }
+        }
+    }
+
+    // MARK: - Content (scrolls behind the floating bars)
+
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.messages.isEmpty {
+            VStack {
+                Spacer()
+                greetingView
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            chatScrollView
+        }
+    }
+
+    // MARK: - Bottom Bar (floats; chat scrolls behind it)
+
+    private var bottomBar: some View {
+        VStack(spacing: 0) {
+            if let warning = viewModel.injectionWarning {
+                Text(warning)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 4)
+                    .transition(.opacity)
+            }
+
+            if let memText = viewModel.memoryActionText {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 12))
+                    Text(memText)
+                        .font(.caption)
+                }
+                .foregroundStyle(.green)
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            HStack {
+                SparkAgentChip(isOn: $viewModel.isAgentModeEnabled)
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 2)
+
+            SparkInputBar(
+                text: $viewModel.inputText,
+                isLoading: viewModel.state == .loading,
+                onSubmit: { viewModel.sendOrRun() },
+                onFocusChange: { _ in }
+            )
+            .padding(.horizontal, 16)
+
+            Text("内容由AI生成，Notiee不会把拍记内容用于任何模型训练")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .padding(.top, 4)
+                .padding(.bottom, 8)
         }
     }
 
