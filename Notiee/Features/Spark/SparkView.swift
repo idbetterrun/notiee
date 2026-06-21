@@ -27,23 +27,35 @@ struct SparkView: View {
     }
 
     var body: some View {
-        ZStack {
-            SparkBackgroundView(state: viewModel.state, isInputFocused: isFocused, keyboardHeight: 0)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                SparkBackgroundView(state: viewModel.state, isInputFocused: isFocused, keyboardHeight: 0)
+                    .ignoresSafeArea()
 
-            contentView
-                .safeAreaInset(edge: .top, spacing: 0) {
-                    headerView
-                        .padding(.top, 8)
-                        .background {
-                            Rectangle()
-                                .fill(.ultraThinMaterial)
-                                .ignoresSafeArea(edges: .top)
-                        }
+                contentView
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        bottomBar
+                    }
+            }
+            .navigationTitle(viewModel.currentTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        viewModel.newConversation()
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                    }
+                    .tint(NotieeColors.themed(.blue))
+
+                    Button {
+                        activeSheet = .history
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                    .tint(NotieeColors.themed(.blue))
                 }
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    bottomBar
-                }
+            }
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -119,7 +131,8 @@ struct SparkView: View {
                 SparkAgentChip(isOn: $viewModel.isAgentModeEnabled)
                 Spacer()
             }
-            .padding(.horizontal, 24)
+            .padding(.leading, 48)
+            .padding(.trailing, 24)
             .padding(.bottom, 2)
 
             SparkInputBar(
@@ -136,61 +149,19 @@ struct SparkView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
         }
-    }
-
-    // MARK: - Header
-
-    private var headerView: some View {
-        HStack(spacing: 0) {
-            HStack(spacing: 6) {
-                Text(viewModel.currentTitle)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.primary)
-
-                if viewModel.messages.isEmpty {
-                    Text("beta")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.secondary.opacity(0.15))
-                        )
-                } else if viewModel.isGeneratingTitle {
-                    ProgressView()
-                        .scaleEffect(0.6)
+        .background {
+            // 内容向底部渐隐成磨砂，保证免责声明/输入区可读，同时上方仍通透
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .mask {
+                    LinearGradient(
+                        colors: [.clear, .black, .black],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
                 }
-
-
-            }
-
-            Spacer()
-
-            AdaptiveGlassContainer {
-                HStack(spacing: 12) {
-                    Button {
-                        viewModel.newConversation()
-                    } label: {
-                        Image(systemName: "square.and.pencil")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(NotieeColors.themed(.blue))
-                    }
-                    .glassIconButton()
-
-                    Button {
-                        activeSheet = .history
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(NotieeColors.themed(.blue))
-                    }
-                    .glassIconButton()
-                }
-            }
+                .ignoresSafeArea(edges: .bottom)
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
     }
 
     // MARK: - Greeting
