@@ -494,7 +494,10 @@ final class SparkViewModel: ObservableObject {
             messages.append(ChatMessage(role: .assistant, content: text))
             state = .loaded
             saveCurrentDraft()
-            Task { saveToHistory() }
+            Task {
+                await generateAndSyncTitle()
+                saveToHistory()
+            }
 
         } catch {
             messages.append(ChatMessage(role: .assistant, content: "Agent 执行出错：\(error.localizedDescription)"))
