@@ -153,6 +153,8 @@
 		CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */; };
 		CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */; };
 		CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */; };
+		CAFE00000006666FFFF0001 /* ScheduleUpdateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */; };
+		CAFE00000006666FFFF0003 /* ScheduleUpdateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */; };
 		CAFE0000000A1001UP000001 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1001UP000002 /* UserProfile.swift */; };
 		CAFE0000000A1002AS000001 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1002AS000002 /* AccountStore.swift */; };
 		CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1003AT000002 /* AccountStoreTests.swift */; };
@@ -370,6 +372,8 @@
 		CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolErrorTests.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleCreateTool.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCreateToolTests.swift; sourceTree = "<group>"; };
+		CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateTool.swift; sourceTree = "<group>"; };
+		CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateToolTests.swift; sourceTree = "<group>"; };
 		CAFE0000000A1001UP000002 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		CAFE0000000A1002AS000002 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
 		CAFE0000000A1003AT000002 /* AccountStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStoreTests.swift; sourceTree = "<group>"; };
@@ -639,6 +643,7 @@
 				CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */,
 				CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */,
 				CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */,
+				CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */,
 				CAFE0000000A1003AT000002 /* AccountStoreTests.swift */,
 				CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */,
 				100000000000000000000021 /* RecordDetailViewModelTests.swift */,
@@ -740,6 +745,7 @@
 				DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */,
 				F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */,
 				CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */,
+				CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */,
 				D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */,
 			);
 			name = Tools;
@@ -1096,6 +1102,7 @@
 				061AAF65967B5A895B5130BD /* TodoCompleteTool.swift in Sources */,
 				0A479BA5770AF5130E713ABF /* CalendarQueryTool.swift in Sources */,
 				CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */,
+				CAFE00000006666FFFF0001 /* ScheduleUpdateTool.swift in Sources */,
 				5F2338B67E12B8BF8344CBAD /* MemoryManageTool.swift in Sources */,
 				CAFE000000006666FFFF0001 /* AgentToolPresentation.swift in Sources */,
 				5F5EEACB80C89EFECC8DFE98 /* SparkPromptFragments.swift in Sources */,
@@ -1121,6 +1128,7 @@
 				CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */,
 				CAFE0000000AABB1CCDD0001 /* CalendarServiceTests.swift in Sources */,
 				CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */,
+				CAFE00000006666FFFF0003 /* ScheduleUpdateToolTests.swift in Sources */,
 				CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */,
 				CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */,
 				200000000000000000000021 /* RecordDetailViewModelTests.swift in Sources */,
