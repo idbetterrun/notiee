@@ -132,6 +132,7 @@
 		A2A5F3EB64CB3E3FB4C301A9 /* EventCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E0702491A101A08018209F /* EventCardView.swift */; };
 		A9CEE72D36BF5B1299BA225B /* SparkBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0042F63F4A1CFF675CA5D6D /* SparkBackgroundView.swift */; };
 		AABBCCDD1122334455667788 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCCBBAA5544332211770088 /* LoginView.swift */; };
+		CAFE0000000A2001LL000001 /* LocalLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A2001LL000002 /* LocalLoginView.swift */; };
 		AB823531986DF87DD3E5FF9A /* TMNModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49671163B1FF58DA2562FE75 /* TMNModels.swift */; };
 		ADE6F7B445EB85B518614CDC /* SparkAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */; };
 		AF10F688D903E23D7B58B4DE /* AgentToolProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */; };
@@ -389,6 +390,7 @@
 		DBE516C2778B82D7C50D438C /* SparkViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkViewModel.swift; path = SparkViewModel.swift; sourceTree = "<group>"; };
 		DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCompleteTool.swift; sourceTree = "<group>"; };
 		DDCCBBAA5544332211770088 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		CAFE0000000A2001LL000002 /* LocalLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLoginView.swift; sourceTree = "<group>"; };
 		E07B50625730EE33FF521449 /* SparkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkView.swift; path = SparkView.swift; sourceTree = "<group>"; };
 		E382FAEB20AB862699A7CFFA /* CustomFolderStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolderStore.swift; sourceTree = "<group>"; };
 		E555B84B89970B1E6511440D /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CalendarManager.swift; sourceTree = "<group>"; };
@@ -580,6 +582,7 @@
 				ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */,
 				FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */,
 				DDCCBBAA5544332211770088 /* LoginView.swift */,
+				CAFE0000000A2001LL000002 /* LocalLoginView.swift */,
 				7F8B25934CD853078C1F734F /* WelcomeView.swift */,
 				1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */,
 				2700A7B251C6870995C7849B /* MeView.swift */,
@@ -1029,6 +1032,7 @@
 				4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */,
 				CCDDEEFF0011223344556677 /* CourseCalendarSelectionView.swift in Sources */,
 				AABBCCDD1122334455667788 /* LoginView.swift in Sources */,
+				CAFE0000000A2001LL000001 /* LocalLoginView.swift in Sources */,
 				7BCB519E902B48AEF17A32D7 /* NotieeCameraIntent.swift in Sources */,
 				24F2845FDFFF93615EC5CF3B /* WelcomeView.swift in Sources */,
 				94811252E3D82186A10F0595 /* WhatsNewView.swift in Sources */,

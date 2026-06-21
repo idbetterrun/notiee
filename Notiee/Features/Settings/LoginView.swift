@@ -45,6 +45,16 @@ struct LoginView: View {
                     primaryLoginButton
                         .modifier(ShakeEffect(animatableData: CGFloat(shakeCount)))
 
+                    NavigationLink {
+                        LocalLoginView()
+                    } label: {
+                        Text("本地登录")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(NotieeColors.primary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                    }
+
                     if showAgreementReminder {
                         HStack(spacing: 4) {
                             Image(systemName: "exclamationmark.circle.fill")
