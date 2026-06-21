@@ -4,6 +4,7 @@ struct SparkInputBar: View {
     @Binding var text: String
     let isLoading: Bool
     let onSubmit: () -> Void
+    let onStop: () -> Void
     let onFocusChange: (Bool) -> Void
 
     @FocusState private var isFocused: Bool
@@ -34,13 +35,11 @@ struct SparkInputBar: View {
             .animation(.easeInOut(duration: 0.15), value: isFocused)
 
             let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            Button(action: onSubmit) {
+            Button(action: { isLoading ? onStop() : onSubmit() }) {
                 Group {
                     if isLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(0.65)
-                            .tint(.white)
+                        Image(systemName: "stop.fill")
+                            .font(.system(size: 14, weight: .semibold))
                     } else {
                         Image(systemName: "arrow.up")
                             .font(.system(size: 15, weight: .semibold))
@@ -48,10 +47,10 @@ struct SparkInputBar: View {
                 }
                 .foregroundStyle(.white)
                 .frame(width: 34, height: 34)
-                .background(isEmpty ? Color(.systemGray4) : accentColor, in: Circle())
+                .background(isEmpty && !isLoading ? Color(.systemGray4) : accentColor, in: Circle())
             }
-            .glassIconButton(prominent: !isEmpty)
-            .disabled(isEmpty || isLoading)
+            .glassIconButton(prominent: !isEmpty || isLoading)
+            .disabled(isEmpty && !isLoading)
             .padding(.trailing, 6)
         }
         .glassSurface(in: RoundedRectangle(cornerRadius: 26))
@@ -71,6 +70,7 @@ struct SparkInputBar: View {
             text: .constant(""),
             isLoading: false,
             onSubmit: {},
+            onStop: {},
             onFocusChange: { _ in }
         )
     }

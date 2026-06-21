@@ -139,6 +139,7 @@ struct SparkView: View {
                 text: $viewModel.inputText,
                 isLoading: viewModel.state == .loading,
                 onSubmit: { viewModel.sendOrRun() },
+                onStop: { viewModel.cancelResponse() },
                 onFocusChange: { _ in }
             )
             .padding(.horizontal, 16)

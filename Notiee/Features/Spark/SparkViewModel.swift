@@ -18,6 +18,7 @@ final class SparkViewModel: ObservableObject {
     @Published var agentActions: [AgentAction] = []
     @Published var agentSuggestionMessageID: UUID?
     private var lastUserQuestion: String = ""
+    private var currentResponseTask: Task<Void, Never>?
 
     let aiService: any SparkAIServing
     let repository: any SparkConversationCoordinating
@@ -112,7 +113,18 @@ final class SparkViewModel: ObservableObject {
         inputText = ""; state = .loading
         let userMsg = ChatMessage(role: .user, content: t)
         messages.append(userMsg)
-        Task { await processQuestion(t, userMsg) }
+        currentResponseTask = Task { await processQuestion(t, userMsg) }
+    }
+
+    func cancelResponse() {
+        currentResponseTask?.cancel()
+        currentResponseTask = nil
+        if let last = messages.last, last.role == .assistant, last.content.isEmpty {
+            messages.removeLast()
+        }
+        currentToolName = nil
+        state = messages.isEmpty ? .idle : .loaded
+        saveCurrentDraft()
     }
 
     func sendQuestion(_ q: String) { inputText = q; sendMessage() }
@@ -166,6 +178,8 @@ final class SparkViewModel: ObservableObject {
                 let cleanStripped = SparkAIService.stripCitationMarkers(clean)
                 return (cleanStripped, ops, cits)
             }.value
+
+            if Task.isCancelled { return }
 
             // Update UI
             if let idx = messages.firstIndex(where: { $0.id == aid }) {
@@ -445,7 +459,7 @@ final class SparkViewModel: ObservableObject {
         messages.append(userMsg)
         agentActions = []
 
-        Task { await executeAgentPipeline(t) }
+        currentResponseTask = Task { await executeAgentPipeline(t) }
     }
 
     private func makeAgentExecutor() -> AgentExecutor? {
@@ -490,6 +504,8 @@ final class SparkViewModel: ObservableObject {
                     Task { @MainActor in self?.agentActions.append(action) }
                 }
             )
+
+            if Task.isCancelled { return }
 
             messages.append(ChatMessage(role: .assistant, content: text))
             state = .loaded

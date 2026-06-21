@@ -276,4 +276,16 @@ final class SparkViewModelTests: XCTestCase {
         vm.isAgentModeEnabled = true
         XCTAssertTrue(vm.isAgentModeEnabled)
     }
+
+    func testCancelResponse_resetsState() async throws {
+        let mockAI = MockAIService()
+        let vm = SparkViewModel(aiService: mockAI, repository: MockRepository())
+        vm.recordsProvider = { [] }
+        vm.inputText = "Hi"
+        vm.sendMessage()              // state -> .loading, 追加 user + 空占位 assistant
+        vm.cancelResponse()
+        XCTAssertNotEqual(vm.state, .loading, "取消后不应仍是 loading")
+        XCTAssertFalse(vm.messages.contains { $0.role == .assistant && $0.content.isEmpty },
+                       "取消应移除空占位助手消息")
+    }
 }
