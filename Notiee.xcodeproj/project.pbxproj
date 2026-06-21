@@ -151,6 +151,9 @@
 		CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */; };
 		CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */; };
 		CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */; };
+		CAFE0000000A1001UP000001 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1001UP000002 /* UserProfile.swift */; };
+		CAFE0000000A1002AS000001 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1002AS000002 /* AccountStore.swift */; };
+		CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1003AT000002 /* AccountStoreTests.swift */; };
 		CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */; };
 		CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */; };
 		CAFE000000005555EEEE0001 /* SparkAgentChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000005555EEEE0002 /* SparkAgentChip.swift */; };
@@ -365,6 +368,9 @@
 		CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolErrorTests.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleCreateTool.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCreateToolTests.swift; sourceTree = "<group>"; };
+		CAFE0000000A1001UP000002 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		CAFE0000000A1002AS000002 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
+		CAFE0000000A1003AT000002 /* AccountStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStoreTests.swift; sourceTree = "<group>"; };
 		CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkIntentDetector.swift; sourceTree = "<group>"; };
 		CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkIntentDetectorTests.swift; sourceTree = "<group>"; };
 		CAFE000000005555EEEE0002 /* SparkAgentChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentChip.swift; sourceTree = "<group>"; };
@@ -593,6 +599,7 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000007 /* ScheduledEvent.swift */,
+				CAFE0000000A1001UP000002 /* UserProfile.swift */,
 				100000000000000000000008 /* NoteRecord.swift */,
 				100000000000000000000009 /* NoteTodo.swift */,
 				100000000000000000000010 /* AIProcessingState.swift */,
@@ -626,6 +633,7 @@
 				CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */,
 				CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */,
 				CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */,
+				CAFE0000000A1003AT000002 /* AccountStoreTests.swift */,
 				CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */,
 				100000000000000000000021 /* RecordDetailViewModelTests.swift */,
 				100000000000000000000024 /* SettingsViewModelTests.swift */,
@@ -663,6 +671,7 @@
 				9498AF5A115D7044C4936431 /* TMNImportService.swift */,
 				D50780AC855D14A170154CD6 /* TMNExportService.swift */,
 				868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */,
+				CAFE0000000A1002AS000002 /* AccountStore.swift */,
 				69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */,
 				AB42779E84C87B7233DEE1BC /* SystemPermissionManager.swift */,
 				B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */,
@@ -1006,6 +1015,8 @@
 				DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */,
 				77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */,
 				C9E505CC0289ABEBE4585D38 /* ScheduledEventStore.swift in Sources */,
+				CAFE0000000A1001UP000001 /* UserProfile.swift in Sources */,
+				CAFE0000000A1002AS000001 /* AccountStore.swift in Sources */,
 				7568F23C0FDBFDF392C370C5 /* ImageSaver.swift in Sources */,
 				37F3859728859E02F78A285B /* TMNImportPreviewSheet.swift in Sources */,
 				F49F77B59BC31180CA924F0A /* EventImportPreviewSheet.swift in Sources */,
@@ -1102,6 +1113,7 @@
 				CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */,
 				CAFE0000000AABB1CCDD0001 /* CalendarServiceTests.swift in Sources */,
 				CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */,
+				CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */,
 				CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */,
 				200000000000000000000021 /* RecordDetailViewModelTests.swift in Sources */,
 				200000000000000000000024 /* SettingsViewModelTests.swift in Sources */,
