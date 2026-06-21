@@ -474,6 +474,7 @@ final class SparkViewModel: ObservableObject {
             TodoCompleteTool(recordManager: recordManager),
             CalendarQueryTool(calendarManager: calendarManager),
             ScheduleCreateTool(calendarManager: calendarManager),
+            ScheduleUpdateTool(calendarManager: calendarManager),
             MemoryManageTool(memoryStore: SparkMemoryStore.live)
         ]
         let registry = AgentToolRegistry(tools: tools)
