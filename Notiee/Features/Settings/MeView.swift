@@ -6,32 +6,68 @@ import Charts
 struct MeView: View {
     let settingsStore: AppSettingsPersisting
     @ObservedObject var store: NotieeStore
+    @ObservedObject private var account = AccountStore.live
+
+    @ViewBuilder private var avatarView: some View {
+        if let img = account.avatarImage {
+            Image(uiImage: img).resizable().scaledToFill()
+        } else {
+            Image(systemName: "person.crop.circle.fill")
+                .resizable().scaledToFit()
+                .foregroundColor(.accentColor)
+        }
+    }
 
     var body: some View {
         List {
             Section {
-                NavigationLink {
-                    LoginView()
-                } label: {
-                    HStack(spacing: 16) {
-                        Image(systemName: "person.crop.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.accentColor)
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("登录您的 TomaGo 账户")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-
-                            Text("开启多端同步与高级功能")
-                                .font(.subheadline)
+                if let profile = account.profile {
+                    NavigationLink {
+                        ProfileEditView()
+                    } label: {
+                        HStack(spacing: 16) {
+                            avatarView
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(AccountStore.greeting())
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                Text(profile.displayName)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Text("编辑个人信息")
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-
-                        Spacer()
+                        .padding(.vertical, 8)
                     }
-                    .padding(.vertical, 8)
+                } else {
+                    NavigationLink {
+                        LoginView()
+                    } label: {
+                        HStack(spacing: 16) {
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .frame(width: 50, height: 50)
+                                .foregroundColor(.accentColor)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("登录您的 TomaGo 账户")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+
+                                Text("开启多端同步与高级功能")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.vertical, 8)
+                    }
                 }
             }
             
