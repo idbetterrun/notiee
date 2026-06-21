@@ -61,6 +61,19 @@ final class CalendarManagerTests: XCTestCase {
         XCTAssertTrue(mgr.isEventIgnored(eventB))
     }
 
+    func testUpdateEvent_customEvent_succeeds() {
+        let event = makeEvent(title: "Old")           // 默认 source .notiee → 进 customEvents
+        let mgr = makeManager(customEvents: [event])
+        let ok = mgr.updateEvent(id: event.id, title: "New", startDate: nil, endDate: nil, notes: nil)
+        XCTAssertTrue(ok)
+        XCTAssertTrue(mgr.allEvents.contains { $0.id == event.id && $0.title == "New" })
+    }
+
+    func testUpdateEvent_unknownID_fails() {
+        let mgr = makeManager()
+        XCTAssertFalse(mgr.updateEvent(id: UUID(), title: "X", startDate: nil, endDate: nil, notes: nil))
+    }
+
     // MARK: - Computed Properties
 
     func testCurrentEventWhenNoEvents() {

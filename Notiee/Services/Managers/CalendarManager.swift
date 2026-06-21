@@ -224,6 +224,20 @@ final class CalendarManager: ObservableObject {
         updateEventsList()
     }
 
+    /// 仅能修改本地 customEvents（.notiee/.ai/.ics）。系统日历事件不在 customEvents，返回 false。
+    @discardableResult
+    func updateEvent(id: UUID, title: String?, startDate: Date?, endDate: Date?, notes: String?) -> Bool {
+        guard let idx = customEvents.firstIndex(where: { $0.id == id }) else { return false }
+        if let title { customEvents[idx].title = title }
+        if let startDate { customEvents[idx].startDate = startDate }
+        if let endDate { customEvents[idx].endDate = endDate }
+        if let notes { customEvents[idx].notes = notes }
+        customEvents[idx].updatedAt = Date()
+        persistCustomEvents()
+        updateEventsList()
+        return true
+    }
+
     func ignoreCalendarEvent(identifier: String, date: Date, future: Bool) {
         if future {
             ignoredCalendarEventKeys.insert("future_\(identifier)")
