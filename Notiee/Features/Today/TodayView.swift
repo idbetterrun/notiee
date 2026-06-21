@@ -80,7 +80,26 @@ struct TodayView: View {
                 }
             }
             .background(Color(.systemGroupedBackground))
-            .toolbar(.hidden, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if let store = viewModel.store {
+                        NavigationLink {
+                            MeView(settingsStore: UserDefaultsAppSettingsStore.live, store: store)
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                        }
+                        .tint(NotieeColors.themed(.blue))
+                    }
+
+                    Button {
+                        showCreateSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .tint(NotieeColors.themed(.blue))
+                }
+            }
             .navigationDestination(for: NoteRecord.self) { record in
                 if let store = viewModel.store {
                     RecordDetailView(viewModel: RecordDetailViewModel(record: record, store: store))
@@ -126,29 +145,6 @@ struct TodayView: View {
             }
 
             Spacer()
-
-            AdaptiveGlassContainer {
-                HStack(spacing: 12) {
-                    if let store = viewModel.store {
-                        NavigationLink {
-                            MeView(settingsStore: UserDefaultsAppSettingsStore.live, store: store)
-                        } label: {
-                            Image(systemName: "person.crop.circle")
-                                .font(.system(size: 26))
-                                .foregroundStyle(NotieeColors.themed(.blue))
-                        }
-                        .glassIconButton()
-                    }
-
-                    Button {
-                        showCreateSheet = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .semibold))
-                    }
-                    .glassIconButton(prominent: true)
-                }
-            }
         }
         .onAppear {
             specialEvents = CalendarService.shared.specialDayEvents(for: viewModel.currentDate)
