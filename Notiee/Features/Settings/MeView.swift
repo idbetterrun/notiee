@@ -124,6 +124,7 @@ struct MeView: View {
             }
         }
         .navigationTitle("我")
+        .toolbar(.hidden, for: .tabBar)
     }
 }
 
