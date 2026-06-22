@@ -22,9 +22,9 @@ struct SettingsMainView: View {
                 }
 
                 Picker("App 启动页", selection: $viewModel.defaultTab) {
-                    Text(AppTab.today.titleKey).tag(AppTab.today)
-                    Text(AppTab.capture.titleKey).tag(AppTab.capture)
-                    Text(AppTab.records.titleKey).tag(AppTab.records)
+                    ForEach(AppTab.launchCandidates) { tab in
+                        Text(tab.titleKey).tag(tab)
+                    }
                 }
                 .onChange(of: viewModel.defaultTab) { _, _ in viewModel.saveDefaultTab() }
                 
