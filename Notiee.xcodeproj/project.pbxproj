@@ -68,6 +68,7 @@
 		200000000000000000000030 /* MockAIProcessingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000030 /* MockAIProcessingServiceTests.swift */; };
 		200000000000000000000035 /* CreateItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000035 /* CreateItemSheet.swift */; };
 		200000000000000000000036 /* ImportScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000036 /* ImportScheduleView.swift */; };
+		215D558942D7F3CFCEE5D1B5 /* SparkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09338A6B409FAB7CB61DE104 /* SparkSettingsView.swift */; };
 		2397324939A5F592DC35ABF2 /* PrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */; };
 		24F2845FDFFF93615EC5CF3B /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B25934CD853078C1F734F /* WelcomeView.swift */; };
 		27D3351E759BC5F0C33BC3D0 /* SparkInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */; };
@@ -121,8 +122,6 @@
 		990000000000000000000004 /* RecordThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000003 /* RecordThumbnailView.swift */; };
 		990000000000000000000006 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000005 /* EventDetailView.swift */; };
 		99000000000000000000000A /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000009 /* AIProvider.swift */; };
-		CAFE0000000B7777C0000001 /* ThinkingCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000B7777C0000002 /* ThinkingCapability.swift */; };
-		CAFE0000000B7777C0000003 /* ThinkingCapabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */; };
 		99000000000000000000000C /* RealAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000B /* RealAIProcessingService.swift */; };
 		99000000000000000000000E /* AIAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000D /* AIAPIClient.swift */; };
 		990000000000000000000010 /* AIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000F /* AIProcessingService.swift */; };
@@ -134,8 +133,6 @@
 		A2A5F3EB64CB3E3FB4C301A9 /* EventCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E0702491A101A08018209F /* EventCardView.swift */; };
 		A9CEE72D36BF5B1299BA225B /* SparkBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0042F63F4A1CFF675CA5D6D /* SparkBackgroundView.swift */; };
 		AABBCCDD1122334455667788 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCCBBAA5544332211770088 /* LoginView.swift */; };
-		CAFE0000000A2001LL000001 /* LocalLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A2001LL000002 /* LocalLoginView.swift */; };
-		CAFE0000000A2001PE000001 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A2001PE000002 /* ProfileEditView.swift */; };
 		AB823531986DF87DD3E5FF9A /* TMNModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49671163B1FF58DA2562FE75 /* TMNModels.swift */; };
 		ADE6F7B445EB85B518614CDC /* SparkAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */; };
 		AF10F688D903E23D7B58B4DE /* AgentToolProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */; };
@@ -155,15 +152,6 @@
 		CAFE000000002222BBBB0001 /* AgentToolErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */; };
 		CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */; };
 		CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */; };
-		CAFE00000006666FFFF0001 /* ScheduleUpdateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */; };
-		CAFE00000006666FFFF0003 /* ScheduleUpdateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */; };
-		CAFE000000SMPRF00000001 /* SparkModelPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */; };
-		CAFE000000SMPRF00000003 /* SparkModelPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */; };
-		CAFE000000074444DDDD0001 /* DateInfoTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000074444DDDD0002 /* DateInfoTool.swift */; };
-		CAFE000000074444DDDD0003 /* DateInfoToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000074444DDDD0004 /* DateInfoToolTests.swift */; };
-		CAFE0000000A1001UP000001 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1001UP000002 /* UserProfile.swift */; };
-		CAFE0000000A1002AS000001 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1002AS000002 /* AccountStore.swift */; };
-		CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1003AT000002 /* AccountStoreTests.swift */; };
 		CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */; };
 		CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */; };
 		CAFE000000005555EEEE0001 /* SparkAgentChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000005555EEEE0002 /* SparkAgentChip.swift */; };
@@ -172,13 +160,27 @@
 		CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */; };
 		CAFE0000000088880001AAAA /* SparkAgentTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */; };
 		CAFE0000000099990001BBBB /* SparkCitationStripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */; };
+		CAFE00000006666FFFF0001 /* ScheduleUpdateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */; };
+		CAFE00000006666FFFF0003 /* ScheduleUpdateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */; };
+		CAFE000000074444DDDD0001 /* DateInfoTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000074444DDDD0002 /* DateInfoTool.swift */; };
+		CAFE000000074444DDDD0003 /* DateInfoToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000074444DDDD0004 /* DateInfoToolTests.swift */; };
+		CAFE0000000A1001UP000001 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1001UP000002 /* UserProfile.swift */; };
+		CAFE0000000A1002AS000001 /* AccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1002AS000002 /* AccountStore.swift */; };
+		CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1003AT000002 /* AccountStoreTests.swift */; };
+		CAFE0000000A2001LL000001 /* LocalLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A2001LL000002 /* LocalLoginView.swift */; };
+		CAFE0000000A2001PE000001 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A2001PE000002 /* ProfileEditView.swift */; };
 		CAFE0000000AABB1CCDD0001 /* CalendarServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */; };
+		CAFE0000000B7777C0000001 /* ThinkingCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000B7777C0000002 /* ThinkingCapability.swift */; };
+		CAFE0000000B7777C0000003 /* ThinkingCapabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */; };
+		CAFE000000SMPRF00000001 /* SparkModelPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */; };
+		CAFE000000SMPRF00000003 /* SparkModelPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */; };
 		CCDDEEFF0011223344556677 /* CourseCalendarSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */; };
 		CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C541D6F62CB3492461A94D /* AboutNotieeView.swift */; };
 		D08E45463E601F6633F4B405 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085D584DC88E0E479852CCCF /* ReviewView.swift */; };
 		D1145EE38C07C212ECDD27B5 /* SettingsMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72552C09CF292FA6C3C36EE /* SettingsMainView.swift */; };
 		D8FC4EF5B5823FE100560D4F /* FolderTagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */; };
 		DB5CEC2D14D92D2B092E3359 /* SparkPrivacySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */; };
+		DC5938125CE22E9F86AB0E58 /* AgentSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE9588D51921FCBFA10E9C7 /* AgentSettingsView.swift */; };
 		DE0C537566909F0A5492B48B /* ICloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */; };
 		DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
 		DFBE0815F70A2516BB7CC745 /* CustomModelsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */; };
@@ -242,6 +244,7 @@
 		00C3C0E8C8898B8DAD12DB4A /* ScenePreset.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScenePreset.swift; sourceTree = "<group>"; };
 		0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkInputBar.swift; path = SparkInputBar.swift; sourceTree = "<group>"; };
 		085D584DC88E0E479852CCCF /* ReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
+		09338A6B409FAB7CB61DE104 /* SparkSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkSettingsView.swift; sourceTree = "<group>"; };
 		0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragments.swift; sourceTree = "<group>"; };
 		0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNImportPreviewSheet.swift; sourceTree = "<group>"; };
 		100000000000000000000001 /* NotieeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeApp.swift; sourceTree = "<group>"; };
@@ -312,6 +315,7 @@
 		480559344177345371C21F7A /* BackupRestoreView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
 		48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryStore.swift; path = SparkHistoryStore.swift; sourceTree = "<group>"; };
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
+		4AE9588D51921FCBFA10E9C7 /* AgentSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentSettingsView.swift; sourceTree = "<group>"; };
 		4C5081ABAC78255979139309 /* AgentTrustManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentTrustManager.swift; sourceTree = "<group>"; };
 		4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigurationView.swift; sourceTree = "<group>"; };
 		54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenSourceAcknowledgmentsView.swift; sourceTree = "<group>"; };
@@ -346,8 +350,6 @@
 		990000000000000000000003 /* RecordThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordThumbnailView.swift; sourceTree = "<group>"; };
 		990000000000000000000005 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		990000000000000000000009 /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvider.swift; sourceTree = "<group>"; };
-		CAFE0000000B7777C0000002 /* ThinkingCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapability.swift; sourceTree = "<group>"; };
-		CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapabilityTests.swift; sourceTree = "<group>"; };
 		99000000000000000000000B /* RealAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealAIProcessingService.swift; sourceTree = "<group>"; };
 		99000000000000000000000D /* AIAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAPIClient.swift; sourceTree = "<group>"; };
 		99000000000000000000000F /* AIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProcessingService.swift; sourceTree = "<group>"; };
@@ -381,15 +383,6 @@
 		CAFE000000002222BBBB0002 /* AgentToolErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolErrorTests.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0002 /* ScheduleCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleCreateTool.swift; sourceTree = "<group>"; };
 		CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCreateToolTests.swift; sourceTree = "<group>"; };
-		CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateTool.swift; sourceTree = "<group>"; };
-		CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateToolTests.swift; sourceTree = "<group>"; };
-		CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModelPreferences.swift; sourceTree = "<group>"; };
-		CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkModelPreferencesTests.swift; sourceTree = "<group>"; };
-		CAFE000000074444DDDD0002 /* DateInfoTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DateInfoTool.swift; sourceTree = "<group>"; };
-		CAFE000000074444DDDD0004 /* DateInfoToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateInfoToolTests.swift; sourceTree = "<group>"; };
-		CAFE0000000A1001UP000002 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
-		CAFE0000000A1002AS000002 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
-		CAFE0000000A1003AT000002 /* AccountStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStoreTests.swift; sourceTree = "<group>"; };
 		CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkIntentDetector.swift; sourceTree = "<group>"; };
 		CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkIntentDetectorTests.swift; sourceTree = "<group>"; };
 		CAFE000000005555EEEE0002 /* SparkAgentChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentChip.swift; sourceTree = "<group>"; };
@@ -398,7 +391,20 @@
 		CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolPresentationTests.swift; sourceTree = "<group>"; };
 		CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentTimelineView.swift; sourceTree = "<group>"; };
 		CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkCitationStripTests.swift; sourceTree = "<group>"; };
+		CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateTool.swift; sourceTree = "<group>"; };
+		CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateToolTests.swift; sourceTree = "<group>"; };
+		CAFE000000074444DDDD0002 /* DateInfoTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DateInfoTool.swift; sourceTree = "<group>"; };
+		CAFE000000074444DDDD0004 /* DateInfoToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateInfoToolTests.swift; sourceTree = "<group>"; };
+		CAFE0000000A1001UP000002 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		CAFE0000000A1002AS000002 /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
+		CAFE0000000A1003AT000002 /* AccountStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStoreTests.swift; sourceTree = "<group>"; };
+		CAFE0000000A2001LL000002 /* LocalLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLoginView.swift; sourceTree = "<group>"; };
+		CAFE0000000A2001PE000002 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
 		CAFE0000000AABB1CCDD0002 /* CalendarServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarServiceTests.swift; sourceTree = "<group>"; };
+		CAFE0000000B7777C0000002 /* ThinkingCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapability.swift; sourceTree = "<group>"; };
+		CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapabilityTests.swift; sourceTree = "<group>"; };
+		CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModelPreferences.swift; sourceTree = "<group>"; };
+		CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkModelPreferencesTests.swift; sourceTree = "<group>"; };
 		D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
 		D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragmentsTests.swift; sourceTree = "<group>"; };
 		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationStore.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
@@ -409,8 +415,6 @@
 		DBE516C2778B82D7C50D438C /* SparkViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkViewModel.swift; path = SparkViewModel.swift; sourceTree = "<group>"; };
 		DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCompleteTool.swift; sourceTree = "<group>"; };
 		DDCCBBAA5544332211770088 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		CAFE0000000A2001LL000002 /* LocalLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalLoginView.swift; sourceTree = "<group>"; };
-		CAFE0000000A2001PE000002 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
 		E07B50625730EE33FF521449 /* SparkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkView.swift; path = SparkView.swift; sourceTree = "<group>"; };
 		E382FAEB20AB862699A7CFFA /* CustomFolderStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolderStore.swift; sourceTree = "<group>"; };
 		E555B84B89970B1E6511440D /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CalendarManager.swift; sourceTree = "<group>"; };
@@ -615,6 +619,8 @@
 				B7E620797C134376A9E304BE /* SparkMemoryView.swift */,
 				1342A65366ED31A59C9A520E /* CalendarSelectionView.swift */,
 				54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */,
+				4AE9588D51921FCBFA10E9C7 /* AgentSettingsView.swift */,
+				09338A6B409FAB7CB61DE104 /* SparkSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1134,6 +1140,8 @@
 				CAFE000000005555EEEE0001 /* SparkAgentChip.swift in Sources */,
 				CAFE000000005555EEEE0011 /* SparkModelChip.swift in Sources */,
 				CAFE0000000088880001AAAA /* SparkAgentTimelineView.swift in Sources */,
+				DC5938125CE22E9F86AB0E58 /* AgentSettingsView.swift in Sources */,
+				215D558942D7F3CFCEE5D1B5 /* SparkSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

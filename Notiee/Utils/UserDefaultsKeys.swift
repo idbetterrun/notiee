@@ -78,7 +78,6 @@ enum UDK {
     static let sparkCurrentConversationId = "spark_current_conversation_id"
 
     // MARK: - Spark Agent
-    static let sparkAgentEnabled = "spark_agent_enabled"
     static let sparkAgentTrustLevel = "spark_agent_trust_level"
     static let sparkAgentMaxIterations = "spark_agent_max_iterations"
     static let sparkAgentMaxToolsPerRound = "spark_agent_max_tools_per_round"
