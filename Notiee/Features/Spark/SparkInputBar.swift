@@ -49,7 +49,6 @@ struct SparkInputBar: View {
                 .frame(width: 34, height: 34)
                 .background(isEmpty && !isLoading ? Color(.systemGray4) : accentColor, in: Circle())
             }
-            .glassIconButton(prominent: !isEmpty || isLoading)
             .disabled(isEmpty && !isLoading)
             .padding(.trailing, 6)
         }
