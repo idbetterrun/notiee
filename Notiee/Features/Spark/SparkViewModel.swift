@@ -517,7 +517,8 @@ final class SparkViewModel: ObservableObject {
             DateInfoTool(),
             ScheduleCreateTool(calendarManager: calendarManager),
             ScheduleUpdateTool(calendarManager: calendarManager),
-            MemoryManageTool(memoryStore: SparkMemoryStore.live)
+            MemoryManageTool(memoryStore: SparkMemoryStore.live),
+            WebFetchTool()
         ]
         let registry = AgentToolRegistry(tools: tools)
         let trustManager = AgentTrustManager(settingsStore: settingsStore)
