@@ -39,23 +39,6 @@ struct SparkView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 6) {
-                        Text(viewModel.currentTitle)
-                            .font(.headline.weight(.semibold))
-                            .foregroundStyle(.primary)
-                        if viewModel.messages.isEmpty {
-                            Text("beta")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 2)
-                                .background(RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.15)))
-                        } else if viewModel.isGeneratingTitle {
-                            ProgressView().scaleEffect(0.6)
-                        }
-                    }
-                }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         viewModel.newConversation()
@@ -103,17 +86,43 @@ struct SparkView: View {
 
     // MARK: - Content (scrolls behind the floating bars)
 
+    private var titleHeader: some View {
+        HStack(spacing: 6) {
+            Text(viewModel.currentTitle)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            if viewModel.messages.isEmpty {
+                Text("beta")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.15)))
+            } else if viewModel.isGeneratingTitle {
+                ProgressView().scaleEffect(0.6)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+    }
+
     @ViewBuilder
     private var contentView: some View {
-        if viewModel.messages.isEmpty {
-            VStack {
-                Spacer()
-                greetingView
-                Spacer()
+        VStack(spacing: 0) {
+            titleHeader
+            if viewModel.messages.isEmpty {
+                VStack {
+                    Spacer()
+                    greetingView
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                chatScrollView
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            chatScrollView
         }
     }
 
