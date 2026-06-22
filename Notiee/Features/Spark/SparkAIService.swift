@@ -51,6 +51,7 @@ protocol SparkAIServing: AnyObject, Sendable {
 final class SparkAIService: SparkAIServing, @unchecked Sendable {
     private let settingsStore: AppSettingsPersisting
     private let memoryStore: SparkMemoryPersisting
+    private let modelPrefs = SparkModelPreferences()
     private let maxRecordsInPrompt = 150
 
     static let memoryTriggerRoundCount = 10
@@ -61,6 +62,18 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     ) {
         self.settingsStore = settingsStore
         self.memoryStore = memoryStore
+    }
+
+    // MARK: - Spark Model / Thinking Resolution
+
+    private func sparkModelAndExtraBody(_ textConfig: AIModelConfiguration) -> (model: String, extra: [String: Any]) {
+        let model = modelPrefs.effectiveModelName(globalModel: textConfig.modelName)
+        var extra: [String: Any] = [:]
+        let cap = ThinkingCapability.forProvider(textConfig.providerType)
+        if let id = modelPrefs.thinkingLevelID, let level = cap.levels.first(where: { $0.id == id }) {
+            cap.apply(level: level, to: &extra)
+        }
+        return (model, extra)
     }
 
     // MARK: - Input Sanitizer
@@ -156,14 +169,16 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         let userPrompt = "用户说：\(question)"
 
         Logger.spark.debug("[ask] calling LLM, protocol=\(String(describing: textConfig.activeProtocol))")
+        let (sparkModel, sparkExtra) = sparkModelAndExtraBody(textConfig)
         let result: (text: String, tokens: Int)
         if textConfig.activeProtocol == .openai {
             result = try await OpenAICaller.callText(
-                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+                endpoint: textConfig.activeEndpoint, model: sparkModel,
+                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt,
+                extraBody: sparkExtra)
         } else {
             result = try await AnthropicCaller.callText(
-                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                endpoint: textConfig.activeEndpoint, model: sparkModel,
                 apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
         }
         Logger.spark.debug("[ask] LLM returned, textLen=\(result.text.count) tokens=\(result.tokens)")
@@ -204,14 +219,16 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         let textConfig = settingsStore.loadConfiguration(for: .text)
         guard textConfig.isComplete else { throw SparkAIError.missingConfiguration }
 
+        let (sparkModel, sparkExtra) = sparkModelAndExtraBody(textConfig)
         let result: (text: String, tokens: Int)
         if textConfig.activeProtocol == .openai {
             result = try await OpenAICaller.callText(
-                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+                endpoint: textConfig.activeEndpoint, model: sparkModel,
+                apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt,
+                extraBody: sparkExtra)
         } else {
             result = try await AnthropicCaller.callText(
-                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                endpoint: textConfig.activeEndpoint, model: sparkModel,
                 apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
         }
         accumulateTokens(result.tokens)
@@ -293,15 +310,17 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
         let userPrompt = "用户说：\(userMessage)\n\nSpark回复（供上下文理解）：\(String(assistantResponse.prefix(200)))"
 
+        let (sparkModel, sparkExtra) = sparkModelAndExtraBody(textConfig)
         do {
             let result: (text: String, tokens: Int)
             if textConfig.activeProtocol == .openai {
                 result = try await OpenAICaller.callText(
-                    endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                    apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+                    endpoint: textConfig.activeEndpoint, model: sparkModel,
+                    apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt,
+                    extraBody: sparkExtra)
             } else {
                 result = try await AnthropicCaller.callText(
-                    endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                    endpoint: textConfig.activeEndpoint, model: sparkModel,
                     apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
             }
             accumulateTokens(result.tokens)
@@ -336,15 +355,17 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
         let userPrompt = "对话记录：\n\(transcript)"
 
+        let (sparkModel, sparkExtra) = sparkModelAndExtraBody(textConfig)
         do {
             let result: (text: String, tokens: Int)
             if textConfig.activeProtocol == .openai {
                 result = try await OpenAICaller.callText(
-                    endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                    apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
+                    endpoint: textConfig.activeEndpoint, model: sparkModel,
+                    apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt,
+                    extraBody: sparkExtra)
             } else {
                 result = try await AnthropicCaller.callText(
-                    endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                    endpoint: textConfig.activeEndpoint, model: sparkModel,
                     apiKey: textConfig.apiKey, systemPrompt: systemPrompt, userPrompt: userPrompt)
             }
             let (_, ops) = extractMemory(from: result.text)
@@ -531,14 +552,16 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         let textConfig = settingsStore.loadConfiguration(for: .text)
         guard textConfig.isComplete else { throw SparkAIError.missingConfiguration }
 
+        let (sparkModel, sparkExtra) = sparkModelAndExtraBody(textConfig)
         let result: (text: String, toolCalls: [[String: Any]], tokens: Int)
         if textConfig.activeProtocol == .openai {
             result = try await OpenAICaller.callAgent(
-                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
-                apiKey: textConfig.apiKey, messages: messages, tools: tools)
+                endpoint: textConfig.activeEndpoint, model: sparkModel,
+                apiKey: textConfig.apiKey, messages: messages, tools: tools,
+                extraBody: sparkExtra)
         } else {
             result = try await AnthropicCaller.callAgent(
-                endpoint: textConfig.activeEndpoint, model: textConfig.modelName,
+                endpoint: textConfig.activeEndpoint, model: sparkModel,
                 apiKey: textConfig.apiKey, messages: messages, tools: tools)
         }
 

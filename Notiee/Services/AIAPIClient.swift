@@ -19,28 +19,30 @@ enum OpenAICaller {
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
 
-    static func callText(endpoint: String, model: String, apiKey: String, systemPrompt: String, userPrompt: String) async throws -> (String, Int) {
+    static func callText(endpoint: String, model: String, apiKey: String, systemPrompt: String, userPrompt: String, extraBody: [String: Any] = [:]) async throws -> (String, Int) {
         var messages: [[String: Any]] = []
         if !systemPrompt.isEmpty {
             messages.append(["role": "system", "content": systemPrompt])
         }
         messages.append(["role": "user", "content": userPrompt])
 
-        let payload: [String: Any] = [
+        var payload: [String: Any] = [
             "model": model,
             "messages": messages,
             "max_tokens": 2000
         ]
-        
+        for (k, v) in extraBody { payload[k] = v }
+
         return try await performRequest(endpoint: endpoint, apiKey: apiKey, payload: payload)
     }
 
-    static func callAgent(endpoint: String, model: String, apiKey: String, messages: [[String: Any]], tools: [[String: Any]]) async throws -> (text: String, toolCalls: [[String: Any]], tokens: Int) {
+    static func callAgent(endpoint: String, model: String, apiKey: String, messages: [[String: Any]], tools: [[String: Any]], extraBody: [String: Any] = [:]) async throws -> (text: String, toolCalls: [[String: Any]], tokens: Int) {
         var payload: [String: Any] = [
             "model": model,
             "messages": messages,
             "max_tokens": 4000
         ]
+        for (k, v) in extraBody { payload[k] = v }
         if !tools.isEmpty {
             payload["tools"] = tools
             payload["tool_choice"] = "auto"
