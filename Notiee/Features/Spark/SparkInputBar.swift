@@ -4,6 +4,7 @@ struct SparkInputBar: View {
     @Binding var text: String
     let isLoading: Bool
     let onSubmit: () -> Void
+    let onStop: () -> Void
     let onFocusChange: (Bool) -> Void
 
     @FocusState private var isFocused: Bool
@@ -33,13 +34,12 @@ struct SparkInputBar: View {
             .opacity(isFocused ? 1 : 0)
             .animation(.easeInOut(duration: 0.15), value: isFocused)
 
-            Button(action: onSubmit) {
+            let isEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            Button(action: { isLoading ? onStop() : onSubmit() }) {
                 Group {
                     if isLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(0.65)
-                            .tint(.white)
+                        Image(systemName: "stop.fill")
+                            .font(.system(size: 14, weight: .semibold))
                     } else {
                         Image(systemName: "arrow.up")
                             .font(.system(size: 15, weight: .semibold))
@@ -47,22 +47,12 @@ struct SparkInputBar: View {
                 }
                 .foregroundStyle(.white)
                 .frame(width: 34, height: 34)
-                .background(
-                    Circle()
-                        .fill(
-                            text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                ? Color(.systemGray4)
-                                : accentColor
-                        )
-                )
+                .background(isEmpty && !isLoading ? Color(.systemGray4) : accentColor, in: Circle())
             }
-            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+            .disabled(isEmpty && !isLoading)
             .padding(.trailing, 6)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 26)
-                .fill(.ultraThinMaterial)
-        )
+        .glassSurface(in: RoundedRectangle(cornerRadius: 26))
         .overlay(
             RoundedRectangle(cornerRadius: 26)
                 .stroke(Color(.separator).opacity(0.12), lineWidth: 0.5)
@@ -79,6 +69,7 @@ struct SparkInputBar: View {
             text: .constant(""),
             isLoading: false,
             onSubmit: {},
+            onStop: {},
             onFocusChange: { _ in }
         )
     }

@@ -99,7 +99,8 @@ struct CaptureView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(viewModel.cameraManager.flashMode == .on ? .black : .white)
                     .frame(width: 32, height: 32)
-                    .background(viewModel.cameraManager.flashMode == .on ? Color.yellow : Color.white.opacity(0.15), in: Circle())
+                    .background(viewModel.cameraManager.flashMode == .on ? Color.yellow : Color.clear, in: Circle())
+                    .glassSurface(in: Circle())
             }
 
             Spacer()
@@ -218,7 +219,7 @@ struct CaptureView: View {
                     .font(.system(size: 16))
                     .foregroundStyle(.black)
                     .frame(width: 32, height: 32)
-                    .background(Color.white, in: Circle())
+                    .glassSurface(in: Circle())
             }
         }
         .padding(.horizontal, 20)
@@ -260,11 +261,8 @@ struct CaptureView: View {
         .font(.system(size: 10))
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(
-            Capsule()
-                .stroke(.white.opacity(0.3), lineWidth: 0.5)
-                .background(Color.black.opacity(0.6))
-        )
+        .glassSurface(in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.3), lineWidth: 0.5))
         .padding(.horizontal, 16)
         .padding(.top, 16)
     }
@@ -372,7 +370,7 @@ struct CaptureView: View {
                         .frame(minWidth: 36)
                         .frame(height: 36)
                         .padding(.horizontal, 8)
-                        .background(Color.black.opacity(0.6), in: Capsule())
+                        .glassSurface(in: Capsule())
                         .overlay(Capsule().stroke(Color.white, lineWidth: 1))
                 }
                 .padding(.bottom, 16)

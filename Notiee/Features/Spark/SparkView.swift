@@ -15,67 +15,65 @@ enum SparkSheet: Identifiable {
 }
 
 struct SparkView: View {
-    @StateObject private var viewModel = SparkViewModel()
+    @StateObject private var viewModel: SparkViewModel
     let store: NotieeStore
     @State private var activeSheet: SparkSheet?
     @FocusState private var isFocused: Bool
 
     init(store: NotieeStore) {
         self.store = store
+        let vm = SparkViewModel(recordManager: store.recordManager, calendarManager: store.calendarManager)
+        _viewModel = StateObject(wrappedValue: vm)
     }
 
     var body: some View {
-        ZStack {
-            SparkBackgroundView(state: viewModel.state, isInputFocused: isFocused, keyboardHeight: 0)
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                SparkBackgroundView(state: viewModel.state, isInputFocused: isFocused, keyboardHeight: 0)
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                headerView
-                    .padding(.top, 8)
-
-                if viewModel.messages.isEmpty {
-                    Spacer()
-                    greetingView
-                    Spacer()
-                } else {
-                    chatScrollView
-                }
-
-                if let warning = viewModel.injectionWarning {
-                    Text(warning)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 4)
-                        .transition(.opacity)
-                }
-
-                if let memText = viewModel.memoryActionText {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 12))
-                        Text(memText)
-                            .font(.caption)
+                contentView
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        bottomBar
                     }
-                    .foregroundStyle(.green)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 4)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 6) {
+                        Text(viewModel.currentTitle)
+                            .font(.headline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .minimumScaleFactor(0.8)
+                        if viewModel.messages.isEmpty {
+                            Text("beta")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.15)))
+                        } else if viewModel.isGeneratingTitle {
+                            ProgressView().scaleEffect(0.6)
+                        }
+                    }
                 }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        viewModel.newConversation()
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                    }
+                    .tint(NotieeColors.themed(.blue))
 
-                SparkInputBar(
-                    text: $viewModel.inputText,
-                    isLoading: viewModel.state == .loading,
-                    onSubmit: { viewModel.sendMessage() },
-                    onFocusChange: { _ in }
-                )
-                .padding(.horizontal, 16)
-
-                Text("内容由AI生成，Notiee不会把拍记内容用于任何模型训练")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 4)
-                    .padding(.bottom, 8)
+                    Button {
+                        activeSheet = .history
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                    .tint(NotieeColors.themed(.blue))
+                }
             }
         }
         .sheet(item: $activeSheet) { sheet in
@@ -106,61 +104,125 @@ struct SparkView: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Content (scrolls behind the floating bars)
 
-    private var headerView: some View {
-        HStack(spacing: 0) {
-            HStack(spacing: 6) {
-                Text(viewModel.currentTitle)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.primary)
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.messages.isEmpty {
+            VStack {
+                Spacer()
+                greetingView
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            chatScrollView
+        }
+    }
 
-                if viewModel.messages.isEmpty {
-                    Text("beta")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.secondary.opacity(0.15))
-                        )
-                } else if viewModel.isGeneratingTitle {
-                    ProgressView()
-                        .scaleEffect(0.6)
+    // MARK: - Bottom Bar (floats; chat scrolls behind it)
+
+    private var thinkingTitle: String {
+        let id = viewModel.lockedThinkingLevelID ?? viewModel.sparkThinkingLevelID
+        if let id, let lvl = viewModel.thinkingLevels.first(where: { $0.id == id }) {
+            return lvl.displayName
+        }
+        return String(localized: "思考强度")
+    }
+
+    private var bottomBar: some View {
+        VStack(spacing: 0) {
+            if let warning = viewModel.injectionWarning {
+                Text(warning)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 4)
+                    .transition(.opacity)
+            }
+
+            if let memText = viewModel.memoryActionText {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 12))
+                    Text(memText)
+                        .font(.caption)
+                }
+                .foregroundStyle(.green)
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            HStack(spacing: 8) {
+                SparkAgentChip(isOn: $viewModel.isAgentModeEnabled)
+
+                if !viewModel.availableModels.isEmpty {
+                    SparkModelChip(
+                        title: viewModel.effectiveModelName,
+                        icon: "cpu",
+                        options: viewModel.availableModels.map { (id: $0, label: $0) },
+                        selectedID: viewModel.effectiveModelName,
+                        onSelect: { viewModel.selectModel($0) }
+                    )
                 }
 
-                Circle()
-                    .fill(viewModel.state == .loading ? Color.orange : Color.green)
-                    .frame(width: 6, height: 6)
-                    .phaseAnimator([1.0, 1.3]) { view, phase in
-                        view.scaleEffect(phase)
-                    } animation: { _ in
-                        .easeInOut(duration: 0.8).repeatForever(autoreverses: true)
+                if !viewModel.thinkingLevels.isEmpty {
+                    if let locked = viewModel.lockedThinkingLevelID {
+                        SparkModelChip(
+                            title: thinkingTitle,
+                            icon: "brain",
+                            options: viewModel.thinkingLevels.filter { $0.id == locked }.map { (id: $0.id, label: $0.displayName) },
+                            selectedID: locked,
+                            onSelect: { _ in }
+                        )
+                        .disabled(true)
+                        .opacity(0.6)
+                    } else {
+                        SparkModelChip(
+                            title: thinkingTitle,
+                            icon: "brain",
+                            options: viewModel.thinkingLevels.map { (id: $0.id, label: $0.displayName) },
+                            selectedID: viewModel.sparkThinkingLevelID,
+                            onSelect: { viewModel.selectThinkingLevel($0) }
+                        )
                     }
-            }
+                }
 
-            Spacer()
-
-            Button {
-                viewModel.newConversation()
-            } label: {
-                Image(systemName: "square.and.pencil")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(NotieeColors.themed(.blue))
+                Spacer()
             }
+            .padding(.leading, 48)
+            .padding(.trailing, 24)
+            .padding(.bottom, 2)
 
-            Button {
-                activeSheet = .history
-            } label: {
-                Image(systemName: "clock.arrow.circlepath")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(NotieeColors.themed(.blue))
-            }
-            .padding(.leading, 16)
+            SparkInputBar(
+                text: $viewModel.inputText,
+                isLoading: viewModel.state == .loading,
+                onSubmit: { viewModel.sendOrRun() },
+                onStop: { viewModel.cancelResponse() },
+                onFocusChange: { _ in }
+            )
+            .padding(.horizontal, 16)
+
+            Text("内容由AI生成，Notiee不会把拍记内容用于任何模型训练")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .padding(.top, 4)
+                .padding(.bottom, 8)
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
+        .background {
+            // 内容向底部渐隐成磨砂，保证免责声明/输入区可读，同时上方仍通透
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .mask {
+                    LinearGradient(
+                        colors: [.clear, .black, .black],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+                .ignoresSafeArea(edges: .bottom)
+        }
     }
 
     // MARK: - Greeting
@@ -216,6 +278,35 @@ struct SparkView: View {
                             }
                         )
                         .id(message.id)
+
+                        if viewModel.agentSuggestionMessageID == message.id {
+                            HStack {
+                                Button {
+                                    viewModel.acceptAgentSuggestion()
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "bolt.fill")
+                                        Text("用 Agent 模式重试")
+                                    }
+                                    .font(.caption.weight(.medium))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 7)
+                                    .glassSurface(in: RoundedRectangle(cornerRadius: 14))
+                                    .foregroundStyle(Color.purple)
+                                }
+                                .buttonStyle(.plain)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .transition(.opacity)
+                        }
+                    }
+
+                    if viewModel.state == .loading && (viewModel.currentToolName != nil || !viewModel.agentActions.isEmpty) {
+                        SparkAgentTimelineView(
+                            actions: viewModel.agentActions,
+                            runningToolName: viewModel.currentToolName
+                        )
                     }
                 }
                 .padding(.horizontal, 16)

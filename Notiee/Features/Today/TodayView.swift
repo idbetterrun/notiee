@@ -9,6 +9,7 @@ struct TodayView: View {
     @State private var selectedEvent: ScheduledEvent?
     @State private var specialEvents: [SpecialDayEvent] = []
     @State private var showCreateSheet = false
+    @ObservedObject private var account = AccountStore.live
 
     @MainActor
     init() {
@@ -32,7 +33,7 @@ struct TodayView: View {
                     // MARK: - Header
                     header
                         .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        .padding(.top, 8)
                         .padding(.bottom, 20)
 
                     // MARK: - Timeline
@@ -127,22 +128,34 @@ struct TodayView: View {
 
             Spacer()
 
-            if let store = viewModel.store {
-                NavigationLink {
-                    MeView(settingsStore: UserDefaultsAppSettingsStore.live, store: store)
-                } label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: 30))
-                        .foregroundStyle(NotieeColors.themed(.blue))
+            HStack(spacing: 12) {
+                if let store = viewModel.store {
+                    NavigationLink {
+                        MeView(settingsStore: UserDefaultsAppSettingsStore.live, store: store)
+                    } label: {
+                        Group {
+                            if let img = account.avatarImage {
+                                Image(uiImage: img).resizable().scaledToFill()
+                            } else {
+                                Image(systemName: "person.crop.circle")
+                                    .resizable().scaledToFit()
+                                    .foregroundStyle(NotieeColors.themed(.blue))
+                            }
+                        }
+                        .frame(width: 32, height: 32)
+                        .clipShape(Circle())
+                    }
+                    .glassIconButton()
                 }
-            }
 
-            Button {
-                showCreateSheet = true
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 30))
-                    .foregroundStyle(NotieeColors.themed(.blue))
+                Button {
+                    showCreateSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 32, height: 32)
+                }
+                .glassIconButton(prominent: true)
             }
         }
         .onAppear {

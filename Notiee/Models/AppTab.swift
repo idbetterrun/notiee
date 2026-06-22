@@ -40,6 +40,7 @@ enum AppTab: String, CaseIterable, Codable, Identifiable, Sendable {
     static let launchCandidates: [AppTab] = [
         .today,
         .capture,
-        .records
+        .records,
+        .spark
     ]
 }

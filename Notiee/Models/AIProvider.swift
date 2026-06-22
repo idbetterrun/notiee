@@ -65,13 +65,15 @@ enum AIProviderType: String, Codable, Sendable, CaseIterable, Identifiable {
     var predefinedModels: [String] {
         switch self {
         case .qwenText:
-            return ["qwen-plus", "qwen-turbo", "qwen-max"]
+            return ["qwen3.5-plus", "qwen-plus", "qwen-max", "qwen-flash"]
         case .qwenVision:
             return ["qwen-vl-plus", "qwen-vl-max"]
         case .deepseek:
-            return ["deepseek-chat"]
+            return ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-chat", "deepseek-reasoner"]
         case .minimax:
-            return ["abab6.5s-chat"]
+            return ["MiniMax-M3", "MiniMax-M2.7"]
+        case .doubaoText:
+            return ["doubao-seed-2-0-pro", "doubao-seed-2-0-lite", "doubao-seed-2-0-mini"]
         default:
             return []
         }

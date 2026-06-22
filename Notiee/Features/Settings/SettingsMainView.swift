@@ -22,9 +22,9 @@ struct SettingsMainView: View {
                 }
 
                 Picker("App 启动页", selection: $viewModel.defaultTab) {
-                    Text(AppTab.today.titleKey).tag(AppTab.today)
-                    Text(AppTab.capture.titleKey).tag(AppTab.capture)
-                    Text(AppTab.records.titleKey).tag(AppTab.records)
+                    ForEach(AppTab.launchCandidates) { tab in
+                        Text(tab.titleKey).tag(tab)
+                    }
                 }
                 .onChange(of: viewModel.defaultTab) { _, _ in viewModel.saveDefaultTab() }
                 
@@ -64,16 +64,10 @@ struct SettingsMainView: View {
 
             Section("大模型") {
                 Toggle("启用大模型处理功能", isOn: $viewModel.aiEnabled)
-                
+
                 if viewModel.aiEnabled {
-                    NavigationLink {
-                        AIFeatureSettingsView(viewModel: viewModel)
-                    } label: {
-                        Label("大模型功能", systemImage: "gearshape.2")
-                    }
-                    
                     Toggle("拍记完后立即分析", isOn: $viewModel.autoProcessAfterCapture)
-                    
+
                     NavigationLink {
                         AIConfigurationView(viewModel: viewModel, kind: .text)
                     } label: {
@@ -95,17 +89,17 @@ struct SettingsMainView: View {
                     }
 
                     NavigationLink {
-                        SparkStyleSettingsView()
+                        SparkSettingsView(viewModel: viewModel)
                     } label: {
-                        Label("Spark聊天风格", systemImage: "theatermasks")
+                        Label("Spark", systemImage: "sparkles")
                     }
 
                     NavigationLink {
-                        SparkMemoryView()
+                        AIFeatureSettingsView(viewModel: viewModel)
                     } label: {
-                        Label("记忆", systemImage: "brain.head.profile")
+                        Label("大模型功能", systemImage: "gearshape.2")
                     }
-                    
+
                     Button("测试双端连接") {
                         viewModel.testConnection(for: .text)
                         viewModel.testConnection(for: .vision)
@@ -122,7 +116,7 @@ struct SettingsMainView: View {
                             ConnectionStatusView(status: viewModel.visionConnectionTestStatus)
                         }
                     }
-                    
+
                     DisclosureGroup("官方帮助文档") {
                         Link("阿里云百炼文档", destination: URL(string: "https://help.aliyun.com/zh/model-studio/")!)
                         Link("火山引擎文档", destination: URL(string: "https://www.volcengine.com/docs/82379/1399009")!)
@@ -132,9 +126,6 @@ struct SettingsMainView: View {
                 }
             }
             .onChange(of: viewModel.aiEnabled) { _, _ in viewModel.saveAll() }
-            .onChange(of: viewModel.aiEnableSummary) { _, _ in viewModel.saveAll() }
-            .onChange(of: viewModel.aiEnableDetailedContent) { _, _ in viewModel.saveAll() }
-            .onChange(of: viewModel.aiEnableTodos) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.autoProcessAfterCapture) { _, _ in viewModel.saveAll() }
             
             Section("通知") {

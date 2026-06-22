@@ -37,6 +37,11 @@ final class SettingsViewModel: ObservableObject {
     @Published var notificationAdvanceTime: Int
     @Published var tokenWarningThreshold: Int
     
+    // Spark Agent
+    @Published var agentTrustLevel: String
+    @Published var agentMaxIterations: Int
+    @Published var agentMaxToolsPerRound: Int
+    
     // Calendar Selection
     @Published var availableCalendars: [EKCalendar] = []
     @Published var selectedCalendarIDs: Set<String> = []
@@ -74,6 +79,10 @@ final class SettingsViewModel: ObservableObject {
         liveActivityEnabled = settingsStore.loadBool(forKey: UDK.liveActivityEnabled, defaultValue: false)
         notificationAdvanceTime = settingsStore.loadInt(forKey: UDK.notificationAdvanceTime, defaultValue: 5)
         tokenWarningThreshold = settingsStore.loadInt(forKey: UDK.tokenWarningThreshold, defaultValue: 0)
+        
+        agentTrustLevel = settingsStore.loadString(forKey: UDK.sparkAgentTrustLevel, defaultValue: "standard")
+        agentMaxIterations = settingsStore.loadInt(forKey: UDK.sparkAgentMaxIterations, defaultValue: 5)
+        agentMaxToolsPerRound = settingsStore.loadInt(forKey: UDK.sparkAgentMaxToolsPerRound, defaultValue: 3)
         
         customModels = settingsStore.loadCustomModels()
         loadCalendarSelection()
@@ -125,6 +134,10 @@ final class SettingsViewModel: ObservableObject {
         NotificationCenter.default.post(name: NSNotification.Name("LiveActivitySettingsChanged"), object: nil)
         settingsStore.saveInt(notificationAdvanceTime, forKey: UDK.notificationAdvanceTime)
         settingsStore.saveInt(tokenWarningThreshold, forKey: UDK.tokenWarningThreshold)
+        
+        settingsStore.saveString(agentTrustLevel, forKey: UDK.sparkAgentTrustLevel)
+        settingsStore.saveInt(agentMaxIterations, forKey: UDK.sparkAgentMaxIterations)
+        settingsStore.saveInt(agentMaxToolsPerRound, forKey: UDK.sparkAgentMaxToolsPerRound)
         
         settingsStore.saveCustomModels(customModels)
         

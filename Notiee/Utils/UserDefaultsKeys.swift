@@ -77,6 +77,16 @@ enum UDK {
     static let sparkLastMemoryCompressionRounds = "spark_last_memory_compression_rounds"
     static let sparkCurrentConversationId = "spark_current_conversation_id"
 
+    // MARK: - Spark Agent
+    static let sparkAgentTrustLevel = "spark_agent_trust_level"
+    static let sparkAgentMaxIterations = "spark_agent_max_iterations"
+    static let sparkAgentMaxToolsPerRound = "spark_agent_max_tools_per_round"
+    static let sparkAgentUndoTTLMinutes = "spark_agent_undo_ttl_minutes"
+    static let sparkAgentHistoryRetentionDays = "spark_agent_history_retention_days"
+    static let sparkAgentTokenWarning = "spark_agent_token_warning"
+    static let sparkModelOverride = "spark_model_override"
+    static let sparkThinkingLevel = "spark_thinking_level"
+
     // MARK: - Lab Features
     static let labMarkdownRenderingEnabled = "labMarkdownRenderingEnabled"
     static let labFullVisionModeEnabled = "labFullVisionModeEnabled"

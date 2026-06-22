@@ -13,10 +13,57 @@ final class SparkViewModel: ObservableObject {
     @Published var isGeneratingTitle: Bool = false
     @Published var injectionWarning: String?
     @Published var memoryActionText: String?
+    @Published var isAgentModeEnabled: Bool = false
+    @Published var currentToolName: String?
+    @Published var agentActions: [AgentAction] = []
+    @Published var agentSuggestionMessageID: UUID?
+    private var lastUserQuestion: String = ""
+    private var currentResponseTask: Task<Void, Never>?
+
+    private let modelPrefs = SparkModelPreferences()
+    @Published var sparkModelOverride: String = SparkModelPreferences().modelOverride
+    @Published var sparkThinkingLevelID: String? = SparkModelPreferences().thinkingLevelID
+
+    private var textConfigForSpark: AIModelConfiguration {
+        settingsStore.loadConfiguration(for: .text)
+    }
+    var availableModels: [String] {
+        let cfg = textConfigForSpark
+        return cfg.providerType == .custom ? [cfg.modelName].filter { !$0.isEmpty } : cfg.providerType.predefinedModels
+    }
+    var effectiveModelName: String {
+        modelPrefs.effectiveModelName(globalModel: textConfigForSpark.modelName)
+    }
+    var thinkingLevels: [ThinkingLevel] {
+        ThinkingCapability.forProvider(textConfigForSpark.providerType).levels
+    }
+    func selectModel(_ name: String) {
+        modelPrefs.setModelOverride(name)
+        sparkModelOverride = modelPrefs.modelOverride
+        if let forced = ModelThinkingPolicy.forcedThinkingLevelID(
+            provider: textConfigForSpark.providerType, model: effectiveModelName) {
+            modelPrefs.setThinkingLevelID(forced)
+            sparkThinkingLevelID = forced
+        }
+    }
+
+    var lockedThinkingLevelID: String? {
+        ModelThinkingPolicy.forcedThinkingLevelID(
+            provider: textConfigForSpark.providerType, model: effectiveModelName)
+    }
+    var isThinkingLocked: Bool { lockedThinkingLevelID != nil }
+
+    func selectThinkingLevel(_ id: String) {
+        guard !isThinkingLocked else { return }
+        modelPrefs.setThinkingLevelID(id)
+        sparkThinkingLevelID = id
+    }
 
     let aiService: any SparkAIServing
     let repository: any SparkConversationCoordinating
     let settingsStore: AppSettingsPersisting
+    let recordManager: RecordManager?
+    let calendarManager: CalendarManager?
 
     var recordsProvider: (() -> [NoteRecord])?
     private var loadedFromHistoryID: UUID?
@@ -27,11 +74,15 @@ final class SparkViewModel: ObservableObject {
     init(
         aiService: any SparkAIServing = SparkAIService(),
         repository: any SparkConversationCoordinating = SparkConversationRepository.live,
-        settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live
+        settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
+        recordManager: RecordManager? = nil,
+        calendarManager: CalendarManager? = nil
     ) {
         self.aiService = aiService
         self.repository = repository
         self.settingsStore = settingsStore
+        self.recordManager = recordManager
+        self.calendarManager = calendarManager
         checkPrivacyNotice()
         loadGreeting()
         restoreCurrentConversationIfNeeded()
@@ -101,7 +152,18 @@ final class SparkViewModel: ObservableObject {
         inputText = ""; state = .loading
         let userMsg = ChatMessage(role: .user, content: t)
         messages.append(userMsg)
-        Task { await processQuestion(t, userMsg) }
+        currentResponseTask = Task { await processQuestion(t, userMsg) }
+    }
+
+    func cancelResponse() {
+        currentResponseTask?.cancel()
+        currentResponseTask = nil
+        if let last = messages.last, last.role == .assistant, last.content.isEmpty {
+            messages.removeLast()
+        }
+        currentToolName = nil
+        state = messages.isEmpty ? .idle : .loaded
+        saveCurrentDraft()
     }
 
     func sendQuestion(_ q: String) { inputText = q; sendMessage() }
@@ -120,15 +182,17 @@ final class SparkViewModel: ObservableObject {
         do {
             let allRecs = recordsProvider?() ?? []
             let recentRounds = buildRecentRounds()
+            let upcoming = calendarManager?.allEvents ?? []
 
             let (full, tokens) = try await withCheckedThrowingContinuation { cont in
                 let service = aiService
                 let recs = allRecs
                 let rounds = recentRounds
                 let question = q
+                let events = upcoming
                 Task.detached {
                     do {
-                        let result = try await service.ask(question: question, with: recs, recentRounds: rounds)
+                        let result = try await service.ask(question: question, with: recs, recentRounds: rounds, upcomingEvents: events)
                         cont.resume(returning: result)
                     } catch {
                         cont.resume(throwing: error)
@@ -151,14 +215,25 @@ final class SparkViewModel: ObservableObject {
                     let r = all[idx]
                     return Citation(recordID: r.id, title: r.title, capturedAt: r.capturedAt)
                 }
-                return (clean, ops, cits)
+                // Strip inline [来源N] markers AFTER extraction so citations are still parsed correctly.
+                let cleanStripped = SparkAIService.stripCitationMarkers(clean)
+                return (cleanStripped, ops, cits)
             }.value
+
+            if Task.isCancelled { return }
 
             // Update UI
             if let idx = messages.firstIndex(where: { $0.id == aid }) {
                 messages[idx] = ChatMessage(id: aid, role: .assistant, content: clean, citations: cits)
             }
             state = .loaded
+
+            if !isAgentModeEnabled, SparkIntentDetector.looksLikeActionRequest(q) {
+                agentSuggestionMessageID = aid
+                lastUserQuestion = q
+            } else {
+                agentSuggestionMessageID = nil
+            }
 
             // Memory operations
             let ms = SparkMemoryStore.live
@@ -280,7 +355,7 @@ final class SparkViewModel: ObservableObject {
         "通义", "千问", "文心", "一言", "智谱", "豆包", "星火",
     ]
 
-    private static let titleTriggerRoundCount = 3
+    private static let titleTriggerRoundCount = 1
 
     private func generateAndSyncTitle() async {
         guard !titleGenerated else { return }
@@ -330,7 +405,11 @@ final class SparkViewModel: ObservableObject {
     }
 
     private func fallbackTitle(from firstMessage: String) {
-        let t = String(firstMessage.trimmingCharacters(in: .whitespacesAndNewlines).prefix(15))
+        let trimmed = firstMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        // 取首句（到第一个句末标点），再限长，避免裸裁产生碎片
+        let firstSentence = trimmed.components(separatedBy: CharacterSet(charactersIn: "。！？.!?\n"))
+            .first?.trimmingCharacters(in: .whitespaces) ?? trimmed
+        let t = String(firstSentence.prefix(20))
         currentTitle = t.isEmpty ? String(localized: "新对话") : t
     }
 
@@ -384,6 +463,106 @@ final class SparkViewModel: ObservableObject {
     func deleteConversations(_ ids: Set<UUID>) {
         Task.detached(priority: .utility) { [repository] in
             try? repository.deleteFromHistory(ids)
+        }
+    }
+
+    // MARK: - Agent Mode
+
+    func acceptAgentSuggestion() {
+        let q = lastUserQuestion
+        agentSuggestionMessageID = nil
+        isAgentModeEnabled = true
+        guard !q.isEmpty else { return }
+        inputText = q
+        runAgent()
+    }
+
+    func sendOrRun() {
+        if isAgentModeEnabled {
+            runAgent()
+        } else {
+            sendMessage()
+        }
+    }
+
+    func runAgent() {
+        let t = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty, state != .loading else { return }
+
+        if SparkAIService.containsInjectionPattern(t) {
+            injectionWarning = String(localized: "输入包含不安全的指令，请修改后重试")
+            return
+        }
+        injectionWarning = nil
+
+        inputText = ""; state = .loading
+        let userMsg = ChatMessage(role: .user, content: t)
+        messages.append(userMsg)
+        agentActions = []
+
+        currentResponseTask = Task { await executeAgentPipeline(t) }
+    }
+
+    private func makeAgentExecutor() -> AgentExecutor? {
+        guard let recordManager, let calendarManager else { return nil }
+        let tools: [any AgentTool] = [
+            NoteSearchTool(recordManager: recordManager),
+            NoteGetDetailTool(recordManager: recordManager),
+            NoteCreateTool(recordManager: recordManager),
+            NoteUpdateTool(recordManager: recordManager),
+            TodoListTool(recordManager: recordManager),
+            TodoCreateTool(recordManager: recordManager),
+            TodoCompleteTool(recordManager: recordManager),
+            CalendarQueryTool(calendarManager: calendarManager),
+            DateInfoTool(),
+            ScheduleCreateTool(calendarManager: calendarManager),
+            ScheduleUpdateTool(calendarManager: calendarManager),
+            MemoryManageTool(memoryStore: SparkMemoryStore.live),
+            WebFetchTool()
+        ]
+        let registry = AgentToolRegistry(tools: tools)
+        let trustManager = AgentTrustManager(settingsStore: settingsStore)
+        let actionStore = AgentActionStore()
+        return AgentExecutor(aiService: aiService, toolRegistry: registry, actionStore: actionStore, trustManager: trustManager)
+    }
+
+    private func executeAgentPipeline(_ question: String) async {
+        guard NetworkMonitor.shared.isConnected else {
+            messages.append(ChatMessage(role: .assistant, content: String(localized: "网络不可用，无法进行 AI 问答。")))
+            state = .offline; saveCurrentDraft(); return
+        }
+
+        guard let executor = makeAgentExecutor() else {
+            messages.append(ChatMessage(role: .assistant, content: "Agent 模式需要完整的数据访问权限，请检查设置。"))
+            state = .error("Agent initialization failed"); saveCurrentDraft(); return
+        }
+
+        do {
+            let (text, _, _) = try await executor.run(
+                userMessage: question,
+                conversationHistory: messages,
+                onToolCallStart: { [weak self] toolName in
+                    Task { @MainActor in self?.currentToolName = toolName }
+                },
+                onToolCallEnd: { [weak self] action in
+                    Task { @MainActor in self?.agentActions.append(action) }
+                }
+            )
+
+            if Task.isCancelled { return }
+
+            messages.append(ChatMessage(role: .assistant, content: text))
+            state = .loaded
+            saveCurrentDraft()
+            Task {
+                await generateAndSyncTitle()
+                saveToHistory()
+            }
+
+        } catch {
+            messages.append(ChatMessage(role: .assistant, content: "Agent 执行出错：\(error.localizedDescription)"))
+            state = .error(error.localizedDescription)
+            saveCurrentDraft()
         }
     }
 }

@@ -46,6 +46,13 @@ struct SparkPrivacySheet: View {
                     title: String(localized: "不用于训练"),
                     detail: String(localized: "你的拍记内容不会用于任何模型训练或分享给第三方。")
                 )
+
+                privacyItem(
+                    icon: "globe",
+                    color: Color(red: 0.6, green: 0.4, blue: 0.9),
+                    title: String(localized: "网页抓取（Agent 模式）"),
+                    detail: String(localized: "开启 Agent 模式时，若你提供网页链接，Spark 可能会访问该网页以读取内容，相关请求会发送到对应的第三方网站。")
+                )
             }
             .padding(.horizontal, 24)
 
