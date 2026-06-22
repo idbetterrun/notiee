@@ -27,6 +27,8 @@ struct AgentToolPresentation {
             return .init(icon: "calendar.badge.plus", displayName: "创建日程", runningText: "正在创建日程…")
         case "schedule_update":
             return .init(icon: "calendar.badge.clock", displayName: "修改日程", runningText: "正在修改日程…")
+        case "date_info":
+            return .init(icon: "calendar", displayName: "查日期", runningText: "正在查日期…")
         case "memory_get":
             return .init(icon: "brain", displayName: "查看记忆", runningText: "正在查看记忆…")
         default:

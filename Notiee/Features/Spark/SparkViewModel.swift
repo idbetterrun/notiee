@@ -473,6 +473,7 @@ final class SparkViewModel: ObservableObject {
             TodoCreateTool(recordManager: recordManager),
             TodoCompleteTool(recordManager: recordManager),
             CalendarQueryTool(calendarManager: calendarManager),
+            DateInfoTool(),
             ScheduleCreateTool(calendarManager: calendarManager),
             ScheduleUpdateTool(calendarManager: calendarManager),
             MemoryManageTool(memoryStore: SparkMemoryStore.live)
