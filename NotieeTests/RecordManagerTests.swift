@@ -7,7 +7,8 @@ final class RecordManagerTests: XCTestCase {
     // MARK: - capturePhoto
 
     func testCapturePhotoStoresRecordAndPersists() throws {
-        let store = makeStore()
+        let persistence = recordStore()
+        let store = makeStore(store: persistence)
         let record = store.capturePhoto(
             localImagePaths: ["test-photo"],
             eventID: UUID(),
@@ -17,7 +18,7 @@ final class RecordManagerTests: XCTestCase {
 
         XCTAssertEqual(store.records, [record])
         XCTAssertEqual(record.title, "测试课程 拍记")
-        XCTAssertEqual(try recordStore().loadRecords(), [record])
+        XCTAssertEqual(try persistence.loadRecords(), [record])
         XCTAssertNil(store.lastPersistenceError)
     }
 
