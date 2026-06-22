@@ -51,12 +51,15 @@ final class AccountStoreTests: XCTestCase {
             let d = Calendar(identifier: .gregorian).date(from: c)!
             return AccountStore.greeting(at: d, calendar: Calendar(identifier: .gregorian))
         }
-        XCTAssertEqual(g(2), "凌晨好")
-        XCTAssertEqual(g(6), "早上好")
-        XCTAssertEqual(g(9), "上午好")
-        XCTAssertEqual(g(12), "中午好")
-        XCTAssertEqual(g(15), "下午好")
-        XCTAssertEqual(g(20), "晚上好")
-        XCTAssertEqual(g(23), "深夜好")
+        // greeting() returns a localized string (Text(greeting()) won't auto-localize a
+        // runtime String), so assert against the localized form of each expected key. This
+        // verifies the hour→bucket mapping independent of the test host's active language.
+        XCTAssertEqual(g(2), String(localized: "凌晨好"))
+        XCTAssertEqual(g(6), String(localized: "早上好"))
+        XCTAssertEqual(g(9), String(localized: "上午好"))
+        XCTAssertEqual(g(12), String(localized: "中午好"))
+        XCTAssertEqual(g(15), String(localized: "下午好"))
+        XCTAssertEqual(g(20), String(localized: "晚上好"))
+        XCTAssertEqual(g(23), String(localized: "深夜好"))
     }
 }
