@@ -36,7 +36,7 @@ struct AgentToolCall: Sendable {
 // MARK: - AI Service Protocol
 
 protocol SparkAIServing: AnyObject, Sendable {
-    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound]) async throws -> (text: String, tokens: Int)
+    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int)
     func accumulatePublic(_ tokens: Int)
     func extractMemory(from text: String) -> (cleanText: String, ops: SparkAIService.MemoryOperations)
     func extractCitations(from text: String, recordCount: Int) -> [Int]
@@ -55,6 +55,35 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     private let maxRecordsInPrompt = 150
 
     static let memoryTriggerRoundCount = 10
+
+    /// Read-only schedule window (in days) injected into the non-agent prompt.
+    static let scheduleWindowDays = 7
+
+    /// Builds a compact, read-only upcoming-schedule block for the non-agent prompt.
+    /// Includes events with `startDate` in `[now, now + windowDays)`, ascending, capped at `cap`.
+    nonisolated static func upcomingScheduleBlock(
+        events: [ScheduledEvent], now: Date, calendar: Calendar,
+        windowDays: Int = 7, cap: Int = 20
+    ) -> String {
+        let end = calendar.date(byAdding: .day, value: windowDays, to: now) ?? now
+        let upcoming = events
+            .filter { $0.startDate >= now && $0.startDate < end }
+            .sorted { $0.startDate < $1.startDate }
+            .prefix(cap)
+
+        guard !upcoming.isEmpty else {
+            return "（未来 \(windowDays) 天没有日程）"
+        }
+
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.dateFormat = "MM-dd HH:mm"
+        let lines = upcoming.map { e -> String in
+            let when = e.isAllDay ? "\(df.string(from: e.startDate).prefix(5))（全天）" : df.string(from: e.startDate)
+            return "  - \(when) \(e.title)"
+        }
+        return lines.joined(separator: "\n")
+    }
 
     init(
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
@@ -153,7 +182,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - Chat (returns full response text)
 
-    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound]) async throws -> (text: String, tokens: Int) {
+    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
         Logger.spark.debug("[ask] START")
         let textConfig = settingsStore.loadConfiguration(for: .text)
         guard textConfig.isComplete else {
@@ -166,7 +195,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
             .prefix(maxRecordsInPrompt)
 
         Logger.spark.debug("[ask] building systemPrompt, recs=\(activeRecords.count) rounds=\(recentRounds.count)")
-        let systemPrompt = buildSystemPrompt(records: Array(activeRecords), recentRounds: recentRounds)
+        let systemPrompt = buildSystemPrompt(records: Array(activeRecords), recentRounds: recentRounds, upcomingEvents: upcomingEvents)
         Logger.spark.debug("[ask] systemPrompt built, len=\(systemPrompt.count)")
         let userPrompt = "用户说：\(question)"
 
@@ -417,7 +446,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - System Prompt Builder
 
-    private func buildSystemPrompt(records: [NoteRecord], recentRounds: [ConversationRound]) -> String {
+    private func buildSystemPrompt(records: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) -> String {
         Logger.spark.debug("[buildSystemPrompt] loading memory...")
         let mem = (try? memoryStore.load()) ?? [:]
         Logger.spark.debug("[buildSystemPrompt] memory loaded, count=\(mem.count)")
@@ -459,6 +488,8 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         } else {
             styleText = "\n\n## 回复风格要求\n\(customStyle)\n\n请严格遵循上述风格进行回复。"
         }
+
+        let scheduleBlock = Self.upcomingScheduleBlock(events: upcomingEvents, now: now, calendar: .current, windowDays: Self.scheduleWindowDays)
 
         return """
         ## 身份
@@ -535,6 +566,11 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
         ## 当前拍记（共 \(records.count) 条）
         \(recordBlock)
+
+        ## 近期日程 (未来\(Self.scheduleWindowDays)天，只读)
+        \(scheduleBlock)
+
+        \(SparkPromptFragments.nonAgentScheduleRule)
         \(styleText)
         """
     }

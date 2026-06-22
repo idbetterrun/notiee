@@ -182,15 +182,17 @@ final class SparkViewModel: ObservableObject {
         do {
             let allRecs = recordsProvider?() ?? []
             let recentRounds = buildRecentRounds()
+            let upcoming = calendarManager?.allEvents ?? []
 
             let (full, tokens) = try await withCheckedThrowingContinuation { cont in
                 let service = aiService
                 let recs = allRecs
                 let rounds = recentRounds
                 let question = q
+                let events = upcoming
                 Task.detached {
                     do {
-                        let result = try await service.ask(question: question, with: recs, recentRounds: rounds)
+                        let result = try await service.ask(question: question, with: recs, recentRounds: rounds, upcomingEvents: events)
                         cont.resume(returning: result)
                     } catch {
                         cont.resume(throwing: error)

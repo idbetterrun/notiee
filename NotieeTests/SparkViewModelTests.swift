@@ -8,7 +8,7 @@ private final class MockAIService: SparkAIServing {
     var responseTokens = 42
     var askCallCount = 0
 
-    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound]) async throws -> (text: String, tokens: Int) {
+    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
         askCallCount += 1
         return (responseText, responseTokens)
     }

@@ -13,6 +13,15 @@ enum SparkPromptFragments {
     - 示例：用户「What's on my schedule today」→ 回复「You have a meeting at 3 PM.」✓，「你今天有个会议」✗
     """
 
+    /// 非 Agent 模式下的日程能力边界说明。
+    static let nonAgentScheduleRule = """
+    ## 日程能力边界
+    - 你可以查看「近期日程」区块中列出的安排（仅未来约一周），可据此回答用户的查询。
+    - 你只能「查看」日程，不能创建或修改日程。如果用户想新增/更改/删除日程，请如实说明需要打开 Agent 模式才能操作。
+    - 如果用户询问的时间超出近期日程区块的范围（例如更久以后），请诚实说明你目前只能看到未来约一周的安排，并建议用户缩小时间范围或打开 Agent 模式查询。
+    - 绝不虚构未在「近期日程」区块中出现的事件。
+    """
+
     /// Agent 模式系统提示词。
     static func agentSystemPrompt(now: Date) -> String {
         """
