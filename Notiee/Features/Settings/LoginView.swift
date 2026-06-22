@@ -3,6 +3,7 @@ import SwiftUI
 struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject private var account = AccountStore.live
     @State private var hasAgreed = false
     @State private var isLoggingIn = false
     @State private var showTimeoutAlert = false
@@ -93,6 +94,11 @@ struct LoginView: View {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
                 appear = true
             }
+        }
+        // 本地登录成功后，LocalLoginView 先 dismiss 自身回到本页，本页再 dismiss 自身，
+        // 两级 push 依次弹出，最终回到「我」页面。两处各自 dismiss 自身，是 NavigationStack 的标准用法。
+        .onChange(of: account.isLoggedIn) { _, loggedIn in
+            if loggedIn { dismiss() }
         }
     }
 
