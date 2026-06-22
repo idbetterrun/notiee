@@ -40,8 +40,21 @@ final class SparkViewModel: ObservableObject {
     func selectModel(_ name: String) {
         modelPrefs.setModelOverride(name)
         sparkModelOverride = modelPrefs.modelOverride
+        if let forced = ModelThinkingPolicy.forcedThinkingLevelID(
+            provider: textConfigForSpark.providerType, model: effectiveModelName) {
+            modelPrefs.setThinkingLevelID(forced)
+            sparkThinkingLevelID = forced
+        }
     }
+
+    var lockedThinkingLevelID: String? {
+        ModelThinkingPolicy.forcedThinkingLevelID(
+            provider: textConfigForSpark.providerType, model: effectiveModelName)
+    }
+    var isThinkingLocked: Bool { lockedThinkingLevelID != nil }
+
     func selectThinkingLevel(_ id: String) {
+        guard !isThinkingLocked else { return }
         modelPrefs.setThinkingLevelID(id)
         sparkThinkingLevelID = id
     }

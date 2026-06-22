@@ -123,8 +123,8 @@ struct SparkView: View {
     // MARK: - Bottom Bar (floats; chat scrolls behind it)
 
     private var thinkingTitle: String {
-        if let id = viewModel.sparkThinkingLevelID,
-           let lvl = viewModel.thinkingLevels.first(where: { $0.id == id }) {
+        let id = viewModel.lockedThinkingLevelID ?? viewModel.sparkThinkingLevelID
+        if let id, let lvl = viewModel.thinkingLevels.first(where: { $0.id == id }) {
             return lvl.displayName
         }
         return String(localized: "思考强度")
@@ -168,13 +168,25 @@ struct SparkView: View {
                 }
 
                 if !viewModel.thinkingLevels.isEmpty {
-                    SparkModelChip(
-                        title: thinkingTitle,
-                        icon: "brain",
-                        options: viewModel.thinkingLevels.map { (id: $0.id, label: $0.displayName) },
-                        selectedID: viewModel.sparkThinkingLevelID,
-                        onSelect: { viewModel.selectThinkingLevel($0) }
-                    )
+                    if let locked = viewModel.lockedThinkingLevelID {
+                        SparkModelChip(
+                            title: thinkingTitle,
+                            icon: "brain",
+                            options: viewModel.thinkingLevels.filter { $0.id == locked }.map { (id: $0.id, label: $0.displayName) },
+                            selectedID: locked,
+                            onSelect: { _ in }
+                        )
+                        .disabled(true)
+                        .opacity(0.6)
+                    } else {
+                        SparkModelChip(
+                            title: thinkingTitle,
+                            icon: "brain",
+                            options: viewModel.thinkingLevels.map { (id: $0.id, label: $0.displayName) },
+                            selectedID: viewModel.sparkThinkingLevelID,
+                            onSelect: { viewModel.selectThinkingLevel($0) }
+                        )
+                    }
                 }
 
                 Spacer()

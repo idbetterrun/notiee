@@ -14,6 +14,7 @@
 		103D91F09BC4B73710A19414 /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		1207A77A443EB00192205A9B /* AllSchedulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43711194AC983B67E9DDD83D /* AllSchedulesView.swift */; };
 		15E40FC86415382712272655 /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40041CD4CF39EED9C31FFF80 /* EventTag.swift */; };
+		1811D7C11B8715C52E08AB57 /* ModelThinkingPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */; };
 		18496E382FC1FC8100861F50 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 9D85F182C464B838D2FFFBEF /* ZIPFoundation */; };
 		18496E392FC1FC8100861F50 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7E69FA26D1D9C53ABC14D974 /* MarkdownUI */; };
 		18496E452FC1FCAB00861F50 /* Notiee.icon in Resources */ = {isa = PBXBuildFile; fileRef = 18496E442FC1FCAB00861F50 /* Notiee.icon */; };
@@ -71,6 +72,7 @@
 		215D558942D7F3CFCEE5D1B5 /* SparkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09338A6B409FAB7CB61DE104 /* SparkSettingsView.swift */; };
 		2397324939A5F592DC35ABF2 /* PrivacyAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */; };
 		24F2845FDFFF93615EC5CF3B /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B25934CD853078C1F734F /* WelcomeView.swift */; };
+		2761AC36E84BB7F6EAEEB3F8 /* ModelThinkingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17AB589004E17D6E6EC284C /* ModelThinkingPolicy.swift */; };
 		27D3351E759BC5F0C33BC3D0 /* SparkInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */; };
 		281FF9867FF2D6DA7C3DB06D /* TodoDetailSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188416259E85118DAA654838 /* TodoDetailSheetView.swift */; };
 		2876D542B722531BE15ED69F /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1F90E8BA746E85124483B23 /* NetworkMonitor.swift */; };
@@ -356,6 +358,7 @@
 		9C95CAEAA335CF398CFDC0F5 /* AgentModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentModels.swift; sourceTree = "<group>"; };
 		9E28D1F521DE8822A2199AEF /* PrivacyAgreementView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrivacyAgreementView.swift; sourceTree = "<group>"; };
 		9E673E48D14130377F7CEC12 /* RecordMigrator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordMigrator.swift; sourceTree = "<group>"; };
+		A17AB589004E17D6E6EC284C /* ModelThinkingPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelThinkingPolicy.swift; sourceTree = "<group>"; };
 		A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolProtocol.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* GlassStyle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GlassStyle.swift; sourceTree = "<group>"; };
 		A23E2AC990E0D7427C4D055A /* NotieeCameraIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotieeCameraIntent.swift; sourceTree = "<group>"; };
@@ -407,6 +410,7 @@
 		CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkModelPreferencesTests.swift; sourceTree = "<group>"; };
 		D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
 		D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragmentsTests.swift; sourceTree = "<group>"; };
+		D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelThinkingPolicyTests.swift; sourceTree = "<group>"; };
 		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationStore.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
 		D395AC82E97090501EA8D180 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D50780AC855D14A170154CD6 /* TMNExportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNExportService.swift; sourceTree = "<group>"; };
@@ -645,6 +649,7 @@
 				608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */,
 				6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */,
 				00C3C0E8C8898B8DAD12DB4A /* ScenePreset.swift */,
+				A17AB589004E17D6E6EC284C /* ModelThinkingPolicy.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -678,6 +683,7 @@
 				CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */,
 				CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */,
 				CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */,
+				D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = "<group>";
@@ -1142,6 +1148,7 @@
 				CAFE0000000088880001AAAA /* SparkAgentTimelineView.swift in Sources */,
 				DC5938125CE22E9F86AB0E58 /* AgentSettingsView.swift in Sources */,
 				215D558942D7F3CFCEE5D1B5 /* SparkSettingsView.swift in Sources */,
+				2761AC36E84BB7F6EAEEB3F8 /* ModelThinkingPolicy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1175,6 +1182,7 @@
 				CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */,
 				CAFE0000000099990001BBBB /* SparkCitationStripTests.swift in Sources */,
 				CAFE0000000B7777C0000003 /* ThinkingCapabilityTests.swift in Sources */,
+				1811D7C11B8715C52E08AB57 /* ModelThinkingPolicyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

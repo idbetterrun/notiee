@@ -70,7 +70,9 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         let model = modelPrefs.effectiveModelName(globalModel: textConfig.modelName)
         var extra: [String: Any] = [:]
         let cap = ThinkingCapability.forProvider(textConfig.providerType)
-        if let id = modelPrefs.thinkingLevelID, let level = cap.levels.first(where: { $0.id == id }) {
+        let forcedID = ModelThinkingPolicy.forcedThinkingLevelID(provider: textConfig.providerType, model: model)
+        let effectiveID = forcedID ?? modelPrefs.thinkingLevelID
+        if let id = effectiveID, let level = cap.levels.first(where: { $0.id == id }) {
             cap.apply(level: level, to: &extra)
         }
         return (model, extra)
