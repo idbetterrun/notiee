@@ -157,6 +157,8 @@
 		CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */; };
 		CAFE00000006666FFFF0001 /* ScheduleUpdateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */; };
 		CAFE00000006666FFFF0003 /* ScheduleUpdateToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */; };
+		CAFE000000SMPRF00000001 /* SparkModelPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */; };
+		CAFE000000SMPRF00000003 /* SparkModelPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */; };
 		CAFE000000074444DDDD0001 /* DateInfoTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000074444DDDD0002 /* DateInfoTool.swift */; };
 		CAFE000000074444DDDD0003 /* DateInfoToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000074444DDDD0004 /* DateInfoToolTests.swift */; };
 		CAFE0000000A1001UP000001 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000A1001UP000002 /* UserProfile.swift */; };
@@ -380,6 +382,8 @@
 		CAFE000000003333CCCC0004 /* ScheduleCreateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCreateToolTests.swift; sourceTree = "<group>"; };
 		CAFE00000006666FFFF0002 /* ScheduleUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateTool.swift; sourceTree = "<group>"; };
 		CAFE00000006666FFFF0004 /* ScheduleUpdateToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleUpdateToolTests.swift; sourceTree = "<group>"; };
+		CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModelPreferences.swift; sourceTree = "<group>"; };
+		CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkModelPreferencesTests.swift; sourceTree = "<group>"; };
 		CAFE000000074444DDDD0002 /* DateInfoTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DateInfoTool.swift; sourceTree = "<group>"; };
 		CAFE000000074444DDDD0004 /* DateInfoToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateInfoToolTests.swift; sourceTree = "<group>"; };
 		CAFE0000000A1001UP000002 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
@@ -665,6 +669,7 @@
 				CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */,
 				CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */,
 				CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */,
+				CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = "<group>";
@@ -739,6 +744,7 @@
 				CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */,
 				A7326FFABA0C07BB0B1902A5 /* Agent */,
 				0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */,
+				CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */,
 			);
 			name = Spark;
 			path = Spark;
@@ -1116,6 +1122,7 @@
 				0A479BA5770AF5130E713ABF /* CalendarQueryTool.swift in Sources */,
 				CAFE000000003333CCCC0001 /* ScheduleCreateTool.swift in Sources */,
 				CAFE00000006666FFFF0001 /* ScheduleUpdateTool.swift in Sources */,
+				CAFE000000SMPRF00000001 /* SparkModelPreferences.swift in Sources */,
 				CAFE000000074444DDDD0001 /* DateInfoTool.swift in Sources */,
 				5F2338B67E12B8BF8344CBAD /* MemoryManageTool.swift in Sources */,
 				CAFE000000006666FFFF0001 /* AgentToolPresentation.swift in Sources */,
@@ -1143,6 +1150,7 @@
 				CAFE0000000AABB1CCDD0001 /* CalendarServiceTests.swift in Sources */,
 				CAFE000000003333CCCC0003 /* ScheduleCreateToolTests.swift in Sources */,
 				CAFE00000006666FFFF0003 /* ScheduleUpdateToolTests.swift in Sources */,
+				CAFE000000SMPRF00000003 /* SparkModelPreferencesTests.swift in Sources */,
 				CAFE000000074444DDDD0003 /* DateInfoToolTests.swift in Sources */,
 				CAFE0000000A1003AT000001 /* AccountStoreTests.swift in Sources */,
 				CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */,

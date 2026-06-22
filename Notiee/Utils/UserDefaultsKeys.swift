@@ -85,6 +85,8 @@ enum UDK {
     static let sparkAgentUndoTTLMinutes = "spark_agent_undo_ttl_minutes"
     static let sparkAgentHistoryRetentionDays = "spark_agent_history_retention_days"
     static let sparkAgentTokenWarning = "spark_agent_token_warning"
+    static let sparkModelOverride = "spark_model_override"
+    static let sparkThinkingLevel = "spark_thinking_level"
 
     // MARK: - Lab Features
     static let labMarkdownRenderingEnabled = "labMarkdownRenderingEnabled"
