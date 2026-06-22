@@ -121,6 +121,8 @@
 		990000000000000000000004 /* RecordThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000003 /* RecordThumbnailView.swift */; };
 		990000000000000000000006 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000005 /* EventDetailView.swift */; };
 		99000000000000000000000A /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990000000000000000000009 /* AIProvider.swift */; };
+		CAFE0000000B7777C0000001 /* ThinkingCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000B7777C0000002 /* ThinkingCapability.swift */; };
+		CAFE0000000B7777C0000003 /* ThinkingCapabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */; };
 		99000000000000000000000C /* RealAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000B /* RealAIProcessingService.swift */; };
 		99000000000000000000000E /* AIAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000D /* AIAPIClient.swift */; };
 		990000000000000000000010 /* AIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99000000000000000000000F /* AIProcessingService.swift */; };
@@ -341,6 +343,8 @@
 		990000000000000000000003 /* RecordThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordThumbnailView.swift; sourceTree = "<group>"; };
 		990000000000000000000005 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		990000000000000000000009 /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvider.swift; sourceTree = "<group>"; };
+		CAFE0000000B7777C0000002 /* ThinkingCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapability.swift; sourceTree = "<group>"; };
+		CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapabilityTests.swift; sourceTree = "<group>"; };
 		99000000000000000000000B /* RealAIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealAIProcessingService.swift; sourceTree = "<group>"; };
 		99000000000000000000000D /* AIAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAPIClient.swift; sourceTree = "<group>"; };
 		99000000000000000000000F /* AIProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProcessingService.swift; sourceTree = "<group>"; };
@@ -618,6 +622,7 @@
 				100000000000000000000009 /* NoteTodo.swift */,
 				100000000000000000000010 /* AIProcessingState.swift */,
 				990000000000000000000009 /* AIProvider.swift */,
+				CAFE0000000B7777C0000002 /* ThinkingCapability.swift */,
 				100000000000000000000025 /* AppTab.swift */,
 				100000000000000000000026 /* AIModelConfiguration.swift */,
 				990000000000000000000001 /* AIProcessingState+UI.swift */,
@@ -659,6 +664,7 @@
 				D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */,
 				CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */,
 				CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */,
+				CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = "<group>";
@@ -982,6 +988,7 @@
 				99000000000000000000000E /* AIAPIClient.swift in Sources */,
 				990000000000000000000010 /* AIProcessingService.swift in Sources */,
 				99000000000000000000000A /* AIProvider.swift in Sources */,
+				CAFE0000000B7777C0000001 /* ThinkingCapability.swift in Sources */,
 				990000000000000000000002 /* AIProcessingState+UI.swift in Sources */,
 				990000000000000000000004 /* RecordThumbnailView.swift in Sources */,
 				990000000000000000000006 /* EventDetailView.swift in Sources */,
@@ -1147,6 +1154,7 @@
 				376C1900597625E431D7E5A1 /* SparkPromptFragmentsTests.swift in Sources */,
 				CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */,
 				CAFE0000000099990001BBBB /* SparkCitationStripTests.swift in Sources */,
+				CAFE0000000B7777C0000003 /* ThinkingCapabilityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
