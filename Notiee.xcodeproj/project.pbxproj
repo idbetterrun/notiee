@@ -167,6 +167,7 @@
 		CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */; };
 		CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */; };
 		CAFE000000005555EEEE0001 /* SparkAgentChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000005555EEEE0002 /* SparkAgentChip.swift */; };
+		CAFE000000005555EEEE0011 /* SparkModelChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000005555EEEE0012 /* SparkModelChip.swift */; };
 		CAFE000000006666FFFF0001 /* AgentToolPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000006666FFFF0002 /* AgentToolPresentation.swift */; };
 		CAFE000000007777AAAA0001 /* AgentToolPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */; };
 		CAFE0000000088880001AAAA /* SparkAgentTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */; };
@@ -392,6 +393,7 @@
 		CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkIntentDetector.swift; sourceTree = "<group>"; };
 		CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkIntentDetectorTests.swift; sourceTree = "<group>"; };
 		CAFE000000005555EEEE0002 /* SparkAgentChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentChip.swift; sourceTree = "<group>"; };
+		CAFE000000005555EEEE0012 /* SparkModelChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModelChip.swift; sourceTree = "<group>"; };
 		CAFE000000006666FFFF0002 /* AgentToolPresentation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolPresentation.swift; sourceTree = "<group>"; };
 		CAFE000000007777AAAA0002 /* AgentToolPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolPresentationTests.swift; sourceTree = "<group>"; };
 		CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAgentTimelineView.swift; sourceTree = "<group>"; };
@@ -741,6 +743,7 @@
 				DBE516C2778B82D7C50D438C /* SparkViewModel.swift */,
 				CAFE000000004444DDDD0002 /* SparkIntentDetector.swift */,
 				CAFE000000005555EEEE0002 /* SparkAgentChip.swift */,
+				CAFE000000005555EEEE0012 /* SparkModelChip.swift */,
 				CAFE0000000088880002AAAA /* SparkAgentTimelineView.swift */,
 				A7326FFABA0C07BB0B1902A5 /* Agent */,
 				0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */,
@@ -1129,6 +1132,7 @@
 				5F5EEACB80C89EFECC8DFE98 /* SparkPromptFragments.swift in Sources */,
 				CAFE000000004444DDDD0001 /* SparkIntentDetector.swift in Sources */,
 				CAFE000000005555EEEE0001 /* SparkAgentChip.swift in Sources */,
+				CAFE000000005555EEEE0011 /* SparkModelChip.swift in Sources */,
 				CAFE0000000088880001AAAA /* SparkAgentTimelineView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

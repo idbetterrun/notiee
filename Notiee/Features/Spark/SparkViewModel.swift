@@ -20,6 +20,32 @@ final class SparkViewModel: ObservableObject {
     private var lastUserQuestion: String = ""
     private var currentResponseTask: Task<Void, Never>?
 
+    private let modelPrefs = SparkModelPreferences()
+    @Published var sparkModelOverride: String = SparkModelPreferences().modelOverride
+    @Published var sparkThinkingLevelID: String? = SparkModelPreferences().thinkingLevelID
+
+    private var textConfigForSpark: AIModelConfiguration {
+        settingsStore.loadConfiguration(for: .text)
+    }
+    var availableModels: [String] {
+        let cfg = textConfigForSpark
+        return cfg.providerType == .custom ? [cfg.modelName].filter { !$0.isEmpty } : cfg.providerType.predefinedModels
+    }
+    var effectiveModelName: String {
+        modelPrefs.effectiveModelName(globalModel: textConfigForSpark.modelName)
+    }
+    var thinkingLevels: [ThinkingLevel] {
+        ThinkingCapability.forProvider(textConfigForSpark.providerType).levels
+    }
+    func selectModel(_ name: String) {
+        modelPrefs.setModelOverride(name)
+        sparkModelOverride = modelPrefs.modelOverride
+    }
+    func selectThinkingLevel(_ id: String) {
+        modelPrefs.setThinkingLevelID(id)
+        sparkThinkingLevelID = id
+    }
+
     let aiService: any SparkAIServing
     let repository: any SparkConversationCoordinating
     let settingsStore: AppSettingsPersisting
