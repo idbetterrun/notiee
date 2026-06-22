@@ -66,17 +66,18 @@ enum OpenAICaller {
             throw AIError.apiError("Status \(httpResponse.statusCode): \(errorString)")
         }
 
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let choices = json["choices"] as? [[String: Any]],
-              let firstChoice = choices.first,
-              let message = firstChoice["message"] as? [String: Any] else {
-            throw AIError.parsingFailed
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        let message = (json?["choices"] as? [[String: Any]])?.first?["message"] as? [String: Any]
+        // content 可能为 null（如 reasoning-only 中间态）；不因此抛错
+        let text = (message?["content"] as? String) ?? ""
+        let toolCalls = (message?["tool_calls"] as? [[String: Any]]) ?? []
+        let tokens = (json?["usage"] as? [String: Any])?["total_tokens"] as? Int ?? 0
+
+        // 仅当结构完全解析不出（无 message、无 toolCalls、无文本）才报错，且带原始片段便于诊断
+        if message == nil && toolCalls.isEmpty && text.isEmpty {
+            let snippet = String(data: data.prefix(500), encoding: .utf8) ?? ""
+            throw AIError.apiError("Unexpected response: \(snippet)")
         }
-
-        let text = message["content"] as? String ?? ""
-        let toolCalls = message["tool_calls"] as? [[String: Any]] ?? []
-        let tokens = (json["usage"] as? [String: Any])?["total_tokens"] as? Int ?? 0
-
         return (text, toolCalls, tokens)
     }
     
@@ -190,10 +191,8 @@ enum AnthropicCaller {
             throw AIError.apiError("Status \(httpResponse.statusCode): \(errorString)")
         }
 
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let contents = json["content"] as? [[String: Any]] else {
-            throw AIError.parsingFailed
-        }
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        let contents = (json?["content"] as? [[String: Any]]) ?? []
 
         var text = ""
         var toolCalls: [[String: Any]] = []
@@ -206,10 +205,16 @@ enum AnthropicCaller {
             }
         }
 
-        let usage = json["usage"] as? [String: Any]
+        let usage = json?["usage"] as? [String: Any]
         let inputTokens = usage?["input_tokens"] as? Int ?? 0
         let outputTokens = usage?["output_tokens"] as? Int ?? 0
         let tokens = inputTokens + outputTokens
+
+        // 仅当完全提取不到任何内容时才报错，带原始片段便于诊断
+        if contents.isEmpty && toolCalls.isEmpty && text.isEmpty {
+            let snippet = String(data: data.prefix(500), encoding: .utf8) ?? ""
+            throw AIError.apiError("Unexpected response: \(snippet)")
+        }
 
         return (text, toolCalls, tokens)
     }
