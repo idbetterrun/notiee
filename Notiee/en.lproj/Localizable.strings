@@ -530,3 +530,22 @@
 "正在创建日程…" = "Creating event…";
 "正在查看记忆…" = "Loading memory…";
 "正在执行…" = "Working…";
+
+/* Account + Spark batch */
+"本地登录" = "Local sign-in";
+"头像（可选）" = "Avatar (optional)";
+"用户名" = "Username";
+"输入用户名（中英皆可）" = "Enter a username";
+"编辑个人信息" = "Edit profile";
+"退出登录" = "Sign out";
+"本地" = "Local";
+"凌晨好" = "Good night";
+"早上好" = "Good morning";
+"上午好" = "Good morning";
+"中午好" = "Good noon";
+"下午好" = "Good afternoon";
+"晚上好" = "Good evening";
+"深夜好" = "Good night";
+"修改日程" = "Edit event";
+"正在修改日程…" = "Updating event…";
+"当前通过 %@ 方式登录" = "Signed in via %@";
