@@ -257,21 +257,26 @@ struct TodayView: View {
                 Text("待办事项")
                     .font(.title3.weight(.bold))
 
-                Text("\(viewModel.pendingTodos.count)")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 20, height: 20)
-                    .background(.blue, in: Circle())
-
-                Spacer()
-
                 if let store = viewModel.store {
                     NavigationLink {
                         AllTodosView(store: store)
                     } label: {
-                        Text("全部待办 →").font(.subheadline).foregroundStyle(.blue)
+                        Text("\(viewModel.pendingTodos.count)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 20, height: 20)
+                            .background(.blue, in: Circle())
                     }
+                    .buttonStyle(.plain)
+                } else {
+                    Text("\(viewModel.pendingTodos.count)")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 20, height: 20)
+                        .background(.blue, in: Circle())
                 }
+
+                Spacer()
             }
 
             if viewModel.todayOverviewTodos.isEmpty {
