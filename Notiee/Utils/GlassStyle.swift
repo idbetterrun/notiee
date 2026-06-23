@@ -7,9 +7,9 @@ extension View {
     func glassIconButton(prominent: Bool = false) -> some View {
         if #available(iOS 26, *) {
             if prominent {
-                self.buttonStyle(.glassProminent)
+                self.buttonStyle(.glassProminent).buttonBorderShape(.circle)
             } else {
-                self.buttonStyle(.glass)
+                self.buttonStyle(.glass).buttonBorderShape(.circle)
             }
         } else {
             self

@@ -11,6 +11,7 @@ struct LabFeaturesView: View {
     @AppStorage(UDK.labFullVisionModeEnabled) private var fullVisionModeEnabled = false
     @AppStorage(UDK.labDeepAssociationModeEnabled) private var deepAssociationModeEnabled = false
     @AppStorage(UDK.labLowConsumptionModeEnabled) private var lowConsumptionModeEnabled = false
+    @AppStorage("spark.semanticSearch.useCloud") private var useCloudEmbedding = false
 
     @State private var showDeepAssociationDetail = false
     
@@ -96,6 +97,13 @@ struct LabFeaturesView: View {
                             .padding(.top, 4)
                     }
                 }
+            }
+
+            Section("语义检索") {
+                Toggle("高质量云端检索", isOn: $useCloudEmbedding)
+                Text("默认在本机计算语义向量（离线、不外传）。开启后用你配置的 AI 服务商接口计算，检索更准但会把拍记文本发送到该服务。")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Section {

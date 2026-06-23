@@ -39,6 +39,32 @@ final class TodayViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.todayRecords.isEmpty)
     }
 
+    func testTodayOverview_showsActionableCapsAndHidesFarFuture() {
+        let store = NotieeStore(
+            currentDate: Date(), events: [], todos: [], records: [],
+            recordStore: JSONNoteRecordStore(fileURL: temporaryFileURL())
+        )
+        let cal = Calendar.current
+        let far = cal.date(byAdding: .day, value: 10, to: Date())!
+        store.addTodo(NoteTodo(recordID: nil, content: "无截止"))
+        store.addTodo(NoteTodo(recordID: nil, content: "远期", dueDate: far))
+
+        let vm = TodayViewModel(store: store)
+        let contents = vm.todayOverviewTodos.map { $0.content }
+        XCTAssertTrue(contents.contains("无截止"))
+        XCTAssertFalse(contents.contains("远期"), "远期待办不进 Today 概览")
+    }
+
+    func testTodayOverview_capsAtMaxCount() {
+        let store = NotieeStore(
+            currentDate: Date(), events: [], todos: [], records: [],
+            recordStore: JSONNoteRecordStore(fileURL: temporaryFileURL())
+        )
+        for i in 0..<10 { store.addTodo(NoteTodo(recordID: nil, content: "无截止\(i)")) }
+        let vm = TodayViewModel(store: store)
+        XCTAssertLessThanOrEqual(vm.todayOverviewTodos.count, TodayViewModel.overviewTodoCap)
+    }
+
     private var referenceDate: Date {
         var components = DateComponents()
         components.calendar = Calendar(identifier: .gregorian)

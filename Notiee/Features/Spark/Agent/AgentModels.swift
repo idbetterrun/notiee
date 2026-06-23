@@ -5,6 +5,18 @@ struct AgentToolResultData: Equatable, Codable, Sendable {
     let message: String
     let shouldTerminate: Bool
     let undoAction: AgentUndoActionData?
+    /// Structured payload (record_id / todo_id / event_id …) serialized as JSON,
+    /// fed back to the model so follow-up write tools can reference these IDs.
+    var dataJSON: String?
+
+    init(success: Bool, message: String, shouldTerminate: Bool,
+         undoAction: AgentUndoActionData?, dataJSON: String? = nil) {
+        self.success = success
+        self.message = message
+        self.shouldTerminate = shouldTerminate
+        self.undoAction = undoAction
+        self.dataJSON = dataJSON
+    }
 }
 
 struct AgentUndoActionData: Equatable, Codable, Sendable {

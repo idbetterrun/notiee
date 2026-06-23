@@ -505,8 +505,21 @@ final class SparkViewModel: ObservableObject {
 
     private func makeAgentExecutor() -> AgentExecutor? {
         guard let recordManager, let calendarManager else { return nil }
+
+        let embeddingModel = UserDefaults.standard.string(forKey: "spark.semanticSearch.embeddingModel") ?? "text-embedding-3-small"
+        let cloud = CloudEmbeddingService(configProvider: { [settingsStore] in
+            let cfg = settingsStore.loadConfiguration(for: .text)
+            return CloudEmbeddingService.Config(endpoint: cfg.activeEndpoint, apiKey: cfg.apiKey, model: embeddingModel)
+        })
+        let hybrid = HybridEmbeddingService(
+            local: LocalEmbeddingService(),
+            cloud: cloud,
+            preferCloud: { UserDefaults.standard.bool(forKey: "spark.semanticSearch.useCloud") }
+        )
+        let searchEngine = SemanticSearchEngine(embeddingService: hybrid, index: .live)
+
         let tools: [any AgentTool] = [
-            NoteSearchTool(recordManager: recordManager),
+            NoteSearchTool(recordManager: recordManager, searchEngine: searchEngine),
             NoteGetDetailTool(recordManager: recordManager),
             NoteCreateTool(recordManager: recordManager),
             NoteUpdateTool(recordManager: recordManager),

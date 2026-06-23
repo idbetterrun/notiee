@@ -1,9 +1,17 @@
 import Foundation
 
+/// 让工具可注入真引擎或测试桩。
+@MainActor
+protocol SemanticSearching {
+    func search(query: String, in records: [NoteRecord], limit: Int) async -> [NoteRecord]
+}
+
+extension SemanticSearchEngine: SemanticSearching {}
+
 @MainActor
 final class NoteSearchTool: AgentTool {
     let name = "note_search"
-    let description = "在用户的所有拍记中搜索相关内容。支持关键词检索。返回匹配的记录列表及其摘要。"
+    let description = "在用户的所有拍记中搜索相关内容。支持关键词与语义检索。返回匹配的记录列表及其摘要。"
     let permission: AgentToolPermission = .read
 
     let parametersSchema = AgentToolParametersSchema(
@@ -16,9 +24,11 @@ final class NoteSearchTool: AgentTool {
     )
 
     let recordManager: RecordManager
+    private let searchEngine: SemanticSearching?
 
-    init(recordManager: RecordManager) {
+    init(recordManager: RecordManager, searchEngine: SemanticSearching? = nil) {
         self.recordManager = recordManager
+        self.searchEngine = searchEngine
     }
 
     func execute(parameters: [String: Any]) async throws -> AgentToolResult {
@@ -34,14 +44,19 @@ final class NoteSearchTool: AgentTool {
             records = filterByTimeRange(records, range)
         }
 
-        let queryLower = query.lowercased()
-        let candidates = records.filter {
-            $0.title.localizedCaseInsensitiveContains(queryLower)
-                || $0.summary.localizedCaseInsensitiveContains(queryLower)
-                || $0.ocrText.localizedCaseInsensitiveContains(queryLower)
+        let results: [NoteRecord]
+        if let engine = searchEngine {
+            results = await engine.search(query: query, in: records, limit: limit)
+        } else {
+            let queryLower = query.lowercased()
+            let candidates = records.filter {
+                $0.title.localizedCaseInsensitiveContains(queryLower)
+                    || $0.summary.localizedCaseInsensitiveContains(queryLower)
+                    || $0.ocrText.localizedCaseInsensitiveContains(queryLower)
+            }
+            results = Array(candidates.prefix(limit))
         }
 
-        let results = Array(candidates.prefix(limit))
         let recordsData = results.enumerated().map { i, record -> [String: Any] in
             return [
                 "index": i + 1,

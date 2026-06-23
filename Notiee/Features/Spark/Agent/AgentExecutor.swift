@@ -54,10 +54,14 @@ final class AgentExecutor {
                 let action = await executeToolCall(toolCall)
                 onToolCallEnd(action)
 
+                var toolContent = action.result.message
+                if let dataJSON = action.result.dataJSON {
+                    toolContent += "\n\n[结构化数据，可直接用于后续工具的 id 参数]\n" + dataJSON
+                }
                 messages.append([
                     "role": "tool",
                     "tool_call_id": toolCall.id,
-                    "content": action.result.message
+                    "content": toolContent
                 ])
 
                 currentActions.append(action)
@@ -104,10 +108,15 @@ final class AgentExecutor {
                 )
             }()
             let shouldTerminate = result.shouldTerminate
+            let dataJSON: String? = {
+                guard let data = result.data, !data.isEmpty,
+                      let json = try? JSONSerialization.data(withJSONObject: data) else { return nil }
+                return String(data: json, encoding: .utf8)
+            }()
             return AgentAction(
                 toolName: call.name,
                 parameters: call.parameters,
-                result: AgentToolResultData(success: result.success, message: result.message, shouldTerminate: shouldTerminate, undoAction: undoData)
+                result: AgentToolResultData(success: result.success, message: result.message, shouldTerminate: shouldTerminate, undoAction: undoData, dataJSON: dataJSON)
             )
         } catch {
             return AgentAction(
