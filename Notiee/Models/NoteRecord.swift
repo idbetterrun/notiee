@@ -1,6 +1,12 @@
 import Foundation
 import UIKit
 
+enum RecordSource: String, Codable, Sendable {
+    case photo
+    case spark
+    case text
+}
+
 struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     let id: UUID
     var eventID: UUID?
@@ -23,6 +29,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     var tokenUsage: Int
     var aiRetryCount: Int
     var deviceName: String?
+    var source: RecordSource
 
     init(
         id: UUID = UUID(),
@@ -43,7 +50,8 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         modelsUsed: [String]? = nil,
         tokenUsage: Int = 0,
         aiRetryCount: Int = 0,
-        deviceName: String? = UIDevice.current.modelName
+        deviceName: String? = UIDevice.current.modelName,
+        source: RecordSource = .photo
     ) {
         self.id = id
         self.eventID = eventID
@@ -64,6 +72,38 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.tokenUsage = tokenUsage
         self.aiRetryCount = aiRetryCount
         self.deviceName = deviceName
+        self.source = source
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, eventID, folderID, capturedAt, localImagePaths, title
+        case ocrText, summary, detailedContent, processingState
+        case keyPoints, definitions, isFavorite, isDeleted, editedAt
+        case modelsUsed, tokenUsage, aiRetryCount, deviceName, source
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        eventID = try c.decodeIfPresent(UUID.self, forKey: .eventID)
+        folderID = try c.decodeIfPresent(UUID.self, forKey: .folderID)
+        capturedAt = try c.decode(Date.self, forKey: .capturedAt)
+        localImagePaths = try c.decodeIfPresent([String].self, forKey: .localImagePaths) ?? []
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? "待处理记录"
+        ocrText = try c.decodeIfPresent(String.self, forKey: .ocrText) ?? ""
+        summary = try c.decodeIfPresent(String.self, forKey: .summary) ?? ""
+        detailedContent = try c.decodeIfPresent(String.self, forKey: .detailedContent) ?? ""
+        processingState = try c.decodeIfPresent(AIProcessingState.self, forKey: .processingState) ?? .pending
+        keyPoints = try c.decodeIfPresent([String].self, forKey: .keyPoints) ?? []
+        definitions = try c.decodeIfPresent([KeyDefinition].self, forKey: .definitions) ?? []
+        isFavorite = try c.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        isDeleted = try c.decodeIfPresent(Bool.self, forKey: .isDeleted) ?? false
+        editedAt = try c.decodeIfPresent(Date.self, forKey: .editedAt)
+        modelsUsed = try c.decodeIfPresent([String].self, forKey: .modelsUsed)
+        tokenUsage = try c.decodeIfPresent(Int.self, forKey: .tokenUsage) ?? 0
+        aiRetryCount = try c.decodeIfPresent(Int.self, forKey: .aiRetryCount) ?? 0
+        deviceName = try c.decodeIfPresent(String.self, forKey: .deviceName)
+        source = try c.decodeIfPresent(RecordSource.self, forKey: .source) ?? .photo
     }
 }
 

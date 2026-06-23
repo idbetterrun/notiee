@@ -1,7 +1,9 @@
 import Foundation
 
 /// Handles schema migrations for the records JSON file.
-/// Current version: 1 (introduced with aiRetryCount field).
+/// Current version: 1.
+/// Note: `NoteRecord.source` (added later) is decoded with a safe default
+/// (.photo) via NoteRecord.init(from:), so no envelope version bump is required.
 enum RecordMigrator {
     static let currentVersion = 1
 
