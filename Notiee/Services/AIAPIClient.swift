@@ -83,6 +83,31 @@ enum OpenAICaller {
         return (text, toolCalls, tokens)
     }
     
+    /// OpenAI 兼容 embeddings 接口。endpoint 应指向 .../embeddings。
+    static func callEmbedding(endpoint: String, model: String, apiKey: String, input: String) async throws -> [Float] {
+        guard let url = URL(string: endpoint) else { throw AIError.apiError("Invalid URL") }
+        let payload: [String: Any] = ["model": model, "input": input]
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw AIError.apiError("Unknown response") }
+        if !(200...299).contains(http.statusCode) {
+            throw AIError.apiError("Status \(http.statusCode): \(String(data: data, encoding: .utf8) ?? "")")
+        }
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let arr = json["data"] as? [[String: Any]],
+              let first = arr.first,
+              let raw = first["embedding"] as? [Double] else {
+            throw AIError.parsingFailed
+        }
+        return raw.map { Float($0) }
+    }
+
     private static func performRequest(endpoint: String, apiKey: String, payload: [String: Any]) async throws -> (String, Int) {
         guard let url = URL(string: endpoint) else {
             throw AIError.apiError("Invalid URL")
