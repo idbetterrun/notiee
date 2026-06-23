@@ -103,10 +103,12 @@
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
 		6A6B481651E79E00EBA96444 /* NotieeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88784320EF16FC6225923813 /* NotieeColors.swift */; };
 		6B4CE97BB8E9A6A4F30EC939 /* TodoRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB5DBCCB1BD85E56C6BE9CA /* TodoRowView.swift */; };
+		6BC7FA702ECDD56739271A2B /* LocalEmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */; };
 		711C659FF150BE3831073ABC /* FeatureHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D173C754CEF3505112591 /* FeatureHintView.swift */; };
 		72398F63847C0F6573941445 /* TMNExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50780AC855D14A170154CD6 /* TMNExportService.swift */; };
 		7568F23C0FDBFDF392C370C5 /* ImageSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */; };
 		77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* SparkMemoryView.swift */; };
+		7A244F40A7A1108C5293684E /* LocalEmbeddingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B26D79729A742911FBD4BE2 /* LocalEmbeddingServiceTests.swift */; };
 		7BCB519E902B48AEF17A32D7 /* NotieeCameraIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23E2AC990E0D7427C4D055A /* NotieeCameraIntent.swift */; };
 		843DF9A146CEAD56FA63E462 /* SparkConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */; };
 		88CA43871198658141B9E253 /* HighlightedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82877F4ACD877D140D13DE81 /* HighlightedText.swift */; };
@@ -293,6 +295,7 @@
 		100000000000000000000030 /* MockAIProcessingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProcessingServiceTests.swift; sourceTree = "<group>"; };
 		100000000000000000000035 /* CreateItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateItemSheet.swift; sourceTree = "<group>"; };
 		100000000000000000000036 /* ImportScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportScheduleView.swift; sourceTree = "<group>"; };
+		1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalEmbeddingService.swift; sourceTree = "<group>"; };
 		1342A65366ED31A59C9A520E /* CalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarSelectionView.swift; sourceTree = "<group>"; };
 		15A0EB3637FD6B8FAB72859B /* zh-Hans */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		165793786621B5B583311051 /* FolderTagManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderTagManagerTests.swift; sourceTree = "<group>"; };
@@ -331,6 +334,7 @@
 		48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryStore.swift; path = SparkHistoryStore.swift; sourceTree = "<group>"; };
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
 		4AE9588D51921FCBFA10E9C7 /* AgentSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentSettingsView.swift; sourceTree = "<group>"; };
+		4B26D79729A742911FBD4BE2 /* LocalEmbeddingServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalEmbeddingServiceTests.swift; sourceTree = "<group>"; };
 		4C5081ABAC78255979139309 /* AgentTrustManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentTrustManager.swift; sourceTree = "<group>"; };
 		4E689E148505EC9477DB8451 /* SemanticRanker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticRanker.swift; sourceTree = "<group>"; };
 		4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigurationView.swift; sourceTree = "<group>"; };
@@ -712,6 +716,7 @@
 				014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */,
 				FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */,
 				C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */,
+				4B26D79729A742911FBD4BE2 /* LocalEmbeddingServiceTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = SOURCE_ROOT;
@@ -801,6 +806,7 @@
 				885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */,
 				EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */,
 				4E689E148505EC9477DB8451 /* SemanticRanker.swift */,
+				1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */,
 			);
 			name = Semantic;
 			path = Notiee/Services/Semantic;
@@ -1196,6 +1202,7 @@
 				478E02DF97C2A416DEC50801 /* EmbeddingService.swift in Sources */,
 				D2DE144E852CDD26A6D2F0AF /* EmbeddingIndex.swift in Sources */,
 				EDD516FA80142CB18D1A0513 /* SemanticRanker.swift in Sources */,
+				6BC7FA702ECDD56739271A2B /* LocalEmbeddingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1236,6 +1243,7 @@
 				CC4D232D1E4481C07C756165 /* RecordEmbeddingTextTests.swift in Sources */,
 				97B6EEA9A7A96CD1F554231D /* EmbeddingIndexTests.swift in Sources */,
 				E4E63E917C5C6F36A4C759B6 /* SemanticRankerTests.swift in Sources */,
+				7A244F40A7A1108C5293684E /* LocalEmbeddingServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
