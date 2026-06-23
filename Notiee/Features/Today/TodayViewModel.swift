@@ -104,6 +104,17 @@ final class TodayViewModel: ObservableObject {
             .sorted { $0.createdAt < $1.createdAt }
     }
 
+    static let overviewTodoCap = 5
+
+    /// Today 概览：未完成 + 当下可执行（逾期/今天/无截止），按截止日升序，封顶。
+    var todayOverviewTodos: [NoteTodo] {
+        pendingTodos
+            .filter { TodoBucketer.isActionableNow($0, now: currentDate, calendar: calendar) }
+            .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
+            .prefix(Self.overviewTodoCap)
+            .map { $0 }
+    }
+
     /// 待办是否应在 Today 展示。
     /// - 无关联拍记的独立待办（如 Spark / 手动创建）：始终展示。
     /// - 有关联拍记的待办：仅当其拍记仍存在且未删除时展示。
