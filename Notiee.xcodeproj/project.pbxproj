@@ -88,6 +88,7 @@
 		410AF681CD08C47089A0F9A5 /* VectorMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03763E897A27D755A3FF8DA /* VectorMathTests.swift */; };
 		45132D99D46734CBB80C2999 /* LabFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */; };
 		4567ABC8D9012345EF678901 /* PDFPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCDEF0123456789ABCDEF01 /* PDFPreviewView.swift */; };
+		478E02DF97C2A416DEC50801 /* EmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */; };
 		4D240DDFE6BA190D7CFA0BAA /* EventTagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCF0867A0D8BE7F3ED6F713 /* EventTagStore.swift */; };
 		4D5AAF4C87304E0631C4BEF2 /* RecordManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9469DF6F1FBDEDAF986815A0 /* RecordManagerTests.swift */; };
 		4FAFAF572727FB4FFFAC2184 /* AIPromptProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */; };
@@ -180,6 +181,7 @@
 		CAFE000000SMPRF00000001 /* SparkModelPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */; };
 		CAFE000000SMPRF00000003 /* SparkModelPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */; };
 		CB87E85EC7953E44DD5A00D5 /* WebFetchTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00A05167291C6F2A627F2A6 /* WebFetchTool.swift */; };
+		CC4D232D1E4481C07C756165 /* RecordEmbeddingTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */; };
 		CCDDEEFF0011223344556677 /* CourseCalendarSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */; };
 		CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C541D6F62CB3492461A94D /* AboutNotieeView.swift */; };
 		D08E45463E601F6633F4B405 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085D584DC88E0E479852CCCF /* ReviewView.swift */; };
@@ -249,6 +251,7 @@
 		000000000000000000000006 /* Notiee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notiee.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000007 /* NotieeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NotieeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00C3C0E8C8898B8DAD12DB4A /* ScenePreset.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScenePreset.swift; sourceTree = "<group>"; };
+		014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordEmbeddingTextTests.swift; sourceTree = "<group>"; };
 		0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkInputBar.swift; path = SparkInputBar.swift; sourceTree = "<group>"; };
 		085D584DC88E0E479852CCCF /* ReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
 		09338A6B409FAB7CB61DE104 /* SparkSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkSettingsView.swift; sourceTree = "<group>"; };
@@ -346,6 +349,7 @@
 		82877F4ACD877D140D13DE81 /* HighlightedText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HighlightedText.swift; sourceTree = "<group>"; };
 		84233399EB935792F9A2F7BA /* RecordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/RecordManager.swift; sourceTree = "<group>"; };
 		868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduledEventStore.swift; sourceTree = "<group>"; };
+		885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingService.swift; sourceTree = "<group>"; };
 		88784320EF16FC6225923813 /* NotieeColors.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotieeColors.swift; sourceTree = "<group>"; };
 		8993B3331CCFAA2B3E52D4F3 /* LiveActivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageStore.swift; sourceTree = "<group>"; };
@@ -697,6 +701,7 @@
 				ECDE5052175A438A3502DE6C /* SparkScheduleContextTests.swift */,
 				C8616C1BA1862496CA793510 /* WebFetchToolTests.swift */,
 				F03763E897A27D755A3FF8DA /* VectorMathTests.swift */,
+				014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = SOURCE_ROOT;
@@ -783,6 +788,7 @@
 			isa = PBXGroup;
 			children = (
 				36FB34A0CEC6AA566D28B479 /* VectorMath.swift */,
+				885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */,
 			);
 			name = Semantic;
 			path = Notiee/Services/Semantic;
@@ -1175,6 +1181,7 @@
 				2761AC36E84BB7F6EAEEB3F8 /* ModelThinkingPolicy.swift in Sources */,
 				CB87E85EC7953E44DD5A00D5 /* WebFetchTool.swift in Sources */,
 				64664EC17D382C6C95A7ED8E /* VectorMath.swift in Sources */,
+				478E02DF97C2A416DEC50801 /* EmbeddingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1212,6 +1219,7 @@
 				DBC70B4FAC3C877675F22867 /* SparkScheduleContextTests.swift in Sources */,
 				9E9E34488FD0270F22864812 /* WebFetchToolTests.swift in Sources */,
 				410AF681CD08C47089A0F9A5 /* VectorMathTests.swift in Sources */,
+				CC4D232D1E4481C07C756165 /* RecordEmbeddingTextTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
