@@ -120,6 +120,7 @@
 		9483D401B6BE29A10B6CB518 /* SparkMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADCB9A01D16F3542265C00F /* SparkMemoryStore.swift */; };
 		9590DC1818F61595BA432B24 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A3896CF3167D274BE7DF3767 /* Localizable.strings */; };
 		97277802715E0DD9D0DBB69B /* TodoListTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9E735DDADB4B58539D7A13 /* TodoListTool.swift */; };
+		97B6EEA9A7A96CD1F554231D /* EmbeddingIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */; };
 		97DB604531B09F41BFF519A1 /* RecordMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E673E48D14130377F7CEC12 /* RecordMigrator.swift */; };
 		985578E2087FC4044FC0521F /* AgentTrustManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5081ABAC78255979139309 /* AgentTrustManager.swift */; };
 		98DE969CD7EEEFF2C0A1A749 /* TagEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */; };
@@ -186,6 +187,7 @@
 		CF00E92327F806EAB351AD71 /* AboutNotieeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C541D6F62CB3492461A94D /* AboutNotieeView.swift */; };
 		D08E45463E601F6633F4B405 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085D584DC88E0E479852CCCF /* ReviewView.swift */; };
 		D1145EE38C07C212ECDD27B5 /* SettingsMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72552C09CF292FA6C3C36EE /* SettingsMainView.swift */; };
+		D2DE144E852CDD26A6D2F0AF /* EmbeddingIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */; };
 		D8FC4EF5B5823FE100560D4F /* FolderTagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */; };
 		DB5CEC2D14D92D2B092E3359 /* SparkPrivacySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */; };
 		DBC70B4FAC3C877675F22867 /* SparkScheduleContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDE5052175A438A3502DE6C /* SparkScheduleContextTests.swift */; };
@@ -437,6 +439,7 @@
 		EADCB9A01D16F3542265C00F /* SparkMemoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkMemoryStore.swift; path = SparkMemoryStore.swift; sourceTree = "<group>"; };
 		ECDE5052175A438A3502DE6C /* SparkScheduleContextTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkScheduleContextTests.swift; sourceTree = "<group>"; };
 		EFB5DBCCB1BD85E56C6BE9CA /* TodoRowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoRowView.swift; sourceTree = "<group>"; };
+		EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingIndex.swift; sourceTree = "<group>"; };
 		F00A05167291C6F2A627F2A6 /* WebFetchTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WebFetchTool.swift; sourceTree = "<group>"; };
 		F03763E897A27D755A3FF8DA /* VectorMathTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VectorMathTests.swift; sourceTree = "<group>"; };
 		F1C65354C2999D0C5C2B00F7 /* NoteCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteCreateTool.swift; sourceTree = "<group>"; };
@@ -444,6 +447,7 @@
 		F1F90E8BA746E85124483B23 /* NetworkMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarQueryTool.swift; sourceTree = "<group>"; };
 		FA37C8BEE05770A01BB243BC /* SyncQueue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncQueue.swift; sourceTree = "<group>"; };
+		FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingIndexTests.swift; sourceTree = "<group>"; };
 		FF966F65697B0EC727F3655D /* SparkChatBubble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkChatBubble.swift; path = SparkChatBubble.swift; sourceTree = "<group>"; };
 		FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseCalendarSelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -702,6 +706,7 @@
 				C8616C1BA1862496CA793510 /* WebFetchToolTests.swift */,
 				F03763E897A27D755A3FF8DA /* VectorMathTests.swift */,
 				014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */,
+				FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = SOURCE_ROOT;
@@ -789,6 +794,7 @@
 			children = (
 				36FB34A0CEC6AA566D28B479 /* VectorMath.swift */,
 				885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */,
+				EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */,
 			);
 			name = Semantic;
 			path = Notiee/Services/Semantic;
@@ -1182,6 +1188,7 @@
 				CB87E85EC7953E44DD5A00D5 /* WebFetchTool.swift in Sources */,
 				64664EC17D382C6C95A7ED8E /* VectorMath.swift in Sources */,
 				478E02DF97C2A416DEC50801 /* EmbeddingService.swift in Sources */,
+				D2DE144E852CDD26A6D2F0AF /* EmbeddingIndex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1220,6 +1227,7 @@
 				9E9E34488FD0270F22864812 /* WebFetchToolTests.swift in Sources */,
 				410AF681CD08C47089A0F9A5 /* VectorMathTests.swift in Sources */,
 				CC4D232D1E4481C07C756165 /* RecordEmbeddingTextTests.swift in Sources */,
+				97B6EEA9A7A96CD1F554231D /* EmbeddingIndexTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
