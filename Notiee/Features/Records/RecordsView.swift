@@ -75,7 +75,7 @@ struct RecordsView: View {
                     }
                 }
 
-                if !store.customFolders.isEmpty {
+                if !userCustomFolders.isEmpty {
                     Section(header: HStack {
                         Text("自建文件夹")
                         Spacer()
@@ -88,7 +88,7 @@ struct RecordsView: View {
                         withAnimation { isCustomFolderExpanded.toggle() }
                     }) {
                         if isCustomFolderExpanded {
-                            ForEach(store.customFolders) { folder in
+                            ForEach(userCustomFolders) { folder in
                                 NavigationLink(destination: GenericRecordListView(title: folder.name, systemImage: "folder", records: store.sortedRecords.filter { $0.folderID == folder.id }, store: store)) {
                                     FolderSummaryRow(
                                         title: folder.name,
@@ -117,7 +117,7 @@ struct RecordsView: View {
                     }
                 }
 
-                if !store.eventsWithRecords.isEmpty {
+                if !store.eventsWithRecords.isEmpty || store.sparkFolder != nil {
                     Section(header: HStack {
                         Text("日程文件夹")
                         Spacer()
@@ -130,6 +130,22 @@ struct RecordsView: View {
                         withAnimation { isEventFolderExpanded.toggle() }
                     }) {
                         if isEventFolderExpanded {
+                            if let sparkFolder = store.sparkFolder {
+                                NavigationLink {
+                                    GenericRecordListView(
+                                        title: sparkFolder.name,
+                                        systemImage: "sparkles",
+                                        records: store.sortedRecords.filter { $0.folderID == sparkFolder.id },
+                                        store: store
+                                    )
+                                } label: {
+                                    FolderSummaryRow(
+                                        title: sparkFolder.name,
+                                        systemImage: "sparkles",
+                                        count: store.records.filter { $0.folderID == sparkFolder.id && !$0.isDeleted }.count
+                                    )
+                                }
+                            }
                             ForEach(store.eventsWithRecords) { event in
                                 NavigationLink {
                                     EventDetailView(event: event, store: store)
@@ -235,6 +251,10 @@ struct RecordsView: View {
                 }
             }
         }
+    }
+
+    private var userCustomFolders: [CustomFolder] {
+        store.customFolders.filter { $0.name != FolderTagManager.sparkFolderName }
     }
 
     private var displayedRecords: [NoteRecord] {
