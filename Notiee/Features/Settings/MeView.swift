@@ -78,6 +78,13 @@ struct MeView: View {
                     Label("全部日程", systemImage: "calendar")
                         .foregroundColor(NotieeColors.themed(.orange))
                 }
+
+                NavigationLink {
+                    AllTodosView(store: store)
+                } label: {
+                    Label("所有待办", systemImage: "checklist")
+                        .foregroundColor(NotieeColors.themed(.blue))
+                }
                 
                 NavigationLink {
                     ImportScheduleView(store: store)

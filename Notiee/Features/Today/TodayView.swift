@@ -262,9 +262,19 @@ struct TodayView: View {
                     .foregroundStyle(.white)
                     .frame(width: 20, height: 20)
                     .background(.blue, in: Circle())
+
+                Spacer()
+
+                if let store = viewModel.store {
+                    NavigationLink {
+                        AllTodosView(store: store)
+                    } label: {
+                        Text("全部待办 →").font(.subheadline).foregroundStyle(.blue)
+                    }
+                }
             }
 
-            if viewModel.allTodos.isEmpty {
+            if viewModel.todayOverviewTodos.isEmpty {
                 Text("AI 提取的待办会显示在这里。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -272,7 +282,7 @@ struct TodayView: View {
                     .padding(16)
                     .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             } else {
-                ForEach(viewModel.allTodos) { todo in
+                ForEach(viewModel.todayOverviewTodos) { todo in
                     TodoRowView(todo: todo, onToggle: {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             viewModel.toggleTodo(id: todo.id)
