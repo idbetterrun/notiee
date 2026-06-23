@@ -198,9 +198,11 @@
 		E2224F389C980FED466E2AA8 /* LocalOCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C23EF23D8944E5A0E6D009 /* LocalOCRService.swift */; };
 		E287718A1BE69BFCBCD8A597 /* ScenePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C3C0E8C8898B8DAD12DB4A /* ScenePreset.swift */; };
 		E2D822957F190C422D07C2B0 /* SyncQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA37C8BEE05770A01BB243BC /* SyncQueue.swift */; };
+		E4E63E917C5C6F36A4C759B6 /* SemanticRankerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */; };
 		E57232A5C6D7EE93F69463CC /* AgentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95CAEAA335CF398CFDC0F5 /* AgentModels.swift */; };
 		ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDE981AB08548758A7CEB2A /* CameraPreviewView.swift */; };
 		EDB4C13DCD86B50AC6A3C798 /* TMNImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9498AF5A115D7044C4936431 /* TMNImportService.swift */; };
+		EDD516FA80142CB18D1A0513 /* SemanticRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E689E148505EC9477DB8451 /* SemanticRanker.swift */; };
 		EF2473F7C9C5434A180AB8B0 /* SparkHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE25D10BF81E21044A271C1 /* SparkHistoryView.swift */; };
 		F49F77B59BC31180CA924F0A /* EventImportPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9AC1257406B758D108B41FD /* EventImportPreviewSheet.swift */; };
 		F58EC10E8CEC69D8EEFF1E5E /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8993B3331CCFAA2B3E52D4F3 /* LiveActivityManager.swift */; };
@@ -330,6 +332,7 @@
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
 		4AE9588D51921FCBFA10E9C7 /* AgentSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentSettingsView.swift; sourceTree = "<group>"; };
 		4C5081ABAC78255979139309 /* AgentTrustManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentTrustManager.swift; sourceTree = "<group>"; };
+		4E689E148505EC9477DB8451 /* SemanticRanker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticRanker.swift; sourceTree = "<group>"; };
 		4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigurationView.swift; sourceTree = "<group>"; };
 		54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenSourceAcknowledgmentsView.swift; sourceTree = "<group>"; };
 		56C541D6F62CB3492461A94D /* AboutNotieeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutNotieeView.swift; sourceTree = "<group>"; };
@@ -392,6 +395,7 @@
 		C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationRepository.swift; path = SparkConversationRepository.swift; sourceTree = "<group>"; };
 		C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkConversationRepositoryTests.swift; sourceTree = "<group>"; };
 		C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkViewModelTests.swift; sourceTree = "<group>"; };
+		C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticRankerTests.swift; sourceTree = "<group>"; };
 		C7F441ADF365412A945FE92D /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		C8616C1BA1862496CA793510 /* WebFetchToolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WebFetchToolTests.swift; sourceTree = "<group>"; };
 		C86AB113713AB0E8B4FFCBF6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = Notiee/Info.plist; sourceTree = "<group>"; };
@@ -707,6 +711,7 @@
 				F03763E897A27D755A3FF8DA /* VectorMathTests.swift */,
 				014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */,
 				FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */,
+				C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = SOURCE_ROOT;
@@ -795,6 +800,7 @@
 				36FB34A0CEC6AA566D28B479 /* VectorMath.swift */,
 				885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */,
 				EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */,
+				4E689E148505EC9477DB8451 /* SemanticRanker.swift */,
 			);
 			name = Semantic;
 			path = Notiee/Services/Semantic;
@@ -1189,6 +1195,7 @@
 				64664EC17D382C6C95A7ED8E /* VectorMath.swift in Sources */,
 				478E02DF97C2A416DEC50801 /* EmbeddingService.swift in Sources */,
 				D2DE144E852CDD26A6D2F0AF /* EmbeddingIndex.swift in Sources */,
+				EDD516FA80142CB18D1A0513 /* SemanticRanker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1228,6 +1235,7 @@
 				410AF681CD08C47089A0F9A5 /* VectorMathTests.swift in Sources */,
 				CC4D232D1E4481C07C756165 /* RecordEmbeddingTextTests.swift in Sources */,
 				97B6EEA9A7A96CD1F554231D /* EmbeddingIndexTests.swift in Sources */,
+				E4E63E917C5C6F36A4C759B6 /* SemanticRankerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
