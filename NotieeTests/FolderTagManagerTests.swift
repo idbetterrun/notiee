@@ -35,6 +35,22 @@ final class FolderTagManagerTests: XCTestCase {
         XCTAssertTrue(mgr.customFolders.first?.name.contains("导入记录") ?? false)
     }
 
+    func testFindOrCreateFolderCreatesWhenMissing() {
+        let mgr = makeManager()
+        let id = mgr.findOrCreateFolder(named: "Spark 生成")
+        XCTAssertEqual(mgr.customFolders.count, 1)
+        XCTAssertEqual(mgr.customFolders.first?.id, id)
+        XCTAssertEqual(mgr.customFolders.first?.name, "Spark 生成")
+    }
+
+    func testFindOrCreateFolderReusesExisting() {
+        let existing = CustomFolder(name: "Spark 生成")
+        let mgr = makeManager(folders: [existing])
+        let id = mgr.findOrCreateFolder(named: "Spark 生成")
+        XCTAssertEqual(id, existing.id)
+        XCTAssertEqual(mgr.customFolders.count, 1)
+    }
+
     // MARK: - Tag tests
 
     func testCreateTag() {

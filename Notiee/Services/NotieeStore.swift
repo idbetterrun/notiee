@@ -304,6 +304,15 @@ final class NotieeStore: ObservableObject {
     }
     func createImportedFolder() -> UUID { folderTagManager.createImportedFolder() }
 
+    @discardableResult
+    func findOrCreateFolder(named name: String) -> UUID {
+        folderTagManager.findOrCreateFolder(named: name)
+    }
+
+    var sparkFolder: CustomFolder? {
+        customFolders.first { $0.name == FolderTagManager.sparkFolderName }
+    }
+
     // MARK: - Tag Mutations
 
     func createTag(name: String, colorHex: String) { folderTagManager.createTag(name: name, colorHex: colorHex) }

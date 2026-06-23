@@ -24,6 +24,8 @@ final class FolderTagManager: ObservableObject {
         self.tagStore = tagStore
     }
 
+    static let sparkFolderName = "Spark 生成"
+
     // MARK: - Folder CRUD
 
     func createFolder(name: String) {
@@ -52,6 +54,17 @@ final class FolderTagManager: ObservableObject {
         customFolders.append(newFolder)
         persistFolders()
         return newFolder.id
+    }
+
+    @discardableResult
+    func findOrCreateFolder(named name: String) -> UUID {
+        if let existing = customFolders.first(where: { $0.name == name }) {
+            return existing.id
+        }
+        let folder = CustomFolder(name: name)
+        customFolders.append(folder)
+        persistFolders()
+        return folder.id
     }
 
     // MARK: - Tag CRUD
