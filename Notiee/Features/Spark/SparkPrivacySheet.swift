@@ -21,7 +21,7 @@ struct SparkPrivacySheet: View {
                 .padding(.top, 40)
 
             // Title
-            Text(String(localized: "Spark - 你的知识 AI"))
+            Text(String(localized: "Spark · 你的知识助手"))
                 .font(.title2.weight(.bold))
 
             // Privacy notice
@@ -29,29 +29,29 @@ struct SparkPrivacySheet: View {
                 privacyItem(
                     icon: "lock.shield",
                     color: Color(red: 0.325, green: 0.980, blue: 0.671),
-                    title: String(localized: "本地检索"),
-                    detail: String(localized: "所有拍记内容的检索和匹配均在设备本地完成，不会上传到云端。")
+                    title: String(localized: "检索在本地"),
+                    detail: String(localized: "拍记的检索与匹配默认在你的设备上完成，原文不会被打包上传。")
                 )
 
                 privacyItem(
                     icon: "arrow.triangle.branch",
                     color: Color(red: 0.361, green: 0.682, blue: 0.980),
-                    title: String(localized: "最小化上传"),
-                    detail: String(localized: "仅你的问题和检索到的记录片段会发送给 AI 模型以生成回答。")
+                    title: String(localized: "只发必要内容"),
+                    detail: String(localized: "生成回答时，仅把你的问题和检索命中的少量片段发送给所选 AI 模型。")
                 )
 
                 privacyItem(
                     icon: "hand.raised",
                     color: .orange,
                     title: String(localized: "不用于训练"),
-                    detail: String(localized: "你的拍记内容不会用于任何模型训练或分享给第三方。")
+                    detail: String(localized: "你的拍记内容不会被用于模型训练，也不会分享给第三方。")
                 )
 
                 privacyItem(
                     icon: "globe",
                     color: Color(red: 0.6, green: 0.4, blue: 0.9),
-                    title: String(localized: "网页抓取（Agent 模式）"),
-                    detail: String(localized: "开启 Agent 模式时，若你提供网页链接，Spark 可能会访问该网页以读取内容，相关请求会发送到对应的第三方网站。")
+                    title: String(localized: "联网读取需授权"),
+                    detail: String(localized: "仅在 Agent 模式下、且你提供链接时，Spark 才会访问对应网页，相关请求会发往该第三方站点。")
                 )
             }
             .padding(.horizontal, 24)
