@@ -11,6 +11,7 @@
 		00BCBB65A18DFBD97B683924 /* CustomFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */; };
 		061AAF65967B5A895B5130BD /* TodoCompleteTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */; };
 		0A479BA5770AF5130E713ABF /* CalendarQueryTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */; };
+		0EB872E642A660D986D3218F /* SemanticSearchEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D21C812ADB4127CDBBA65D6D /* SemanticSearchEngineTests.swift */; };
 		103D91F09BC4B73710A19414 /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		1207A77A443EB00192205A9B /* AllSchedulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43711194AC983B67E9DDD83D /* AllSchedulesView.swift */; };
 		15E40FC86415382712272655 /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40041CD4CF39EED9C31FFF80 /* EventTag.swift */; };
@@ -102,6 +103,7 @@
 		651E739CD247600EE7816C96 /* SparkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE516C2778B82D7C50D438C /* SparkViewModel.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
 		6A6B481651E79E00EBA96444 /* NotieeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88784320EF16FC6225923813 /* NotieeColors.swift */; };
+		6B34EADC616086132DD8F5E5 /* SemanticSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CED309E4EABF3F56BA55181 /* SemanticSearchEngine.swift */; };
 		6B4CE97BB8E9A6A4F30EC939 /* TodoRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB5DBCCB1BD85E56C6BE9CA /* TodoRowView.swift */; };
 		6BC7FA702ECDD56739271A2B /* LocalEmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */; };
 		711C659FF150BE3831073ABC /* FeatureHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D173C754CEF3505112591 /* FeatureHintView.swift */; };
@@ -323,6 +325,7 @@
 		36FB34A0CEC6AA566D28B479 /* VectorMath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
 		3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventDetailSheetView.swift; sourceTree = "<group>"; };
 		3C9E735DDADB4B58539D7A13 /* TodoListTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoListTool.swift; sourceTree = "<group>"; };
+		3CED309E4EABF3F56BA55181 /* SemanticSearchEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticSearchEngine.swift; sourceTree = "<group>"; };
 		3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomModelsListView.swift; sourceTree = "<group>"; };
 		3E16D916C859E3FB8DD53D5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkAIService.swift; path = SparkAIService.swift; sourceTree = "<group>"; };
@@ -430,6 +433,7 @@
 		CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModelPreferences.swift; sourceTree = "<group>"; };
 		CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkModelPreferencesTests.swift; sourceTree = "<group>"; };
 		D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
+		D21C812ADB4127CDBBA65D6D /* SemanticSearchEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticSearchEngineTests.swift; sourceTree = "<group>"; };
 		D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragmentsTests.swift; sourceTree = "<group>"; };
 		D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelThinkingPolicyTests.swift; sourceTree = "<group>"; };
 		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationStore.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
@@ -717,6 +721,7 @@
 				FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */,
 				C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */,
 				4B26D79729A742911FBD4BE2 /* LocalEmbeddingServiceTests.swift */,
+				D21C812ADB4127CDBBA65D6D /* SemanticSearchEngineTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = SOURCE_ROOT;
@@ -807,6 +812,7 @@
 				EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */,
 				4E689E148505EC9477DB8451 /* SemanticRanker.swift */,
 				1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */,
+				3CED309E4EABF3F56BA55181 /* SemanticSearchEngine.swift */,
 			);
 			name = Semantic;
 			path = Notiee/Services/Semantic;
@@ -1203,6 +1209,7 @@
 				D2DE144E852CDD26A6D2F0AF /* EmbeddingIndex.swift in Sources */,
 				EDD516FA80142CB18D1A0513 /* SemanticRanker.swift in Sources */,
 				6BC7FA702ECDD56739271A2B /* LocalEmbeddingService.swift in Sources */,
+				6B34EADC616086132DD8F5E5 /* SemanticSearchEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1244,6 +1251,7 @@
 				97B6EEA9A7A96CD1F554231D /* EmbeddingIndexTests.swift in Sources */,
 				E4E63E917C5C6F36A4C759B6 /* SemanticRankerTests.swift in Sources */,
 				7A244F40A7A1108C5293684E /* LocalEmbeddingServiceTests.swift in Sources */,
+				0EB872E642A660D986D3218F /* SemanticSearchEngineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
