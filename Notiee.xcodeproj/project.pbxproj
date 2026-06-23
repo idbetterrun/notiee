@@ -15,6 +15,7 @@
 		103D91F09BC4B73710A19414 /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		1207A77A443EB00192205A9B /* AllSchedulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43711194AC983B67E9DDD83D /* AllSchedulesView.swift */; };
 		15E40FC86415382712272655 /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40041CD4CF39EED9C31FFF80 /* EventTag.swift */; };
+		172727450361D6F3633B443C /* TodoBucketerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F885FDAEDF1E0BBD97592D0F /* TodoBucketerTests.swift */; };
 		1811D7C11B8715C52E08AB57 /* ModelThinkingPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */; };
 		18496E382FC1FC8100861F50 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 9D85F182C464B838D2FFFBEF /* ZIPFoundation */; };
 		18496E392FC1FC8100861F50 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7E69FA26D1D9C53ABC14D974 /* MarkdownUI */; };
@@ -145,6 +146,7 @@
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* GlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* GlassStyle.swift */; };
 		A2A5F3EB64CB3E3FB4C301A9 /* EventCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E0702491A101A08018209F /* EventCardView.swift */; };
 		A9CEE72D36BF5B1299BA225B /* SparkBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0042F63F4A1CFF675CA5D6D /* SparkBackgroundView.swift */; };
+		AA113CB3E9C994D35424BAD1 /* TodoBucketer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793B134A802E2B48548F0F06 /* TodoBucketer.swift */; };
 		AABBCCDD1122334455667788 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCCBBAA5544332211770088 /* LoginView.swift */; };
 		AB823531986DF87DD3E5FF9A /* TMNModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49671163B1FF58DA2562FE75 /* TMNModels.swift */; };
 		ADE6F7B445EB85B518614CDC /* SparkAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */; };
@@ -363,6 +365,7 @@
 		70532E6B568AB1E2C463DC41 /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		716D25BBAE5952F2A204A2E1 /* NoteUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteUpdateTool.swift; sourceTree = "<group>"; };
 		72E53801E091F5B2CB2FDF5C /* AgentToolRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolRegistry.swift; sourceTree = "<group>"; };
+		793B134A802E2B48548F0F06 /* TodoBucketer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoBucketer.swift; sourceTree = "<group>"; };
 		7F8B25934CD853078C1F734F /* WelcomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		809810EE943DED7F3FB0382C /* AIPipelineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/AIPipelineManager.swift; sourceTree = "<group>"; };
 		82877F4ACD877D140D13DE81 /* HighlightedText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HighlightedText.swift; sourceTree = "<group>"; };
@@ -466,6 +469,7 @@
 		F1E88675E4C25EA430257B7D /* zh-Hant */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		F1F90E8BA746E85124483B23 /* NetworkMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		F56FD6FB0771C4EE421E547B /* CalendarQueryTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarQueryTool.swift; sourceTree = "<group>"; };
+		F885FDAEDF1E0BBD97592D0F /* TodoBucketerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoBucketerTests.swift; sourceTree = "<group>"; };
 		FA37C8BEE05770A01BB243BC /* SyncQueue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncQueue.swift; sourceTree = "<group>"; };
 		FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingIndexTests.swift; sourceTree = "<group>"; };
 		FF966F65697B0EC727F3655D /* SparkChatBubble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkChatBubble.swift; path = SparkChatBubble.swift; sourceTree = "<group>"; };
@@ -602,9 +606,10 @@
 				100000000000000000000015 /* TodayViewModel.swift */,
 				100000000000000000000035 /* CreateItemSheet.swift */,
 				BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */,
+				793B134A802E2B48548F0F06 /* TodoBucketer.swift */,
 			);
-			path = Today;
-			sourceTree = "<group>";
+			path = Notiee/Features/Today;
+			sourceTree = SOURCE_ROOT;
 		};
 		000000000000000000000012 /* Capture */ = {
 			isa = PBXGroup;
@@ -732,6 +737,7 @@
 				D21C812ADB4127CDBBA65D6D /* SemanticSearchEngineTests.swift */,
 				6A705932D2B69FE2616C7F32 /* NoteSearchToolTests.swift */,
 				3648790C69669ADC36B54A17 /* HybridEmbeddingServiceTests.swift */,
+				F885FDAEDF1E0BBD97592D0F /* TodoBucketerTests.swift */,
 			);
 			path = NotieeTests;
 			sourceTree = SOURCE_ROOT;
@@ -1224,6 +1230,7 @@
 				6B34EADC616086132DD8F5E5 /* SemanticSearchEngine.swift in Sources */,
 				B7601FC3FBD04C330CC2720A /* CloudEmbeddingService.swift in Sources */,
 				63C160DB014F457F3D2A818C /* HybridEmbeddingService.swift in Sources */,
+				AA113CB3E9C994D35424BAD1 /* TodoBucketer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1268,6 +1275,7 @@
 				0EB872E642A660D986D3218F /* SemanticSearchEngineTests.swift in Sources */,
 				F5E9E0D97F0859A5CFE62CEE /* NoteSearchToolTests.swift in Sources */,
 				8306357280720BA51A59C1AE /* HybridEmbeddingServiceTests.swift in Sources */,
+				172727450361D6F3633B443C /* TodoBucketerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
