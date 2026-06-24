@@ -27,6 +27,19 @@ struct SparkHistoryView: View {
 
     @State private var editMode: EditMode = .inactive
     @State private var selectedIDs: Set<UUID> = []
+    @State private var searchText = ""
+
+    private var visibleGroups: [DateGroup] {
+        let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return store.groups }
+        return store.groups.compactMap { group in
+            let matched = group.conversations.filter { conv in
+                conv.title.lowercased().contains(q)
+                || conv.messages.contains { $0.content.lowercased().contains(q) }
+            }
+            return matched.isEmpty ? nil : DateGroup(date: group.date, conversations: matched)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -41,10 +54,10 @@ struct SparkHistoryView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List(selection: $selectedIDs) {
-                        if store.groups.isEmpty {
+                        if visibleGroups.isEmpty {
                             emptyView
                         }
-                        ForEach(store.groups) { group in
+                        ForEach(visibleGroups) { group in
                             Section(group.label) {
                                 ForEach(group.conversations) { conv in
                                     Button {
@@ -115,6 +128,7 @@ struct SparkHistoryView: View {
                 }
             }
             .environment(\.editMode, $editMode)
+            .searchable(text: $searchText, prompt: "搜索标题或对话内容")
             .onAppear { store.load() }
         }
     }
