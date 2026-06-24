@@ -111,47 +111,9 @@ struct AboutNotieeView: View {
         return "\(version) (\(build))"
     }
 
-    private var legalLocaleSuffix: String {
-        let lang = UserDefaults.standard.string(forKey: UDK.language) ?? "system"
-        switch lang {
-        case "zh-Hans": return "zh-Hans"
-        case "en": return "en"
-        case "zh-Hant":
-            let region = Locale.current.region?.identifier ?? ""
-            if region == "TW" { return "zh-Hant-TW" }
-            return "zh-Hant-HK"
-        default:
-            let current = Locale.current
-            let region = current.region?.identifier ?? ""
-            let langCode = current.language.languageCode?.identifier ?? ""
-            let script = current.language.script?.identifier ?? ""
-
-            if langCode == "zh", script == "Hant" {
-                if region == "TW" { return "zh-Hant-TW" }
-                return "zh-Hant-HK"
-            }
-            if langCode == "zh" { return "zh-Hans" }
-            if langCode == "en" { return "en" }
-            return "zh-Hans"
-        }
-    }
-
-    private func legalHTMLURL(base: String) -> URL? {
-        let suffix = legalLocaleSuffix
-        if let url = Bundle.main.url(forResource: "\(base)_\(suffix)", withExtension: "html") {
-            return url
-        }
-        // 目前仅内置简体中文，其它语言环境回退到简体。
-        if suffix != "zh-Hans",
-           let fallback = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "html") {
-            return fallback
-        }
-        return nil
-    }
-
     private func legalHTMLView(base: String, title: String) -> some View {
         Group {
-            if let url = legalHTMLURL(base: base) {
+            if let url = LegalDocument.bundleURL(base: base) {
                 LegalHTMLView(url: url)
                     .ignoresSafeArea(edges: .bottom)
             } else {

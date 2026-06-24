@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notiee Privacy Policy</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; -webkit-text-size-adjust: 100%; }
+  body {
+    font: -apple-system-body;
+    font-family: -apple-system, system-ui, sans-serif;
+    line-height: 1.7;
+    margin: 0;
+    padding: 20px 18px 56px;
+    color: #1c1c1e;
+    background: transparent;
+    word-break: break-word;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #f2f2f7; }
+    th { background: #1c1c1e !important; }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.04) !important; }
+    td, th { border-color: #38383a !important; }
+    .meta, blockquote { background: rgba(255,255,255,0.06) !important; }
+  }
+  h1 { font-size: 1.6em; font-weight: 700; margin: 0 0 4px; }
+  h2 { font-size: 1.2em; font-weight: 700; margin: 1.8em 0 .6em; padding-top: .4em; }
+  h3 { font-size: 1.05em; font-weight: 600; margin: 1.2em 0 .4em; }
+  p, li { font-size: 1em; }
+  .meta { font-size: .9em; color: #6e6e73; background: rgba(0,0,0,0.04); border-radius: 10px; padding: 10px 14px; margin: 12px 0 0; }
+  .meta b { color: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: .8em 0; font-size: .92em; }
+  th, td { border: 1px solid #d1d1d6; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f2f2f7; font-weight: 600; }
+  blockquote { margin: 1em 0; padding: 10px 14px; background: rgba(0,0,0,0.04); border-left: 3px solid #ff9500; border-radius: 6px; }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  pre { background: rgba(0,0,0,0.05); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: .82em; line-height: 1.5; }
+  hr { border: none; border-top: 1px solid #d1d1d6; margin: 1.6em 0; }
+  a { color: #007aff; }
+</style>
+</head>
+<body>
+
+<h1>Notiee Privacy Policy</h1>
+<div class="meta"><b>Version:</b> v1.0.5 &nbsp; <b>Effective Date:</b> June 24, 2026</div>
+
+<h2>1. Introduction</h2>
+<p>We take your privacy seriously. This Privacy Policy aims to transparently explain what information Notiee (hereinafter "the App") collects, how it uses that information, and how it protects your data security.</p>
+<p><b>Core Principle: Your data stays in your hands.</b> This App is a local-first utility application. All your records, notes, to-dos, and conversations are stored on your own device.</p>
+
+<h2>2. Information Collection and Use</h2>
+
+<h3>2.1 Information We Do Not Collect</h3>
+<table>
+  <tr><th>Information Type</th><th>Description</th></tr>
+  <tr><td>Personal Identity Information</td><td>No online account system; does not collect names, email addresses, phone numbers, or other identity information</td></tr>
+  <tr><td>Location Information</td><td>Does not request location permissions; does not collect GPS coordinates</td></tr>
+  <tr><td>Device Identifiers</td><td>Does not collect IDFA, IDFV, or other device identifiers</td></tr>
+  <tr><td>Usage Analytics</td><td>Does not integrate any analytics/statistics SDKs; no event tracking</td></tr>
+  <tr><td>Advertising Identifiers</td><td>Does not integrate advertising SDKs; no ad tracking</td></tr>
+  <tr><td>Network Logs</td><td>Does not record user network request logs</td></tr>
+</table>
+
+<h3>2.2 Information Stored Locally on Device</h3>
+<table>
+  <tr><th>Information Type</th><th>Storage Location</th><th>Purpose</th></tr>
+  <tr><td>Captured Photos</td><td>Device local file system</td><td>Content display and review</td></tr>
+  <tr><td>OCR Text, AI Summaries, Key Points</td><td>Local JSON files</td><td>Search and knowledge review</td></tr>
+  <tr><td>Plain Text Records</td><td>Local JSON files</td><td>Manual text notes</td></tr>
+  <tr><td>To-Do Items</td><td>Local JSON files</td><td>Task management (including deadlines, reminder markers)</td></tr>
+  <tr><td>Custom Folders, Tags, Schedule Tags</td><td>Local JSON files</td><td>Categorization and schedule coloring</td></tr>
+  <tr><td>Spark Conversation History</td><td>Local JSON files</td><td>AI conversation record storage and search</td></tr>
+  <tr><td>Spark Long-Term Memory</td><td>Local JSON files</td><td>AI assistant personalized memory</td></tr>
+  <tr><td>Local Account Profile (Nickname, Avatar)</td><td>Local file system</td><td>Profile display</td></tr>
+  <tr><td>Semantic Vector Index (Search / Deep Association)</td><td>Local file system</td><td>Photo note semantic search and related note recommendations (on-device vectors)</td></tr>
+  <tr><td>API Key</td><td>iOS Keychain (hardware-level encryption)</td><td>AI service invocation</td></tr>
+  <tr><td>App Preferences (Theme, Language, Model Config, etc.)</td><td>UserDefaults</td><td>Personalized experience</td></tr>
+  <tr><td>Calendar Schedule Information</td><td>Processed in memory, not stored long-term</td><td>Matching schedule context when capturing photos</td></tr>
+</table>
+
+<h3>2.3 Information Sent to Third Parties</h3>
+<p>In the following scenarios, data is sent to third-party AI service providers <b>configured by the user</b>:</p>
+<table>
+  <tr><th>Scenario</th><th>Content Sent</th><th>Recipient</th><th>User Control</th></tr>
+  <tr><td>AI Photo Note Processing</td><td>Photo image data + text prompts</td><td>User-configured AI service provider</td><td>Automatically processed after user-initiated capture; AI features can be disabled</td></tr>
+  <tr><td>Spark Conversations</td><td>User messages + conversation history context</td><td>User-configured AI service provider</td><td>User-initiated conversations</td></tr>
+  <tr><td>Spark Agent Operations</td><td>User instructions + related photo notes/schedule/to-do data</td><td>User-configured AI service provider</td><td>User-initiated Agent mode</td></tr>
+  <tr><td>WebFetch Web Scraping</td><td>Target URL (provided by user)</td><td>Server hosting the target webpage</td><td>Triggered only by user instructions in Agent mode</td></tr>
+  <tr><td>Cloud Semantic Retrieval (Optional)</td><td>Photo note text summaries</td><td>User-configured AI service provider Embedding API</td><td><b>Disabled by default</b>; must be manually enabled in Labs</td></tr>
+  <tr><td>iCloud Sync (if enabled)</td><td>.tmn archive files</td><td>Apple iCloud Drive</td><td>Manually triggered by user</td></tr>
+</table>
+<blockquote><b>Important:</b> All AI service calls above use API Keys <b>provided by the user</b> and are sent to AI service providers <b>chosen by the user</b>. Notiee does not operate its own servers and does not intercept or store any data sent to third parties. <b>The "Deep Association" related note recommendations on the detail page are computed entirely on-device by default and send no data to any server.</b></blockquote>
+
+<h2>3. Permission Usage</h2>
+<table>
+  <tr><th>Permission</th><th>Purpose</th><th>Required</th><th>Revocable</th></tr>
+  <tr><td>Camera</td><td>Capture class notes, meeting minutes, whiteboard content</td><td>Core function, required</td><td>Can be disabled in system settings</td></tr>
+  <tr><td>Microphone</td><td>Voice recording (if enabled)</td><td>Optional</td><td>Can be disabled in system settings</td></tr>
+  <tr><td>Photo Library</td><td>Import existing images</td><td>Optional</td><td>Can be disabled in system settings</td></tr>
+  <tr><td>Calendar</td><td>Read system calendar to match current schedule context</td><td>Optional (can manually select schedule if disabled)</td><td>Can be disabled in system settings</td></tr>
+  <tr><td>Speech Recognition</td><td>Speech-to-text</td><td>Optional</td><td>Can be disabled in system settings</td></tr>
+  <tr><td>Notifications</td><td>Schedule reminders, to-do reminders</td><td>Optional</td><td>Can be disabled in system settings</td></tr>
+</table>
+<blockquote>This App does not request location permissions, Bluetooth permissions, contacts permissions, or any other unlisted system permissions.</blockquote>
+
+<h2>4. Data Storage and Security</h2>
+<table>
+  <tr><th>Measure</th><th>Description</th></tr>
+  <tr><td>Local-First</td><td>All records and to-dos are stored locally on device by default, not dependent on the cloud</td></tr>
+  <tr><td>Keychain Encryption</td><td>API Keys are stored using iOS Keychain (hardware-level Secure Enclave encryption), not written to regular files, and automatically cleared upon app uninstallation</td></tr>
+  <tr><td>HTTPS Transport</td><td>All AI service calls use HTTPS encrypted transport</td></tr>
+  <tr><td>No Cloud Retention</td><td>Notiee does not operate its own servers and does not collect or store user content data</td></tr>
+  <tr><td>iCloud Security</td><td>If the user manually enables iCloud sync, data is stored in the user's personal iCloud Drive, protected by Apple's security framework</td></tr>
+  <tr><td>WebFetch Security</td><td>Uses ephemeral network sessions (non-persistent cookies/cache), built-in SSRF protection, blocks access to local and intranet addresses (localhost, 10.x, 172.16-31.x, 192.168.x, etc.)</td></tr>
+  <tr><td>On-Device Semantic Computing</td><td>Uses Apple NLEmbedding on-device vector engine by default; vector computation for photo note search and "Deep Association" related recommendations is performed entirely on-device and not uploaded to any server</td></tr>
+  <tr><td>No Unsolicited Network Requests</td><td>Except for user-initiated AI processing, Spark conversations, WebFetch, or iCloud sync, this App does not spontaneously send data to any server</td></tr>
+</table>
+
+<h2>5. Data Sharing and Disclosure</h2>
+<p>5.1 <b>Does not sell, rent, or trade user data to third parties.</b></p>
+<p>5.2 User data may only be disclosed under the following circumstances: required by laws and regulations; to protect the legal rights of the developer or others; with the user's explicit consent.</p>
+<p>5.3 Data for AI service calls is sent to AI service providers chosen by the user and is subject to those providers' own privacy policies, unrelated to this App.</p>
+<p>5.4 Web content fetched by WebFetch is provided by the target website and is subject to that website's terms of use.</p>
+
+<h2>6. User Rights</h2>
+<table>
+  <tr><th>Right</th><th>Description</th></tr>
+  <tr><td>Right of Access</td><td>All data can be viewed directly within the App, including photo notes, to-dos, Spark conversations, profiles, etc.</td></tr>
+  <tr><td>Right of Export</td><td>Supports one-click export of all records as .tmn archive files (Settings → Me → Backup &amp; Restore)</td></tr>
+  <tr><td>Right of Deletion</td><td>Individual records, to-dos, conversations can be deleted within the App, or all data can be cleared</td></tr>
+  <tr><td>Right of Search</td><td>Supports full-text search and semantic search of photo notes and Spark conversations</td></tr>
+  <tr><td>Right to Withdraw Consent</td><td>Any permission can be disabled in system settings</td></tr>
+  <tr><td>Account Deletion</td><td>Currently uses a local account; uninstalling the App clears all local data (iCloud synced files must be manually deleted in iCloud)</td></tr>
+</table>
+
+<h2>7. Protection of Minors</h2>
+<p>7.1 This App is designed for students and professionals and is not specifically targeted at children under 14.</p>
+<p>7.2 If a guardian discovers that a minor is using this App without consent, they may contact us using the contact information at the end of this policy to delete the data.</p>
+
+<h2>8. Spark AI Assistant Privacy</h2>
+<p>Spark is the built-in AI assistant of this App with the following privacy features:</p>
+<p>8.1 <b>Conversation Content:</b> Spark's conversation messages (user input and AI responses) are sent to the user-configured AI service provider for processing. Conversation history is stored locally on the device.</p>
+<p>8.2 <b>Agent Mode:</b> When using Agent mode, Spark may read the user's photo notes, schedules, to-dos, and other local data as operational context, and related data may be sent to the AI service provider with the request.</p>
+<p>8.3 <b>WebFetch:</b> In Agent mode, web content may be fetched based on user instructions, using ephemeral secure sessions with no persistent network data.</p>
+<p>8.4 <b>Long-Term Memory:</b> Spark's memory system (user preferences, habits, etc.) is stored locally on the device and not uploaded to any server.</p>
+<p>8.5 <b>Privacy Consent:</b> When using Spark for the first time, users must read and agree to the Spark Privacy Consent.</p>
+
+<h2>9. Policy Updates</h2>
+<p>9.1 We reserve the right to update this Privacy Policy at any time.</p>
+<p>9.2 Material changes will be notified to users via in-app pop-up.</p>
+<p>9.3 Continued use of this App after updates constitutes your agreement to be bound by the updated policy.</p>
+
+<h2>10. Third-Party Privacy Policies</h2>
+<p>We recommend reading the privacy policies of the corresponding service providers when configuring AI services:</p>
+<table>
+  <tr><th>Service Provider</th><th>Privacy Policy Link</th></tr>
+  <tr><td>OpenAI</td><td>https://openai.com/policies/privacy-policy</td></tr>
+  <tr><td>Anthropic</td><td>https://www.anthropic.com/privacy</td></tr>
+  <tr><td>DeepSeek</td><td>https://www.deepseek.com/policies/privacy</td></tr>
+  <tr><td>Alibaba Cloud Bailian</td><td>https://help.aliyun.com/document_detail/</td></tr>
+  <tr><td>Volcano Engine</td><td>https://www.volcengine.com/docs/</td></tr>
+  <tr><td>MiniMax</td><td>https://platform.minimaxi.com/document</td></tr>
+</table>
+
+<h2>11. Contact</h2>
+<p>For any privacy-related questions, please contact us through the following channels:</p>
+<ul>
+  <li><b>Email:</b> woxiantao@icloud.com</li>
+  <li><b>Developer Website:</b> https://tanqinghua.asia</li>
+  <li><b>Response Commitment:</b> We will respond to privacy-related inquiries within 15 business days</li>
+</ul>
+
+<hr>
+
+<h2>Appendix A: Data Lifecycle</h2>
+<pre>Capture → Local Storage → [User triggers AI Processing] → Sent to AI Service Provider → Returns Result → Local Storage
+                        ↓
+                [Spark Conversation] → Sent to AI Service Provider → Returns Result → Local Storage
+                        ↓
+                [Agent Operation] → Reads Local Data → Sent to AI Service Provider → Executes Operation
+                        ↓
+                [WebFetch] → Temporary Web Scraping → Returns Content → Not Persisted
+                        ↓
+                [Deep Association / On-Device Search] → On-Device Vector Computation → Local Matching → Not Transmitted
+                        ↓
+                [Cloud Semantic Retrieval (Optional)] → Sends Text to Embedding API → Returns Vector → Local Storage
+                        ↓
+                [iCloud Sync] → Sent to iCloud Drive
+                        ↓
+                [User Deletion] → Local File Removal + AI Service Provider Side Handled per Their Policy</pre>
+
+<h2>Appendix B: Technical Implementation Privacy Highlights</h2>
+<table>
+  <tr><th>Implementation</th><th>Description</th></tr>
+  <tr><td>No Tracking</td><td>Does not integrate any analytics/statistics SDKs</td></tr>
+  <tr><td>No Ads</td><td>Does not integrate advertising SDKs</td></tr>
+  <tr><td>No Unsolicited Network Requests</td><td>Except for user-initiated actions, does not spontaneously send data to any server</td></tr>
+  <tr><td>API Key Localization</td><td>Stored in Keychain, automatically cleared upon app uninstallation</td></tr>
+  <tr><td>Transport Encryption</td><td>All AI requests use HTTPS</td></tr>
+  <tr><td>WebFetch Ephemeral Sessions</td><td>Uses URLSessionConfiguration.ephemeral, no persistent cookies/cache</td></tr>
+  <tr><td>WebFetch SSRF Protection</td><td>Blocks localhost, intranet IPs, IPv6 local addresses</td></tr>
+  <tr><td>On-Device Vector Engine</td><td>Uses Apple NLEmbedding by default; semantic computation for search and Deep Association is performed on-device</td></tr>
+  <tr><td>Deep Association Localization</td><td>Related note recommendations on detail pages consistently use local vectors and an independent local index, triggering no cloud requests during browsing</td></tr>
+  <tr><td>Cloud Retrieval Optional</td><td>Cloud Embedding is disabled by default; must be manually enabled by the user</td></tr>
+</table>
+
+<hr>
+<blockquote><b>Version History</b><br>
+v1.0.5 (2026-06-24): Added "Deep Association" on-device semantic related notes (local vectors, independent local index, no external transmission) description; to-do items local persistence; added plain text record data description<br>
+v1.0.4 (2026-06-24, unreleased): Added Spark Agent WebFetch privacy description, cloud semantic retrieval description, local account data description, WebFetch security measures, etc.<br>
+v1.0.3 (2026-06-04): Added Spark AI Assistant conversation data description<br>
+v1.0.1: Initial version</blockquote>
+
+</body>
+</html>

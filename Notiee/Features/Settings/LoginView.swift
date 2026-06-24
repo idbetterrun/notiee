@@ -273,7 +273,7 @@ struct LoginView: View {
 
     private func legalHTMLViewForLogin(base: String, title: String) -> some View {
         Group {
-            if let url = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "html") {
+            if let url = LegalDocument.bundleURL(base: base) {
                 LegalHTMLView(url: url)
                     .ignoresSafeArea(edges: .bottom)
             } else {
