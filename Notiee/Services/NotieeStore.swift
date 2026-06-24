@@ -372,12 +372,21 @@ final class NotieeStore: ObservableObject {
 
     static func sample(currentDate: Date = Date()) -> NotieeStore {
         let today = TodayViewModel.sample(currentDate: currentDate)
+        // 预览/示例数据走唯一的临时文件存储，绝不写入真实的 records.json / todos.json 等。
+        let tmp = FileManager.default.temporaryDirectory
+        let prefix = "NotieePreview-\(UUID().uuidString)-"
+        func tmpURL(_ name: String) -> URL { tmp.appendingPathComponent("\(prefix)\(name)") }
         return NotieeStore(
             currentDate: currentDate,
             events: today.events,
             customEvents: today.events,
             todos: today.todos,
-            records: today.records
+            records: today.records,
+            recordStore: JSONNoteRecordStore(fileURL: tmpURL("records.json")),
+            todoStore: JSONNoteTodoStore(fileURL: tmpURL("todos.json")),
+            folderStore: JSONCustomFolderStore(fileURL: tmpURL("folders.json")),
+            tagStore: JSONEventTagStore(fileURL: tmpURL("tags.json")),
+            eventStore: JSONScheduledEventStore(fileURL: tmpURL("events.json"))
         )
     }
 
