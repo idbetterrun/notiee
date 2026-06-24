@@ -278,9 +278,16 @@ final class CalendarManager: ObservableObject {
     }
 
     func updateEventTag(eventID: UUID, tagID: UUID?) {
-        if let index = events.firstIndex(where: { $0.id == eventID }) {
-            events[index].tagID = tagID
+        // 自定义事件（.notiee/.ai/.ics）：写入 customEvents 并落盘，否则大退后标签丢失。
+        if let index = customEvents.firstIndex(where: { $0.id == eventID }) {
+            customEvents[index].tagID = tagID
+            persistCustomEvents()
         }
+        // 系统日历事件：更新内存副本（颜色靠 eventTagMapping 按标题在 syncCalendar 时重套）。
+        if let index = calendarEvents.firstIndex(where: { $0.id == eventID }) {
+            calendarEvents[index].tagID = tagID
+        }
+        updateEventsList()
     }
 
     // MARK: - Calendar Sync

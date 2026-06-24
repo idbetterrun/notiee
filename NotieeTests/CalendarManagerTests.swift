@@ -69,6 +69,42 @@ final class CalendarManagerTests: XCTestCase {
         XCTAssertTrue(mgr.allEvents.contains { $0.id == event.id && $0.title == "New" })
     }
 
+    func testUpdateEventTag_customEvent_persistsAcrossReload() throws {
+        let store = makeEventStore()
+        let event = makeEvent(title: "工作会议") // .notiee → customEvents
+        let mgr = CalendarManager(
+            currentDate: ref,
+            calendar: Calendar(identifier: .gregorian),
+            customEvents: [event],
+            eventStore: store,
+            persistedRecordsProvider: { [] }
+        )
+        let tag = UUID()
+        mgr.updateEventTag(eventID: event.id, tagID: tag)
+
+        XCTAssertEqual(mgr.allEvents.first { $0.id == event.id }?.tagID, tag)
+
+        // 模拟大退重启：用同一 store 重载
+        let reloaded = try store.loadEvents()
+        XCTAssertEqual(reloaded.first { $0.id == event.id }?.tagID, tag, "自定义事件标签应持久化")
+    }
+
+    func testUpdateEventTag_clearingPersists() throws {
+        let store = makeEventStore()
+        let event = makeEvent(title: "临时安排")
+        let mgr = CalendarManager(
+            currentDate: ref,
+            calendar: Calendar(identifier: .gregorian),
+            customEvents: [event],
+            eventStore: store,
+            persistedRecordsProvider: { [] }
+        )
+        mgr.updateEventTag(eventID: event.id, tagID: UUID())
+        mgr.updateEventTag(eventID: event.id, tagID: nil)
+        let reloaded = try store.loadEvents()
+        XCTAssertNil(reloaded.first { $0.id == event.id }?.tagID)
+    }
+
     func testUpdateEvent_unknownID_fails() {
         let mgr = makeManager()
         XCTAssertFalse(mgr.updateEvent(id: UUID(), title: "X", startDate: nil, endDate: nil, notes: nil))
