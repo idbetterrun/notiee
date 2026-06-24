@@ -186,7 +186,7 @@ struct LoginView: View {
                     .font(.caption)
                     .foregroundColor(isDark ? .white.opacity(0.3) : .secondary.opacity(0.7))
                 NavigationLink {
-                    legalPDFViewForLogin(base: "UserAgreement", title: "用户协议")
+                    legalHTMLViewForLogin(base: "UserAgreement", title: "用户协议")
                 } label: {
                     Text("《用户协议》")
                         .font(.caption.weight(.medium))
@@ -196,7 +196,7 @@ struct LoginView: View {
                     .font(.caption)
                     .foregroundColor(isDark ? .white.opacity(0.3) : .secondary.opacity(0.7))
                 NavigationLink {
-                    legalPDFViewForLogin(base: "PrivacyPolicy", title: "隐私政策")
+                    legalHTMLViewForLogin(base: "PrivacyPolicy", title: "隐私政策")
                 } label: {
                     Text("《隐私政策》")
                         .font(.caption.weight(.medium))
@@ -271,10 +271,10 @@ struct LoginView: View {
         }
     }
 
-    private func legalPDFViewForLogin(base: String, title: String) -> some View {
+    private func legalHTMLViewForLogin(base: String, title: String) -> some View {
         Group {
-            if let url = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "pdf") {
-                PDFPreviewView(url: url)
+            if let url = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "html") {
+                LegalHTMLView(url: url)
                     .ignoresSafeArea(edges: .bottom)
             } else {
                 Text("无法加载\(title)")

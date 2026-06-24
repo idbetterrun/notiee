@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct AboutNotieeView: View {
+    /// 开发者署名三态，点击循环（彩蛋）。默认 idbetterrun。
+    private let developerNames = ["idbetterrun", "woxiantao", "我先逃"]
+    @State private var developerIndex = 0
+
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
@@ -17,9 +21,19 @@ struct AboutNotieeView: View {
                 VStack(spacing: 0) {
                     InfoRow(title: "版本号", value: versionText)
                     Divider().padding(.leading)
-                    InfoRow(title: "开发者", value: "douyin@idbetterrun")
+                    Button {
+                        developerIndex = (developerIndex + 1) % developerNames.count
+                    } label: {
+                        InfoRow(title: "开发者", value: developerNames[developerIndex])
+                    }
+                    .buttonStyle(.plain)
                     Divider().padding(.leading)
                     InfoRow(title: "联系邮箱", value: "woxiantao@icloud.com")
+                    Divider().padding(.leading)
+                    Link(destination: URL(string: "https://tanqinghua.asia")!) {
+                        InfoRow(title: "开发者网页", value: "tanqinghua.asia", showsLinkChevron: true)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .cornerRadius(12)
@@ -28,13 +42,13 @@ struct AboutNotieeView: View {
                 // Links Section
                 VStack(spacing: 0) {
                     NavigationLink {
-                        legalPDFView(base: "UserAgreement", title: "用户协议")
+                        legalHTMLView(base: "UserAgreement", title: "用户协议")
                     } label: {
                         ActionRow(title: "用户协议")
                     }
                     Divider().padding(.leading)
                     NavigationLink {
-                        legalPDFView(base: "PrivacyPolicy", title: "隐私政策")
+                        legalHTMLView(base: "PrivacyPolicy", title: "隐私政策")
                     } label: {
                         ActionRow(title: "隐私政策")
                     }
@@ -122,22 +136,23 @@ struct AboutNotieeView: View {
         }
     }
 
-    private func legalPDFURL(base: String) -> URL? {
+    private func legalHTMLURL(base: String) -> URL? {
         let suffix = legalLocaleSuffix
-        if let url = Bundle.main.url(forResource: "\(base)_\(suffix)", withExtension: "pdf") {
+        if let url = Bundle.main.url(forResource: "\(base)_\(suffix)", withExtension: "html") {
             return url
         }
+        // 目前仅内置简体中文，其它语言环境回退到简体。
         if suffix != "zh-Hans",
-           let fallback = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "pdf") {
+           let fallback = Bundle.main.url(forResource: "\(base)_zh-Hans", withExtension: "html") {
             return fallback
         }
         return nil
     }
 
-    private func legalPDFView(base: String, title: String) -> some View {
+    private func legalHTMLView(base: String, title: String) -> some View {
         Group {
-            if let url = legalPDFURL(base: base) {
-                PDFPreviewView(url: url)
+            if let url = legalHTMLURL(base: base) {
+                LegalHTMLView(url: url)
                     .ignoresSafeArea(edges: .bottom)
             } else {
                 ScrollView {
@@ -156,6 +171,7 @@ struct AboutNotieeView: View {
 private struct InfoRow: View {
     let title: String
     let value: String
+    var showsLinkChevron: Bool = false
 
     var body: some View {
         HStack {
@@ -163,9 +179,15 @@ private struct InfoRow: View {
                 .foregroundColor(.primary)
             Spacer()
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundColor(showsLinkChevron ? NotieeColors.themed(.blue) : .secondary)
+            if showsLinkChevron {
+                Image(systemName: "arrow.up.right")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding()
+        .contentShape(Rectangle())
     }
 }
 
