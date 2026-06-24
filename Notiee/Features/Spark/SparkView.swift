@@ -22,7 +22,7 @@ struct SparkView: View {
 
     init(store: NotieeStore) {
         self.store = store
-        let vm = SparkViewModel(recordManager: store.recordManager, calendarManager: store.calendarManager)
+        let vm = SparkViewModel(recordManager: store.recordManager, calendarManager: store.calendarManager, folderTagManager: store.folderTagManager)
         _viewModel = StateObject(wrappedValue: vm)
     }
 

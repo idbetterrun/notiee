@@ -16,9 +16,11 @@ final class NoteCreateTool: AgentTool {
     )
 
     let recordManager: RecordManager
+    let folderTagManager: FolderTagManager
 
-    init(recordManager: RecordManager) {
+    init(recordManager: RecordManager, folderTagManager: FolderTagManager) {
         self.recordManager = recordManager
+        self.folderTagManager = folderTagManager
     }
 
     func execute(parameters: [String: Any]) async throws -> AgentToolResult {
@@ -27,13 +29,17 @@ final class NoteCreateTool: AgentTool {
         }
         let content = parameters["content"] as? String ?? ""
         let eventID = (parameters["event_id"] as? String).flatMap(UUID.init(uuidString:))
+        let folderID = folderTagManager.findOrCreateFolder(named: FolderTagManager.sparkFolderName)
 
         let newRecord = NoteRecord(
             eventID: eventID,
+            folderID: folderID,
             localImagePaths: [],
             title: title,
             summary: String(content.prefix(400)),
-            detailedContent: content
+            detailedContent: content,
+            processingState: .completed,
+            source: .spark
         )
         recordManager.addRecord(newRecord)
 

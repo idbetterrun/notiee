@@ -64,6 +64,7 @@ final class SparkViewModel: ObservableObject {
     let settingsStore: AppSettingsPersisting
     let recordManager: RecordManager?
     let calendarManager: CalendarManager?
+    let folderTagManager: FolderTagManager?
 
     var recordsProvider: (() -> [NoteRecord])?
     private var loadedFromHistoryID: UUID?
@@ -76,13 +77,15 @@ final class SparkViewModel: ObservableObject {
         repository: any SparkConversationCoordinating = SparkConversationRepository.live,
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
         recordManager: RecordManager? = nil,
-        calendarManager: CalendarManager? = nil
+        calendarManager: CalendarManager? = nil,
+        folderTagManager: FolderTagManager? = nil
     ) {
         self.aiService = aiService
         self.repository = repository
         self.settingsStore = settingsStore
         self.recordManager = recordManager
         self.calendarManager = calendarManager
+        self.folderTagManager = folderTagManager
         checkPrivacyNotice()
         loadGreeting()
         restoreCurrentConversationIfNeeded()
@@ -504,7 +507,7 @@ final class SparkViewModel: ObservableObject {
     }
 
     private func makeAgentExecutor() -> AgentExecutor? {
-        guard let recordManager, let calendarManager else { return nil }
+        guard let recordManager, let calendarManager, let folderTagManager else { return nil }
 
         let embeddingModel = UserDefaults.standard.string(forKey: "spark.semanticSearch.embeddingModel") ?? "text-embedding-3-small"
         let cloud = CloudEmbeddingService(configProvider: { [settingsStore] in
@@ -521,7 +524,7 @@ final class SparkViewModel: ObservableObject {
         let tools: [any AgentTool] = [
             NoteSearchTool(recordManager: recordManager, searchEngine: searchEngine),
             NoteGetDetailTool(recordManager: recordManager),
-            NoteCreateTool(recordManager: recordManager),
+            NoteCreateTool(recordManager: recordManager, folderTagManager: folderTagManager),
             NoteUpdateTool(recordManager: recordManager),
             TodoListTool(recordManager: recordManager),
             TodoCreateTool(recordManager: recordManager),
