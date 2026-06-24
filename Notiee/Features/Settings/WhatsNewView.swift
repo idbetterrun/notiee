@@ -5,52 +5,52 @@ struct WhatsNewContainerView: View {
 
     private let highlights = [
         WhatsNewHighlight(
-            title: "Spark AI 伴侣",
-            subtitle: "全新第四标签页，智能 AI 助手帮你回顾笔记、回答问题，支持对话历史与自动记忆。",
+            title: "Spark Agent 全面增强",
+            subtitle: "Agent 模式新增日程修改、日期查询、网页抓取等工具，还能切换模型与思考强度，生成中可随时终止回复。",
             systemImage: "sparkles",
             tint: .orange
         ),
         WhatsNewHighlight(
-            title: "Spark 风格自定义",
-            subtitle: "6 种预设聊天风格（温柔知心、犀利毒舌等），还支持自定义风格指令，打造专属 AI 伴侣。",
-            systemImage: "theatermasks",
-            tint: .purple
-        ),
-        WhatsNewHighlight(
-            title: "智能记忆系统",
-            subtitle: "Spark 会自动记住你的名字、偏好和习惯，下次聊天时自然提起，越聊越懂你。",
+            title: "语义检索 + 深度联想",
+            subtitle: "拍记搜索升级为语义理解，不再只靠关键词；详情页底部按内容相关度智能推荐相关历史笔记。默认全程在设备本地计算，不外传。",
             systemImage: "brain.head.profile.fill",
             tint: .pink
         ),
         WhatsNewHighlight(
-            title: "Spark Token 追踪",
-            subtitle: "回顾页新增 Spark 耗费Token估计，独立统计 AI 对话消耗，与拍记 Token 分开显示。",
-            systemImage: "chart.pie.fill",
-            tint: .blue
-        ),
-        WhatsNewHighlight(
-            title: "多语言全面适配",
-            subtitle: "完善繁体中文与 English 的全界面翻译，覆盖 Spark、设置、回顾等全部页面，告别机翻感。",
-            systemImage: "globe",
-            tint: .indigo
-        ),
-        WhatsNewHighlight(
-            title: "架构与性能优化",
-            subtitle: "管理架构重组、设置页拆分、Key 集中化，代码更规范，页面加载速度大幅提升。",
-            systemImage: "gearshape.2.fill",
-            tint: .gray
-        ),
-        WhatsNewHighlight(
-            title: "AI Pipeline 修复",
-            subtitle: "移除无限重试循环，引入指数退避机制，网络异常时快速返回错误不再卡死。",
-            systemImage: "arrow.triangle.merge",
+            title: "全量待办管理",
+            subtitle: "全新待办页面，按截止日分桶（逾期 / 今天 / 明天 / 本周 / 更晚）；待办与截止日期现已稳定保存，重启不丢。",
+            systemImage: "checklist",
             tint: .green
         ),
         WhatsNewHighlight(
-            title: "日程匹配增强",
-            subtitle: "修复系统日历事件 ID 重启后变化导致丢失关联的问题，日程追踪更稳定。",
-            systemImage: "calendar.badge.clock",
+            title: "本地账户",
+            subtitle: "设置昵称与头像，拥有专属身份标识。所有资料仅存本机，不上传任何服务器。",
+            systemImage: "person.crop.circle.fill",
+            tint: .blue
+        ),
+        WhatsNewHighlight(
+            title: "纯文本记录",
+            subtitle: "不止拍照，现在也能直接新建文字笔记，随手记录想法。",
+            systemImage: "square.and.pencil",
             tint: .teal
+        ),
+        WhatsNewHighlight(
+            title: "记录详情焕新",
+            subtitle: "详情页按来源智能呈现内容，去除冗余区块；Spark 生成的记录带真摘要不再与正文重复；Markdown 渲染开关移至「设置 → 外观」。",
+            systemImage: "doc.text.image",
+            tint: .indigo
+        ),
+        WhatsNewHighlight(
+            title: "日程颜色标签",
+            subtitle: "给日程打上彩色标签（工作 / 课程 / 临时等），现已稳定保存，重启后颜色不再丢失。",
+            systemImage: "tag.fill",
+            tint: .purple
+        ),
+        WhatsNewHighlight(
+            title: "备份与稳定性",
+            subtitle: "单个 .tmn 文件导入移至「备份与恢复」；修复多项数据持久化问题，让你的记录更安心。",
+            systemImage: "externaldrive.fill.badge.checkmark",
+            tint: .gray
         )
     ]
 
@@ -84,7 +84,7 @@ struct WhatsNewContainerView: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
 
-                Text("这次重磅推出 Spark AI 伴侣，并完成了全面的多语言适配与性能优化。")
+                Text("Spark 更聪明了，待办与记录更稳更全：语义检索、深度联想、全量待办、本地账户与纯文本记录一次到位。")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
@@ -100,11 +100,11 @@ struct WhatsNewContainerView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.green)
 
-                Text("你的 AI 伴侣来了")
+                Text("更聪明，也更稳了")
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text("Spark 正式登场，多语言全面适配。")
+                Text("语义检索 · 深度联想 · 全量待办")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
