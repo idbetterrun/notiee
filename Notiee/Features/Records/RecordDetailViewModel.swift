@@ -51,6 +51,27 @@ final class RecordDetailViewModel: ObservableObject {
         store.todos(for: record)
     }
 
+    // MARK: - 区块可见性（按来源差异化）
+
+    /// AI 摘要：拍照记录始终展示；Spark 记录仅当有真摘要且不等于正文时展示；纯文本不展示。
+    var showsSummarySection: Bool {
+        switch record.source {
+        case .photo: return true
+        case .spark: return !record.summary.isEmpty && record.summary != record.detailedContent
+        case .text: return false
+        }
+    }
+
+    /// OCR 原文只对拍照记录有意义（纯文本/Spark 无图、无 OCR）。
+    var showsOCRSection: Bool {
+        record.source == .photo
+    }
+
+    /// 仅拍照记录会 AI 抽取待办，故只有它在待办为空时展示「将自动提取」占位。
+    var showsTodoPlaceholder: Bool {
+        record.source == .photo
+    }
+
     private var fallbackSummary: String {
         switch record.processingState {
         case .pending, .processing:
@@ -130,20 +151,35 @@ final class RecordDetailViewModel: ObservableObject {
         return previous
     }
 
-    var relatedRecords: [NoteRecord] {
-        guard UserDefaults.standard.bool(forKey: UDK.labDeepAssociationModeEnabled) else { return [] }
+    // MARK: - 相关内容（语义联想）
 
-        let allRecords = store.records.filter { !$0.isDeleted && $0.id != record.id && $0.processingState == .completed }
+    /// 被动推荐的质量门槛：高于 Spark 主动搜索的阈值，宁缺毋滥。需在真机数据上调优。
+    private static let relatedThreshold: Float = 0.6
+    private static let relatedLimit = 3
 
-        let sameEvent = allRecords
-            .filter { $0.eventID == record.eventID }
-            .sorted { $0.capturedAt > $1.capturedAt }
-            .prefix(3)
+    /// 详情页「相关内容」。异步语义计算，算好后填充；空则该区块自动隐藏。
+    @Published private(set) var relatedRecords: [NoteRecord] = []
 
-        let sameTitle = allRecords
-            .filter { $0.title == record.title && $0.eventID != record.eventID }
-            .prefix(2)
+    /// 固定走本地向量 + 独立索引：浏览时不触发云端 embedding（零成本、不外传）。
+    private lazy var relatedEngine = SemanticSearchEngine(
+        embeddingService: LocalEmbeddingService(),
+        index: .relatedNotes
+    )
 
-        return Array(sameEvent) + Array(sameTitle)
+    func loadRelatedRecords() async {
+        guard UserDefaults.standard.bool(forKey: UDK.labDeepAssociationModeEnabled) else {
+            relatedRecords = []
+            return
+        }
+
+        let candidates = store.records.filter {
+            !$0.isDeleted && $0.id != record.id && $0.processingState == .completed
+        }
+        relatedRecords = await relatedEngine.related(
+            to: record,
+            in: candidates,
+            limit: Self.relatedLimit,
+            threshold: Self.relatedThreshold
+        )
     }
 }

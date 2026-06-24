@@ -10,6 +10,7 @@ final class NoteCreateTool: AgentTool {
         properties: [
             "title": AgentToolProperty(type: "string", description: "拍记标题", enumValues: nil, items: nil),
             "content": AgentToolProperty(type: "string", description: "拍记详细内容（可选）", enumValues: nil, items: nil),
+            "summary": AgentToolProperty(type: "string", description: "一句话摘要（可选但推荐）。提炼内容要点，不要照抄正文。", enumValues: nil, items: nil),
             "event_id": AgentToolProperty(type: "string", description: "关联的日程UUID（可选）", enumValues: nil, items: nil)
         ],
         required: ["title"]
@@ -28,6 +29,8 @@ final class NoteCreateTool: AgentTool {
             throw AgentToolError.missingParameter("title")
         }
         let content = parameters["content"] as? String ?? ""
+        // 真摘要：Spark 提供则用，否则留空（不照抄正文截断，避免摘要与正文重复）。
+        let summary = (parameters["summary"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let eventID = (parameters["event_id"] as? String).flatMap(UUID.init(uuidString:))
         let folderID = folderTagManager.findOrCreateFolder(named: FolderTagManager.sparkFolderName)
 
@@ -36,7 +39,7 @@ final class NoteCreateTool: AgentTool {
             folderID: folderID,
             localImagePaths: [],
             title: title,
-            summary: String(content.prefix(400)),
+            summary: summary,
             detailedContent: content,
             processingState: .completed,
             source: .spark

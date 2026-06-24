@@ -42,8 +42,9 @@ struct NewTextRecordSheet: View {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let record = NoteRecord(
             localImagePaths: [],
+            // 纯文本由用户手敲，没有 AI 摘要——留空，正文即内容。
             title: trimmedTitle.isEmpty ? "无标题" : trimmedTitle,
-            summary: String(bodyText.prefix(400)),
+            summary: "",
             detailedContent: bodyText,
             processingState: .completed,
             source: .text

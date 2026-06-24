@@ -39,6 +39,27 @@ final class NoteCreateToolTests: XCTestCase {
         XCTAssertEqual(created.folderID, sparkFolder.id)
     }
 
+    func testCreate_usesProvidedSummary() async throws {
+        let records = makeRecordManager()
+        let tool = NoteCreateTool(recordManager: records, folderTagManager: makeFolderManager())
+        _ = try await tool.execute(parameters: [
+            "title": "会议记录",
+            "content": "这是一段很长的会议正文……",
+            "summary": "讨论了 Q3 排期"
+        ])
+        let created = try XCTUnwrap(records.records.first)
+        XCTAssertEqual(created.summary, "讨论了 Q3 排期")
+        XCTAssertNotEqual(created.summary, created.detailedContent)
+    }
+
+    func testCreate_withoutSummary_leavesEmptyNotTruncatedContent() async throws {
+        let records = makeRecordManager()
+        let tool = NoteCreateTool(recordManager: records, folderTagManager: makeFolderManager())
+        _ = try await tool.execute(parameters: ["title": "随手记", "content": "正文内容"])
+        let created = try XCTUnwrap(records.records.first)
+        XCTAssertEqual(created.summary, "", "未提供摘要时应留空，而非照抄正文")
+    }
+
     func testSecondCreateReusesSameFolder() async throws {
         let records = makeRecordManager()
         let folders = makeFolderManager()

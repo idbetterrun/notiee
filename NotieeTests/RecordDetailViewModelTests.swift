@@ -83,6 +83,48 @@ final class RecordDetailViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.statusTitle, "已生成摘要")
     }
 
+    // MARK: - 区块可见性（按来源）
+
+    private func vm(for record: NoteRecord) -> RecordDetailViewModel {
+        let store = NotieeStore(
+            currentDate: referenceDate,
+            todos: [],
+            records: [record],
+            recordStore: JSONNoteRecordStore(fileURL: temporaryFileURL())
+        )
+        return RecordDetailViewModel(record: record, store: store)
+    }
+
+    func testPhotoRecord_showsSummaryOCRAndTodoPlaceholder() {
+        let r = NoteRecord(localImagePaths: ["x"], title: "拍照", source: .photo)
+        let m = vm(for: r)
+        XCTAssertTrue(m.showsSummarySection)
+        XCTAssertTrue(m.showsOCRSection)
+        XCTAssertTrue(m.showsTodoPlaceholder)
+    }
+
+    func testTextRecord_hidesSummaryOCRAndPlaceholder() {
+        let r = NoteRecord(localImagePaths: [], title: "纯文本", summary: "", detailedContent: "正文", source: .text)
+        let m = vm(for: r)
+        XCTAssertFalse(m.showsSummarySection)
+        XCTAssertFalse(m.showsOCRSection)
+        XCTAssertFalse(m.showsTodoPlaceholder)
+    }
+
+    func testSparkRecord_showsSummaryOnlyWhenRealSummaryDiffersFromContent() {
+        let withReal = NoteRecord(localImagePaths: [], title: "S", summary: "一句话摘要", detailedContent: "很长的正文", source: .spark)
+        XCTAssertTrue(vm(for: withReal).showsSummarySection)
+
+        let noSummary = NoteRecord(localImagePaths: [], title: "S", summary: "", detailedContent: "正文", source: .spark)
+        XCTAssertFalse(vm(for: noSummary).showsSummarySection)
+
+        let dup = NoteRecord(localImagePaths: [], title: "S", summary: "正文", detailedContent: "正文", source: .spark)
+        XCTAssertFalse(vm(for: dup).showsSummarySection, "摘要等于正文时不展示")
+
+        // Spark 记录无图，OCR 始终隐藏
+        XCTAssertFalse(vm(for: withReal).showsOCRSection)
+    }
+
     private func temporaryFileURL() -> URL {
         FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)

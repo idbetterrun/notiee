@@ -103,6 +103,9 @@ struct RecordDetailView: View {
         .fullScreenCover(item: $fullScreenItem) { item in
             FullScreenImageView(images: item.images, initialIndex: item.initialIndex)
         }
+        .task(id: viewModel.record.id) {
+            await viewModel.loadRelatedRecords()
+        }
         .onAppear {
             Task.detached(priority: .userInitiated) {
                 var images: [UIImage] = []
@@ -318,13 +321,16 @@ struct RecordDetailView: View {
     }
 
     private var summarySection: some View {
-        DetailSection(title: "AI 摘要", systemImage: "sparkles", isExpanded: $isSummaryExpanded) {
-            Text(viewModel.summaryText)
-                .font(.body)
-                .foregroundStyle(.primary)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        guard viewModel.showsSummarySection else { return AnyView(EmptyView()) }
+        return AnyView(
+            DetailSection(title: "AI 摘要", systemImage: "sparkles", isExpanded: $isSummaryExpanded) {
+                Text(viewModel.summaryText)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        )
     }
     
     private var detailedContentSection: some View {
@@ -350,39 +356,47 @@ struct RecordDetailView: View {
     }
 
     private var todoSection: some View {
-        DetailSection(title: "待办事项", systemImage: "checklist", isExpanded: $isTodosExpanded) {
-            if viewModel.todos.isEmpty {
-                Text("AI 提取出的行动项会显示在这里。")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                VStack(spacing: 12) {
-                    ForEach(viewModel.todos) { todo in
-                        SwipeableTodoRow(
-                            todo: todo,
-                            onToggleComplete: { viewModel.toggleTodo(id: todo.id) },
-                            onDelete: { viewModel.deleteTodo(id: todo.id) }
-                        )
-                    }
-                    
-                    Divider()
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("本地路径")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                        ForEach(viewModel.record.localImagePaths, id: \.self) { path in
-                            Text(path)
-                                .font(.caption.monospaced())
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
+        // 待办为空时：拍照记录展示「将自动提取」占位；纯文本/Spark 直接隐藏。
+        guard !viewModel.todos.isEmpty || viewModel.showsTodoPlaceholder else {
+            return AnyView(EmptyView())
+        }
+        return AnyView(
+            DetailSection(title: "待办事项", systemImage: "checklist", isExpanded: $isTodosExpanded) {
+                if viewModel.todos.isEmpty {
+                    Text("AI 提取出的行动项会显示在这里。")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    VStack(spacing: 12) {
+                        ForEach(viewModel.todos) { todo in
+                            SwipeableTodoRow(
+                                todo: todo,
+                                onToggleComplete: { viewModel.toggleTodo(id: todo.id) },
+                                onDelete: { viewModel.deleteTodo(id: todo.id) }
+                            )
+                        }
+
+                        if viewModel.showsTodoPlaceholder, !viewModel.record.localImagePaths.isEmpty {
+                            Divider()
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("本地路径")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                                ForEach(viewModel.record.localImagePaths, id: \.self) { path in
+                                    Text(path)
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-        }
+        )
     }
 
     private var continuationSection: some View {
@@ -444,13 +458,16 @@ struct RecordDetailView: View {
     }
 
     private var ocrSection: some View {
-        DetailSection(title: "OCR 原文", systemImage: "text.viewfinder", isExpanded: $isOCRExpanded) {
-            Text(viewModel.ocrText)
-                .font(.callout.monospaced())
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        guard viewModel.showsOCRSection else { return AnyView(EmptyView()) }
+        return AnyView(
+            DetailSection(title: "OCR 原文", systemImage: "text.viewfinder", isExpanded: $isOCRExpanded) {
+                Text(viewModel.ocrText)
+                    .font(.callout.monospaced())
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        )
     }
     
     private var infoSheetContent: some View {
