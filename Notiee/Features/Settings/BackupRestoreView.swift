@@ -13,6 +13,9 @@ struct BackupRestoreView: View {
     @State private var isImporting = false
     @State private var importPreviewData: [PreviewData] = []
     @State private var showingImportPreview = false
+
+    @State private var showingSingleTMNPicker = false
+    @State private var singleTMNPreview: PreviewData?
     
     var body: some View {
         Form {
@@ -73,6 +76,20 @@ struct BackupRestoreView: View {
             } footer: {
                 Text("选择一个包含 .tmn 记录文件的 ZIP 压缩包恢复到本地。")
             }
+
+            Section {
+                Button {
+                    showingSingleTMNPicker = true
+                } label: {
+                    HStack {
+                        Image(systemName: "doc.badge.plus")
+                        Text("导入单个 .tmn 文件")
+                    }
+                }
+                .disabled(isExporting || isImporting)
+            } footer: {
+                Text(".tmn 是 Notiee 及关联应用专属的结构化导出格式，支持图文完整记录的无损迁移。")
+            }
         }
         .navigationTitle("备份与恢复")
         .navigationBarTitleDisplayMode(.inline)
@@ -96,6 +113,31 @@ struct BackupRestoreView: View {
         }
         .sheet(isPresented: $showingImportPreview) {
             BackupImportPreviewSheet(previewData: importPreviewData, store: store)
+        }
+        .fileImporter(
+            isPresented: $showingSingleTMNPicker,
+            allowedContentTypes: [.item],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                Task {
+                    do {
+                        let (record, todos) = try await TMNImportService.importTMN(url: url)
+                        await MainActor.run {
+                            self.singleTMNPreview = PreviewData(record: record, todos: todos)
+                        }
+                    } catch {
+                        print("Single TMN import failed: \(error.localizedDescription)")
+                    }
+                }
+            case .failure(let error):
+                print("Single TMN import picker failed: \(error)")
+            }
+        }
+        .sheet(item: $singleTMNPreview) { data in
+            TMNImportPreviewSheet(record: data.record, todos: data.todos, store: store)
         }
     }
     

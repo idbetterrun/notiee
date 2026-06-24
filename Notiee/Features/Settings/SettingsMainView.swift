@@ -5,6 +5,7 @@ import Charts
 // MARK: - SettingsMainView
 struct SettingsMainView: View {
     @StateObject private var viewModel: SettingsViewModel
+    @AppStorage(UDK.labMarkdownRenderingEnabled) private var markdownRenderingEnabled = false
 
     @MainActor
     init(settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live) {
@@ -214,6 +215,11 @@ struct SettingsMainView: View {
                 Text("English").tag("en")
             }
             Text("切换语言后需要重新启动应用才能生效").font(.caption).foregroundColor(.secondary)
+
+            Toggle(isOn: $markdownRenderingEnabled) {
+                Label("Markdown 渲染", systemImage: "m.square")
+            }
+            Text("开启后，记录详情页若包含 Markdown 语法，将渲染为样式化排版。").font(.caption).foregroundColor(.secondary)
         }
     }
 
