@@ -7,6 +7,8 @@ struct RecordsView: View {
     @State private var showingCreateFolderAlert = false
     @State private var newFolderName = ""
 
+    @State private var showingNewTextRecord = false
+
     @State private var showingRenameFolderAlert = false
     @State private var folderToRename: CustomFolder?
     @State private var renameFolderName = ""
@@ -197,14 +199,26 @@ struct RecordsView: View {
             .searchable(text: $searchText, prompt: "搜索标题、摘要或 OCR")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        newFolderName = ""
-                        showingCreateFolderAlert = true
-                    } label: {
-                        Image(systemName: "folder.badge.plus")
+                    HStack(spacing: 16) {
+                        Button {
+                            showingNewTextRecord = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .accessibilityLabel("新建纯文字记录")
+
+                        Button {
+                            newFolderName = ""
+                            showingCreateFolderAlert = true
+                        } label: {
+                            Image(systemName: "folder.badge.plus")
+                        }
+                        .accessibilityLabel("新建文件夹")
                     }
-                    .accessibilityLabel("新建文件夹")
                 }
+            }
+            .sheet(isPresented: $showingNewTextRecord) {
+                NewTextRecordSheet(store: store)
             }
             .alert("新建文件夹", isPresented: $showingCreateFolderAlert) {
                 TextField("文件夹名称", text: $newFolderName)
