@@ -28,19 +28,46 @@ struct RecordThumbnailView: View {
             }
             
             Group {
-                if let image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    // Fallback to placeholder
+                switch record.source {
+                case .spark:
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(record.processingState.tint.opacity(0.12))
+                        .fill(Color(.secondarySystemGroupedBackground))
                         .overlay {
-                            Image(systemName: record.processingState == .completed ? "doc.richtext" : "photo")
-                                .font(.title3)
-                                .foregroundStyle(record.processingState.tint)
+                            Image(systemName: "sparkles")
+                                .font(.system(size: size * 0.42, weight: .light))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [
+                                            Color(red: 0.361, green: 0.682, blue: 0.980),
+                                            Color(red: 0.325, green: 0.980, blue: 0.671)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
                         }
+                case .text:
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(NotieeColors.themed(.blue).opacity(0.12))
+                        .overlay {
+                            Image(systemName: "doc.text")
+                                .font(.title3)
+                                .foregroundStyle(NotieeColors.themed(.blue))
+                        }
+                case .photo:
+                    if let image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .fill(record.processingState.tint.opacity(0.12))
+                            .overlay {
+                                Image(systemName: record.processingState == .completed ? "doc.richtext" : "photo")
+                                    .font(.title3)
+                                    .foregroundStyle(record.processingState.tint)
+                            }
+                    }
                 }
             }
             .frame(width: size, height: size)

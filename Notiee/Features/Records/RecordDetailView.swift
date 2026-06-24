@@ -28,7 +28,9 @@ struct RecordDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
-                imagePreview
+                if viewModel.record.source == .photo {
+                    imagePreview
+                }
                 keyPointsSection
                 definitionsSection
                 summarySection
