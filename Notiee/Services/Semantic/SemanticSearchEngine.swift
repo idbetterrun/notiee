@@ -25,6 +25,26 @@ final class SemanticSearchEngine {
         return ranker.rank(queryVector: queryVector, queryText: query, candidates: candidates, limit: limit)
     }
 
+    /// 记录到记录的语义联想：用目标记录自身的向量，按余弦相似度找最相关的其它记录。
+    /// 与按 query 字符串搜索不同——不做关键词保底，纯语义；阈值更高，避免被动推荐塞入弱相关。
+    func related(to record: NoteRecord, in records: [NoteRecord], limit: Int, threshold: Float) async -> [NoteRecord] {
+        guard let sourceVector = await ensureVector(for: record) else { return [] }
+
+        var scored: [(record: NoteRecord, score: Float)] = []
+        for candidate in records where candidate.id != record.id {
+            guard let vector = await ensureVector(for: candidate) else { continue }
+            let sim = VectorMath.cosineSimilarity(sourceVector, vector)
+            if sim >= threshold {
+                scored.append((candidate, sim))
+            }
+        }
+
+        return scored
+            .sorted { $0.score > $1.score }
+            .prefix(limit)
+            .map { $0.record }
+    }
+
     /// 后台回填（启动时可调用）。失败的单条跳过，不影响整体。
     func backfill(records: [NoteRecord]) async {
         for record in records { _ = await ensureVector(for: record) }

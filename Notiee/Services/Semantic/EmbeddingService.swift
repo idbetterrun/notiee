@@ -29,7 +29,9 @@ enum RecordEmbeddingText {
     static let maxLength = 2000
 
     static func compose(_ record: NoteRecord) -> String {
-        let joined = [record.title, record.summary, record.ocrText]
+        // 顺序：标题/摘要/正文（语义最密）在前，OCR 原文在后，
+        // 超长截断时优先保留高信息密度内容。纳入正文让纯文本/Spark 记录也能联想。
+        let joined = [record.title, record.summary, record.detailedContent, record.ocrText]
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .joined(separator: "\n")
