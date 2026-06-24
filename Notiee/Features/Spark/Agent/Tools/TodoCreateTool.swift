@@ -10,7 +10,7 @@ final class TodoCreateTool: AgentTool {
         properties: [
             "content": AgentToolProperty(type: "string", description: "待办内容", enumValues: nil, items: nil),
             "record_id": AgentToolProperty(type: "string", description: "关联拍记ID（可选）", enumValues: nil, items: nil),
-            "due_date": AgentToolProperty(type: "string", description: "截止日期 ISO8601 格式（可选）", enumValues: nil, items: nil),
+            "due_date": AgentToolProperty(type: "string", description: "截止日期 ISO8601 或 yyyy-MM-dd（可选）", enumValues: nil, items: nil),
             "has_reminder": AgentToolProperty(type: "boolean", description: "是否设置提醒（可选）", enumValues: nil, items: nil)
         ],
         required: ["content"]
@@ -27,12 +27,7 @@ final class TodoCreateTool: AgentTool {
             throw AgentToolError.missingParameter("content")
         }
         let recordID = (parameters["record_id"] as? String).flatMap(UUID.init(uuidString:))
-        let dueDate: Date? = {
-            if let dateStr = parameters["due_date"] as? String {
-                return ISO8601DateFormatter().date(from: dateStr)
-            }
-            return nil
-        }()
+        let dueDate = CalendarQueryTool.parseDate(parameters["due_date"] as? String)
         let hasReminder = parameters["has_reminder"] as? Bool ?? false
 
         let todo = NoteTodo(recordID: recordID, content: content, dueDate: dueDate, hasReminder: hasReminder)

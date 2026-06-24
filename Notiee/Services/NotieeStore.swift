@@ -82,6 +82,7 @@ final class NotieeStore: ObservableObject {
         customTags: [EventTag] = EventTag.systemTags,
         eventTagMapping: [String: UUID] = [:],
         recordStore: NoteRecordPersisting = JSONNoteRecordStore.live,
+        todoStore: NoteTodoPersisting = JSONNoteTodoStore.live,
         folderStore: CustomFolderPersisting = JSONCustomFolderStore.live,
         tagStore: EventTagPersisting = JSONEventTagStore.live,
         eventStore: ScheduledEventPersisting = JSONScheduledEventStore.live,
@@ -94,6 +95,7 @@ final class NotieeStore: ObservableObject {
             records: records,
             todos: todos,
             recordStore: recordStore,
+            todoStore: todoStore,
             calendar: calendar
         )
         let folderTagMgr = FolderTagManager(
@@ -381,11 +383,13 @@ final class NotieeStore: ObservableObject {
 
     static func live(currentDate: Date = Date(), settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live) -> NotieeStore {
         let recordJSONStore = JSONNoteRecordStore.live
+        let todoJSONStore = JSONNoteTodoStore.live
         let folderJSONStore = JSONCustomFolderStore.live
         let tagJSONStore = JSONEventTagStore.live
         let eventJSONStore = JSONScheduledEventStore.live
 
         let persistedRecords = (try? recordJSONStore.loadRecords()) ?? []
+        let persistedTodos = (try? todoJSONStore.loadTodos()) ?? []
         let persistedFolders = (try? folderJSONStore.loadFolders()) ?? []
         let persistedTags = (try? tagJSONStore.loadTags()) ?? []
 
@@ -403,8 +407,9 @@ final class NotieeStore: ObservableObject {
 
         let recordMgr = RecordManager(
             records: persistedRecords,
-            todos: [],
-            recordStore: recordJSONStore
+            todos: persistedTodos,
+            recordStore: recordJSONStore,
+            todoStore: todoJSONStore
         )
         let folderTagMgr = FolderTagManager(
             customFolders: persistedFolders,

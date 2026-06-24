@@ -257,6 +257,44 @@ final class RecordManagerTests: XCTestCase {
         XCTAssertNil(store.todos.first?.recordID)
     }
 
+    // MARK: - Todo persistence (Spark todos must survive app relaunch)
+
+    func testAddTodoPersistsToStore() throws {
+        let persistence = todoStore()
+        let store = makeStore(todoPersistence: persistence)
+        let todo = NoteTodo(recordID: nil, content: "Spark todo")
+        store.addTodo(todo)
+        XCTAssertEqual(try persistence.loadTodos(), [todo])
+    }
+
+    func testTodosSurviveReload() throws {
+        let persistence = todoStore()
+        let first = makeStore(todoPersistence: persistence)
+        first.addStandaloneTodo(content: "周五到期", dueDate: ref, hasReminder: true)
+
+        // Simulate relaunch: a fresh manager loading from the same store.
+        let reloaded = makeStore(todos: try persistence.loadTodos(), todoPersistence: persistence)
+        XCTAssertEqual(reloaded.todos.map(\.content), ["周五到期"])
+        XCTAssertEqual(reloaded.todos.first?.dueDate, ref)
+        XCTAssertEqual(reloaded.todos.first?.hasReminder, true)
+    }
+
+    func testDeleteTodoPersists() throws {
+        let persistence = todoStore()
+        let todo = NoteTodo(recordID: nil, content: "Temp")
+        let store = makeStore(todos: [todo], todoPersistence: persistence)
+        store.deleteTodo(id: todo.id)
+        XCTAssertTrue(try persistence.loadTodos().isEmpty)
+    }
+
+    func testToggleTodoPersists() throws {
+        let persistence = todoStore()
+        let todo = NoteTodo(recordID: nil, content: "Task")
+        let store = makeStore(todos: [todo], todoPersistence: persistence)
+        store.toggleTodo(id: todo.id)
+        XCTAssertEqual(try persistence.loadTodos().first?.isCompleted, true)
+    }
+
     // MARK: - Persistence error
 
     func testLastPersistenceErrorIsNilOnSuccess() throws {
@@ -285,15 +323,23 @@ final class RecordManagerTests: XCTestCase {
             .appendingPathExtension("json"))
     }
 
+    private func todoStore() -> JSONNoteTodoStore {
+        JSONNoteTodoStore(fileURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("json"))
+    }
+
     private func makeStore(
         records: [NoteRecord] = [],
         todos: [NoteTodo] = [],
-        store: JSONNoteRecordStore? = nil
+        store: JSONNoteRecordStore? = nil,
+        todoPersistence: JSONNoteTodoStore? = nil
     ) -> RecordManager {
         RecordManager(
             records: records,
             todos: todos,
-            recordStore: store ?? recordStore()
+            recordStore: store ?? recordStore(),
+            todoStore: todoPersistence ?? todoStore()
         )
     }
 

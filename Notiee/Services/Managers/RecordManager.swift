@@ -8,17 +8,20 @@ final class RecordManager: ObservableObject {
     @Published var lastPersistenceError: String?
 
     let recordStore: NoteRecordPersisting
+    let todoStore: NoteTodoPersisting
     let calendar: Calendar
 
     init(
         records: [NoteRecord],
         todos: [NoteTodo],
         recordStore: NoteRecordPersisting,
+        todoStore: NoteTodoPersisting = JSONNoteTodoStore.live,
         calendar: Calendar = .current
     ) {
         self.records = records
         self.todos = todos
         self.recordStore = recordStore
+        self.todoStore = todoStore
         self.calendar = calendar
     }
 
@@ -198,6 +201,7 @@ final class RecordManager: ObservableObject {
 
         records.remove(at: index)
         persistRecords()
+        persistTodos()
     }
 
     func toggleDeletedMultiple(ids: Set<UUID>, isDeleted: Bool) {
@@ -228,6 +232,7 @@ final class RecordManager: ObservableObject {
             return false
         }
         persistRecords()
+        persistTodos()
     }
 
     func updateRecordEvent(recordID: UUID, newEventID: UUID?) {
@@ -264,15 +269,18 @@ final class RecordManager: ObservableObject {
 
     func addTodo(_ todo: NoteTodo) {
         todos.append(todo)
+        persistTodos()
     }
 
     func replaceTodos(for recordID: UUID, with newTodos: [NoteTodo]) {
         todos.removeAll { $0.recordID == recordID }
         todos.append(contentsOf: newTodos)
+        persistTodos()
     }
 
     func deleteTodo(id: UUID) {
         todos.removeAll { $0.id == id }
+        persistTodos()
     }
 
     func toggleTodo(id: UUID) {
@@ -280,7 +288,7 @@ final class RecordManager: ObservableObject {
             return
         }
         todos[index].isCompleted.toggle()
-        persistRecords()
+        persistTodos()
     }
 
     func updateTodoContent(id: UUID, newContent: String) {
@@ -288,12 +296,13 @@ final class RecordManager: ObservableObject {
             return
         }
         todos[index].content = newContent
-        persistRecords()
+        persistTodos()
     }
 
     func addStandaloneTodo(content: String, dueDate: Date?, hasReminder: Bool) {
         let todo = NoteTodo(recordID: nil, content: content, dueDate: dueDate, hasReminder: hasReminder)
         todos.append(todo)
+        persistTodos()
     }
 
     // MARK: - Persistence
@@ -301,6 +310,15 @@ final class RecordManager: ObservableObject {
     func persistRecords() {
         do {
             try recordStore.saveRecords(records)
+            lastPersistenceError = nil
+        } catch {
+            lastPersistenceError = error.localizedDescription
+        }
+    }
+
+    func persistTodos() {
+        do {
+            try todoStore.saveTodos(todos)
             lastPersistenceError = nil
         } catch {
             lastPersistenceError = error.localizedDescription

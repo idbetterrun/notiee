@@ -1,6 +1,6 @@
 import Foundation
 
-struct NoteTodo: Identifiable, Equatable, Sendable {
+struct NoteTodo: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     var recordID: UUID?
     var content: String
