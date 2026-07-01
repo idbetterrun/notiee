@@ -15,6 +15,10 @@ struct RecordDetailView: View {
     @State private var isTodosExpanded = true
     
     @State private var fullScreenItem: FullScreenImageItem?
+    @State private var unlockedRecord: NoteRecord?
+    @State private var unlockedTodos: [NoteTodo] = []
+    @State private var unlockFailed = false
+    @StateObject private var appLock = AppLockManager.shared
     
     @AppStorage(UDK.labMarkdownRenderingEnabled) private var markdownRenderingEnabled = false
     
@@ -25,38 +29,17 @@ struct RecordDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                header
-                if viewModel.record.source == .photo {
-                    imagePreview
-                }
-                keyPointsSection
-                definitionsSection
-                summarySection
-                detailedContentSection
-                todoSection
-                continuationSection
-                relatedNotesSection
-                ocrSection
+        Group {
+            if viewModel.record.isEncrypted && unlockedRecord == nil {
+                lockedPlaceholder
+            } else {
+                contentScrollView
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 40)
-            .scrollContentTouchFix()
         }
-        .background(Color(.systemGroupedBackground))
         .navigationTitle("记录详情")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                Button("编辑", systemImage: "pencil") {
-                    showEditSheet = true
-                }
-                Button("信息", systemImage: "info.circle") {
-                    showInfoSheet = true
-                }
-                
                 Menu {
                     Button("导出为 .tmn 文件") {
                         Task {
@@ -83,12 +66,28 @@ struct RecordDetailView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
-                
-                Button("删除", systemImage: "trash", role: .destructive) {
-                    viewModel.deleteRecord()
-                    dismiss()
+                .disabled(viewModel.record.isEncrypted)
+
+                Menu {
+                    Button("编辑", systemImage: "pencil") { showEditSheet = true }
+                    Button("更多信息", systemImage: "info.circle") { showInfoSheet = true }
+                    if viewModel.record.isEncrypted {
+                        Button("已加密（在设置中管理）", systemImage: "lock.fill") {}
+                            .disabled(true)
+                    } else {
+                        Button("加密该条拍记", systemImage: "lock") {
+                            viewModel.store.encryptRecord(id: viewModel.record.id)
+                            dismiss()
+                        }
+                    }
+                    Divider()
+                    Button("删除", systemImage: "trash", role: .destructive) {
+                        viewModel.deleteRecord()
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
-                .tint(.red)
             }
         }
         .sheet(isPresented: $showEditSheet) {
@@ -110,8 +109,13 @@ struct RecordDetailView: View {
             Task.detached(priority: .userInitiated) {
                 var images: [UIImage] = []
                 for path in viewModel.record.localImagePaths {
-                    if let data = LocalImageStore.readImageData(path: path),
-                       let img = UIImage(data: data) {
+                    if path.hasSuffix(".enc") {
+                        let img = await MainActor.run {
+                            SecureRecordCodec(crypto: CryptoService.shared()).decryptedImage(atEncryptedPath: path)
+                        }
+                        if let img = img { images.append(img) }
+                    } else if let data = LocalImageStore.readImageData(path: path),
+                              let img = UIImage(data: data) {
                         images.append(img)
                     }
                 }
@@ -119,6 +123,70 @@ struct RecordDetailView: View {
                 await MainActor.run { self.loadedImages = finalImages }
             }
         }
+    }
+
+    private var contentScrollView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                header
+                if viewModel.record.source == .photo {
+                    imagePreview
+                }
+                keyPointsSection
+                definitionsSection
+                summarySection
+                detailedContentSection
+                todoSection
+                continuationSection
+                relatedNotesSection
+                ocrSection
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 40)
+            .scrollContentTouchFix()
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+
+    private var lockedPlaceholder: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "lock.fill").font(.system(size: 44)).foregroundColor(.accentColor)
+            Text("此拍记已加密").font(.headline)
+            Button {
+                Task {
+                    if await appLock.authenticateWithBiometrics(reason: "查看加密拍记") || !appLock.biometricEnabled {
+                        if let result = viewModel.store.decryptedForViewing(viewModel.record) {
+                            unlockedRecord = result.record
+                            unlockedTodos = result.todos
+                        } else {
+                            unlockFailed = true
+                        }
+                    }
+                }
+            } label: {
+                Label("解锁查看", systemImage: "faceid")
+            }
+            .buttonStyle(.borderedProminent)
+            if unlockFailed { Text("解锁失败").foregroundColor(.red) }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
+    }
+
+    private var displayRecord: NoteRecord { unlockedRecord ?? viewModel.record }
+    private var displaySummaryText: String {
+        let r = displayRecord
+        guard !r.summary.isEmpty else { return viewModel.summaryText }
+        return r.summary
+    }
+    private var displayOcrText: String {
+        let r = displayRecord
+        guard !r.ocrText.isEmpty else { return viewModel.ocrText }
+        return r.ocrText
+    }
+    private var displayTodos: [NoteTodo] {
+        unlockedRecord != nil ? unlockedTodos : viewModel.todos
     }
 
     private var header: some View {
@@ -174,7 +242,7 @@ struct RecordDetailView: View {
                 }
             }
 
-            Text(viewModel.record.title)
+            Text(displayRecord.title)
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .lineLimit(2)
                 .minimumScaleFactor(0.78)
@@ -273,7 +341,7 @@ struct RecordDetailView: View {
     }
 
     private var keyPointsSection: some View {
-        let points = viewModel.record.keyPoints
+        let points = displayRecord.keyPoints
         guard !points.isEmpty else { return AnyView(EmptyView()) }
         return AnyView(
             DetailSection(title: "📌 知识点", systemImage: "lightbulb.fill", isExpanded: .constant(true)) {
@@ -296,7 +364,7 @@ struct RecordDetailView: View {
     }
 
     private var definitionsSection: some View {
-        let defs = viewModel.record.definitions
+        let defs = displayRecord.definitions
         guard !defs.isEmpty else { return AnyView(EmptyView()) }
         return AnyView(
             DetailSection(title: "📖 名词解释", systemImage: "book.pages.fill", isExpanded: .constant(true)) {
@@ -324,7 +392,7 @@ struct RecordDetailView: View {
         guard viewModel.showsSummarySection else { return AnyView(EmptyView()) }
         return AnyView(
             DetailSection(title: "AI 摘要", systemImage: "sparkles", isExpanded: $isSummaryExpanded) {
-                Text(viewModel.summaryText)
+                Text(displaySummaryText)
                     .font(.body)
                     .foregroundStyle(.primary)
                     .textSelection(.enabled)
@@ -334,7 +402,7 @@ struct RecordDetailView: View {
     }
     
     private var detailedContentSection: some View {
-            let content = viewModel.record.detailedContent
+            let content = displayRecord.detailedContent
             let hasMarkdown = content.contains("#") || content.contains("*") || content.contains("- ") || content.contains("`") || content.contains(">") || content.contains("[")
             let shouldRenderMarkdown = markdownRenderingEnabled && hasMarkdown
 
@@ -357,19 +425,19 @@ struct RecordDetailView: View {
 
     private var todoSection: some View {
         // 待办为空时：拍照记录展示「将自动提取」占位；纯文本/Spark 直接隐藏。
-        guard !viewModel.todos.isEmpty || viewModel.showsTodoPlaceholder else {
+        guard !displayTodos.isEmpty || viewModel.showsTodoPlaceholder else {
             return AnyView(EmptyView())
         }
         return AnyView(
             DetailSection(title: "待办事项", systemImage: "checklist", isExpanded: $isTodosExpanded) {
-                if viewModel.todos.isEmpty {
+                if displayTodos.isEmpty {
                     Text("AI 提取出的行动项会显示在这里。")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     VStack(spacing: 12) {
-                        ForEach(viewModel.todos) { todo in
+                        ForEach(displayTodos) { todo in
                             SwipeableTodoRow(
                                 todo: todo,
                                 onToggleComplete: { viewModel.toggleTodo(id: todo.id) },
@@ -461,7 +529,7 @@ struct RecordDetailView: View {
         guard viewModel.showsOCRSection else { return AnyView(EmptyView()) }
         return AnyView(
             DetailSection(title: "OCR 原文", systemImage: "text.viewfinder", isExpanded: $isOCRExpanded) {
-                Text(viewModel.ocrText)
+                Text(displayOcrText)
                     .font(.callout.monospaced())
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
