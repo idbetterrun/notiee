@@ -58,7 +58,7 @@ final class ICloudSyncService: ObservableObject {
             try FileManager.default.createDirectory(at: syncURL, withIntermediateDirectories: true, attributes: nil)
         }
         
-        let records = store.sortedRecords
+        let records = store.sortedRecords.filter { !$0.isEncrypted }
         guard !records.isEmpty else {
             throw SyncError.noRecords
         }

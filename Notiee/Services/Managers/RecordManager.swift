@@ -134,7 +134,8 @@ final class RecordManager: ObservableObject {
             return sortedRecords
         }
         return sortedRecords.filter { record in
-            record.title.localizedCaseInsensitiveContains(normalizedQuery)
+            guard !record.isEncrypted else { return false }
+            return record.title.localizedCaseInsensitiveContains(normalizedQuery)
                 || record.summary.localizedCaseInsensitiveContains(normalizedQuery)
                 || record.ocrText.localizedCaseInsensitiveContains(normalizedQuery)
                 || record.detailedContent.localizedCaseInsensitiveContains(normalizedQuery)

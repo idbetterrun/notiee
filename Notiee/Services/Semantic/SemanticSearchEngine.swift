@@ -17,7 +17,7 @@ final class SemanticSearchEngine {
         let queryVector = try? await embeddingService.embed(query)
 
         var candidates: [(record: NoteRecord, vector: [Float]?)] = []
-        for record in records {
+        for record in records where !record.isEncrypted {
             let vector = await ensureVector(for: record)
             candidates.append((record, vector))
         }
@@ -31,7 +31,7 @@ final class SemanticSearchEngine {
         guard let sourceVector = await ensureVector(for: record) else { return [] }
 
         var scored: [(record: NoteRecord, score: Float)] = []
-        for candidate in records where candidate.id != record.id {
+        for candidate in records where candidate.id != record.id && !candidate.isEncrypted {
             guard let vector = await ensureVector(for: candidate) else { continue }
             let sim = VectorMath.cosineSimilarity(sourceVector, vector)
             if sim >= threshold {
@@ -47,7 +47,7 @@ final class SemanticSearchEngine {
 
     /// 后台回填（启动时可调用）。失败的单条跳过，不影响整体。
     func backfill(records: [NoteRecord]) async {
-        for record in records { _ = await ensureVector(for: record) }
+        for record in records where !record.isEncrypted { _ = await ensureVector(for: record) }
     }
 
     private func ensureVector(for record: NoteRecord) async -> [Float]? {

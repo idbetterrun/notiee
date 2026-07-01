@@ -5,6 +5,9 @@ import UIKit
 @MainActor
 final class TMNExportService {
     static func export(record: NoteRecord, store: NotieeStore) async throws -> URL {
+        if record.isEncrypted {
+            throw NSError(domain: "TMNExport", code: 1, userInfo: [NSLocalizedDescriptionKey: "已加密的拍记无法导出，请先在「设置 → 安全」中解除加密。"])
+        }
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         
