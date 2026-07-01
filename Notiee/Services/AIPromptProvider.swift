@@ -58,17 +58,45 @@ struct AIPromptProvider {
             user += latexVisionSuffixPrompt[lang]!
             system += latexSystemSuffixPrompt[lang]!
         }
-        return (user, system)
+        let directive = outputLanguageDirective()
+        return (user + directive, system + directive)
     }
 
     /// Builds the text structuring prompt with template fields
     static func textPrompt(ocrText: String, enableSummary: Bool, enableDetailedContent: Bool, preset: ScenePreset, language: String = currentLanguage()) -> String {
         let lang = normalizedLanguage(language)
         let hasAdvanced = preset.enableKeyPoints || preset.enableDefinitions
+        let base: String
         switch lang {
-        case "en": return buildTextPromptEN(ocrText: ocrText, enableSummary: enableSummary, enableDetailedContent: enableDetailedContent, preset: preset, hasAdvanced: hasAdvanced)
-        case "zh-Hant": return buildTextPromptZHHant(ocrText: ocrText, enableSummary: enableSummary, enableDetailedContent: enableDetailedContent, preset: preset, hasAdvanced: hasAdvanced)
-        default: return buildTextPromptZHHans(ocrText: ocrText, enableSummary: enableSummary, enableDetailedContent: enableDetailedContent, preset: preset, hasAdvanced: hasAdvanced)
+        case "en": base = buildTextPromptEN(ocrText: ocrText, enableSummary: enableSummary, enableDetailedContent: enableDetailedContent, preset: preset, hasAdvanced: hasAdvanced)
+        case "zh-Hant": base = buildTextPromptZHHant(ocrText: ocrText, enableSummary: enableSummary, enableDetailedContent: enableDetailedContent, preset: preset, hasAdvanced: hasAdvanced)
+        default: base = buildTextPromptZHHans(ocrText: ocrText, enableSummary: enableSummary, enableDetailedContent: enableDetailedContent, preset: preset, hasAdvanced: hasAdvanced)
+        }
+        return base + outputLanguageDirective()
+    }
+
+    /// Reads the Lab output-language preference and returns an instruction appended
+    /// to both vision and text prompts so the model produces output in the intended language.
+    static func outputLanguageDirective(preference: String = UserDefaults.standard.string(forKey: UDK.labRecordOutputLanguage) ?? "auto") -> String {
+        if preference == "auto" {
+            return "\n\nOUTPUT LANGUAGE: Detect the dominant language of the source content (images/text) and produce ALL output fields (title, summary, detailedContent, keyPoints, definitions, todos) in that same language. Do not translate the content into any other language."
+        }
+        let name = outputLanguageDisplayName(preference)
+        return "\n\nOUTPUT LANGUAGE: Produce ALL output fields (title, summary, detailedContent, keyPoints, definitions, todos) in \(name). If the source content is in another language, translate faithfully into \(name)."
+    }
+
+    /// Native display name for a language code, used inside the directive.
+    static func outputLanguageDisplayName(_ code: String) -> String {
+        switch code {
+        case "zh-Hans": return "简体中文 (Simplified Chinese)"
+        case "zh-Hant": return "繁體中文 (Traditional Chinese)"
+        case "en": return "English"
+        case "ko": return "한국어 (Korean)"
+        case "ja": return "日本語 (Japanese)"
+        case "fr": return "Français (French)"
+        case "de": return "Deutsch (German)"
+        case "es": return "Español (Spanish)"
+        default: return "简体中文 (Simplified Chinese)"
         }
     }
 
