@@ -123,7 +123,7 @@ struct MeView: View {
             
             Section {
                 NavigationLink {
-                    SettingsMainView(settingsStore: settingsStore)
+                    SettingsMainView(store: store, settingsStore: settingsStore)
                 } label: {
                     Label("设置", systemImage: "gearshape.fill")
                         .foregroundColor(NotieeColors.themed(.gray))

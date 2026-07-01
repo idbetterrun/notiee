@@ -4,11 +4,13 @@ import Charts
 
 // MARK: - SettingsMainView
 struct SettingsMainView: View {
+    let store: NotieeStore
     @StateObject private var viewModel: SettingsViewModel
     @AppStorage(UDK.labMarkdownRenderingEnabled) private var markdownRenderingEnabled = false
 
     @MainActor
-    init(settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live) {
+    init(store: NotieeStore, settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live) {
+        self.store = store
         _viewModel = StateObject(wrappedValue: SettingsViewModel(settingsStore: settingsStore))
     }
 
@@ -163,6 +165,12 @@ struct SettingsMainView: View {
                     CustomModelsListView(viewModel: viewModel)
                 } label: {
                     Label("管理自定义模型", systemImage: "slider.horizontal.3")
+                }
+
+                NavigationLink {
+                    SecuritySettingsView(store: store)
+                } label: {
+                    Label("安全", systemImage: "lock.shield")
                 }
             }
             
