@@ -18,6 +18,8 @@ struct RecordDetailView: View {
     @State private var unlockedRecord: NoteRecord?
     @State private var unlockedTodos: [NoteTodo] = []
     @State private var unlockFailed = false
+    @State private var showUnlockSheet = false
+    @State private var showDeleteVerify = false
     @StateObject private var appLock = AppLockManager.shared
     
     @AppStorage(UDK.labMarkdownRenderingEnabled) private var markdownRenderingEnabled = false
@@ -82,8 +84,12 @@ struct RecordDetailView: View {
                     }
                     Divider()
                     Button("删除", systemImage: "trash", role: .destructive) {
-                        viewModel.deleteRecord()
-                        dismiss()
+                        if appLock.shouldAuthForDeleting(viewModel.record) {
+                            showDeleteVerify = true
+                        } else {
+                            viewModel.deleteRecord()
+                            dismiss()
+                        }
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -99,29 +105,63 @@ struct RecordDetailView: View {
             infoSheetContent
                 .presentationDetents([.medium])
         }
+        .sheet(isPresented: $showUnlockSheet) {
+            PasscodeUnlockView(
+                lock: appLock,
+                title: "验证以查看",
+                subtitle: "验证身份后查看加密拍记",
+                reason: "查看加密拍记",
+                onAuthenticated: {
+                    showUnlockSheet = false
+                    unlockForViewing()
+                },
+                onCancel: { showUnlockSheet = false }
+            )
+        }
+        .sheet(isPresented: $showDeleteVerify) {
+            PasscodeUnlockView(
+                lock: appLock,
+                title: "验证以删除",
+                subtitle: "删除加密拍记需要验证身份",
+                reason: "删除加密拍记",
+                onAuthenticated: {
+                    showDeleteVerify = false
+                    viewModel.deleteRecord()
+                    dismiss()
+                },
+                onCancel: { showDeleteVerify = false }
+            )
+        }
         .fullScreenCover(item: $fullScreenItem) { item in
             FullScreenImageView(images: item.images, initialIndex: item.initialIndex)
         }
         .task(id: viewModel.record.id) {
             await viewModel.loadRelatedRecords()
         }
-        .onAppear {
-            Task.detached(priority: .userInitiated) {
-                var images: [UIImage] = []
-                for path in viewModel.record.localImagePaths {
-                    if path.hasSuffix(".enc") {
-                        let img = await MainActor.run {
-                            SecureRecordCodec(crypto: CryptoService.shared()).decryptedImage(atEncryptedPath: path)
-                        }
-                        if let img = img { images.append(img) }
-                    } else if let data = LocalImageStore.readImageData(path: path),
-                              let img = UIImage(data: data) {
-                        images.append(img)
+        .onAppear { loadImages() }
+        .onChange(of: unlockedRecord?.id) { _, _ in loadImages() }
+    }
+
+    /// Loads preview images. Encrypted images are only decrypted after the record has
+    /// been unlocked for viewing, so plaintext never lands in memory while locked.
+    private func loadImages() {
+        guard !viewModel.record.isEncrypted || unlockedRecord != nil else { return }
+        let paths = viewModel.record.localImagePaths
+        Task.detached(priority: .userInitiated) {
+            var images: [UIImage] = []
+            for path in paths {
+                if path.hasSuffix(".enc") {
+                    let img = await MainActor.run {
+                        SecureRecordCodec(crypto: CryptoService.shared()).decryptedImage(atEncryptedPath: path)
                     }
+                    if let img = img { images.append(img) }
+                } else if let data = LocalImageStore.readImageData(path: path),
+                          let img = UIImage(data: data) {
+                    images.append(img)
                 }
-                let finalImages = images
-                await MainActor.run { self.loadedImages = finalImages }
             }
+            let finalImages = images
+            await MainActor.run { self.loadedImages = finalImages }
         }
     }
 
@@ -150,28 +190,51 @@ struct RecordDetailView: View {
     }
 
     private var lockedPlaceholder: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "lock.fill").font(.system(size: 44)).foregroundColor(.accentColor)
-            Text("此拍记已加密").font(.headline)
+        VStack(spacing: 18) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.12))
+                    .frame(width: 96, height: 96)
+                Image(systemName: "lock.doc.fill")
+                    .font(.system(size: 38, weight: .semibold))
+                    .foregroundStyle(Color.accentColor)
+            }
+            VStack(spacing: 6) {
+                Text("此拍记已加密")
+                    .font(.title3.weight(.semibold))
+                Text("验证身份后可查看内容，内容不会以明文写回磁盘。")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
             Button {
-                Task {
-                    if await appLock.authenticateWithBiometrics(reason: "查看加密拍记") || !appLock.biometricEnabled {
-                        if let result = viewModel.store.decryptedForViewing(viewModel.record) {
-                            unlockedRecord = result.record
-                            unlockedTodos = result.todos
-                        } else {
-                            unlockFailed = true
-                        }
-                    }
-                }
+                unlockFailed = false
+                showUnlockSheet = true
             } label: {
-                Label("解锁查看", systemImage: "faceid")
+                Label("解锁查看", systemImage: appLock.biometricEnabled && appLock.biometryAvailable ? "faceid" : "lock.open")
+                    .font(.headline)
+                    .padding(.horizontal, 8)
             }
             .buttonStyle(.borderedProminent)
-            if unlockFailed { Text("解锁失败").foregroundColor(.red) }
+            .controlSize(.large)
+            .padding(.top, 4)
+            if unlockFailed {
+                Text("解锁失败，请重试").foregroundStyle(.red).font(.subheadline)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
+    }
+
+    private func unlockForViewing() {
+        if let result = viewModel.store.decryptedForViewing(viewModel.record) {
+            unlockedRecord = result.record
+            unlockedTodos = result.todos
+            unlockFailed = false
+        } else {
+            unlockFailed = true
+        }
     }
 
     private var displayRecord: NoteRecord { unlockedRecord ?? viewModel.record }
@@ -188,6 +251,19 @@ struct RecordDetailView: View {
     private var displayTodos: [NoteTodo] {
         unlockedRecord != nil ? unlockedTodos : viewModel.todos
     }
+
+    // Section visibility must be resolved against the *displayed* (possibly decrypted)
+    // record — the ViewModel's flags read the redacted record, which would wrongly hide
+    // the AI summary of an unlocked encrypted note.
+    private var showsSummarySection: Bool {
+        switch displayRecord.source {
+        case .photo: return true
+        case .spark: return !displayRecord.summary.isEmpty && displayRecord.summary != displayRecord.detailedContent
+        case .text: return false
+        }
+    }
+    private var showsOCRSection: Bool { displayRecord.source == .photo }
+    private var showsTodoPlaceholder: Bool { displayRecord.source == .photo }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -389,7 +465,7 @@ struct RecordDetailView: View {
     }
 
     private var summarySection: some View {
-        guard viewModel.showsSummarySection else { return AnyView(EmptyView()) }
+        guard showsSummarySection else { return AnyView(EmptyView()) }
         return AnyView(
             DetailSection(title: "AI 摘要", systemImage: "sparkles", isExpanded: $isSummaryExpanded) {
                 Text(displaySummaryText)
@@ -425,7 +501,7 @@ struct RecordDetailView: View {
 
     private var todoSection: some View {
         // 待办为空时：拍照记录展示「将自动提取」占位；纯文本/Spark 直接隐藏。
-        guard !displayTodos.isEmpty || viewModel.showsTodoPlaceholder else {
+        guard !displayTodos.isEmpty || showsTodoPlaceholder else {
             return AnyView(EmptyView())
         }
         return AnyView(
@@ -526,7 +602,7 @@ struct RecordDetailView: View {
     }
 
     private var ocrSection: some View {
-        guard viewModel.showsOCRSection else { return AnyView(EmptyView()) }
+        guard showsOCRSection else { return AnyView(EmptyView()) }
         return AnyView(
             DetailSection(title: "OCR 原文", systemImage: "text.viewfinder", isExpanded: $isOCRExpanded) {
                 Text(displayOcrText)

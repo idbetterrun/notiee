@@ -91,6 +91,7 @@ enum UDK {
     static let securityAppLockEnabled = "notiee.security.appLockEnabled"
     static let securityBiometricEnabled = "notiee.security.biometricEnabled"
     static let securityAutoLockGraceSeconds = "notiee.security.autoLockGraceSeconds"
+    static let securityRequireEncryptedDeleteAuth = "notiee.security.requireEncryptedDeleteAuth"
 
     // MARK: - Lab Features
     static let labMarkdownRenderingEnabled = "labMarkdownRenderingEnabled"

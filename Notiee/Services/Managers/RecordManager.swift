@@ -199,6 +199,9 @@ final class RecordManager: ObservableObject {
         for path in record.localImagePaths {
             LocalImageStore.deleteImage(path: path)
         }
+        if record.isEncrypted {
+            SecureRecordCodec(crypto: CryptoService.shared()).deleteBlob(for: id)
+        }
 
         todos.removeAll { $0.recordID == id }
 
@@ -230,6 +233,9 @@ final class RecordManager: ObservableObject {
                 }
                 for path in record.localImagePaths {
                     LocalImageStore.deleteImage(path: path)
+                }
+                if record.isEncrypted {
+                    SecureRecordCodec(crypto: CryptoService.shared()).deleteBlob(for: record.id)
                 }
                 todos.removeAll { $0.recordID == record.id }
                 deletedIDs.append(record.id)

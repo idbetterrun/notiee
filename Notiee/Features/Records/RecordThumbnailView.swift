@@ -16,8 +16,23 @@ struct RecordThumbnailView: View {
     var body: some View {
         ZStack {
             if record.isEncrypted {
-                Rectangle().fill(Color.secondary.opacity(0.12))
-                Image(systemName: "lock.fill").foregroundColor(.secondary)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.accentColor.opacity(0.22),
+                                Color.accentColor.opacity(0.08)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: size * 0.34, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    .frame(width: size, height: size)
             } else {
                 if record.localImagePaths.count > 1 {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)

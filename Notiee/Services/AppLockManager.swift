@@ -10,6 +10,11 @@ final class AppLockManager: ObservableObject {
 
     private let secretStore: SecretPersisting
     private var backgroundedAt: Date?
+    /// True while a system biometric sheet is being presented. The biometric prompt
+    /// briefly resigns/backgrounds the app; without this guard the scene lifecycle
+    /// would record a background timestamp and re-lock the instant we unlock,
+    /// producing an unlock↔lock loop.
+    private var isAuthenticating = false
 
     private static let passcodeHashKey = "notiee.security.passcodeHash"
     private static let passcodeSaltKey = "notiee.security.passcodeSalt"
@@ -30,6 +35,22 @@ final class AppLockManager: ObservableObject {
 
     var hasPasscode: Bool {
         secretStore.string(forKey: Self.passcodeHashKey) != nil
+    }
+
+    /// Whether deleting an encrypted record must be confirmed with passcode/biometric.
+    /// Defaults to `true` when the user has never toggled it.
+    var requiresAuthForEncryptedDelete: Bool {
+        UserDefaults.standard.object(forKey: UDK.securityRequireEncryptedDeleteAuth) as? Bool ?? true
+    }
+
+    func setRequiresAuthForEncryptedDelete(_ value: Bool) {
+        UserDefaults.standard.set(value, forKey: UDK.securityRequireEncryptedDeleteAuth)
+        objectWillChange.send()
+    }
+
+    /// True if the given record's deletion should be gated behind identity verification.
+    func shouldAuthForDeleting(_ record: NoteRecord) -> Bool {
+        isEnabled && record.isEncrypted && requiresAuthForEncryptedDelete
     }
 
     private var graceSeconds: TimeInterval {
@@ -77,14 +98,19 @@ final class AppLockManager: ObservableObject {
 
     func appDidEnterBackground() {
         guard isEnabled else { return }
+        // Ignore the transient background caused by the biometric prompt itself.
+        guard !isAuthenticating else { return }
         backgroundedAt = Date()
     }
 
     func appWillEnterForeground() {
         guard isEnabled else { return }
-        if let at = backgroundedAt, Date().timeIntervalSince(at) < graceSeconds {
-            return
-        }
+        // Only re-lock if we actually went to the background. Cold start is handled by
+        // `init`; spurious `.active` transitions (e.g. after dismissing the Face ID
+        // sheet) must NOT re-lock, or the lock screen loops forever.
+        guard let at = backgroundedAt else { return }
+        backgroundedAt = nil
+        if Date().timeIntervalSince(at) < graceSeconds { return }
         isLocked = true
     }
 
@@ -109,20 +135,36 @@ final class AppLockManager: ObservableObject {
         LAContext().canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
     }
 
-    /// Authenticate with biometrics; on success clears the lock. Completion(false) lets the
-    /// UI fall back to passcode entry.
+    /// Authenticate with biometrics. Returns whether it succeeded; does NOT mutate
+    /// `isLocked` — callers decide what a success unlocks (the app, a record, a delete…).
+    /// Returns `false` (letting the UI fall back to passcode) if biometrics are
+    /// disabled or unavailable.
     func authenticateWithBiometrics(reason: String = "解锁 Notiee") async -> Bool {
         let ctx = LAContext()
         guard biometricEnabled, ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
             return false
         }
+        isAuthenticating = true
+        defer { isAuthenticating = false }
         do {
-            let ok = try await ctx.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
-            if ok { isLocked = false }
-            return ok
+            return try await ctx.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
         } catch {
             return false
         }
+    }
+
+    /// Triggers the OS biometric-permission prompt immediately (used the moment the
+    /// user enables "quick unlock", so the permission dialog isn't deferred until the
+    /// first real unlock).
+    func primeBiometricPermission() async {
+        let ctx = LAContext()
+        guard ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return }
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+        _ = try? await ctx.evaluatePolicy(
+            .deviceOwnerAuthenticationWithBiometrics,
+            localizedReason: "开启 \(biometryTypeName) 快速解锁"
+        )
     }
 
     func unlockWithPasscode(_ passcode: String) -> Bool {

@@ -30,6 +30,9 @@ final class NoteUpdateTool: AgentTool {
         guard let index = recordManager.records.firstIndex(where: { $0.id == recordID }) else {
             return AgentToolResult(success: false, message: "未找到ID为 \(recordIDStr) 的拍记", data: nil, undoAction: nil)
         }
+        guard !recordManager.records[index].isEncrypted else {
+            return AgentToolResult(success: false, message: "该拍记已加密，内容受保护，无法修改。", data: nil, undoAction: nil)
+        }
 
         let originalRecord = recordManager.records[index]
         var updated = originalRecord

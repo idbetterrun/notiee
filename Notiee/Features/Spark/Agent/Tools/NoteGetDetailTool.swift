@@ -27,6 +27,9 @@ final class NoteGetDetailTool: AgentTool {
         guard let record = recordManager.records.first(where: { $0.id == recordID }) else {
             return AgentToolResult(success: false, message: "未找到ID为 \(recordIDStr) 的拍记", data: nil, undoAction: nil)
         }
+        guard !record.isEncrypted else {
+            return AgentToolResult(success: false, message: "该拍记已加密，内容受保护，无法访问。", data: nil, undoAction: nil)
+        }
 
         let message = """
         拍记详情：

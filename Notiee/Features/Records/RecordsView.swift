@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RecordsView: View {
     @ObservedObject private var store: NotieeStore
+    @ObservedObject private var appLock = AppLockManager.shared
+    @State private var pendingDelete: PendingAuthDelete?
     @State private var searchText = ""
 
     @State private var showingCreateFolderAlert = false
@@ -184,9 +186,9 @@ struct RecordsView: View {
                                 }
                                 .tint(.orange)
                             }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            .swipeActions(edge: .trailing, allowsFullSwipe: !appLock.shouldAuthForDeleting(record)) {
                                 Button(role: .destructive) {
-                                    store.toggleDeleted(id: record.id)
+                                    requestDelete(record) { store.toggleDeleted(id: record.id) }
                                 } label: {
                                     Label("删除", systemImage: "trash")
                                 }
@@ -195,6 +197,7 @@ struct RecordsView: View {
                     }
                 }
             }
+            .deleteAuthSheet($pendingDelete, lock: appLock)
             .navigationTitle("记录")
             .searchable(text: $searchText, prompt: "搜索标题、摘要或 OCR")
             .toolbar {
@@ -274,6 +277,40 @@ struct RecordsView: View {
     private var displayedRecords: [NoteRecord] {
         store.records(matching: searchText)
     }
+
+    private func requestDelete(_ record: NoteRecord, _ action: @escaping () -> Void) {
+        if appLock.shouldAuthForDeleting(record) {
+            pendingDelete = PendingAuthDelete(count: 1, perform: action)
+        } else {
+            action()
+        }
+    }
+}
+
+/// A pending delete that must pass identity verification before running.
+struct PendingAuthDelete: Identifiable {
+    let id = UUID()
+    let count: Int
+    let perform: () -> Void
+}
+
+extension View {
+    /// Presents the passcode/biometric gate for a pending encrypted-record deletion.
+    func deleteAuthSheet(_ item: Binding<PendingAuthDelete?>, lock: AppLockManager) -> some View {
+        sheet(item: item) { pending in
+            PasscodeUnlockView(
+                lock: lock,
+                title: "验证以删除",
+                subtitle: pending.count > 1 ? "删除 \(pending.count) 条加密拍记需验证身份" : "删除加密拍记需要验证身份",
+                reason: "删除加密拍记",
+                onAuthenticated: {
+                    pending.perform()
+                    item.wrappedValue = nil
+                },
+                onCancel: { item.wrappedValue = nil }
+            )
+        }
+    }
 }
 
 #Preview {
@@ -346,6 +383,8 @@ struct GenericRecordListView: View {
     @ObservedObject var store: NotieeStore
     var isTrash: Bool = false
 
+    @ObservedObject private var appLock = AppLockManager.shared
+    @State private var pendingDelete: PendingAuthDelete?
     @State private var selection = Set<UUID>()
     @Environment(\.editMode) private var editMode
 
@@ -374,17 +413,17 @@ struct GenericRecordListView: View {
                         .tint(.blue)
                     }
                 }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                .swipeActions(edge: .trailing, allowsFullSwipe: !appLock.shouldAuthForDeleting(record)) {
                     if !isTrash {
                         Button(role: .destructive) {
-                            store.toggleDeleted(id: record.id)
+                            requestDelete([record]) { store.toggleDeleted(id: record.id) }
                         } label: {
                             Label("删除", systemImage: "trash")
                         }
                         .tint(.red)
                     } else {
                         Button(role: .destructive) {
-                            store.permanentlyDelete(id: record.id)
+                            requestDelete([record]) { store.permanentlyDelete(id: record.id) }
                         } label: {
                             Label("彻底删除", systemImage: "trash.fill")
                         }
@@ -393,6 +432,7 @@ struct GenericRecordListView: View {
                 }
             }
         }
+        .deleteAuthSheet($pendingDelete, lock: appLock)
         .navigationTitle(title)
         .overlay {
             if records.isEmpty {
@@ -409,9 +449,12 @@ struct GenericRecordListView: View {
                 HStack {
                     if !isTrash {
                         Button(role: .destructive) {
-                            store.toggleDeletedMultiple(ids: selection, isDeleted: true)
-                            selection.removeAll()
-                            editMode?.wrappedValue = .inactive
+                            let ids = selection
+                            requestDeleteMultiple(ids) {
+                                store.toggleDeletedMultiple(ids: ids, isDeleted: true)
+                                selection.removeAll()
+                                editMode?.wrappedValue = .inactive
+                            }
                         } label: {
                             Text("删除选中 (\(selection.count))")
                         }
@@ -432,9 +475,12 @@ struct GenericRecordListView: View {
                         Spacer()
 
                         Button(role: .destructive) {
-                            store.permanentlyDeleteMultiple(ids: selection)
-                            selection.removeAll()
-                            editMode?.wrappedValue = .inactive
+                            let ids = selection
+                            requestDeleteMultiple(ids) {
+                                store.permanentlyDeleteMultiple(ids: ids)
+                                selection.removeAll()
+                                editMode?.wrappedValue = .inactive
+                            }
                         } label: {
                             Text("彻底删除 (\(selection.count))")
                         }
@@ -448,6 +494,23 @@ struct GenericRecordListView: View {
                 .frame(maxWidth: .infinity)
                 .background(.regularMaterial)
             }
+        }
+    }
+
+    private func requestDelete(_ recordsToDelete: [NoteRecord], _ action: @escaping () -> Void) {
+        if recordsToDelete.contains(where: { appLock.shouldAuthForDeleting($0) }) {
+            pendingDelete = PendingAuthDelete(count: recordsToDelete.count, perform: action)
+        } else {
+            action()
+        }
+    }
+
+    private func requestDeleteMultiple(_ ids: Set<UUID>, _ action: @escaping () -> Void) {
+        let encrypted = records.filter { ids.contains($0.id) && appLock.shouldAuthForDeleting($0) }
+        if encrypted.isEmpty {
+            action()
+        } else {
+            pendingDelete = PendingAuthDelete(count: encrypted.count, perform: action)
         }
     }
 }

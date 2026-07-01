@@ -24,6 +24,8 @@ struct NotieeApp: App {
     @StateObject private var appLock = AppLockManager.shared
     @Environment(\.scenePhase) private var scenePhase
 
+    @State private var isSplashActive = true
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -55,10 +57,25 @@ struct NotieeApp: App {
                         .transition(.opacity)
                         .zIndex(1)
                 }
+
+                if isSplashActive {
+                    SplashView()
+                        .transition(.opacity)
+                        .zIndex(2)
+                }
             }
+            .animation(.easeInOut(duration: 0.25), value: appLock.isLocked)
             .preferredColorScheme(colorScheme)
             .tint(appTint)
             .environment(\.sizeCategory, contentSizeCategory)
+            .task {
+                // Cover cold-launch initialization with the branded splash,
+                // then fade to the app once the first frame is settled.
+                try? await Task.sleep(nanoseconds: 800_000_000)
+                withAnimation(.easeOut(duration: 0.35)) {
+                    isSplashActive = false
+                }
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
@@ -92,6 +109,30 @@ struct NotieeApp: App {
         case "extraLarge": return .accessibilityExtraLarge
         default: return .large
         }
+    }
+}
+
+/// Full-screen branded launch cover shown over the app while it warms up on
+/// cold launch. Follows light/dark automatically and picks the brand image per
+/// target (Notiee vs. Notiee+).
+private struct SplashView: View {
+    private var imageName: String {
+        #if NOTIEE_PLUS
+        "LaunchNotieePlus"
+        #else
+        "LaunchNotiee"
+        #endif
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
+        }
+        .ignoresSafeArea()
     }
 }
 

@@ -111,9 +111,17 @@ struct NotieeLogoMark: View {
     let size: CGFloat
     let cornerRadius: CGFloat
 
+    private var logoName: String {
+        #if NOTIEE_PLUS
+        "LogoNotieePlus"
+        #else
+        "Notiee-iOS"
+        #endif
+    }
+
     var body: some View {
         Group {
-            if let logo = UIImage(named: "Notiee-iOS") {
+            if let logo = UIImage(named: logoName) {
                 Image(uiImage: logo)
                     .resizable()
                     .scaledToFill()

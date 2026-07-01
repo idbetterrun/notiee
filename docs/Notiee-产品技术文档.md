@@ -2,7 +2,7 @@
 
 > **版本**: 1.0.1 (MVP)  
 > **平台**: iOS 18.0+  
-> **语言**: Swift 5.9+ / Swift 6.0  
+> **语言**: Swift 6.0+  
 > **架构**: MVVM + Offline-First  
 > **最后更新**: 2026-05-27
 
@@ -1308,12 +1308,21 @@ protocol AppSettingsPersisting {
 - `"system"` 跟随系统，其余强制指定语言
 - AI 提示词会跟随用户语言选择动态切换
 
-### 14.3 法律文件
+### 14.3 法律文件（HTML 内嵌）
+
+法务文件（隐私政策 / 用户协议）以 HTML 格式内嵌于 `Notiee/Legal/`，按 App 语言与设备地区自动路由：
 
 | 文件 | 语言版本 |
 |------|----------|
-| `PrivacyPolicy_*.pdf` | EN, zh-Hans, zh-Hant-HK, zh-Hant-TW |
-| `UserAgreement_*.pdf` | EN, zh-Hans, zh-Hant-HK, zh-Hant-TW |
+| `PrivacyPolicy_*.html` | zh-Hans, zh-Hant-HK, zh-Hant-TW, en |
+| `UserAgreement_*.html` | zh-Hans, zh-Hant-HK, zh-Hant-TW, en |
+
+路由逻辑（`AboutNotieeView.swift:legalLocaleSuffix`）：
+- 简体中文（zh-Hans）→ `zh-Hans`
+- 繁體中文（zh-Hant）+ 非 TW 地区 → `zh-Hant-HK`（港澳繁體）
+- 繁體中文（zh-Hant）+ TW 地区 → `zh-Hant-TW`（台灣繁體）
+- English（en）→ `en`
+- 系统默认按 `Locale.current` 推断，无法匹配时回退 `zh-Hans`
 
 ---
 
@@ -1513,8 +1522,15 @@ Notiee/
 │   ├── zh-Hans.lproj/Localizable.strings      # 简体中文本地化
 │   ├── zh-Hant.lproj/Localizable.strings      # 繁体中文本地化
 │   ├── Info.plist                             # 权限 + UTI 声明
-│   ├── PrivacyPolicy_*.pdf                    # 隐私政策 (4 语言)
-│   └── UserAgreement_*.pdf                    # 用户协议 (4 语言)
+│   ├── Legal/                                  # 法务 HTML 文件
+│   │   ├── UserAgreement_zh-Hans.html           # 用户协议（简体中文）
+│   │   ├── UserAgreement_zh-Hant-HK.html        # 用户协议（繁體港澳）
+│   │   ├── UserAgreement_zh-Hant-TW.html        # 用户协议（繁體台灣）
+│   │   ├── UserAgreement_en.html                # Terms of Service (English)
+│   │   ├── PrivacyPolicy_zh-Hans.html           # 隐私政策（简体中文）
+│   │   ├── PrivacyPolicy_zh-Hant-HK.html        # 私隱政策（繁體港澳）
+│   │   ├── PrivacyPolicy_zh-Hant-TW.html        # 隱私權政策（繁體台灣）
+│   │   └── PrivacyPolicy_en.html                # Privacy Policy (English)
 │
 ├── NotieeWidget/                              # Widget Extension
 │   ├── NotieeWidgetBundle.swift               # Widget 入口

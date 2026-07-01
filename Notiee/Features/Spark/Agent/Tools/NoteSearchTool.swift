@@ -39,7 +39,8 @@ final class NoteSearchTool: AgentTool {
         let limit = (parameters["limit"] as? Int) ?? 5
         let timeRangeStr = parameters["time_range"] as? String
 
-        var records = recordManager.sortedRecords
+        // Encrypted records are private: never surfaced to the assistant.
+        var records = recordManager.sortedRecords.filter { !$0.isEncrypted }
         if let range = timeRangeStr {
             records = filterByTimeRange(records, range)
         }
