@@ -92,4 +92,5 @@ enum UDK {
     static let labFullVisionModeEnabled = "labFullVisionModeEnabled"
     static let labDeepAssociationModeEnabled = "labDeepAssociationModeEnabled"
     static let labLowConsumptionModeEnabled = "labLowConsumptionModeEnabled"
+    static let labRecordOutputLanguage = "labRecordOutputLanguage"
 }
