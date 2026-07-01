@@ -61,8 +61,8 @@ final class SemanticSearchEngine {
             return existing.vector
         }
 
-        guard let vector = try? await embeddingService.embed(text) else { return nil }
-        index.set(EmbeddingEntry(vector: vector, model: embeddingService.modelIdentifier, contentHash: hash), for: record.id)
-        return vector
+        guard let result = try? await embeddingService.embedTagged(text) else { return nil }
+        index.set(EmbeddingEntry(vector: result.vector, model: result.model, contentHash: hash), for: record.id)
+        return result.vector
     }
 }

@@ -22,4 +22,14 @@ final class HybridEmbeddingService: EmbeddingService {
         }
         return try await local.embed(text)
     }
+
+    func embedTagged(_ text: String) async throws -> EmbeddingResult {
+        if preferCloud(), let cloud {
+            if let v = try? await cloud.embed(text) {
+                return EmbeddingResult(vector: v, model: cloud.modelIdentifier)
+            }
+        }
+        let v = try await local.embed(text)
+        return EmbeddingResult(vector: v, model: local.modelIdentifier)
+    }
 }

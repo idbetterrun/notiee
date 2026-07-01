@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7817E5B2EDFC4125B5F52DBE /* PersistenceRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1EBF5A4A2B4B338E3DC72A /* PersistenceRecovery.swift */; };
+		051B8D9BC31243C09651CCBE /* NoteDeleteTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D2B43D9E734FE78350B0C1 /* NoteDeleteTool.swift */; };
+		460D4B22983B4EC9A1C6CD07 /* TodoDeleteTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410006A21CC84DC78404C1CC /* TodoDeleteTool.swift */; };
+		78F0FC3C5888414DA58947B8 /* ScheduleDeleteTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE5465068F34D5192CF8F34 /* ScheduleDeleteTool.swift */; };
+		15E69104C860461B9F78C1A8 /* NoteTodoDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB75EAAF9AA4F4FAF329B42 /* NoteTodoDecodingTests.swift */; };
+		5EB247180BF141768490D310 /* PersistenceRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A52C183F894D49954936B2 /* PersistenceRecoveryTests.swift */; };
+		4419DB2E435B4FD19F0D76C1 /* LocalImageStoreDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68D85D61BD1A4102BABF2208 /* LocalImageStoreDeleteTests.swift */; };
+		AA0850A9942444469E4267C1 /* RecordDeletionHookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0FB67777201499DB63BAA9C /* RecordDeletionHookTests.swift */; };
+		33181439E235441A8BE490E8 /* CustomModelKeychainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C741750FBD0A450E8C2F2FDD /* CustomModelKeychainTests.swift */; };
+		FEBA392ACC604F37899060D5 /* TMNPathSafetyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97137A9D615941E4BF67CEC0 /* TMNPathSafetyTests.swift */; };
+		C15CBEFD15434819B39E2AC5 /* AgentUndoDeleteToolsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9CA5D14EFCB4C58A501EDF4 /* AgentUndoDeleteToolsTests.swift */; };
 		005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F441ADF365412A945FE92D /* CameraManager.swift */; };
 		00BCBB65A18DFBD97B683924 /* CustomFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */; };
 		061AAF65967B5A895B5130BD /* TodoCompleteTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */; };
@@ -29,7 +40,7 @@
 		18B83FE82FC0A058002A7EC9 /* NotieeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		18E20B0B2FC499F9006F3FCE /* OnboardingKit in Frameworks */ = {isa = PBXBuildFile; productRef = CFB8ABB57A1D5E1E078986D3 /* OnboardingKit */; };
 		18E20B0C2FC499F9006F3FCE /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = FDC1C7CC6F9DE204313FBCB5 /* WhatsNewKit */; };
-		1AC220ACD789258E119ADE8C /* RecordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84233399EB935792F9A2F7BA /* RecordManager.swift */; };
+		1AC220ACD789258E119ADE8C /* Managers/RecordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84233399EB935792F9A2F7BA /* Managers/RecordManager.swift */; };
 		1AC2F4182578FB592A9E6BB2 /* AgentActionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1819D48A4E95513AC98EC908 /* AgentActionStore.swift */; };
 		1C100501D4B43F9FC9EC1BFE /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */; };
 		1D8EA4FCDC7C4817C8D3F6E6 /* NoteCreateTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C65354C2999D0C5C2B00F7 /* NoteCreateTool.swift */; };
@@ -89,7 +100,7 @@
 		4D5AAF4C87304E0631C4BEF2 /* RecordManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9469DF6F1FBDEDAF986815A0 /* RecordManagerTests.swift */; };
 		4FAFAF572727FB4FFFAC2184 /* AIPromptProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */; };
 		55CDB316557B1786E77FB2BA /* SparkChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF966F65697B0EC727F3655D /* SparkChatBubble.swift */; };
-		59691F6C242A13293928B152 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E555B84B89970B1E6511440D /* CalendarManager.swift */; };
+		59691F6C242A13293928B152 /* Managers/CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E555B84B89970B1E6511440D /* Managers/CalendarManager.swift */; };
 		5B878F3C88A6EF0DEC0562B8 /* SparkHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */; };
 		5EE3C366D173A176CDDAE8AB /* AgentToolRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72E53801E091F5B2CB2FDF5C /* AgentToolRegistry.swift */; };
 		5F2338B67E12B8BF8344CBAD /* MemoryManageTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */; };
@@ -113,7 +124,7 @@
 		8306357280720BA51A59C1AE /* HybridEmbeddingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3648790C69669ADC36B54A17 /* HybridEmbeddingServiceTests.swift */; };
 		843DF9A146CEAD56FA63E462 /* SparkConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */; };
 		88CA43871198658141B9E253 /* HighlightedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82877F4ACD877D140D13DE81 /* HighlightedText.swift */; };
-		88FE8511C00D6740483676E5 /* AIPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 809810EE943DED7F3FB0382C /* AIPipelineManager.swift */; };
+		88FE8511C00D6740483676E5 /* Managers/AIPipelineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 809810EE943DED7F3FB0382C /* Managers/AIPipelineManager.swift */; };
 		8C4C152AA7CF86B41897B82A /* EventDetailSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */; };
 		8F08036E1FFE02A15B459735 /* CalendarSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1342A65366ED31A59C9A520E /* CalendarSelectionView.swift */; };
 		8FEB4F50442D74F858390C0A /* SparkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07B50625730EE33FF521449 /* SparkView.swift */; };
@@ -200,7 +211,7 @@
 		D1145EE38C07C212ECDD27B5 /* SettingsMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72552C09CF292FA6C3C36EE /* SettingsMainView.swift */; };
 		D2DE144E852CDD26A6D2F0AF /* EmbeddingIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */; };
 		D46B3EE8FAA929A9E058B609 /* PrivacyPolicy_zh-Hans.html in Resources */ = {isa = PBXBuildFile; fileRef = BFED0688BDB304E80624D4F8 /* PrivacyPolicy_zh-Hans.html */; };
-		D8FC4EF5B5823FE100560D4F /* FolderTagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */; };
+		D8FC4EF5B5823FE100560D4F /* Managers/FolderTagManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EB226E33EFE9B71D52BAFE /* Managers/FolderTagManager.swift */; };
 		DB5CEC2D14D92D2B092E3359 /* SparkPrivacySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */; };
 		DBC70B4FAC3C877675F22867 /* SparkScheduleContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDE5052175A438A3502DE6C /* SparkScheduleContextTests.swift */; };
 		DC4B8E120AEAC1BEF42D323E /* PrivacyPolicy_zh-Hant-TW.html in Resources */ = {isa = PBXBuildFile; fileRef = 6412BE1BD7CEE8A30870EA78 /* PrivacyPolicy_zh-Hant-TW.html */; };
@@ -268,11 +279,22 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3C1EBF5A4A2B4B338E3DC72A /* PersistenceRecovery.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceRecovery.swift; sourceTree = "<group>"; };
+		34D2B43D9E734FE78350B0C1 /* NoteDeleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteDeleteTool.swift; sourceTree = "<group>"; };
+		410006A21CC84DC78404C1CC /* TodoDeleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoDeleteTool.swift; sourceTree = "<group>"; };
+		9AE5465068F34D5192CF8F34 /* ScheduleDeleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduleDeleteTool.swift; sourceTree = "<group>"; };
+		BAB75EAAF9AA4F4FAF329B42 /* NoteTodoDecodingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteTodoDecodingTests.swift; sourceTree = "<group>"; };
+		48A52C183F894D49954936B2 /* PersistenceRecoveryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceRecoveryTests.swift; sourceTree = "<group>"; };
+		68D85D61BD1A4102BABF2208 /* LocalImageStoreDeleteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalImageStoreDeleteTests.swift; sourceTree = "<group>"; };
+		F0FB67777201499DB63BAA9C /* RecordDeletionHookTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordDeletionHookTests.swift; sourceTree = "<group>"; };
+		C741750FBD0A450E8C2F2FDD /* CustomModelKeychainTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomModelKeychainTests.swift; sourceTree = "<group>"; };
+		97137A9D615941E4BF67CEC0 /* TMNPathSafetyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNPathSafetyTests.swift; sourceTree = "<group>"; };
+		E9CA5D14EFCB4C58A501EDF4 /* AgentUndoDeleteToolsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentUndoDeleteToolsTests.swift; sourceTree = "<group>"; };
 		000000000000000000000006 /* Notiee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notiee.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000007 /* NotieeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NotieeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00C3C0E8C8898B8DAD12DB4A /* ScenePreset.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScenePreset.swift; sourceTree = "<group>"; };
 		014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordEmbeddingTextTests.swift; sourceTree = "<group>"; };
-		0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkInputBar.swift; path = SparkInputBar.swift; sourceTree = "<group>"; };
+		0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkInputBar.swift; sourceTree = "<group>"; };
 		085D584DC88E0E479852CCCF /* ReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
 		09338A6B409FAB7CB61DE104 /* SparkSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkSettingsView.swift; sourceTree = "<group>"; };
 		0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragments.swift; sourceTree = "<group>"; };
@@ -325,8 +347,8 @@
 		1CCEBDBA7CA82B78E268E358 /* WhatsNewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		26BC4058193AD67C2BDE03B3 /* CalendarManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManagerTests.swift; sourceTree = "<group>"; };
 		2700A7B251C6870995C7849B /* MeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeView.swift; sourceTree = "<group>"; };
-		2D458A6ABF9D7D35D2BDAA69 /* UserAgreement_zh-Hant-HK.html */ = {isa = PBXFileReference; includeInIndex = 1; path = "UserAgreement_zh-Hant-HK.html"; sourceTree = "<group>"; };
-		2DF7D3B027CB193005C91BEE /* PrivacyPolicy_en.html */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyPolicy_en.html; sourceTree = "<group>"; };
+		2D458A6ABF9D7D35D2BDAA69 /* UserAgreement_zh-Hant-HK.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "UserAgreement_zh-Hant-HK.html"; sourceTree = "<group>"; };
+		2DF7D3B027CB193005C91BEE /* PrivacyPolicy_en.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = PrivacyPolicy_en.html; sourceTree = "<group>"; };
 		2DFF9B8179789C6EF88FFB42 /* NoteSearchTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteSearchTool.swift; sourceTree = "<group>"; };
 		3648790C69669ADC36B54A17 /* HybridEmbeddingServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HybridEmbeddingServiceTests.swift; sourceTree = "<group>"; };
 		36BF1BFA937AF9FC94C294B9 /* LabFeaturesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LabFeaturesView.swift; sourceTree = "<group>"; };
@@ -336,13 +358,13 @@
 		3CED309E4EABF3F56BA55181 /* SemanticSearchEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticSearchEngine.swift; sourceTree = "<group>"; };
 		3D6A6D0E34E70A3AFCE6D70C /* CustomModelsListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomModelsListView.swift; sourceTree = "<group>"; };
 		3E16D916C859E3FB8DD53D5C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkAIService.swift; path = SparkAIService.swift; sourceTree = "<group>"; };
+		3F05F47F4520F5210B0DB6AE /* SparkAIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkAIService.swift; sourceTree = "<group>"; };
 		40041CD4CF39EED9C31FFF80 /* EventTag.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventTag.swift; sourceTree = "<group>"; };
 		42E0702491A101A08018209F /* EventCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventCardView.swift; sourceTree = "<group>"; };
 		43711194AC983B67E9DDD83D /* AllSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AllSchedulesView.swift; sourceTree = "<group>"; };
 		46A87EBD51FEEA3F9347B0D9 /* RecordCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordCardView.swift; sourceTree = "<group>"; };
 		480559344177345371C21F7A /* BackupRestoreView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
-		48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryStore.swift; path = SparkHistoryStore.swift; sourceTree = "<group>"; };
+		48F3570C6A7106BEB3B9C3B4 /* SparkHistoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkHistoryStore.swift; sourceTree = "<group>"; };
 		49134555466C2DEE312B35AB /* LegalHTMLView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LegalHTMLView.swift; sourceTree = "<group>"; };
 		49671163B1FF58DA2562FE75 /* TMNModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNModels.swift; sourceTree = "<group>"; };
 		4AE9588D51921FCBFA10E9C7 /* AgentSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentSettingsView.swift; sourceTree = "<group>"; };
@@ -350,38 +372,38 @@
 		4C5081ABAC78255979139309 /* AgentTrustManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentTrustManager.swift; sourceTree = "<group>"; };
 		4E689E148505EC9477DB8451 /* SemanticRanker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticRanker.swift; sourceTree = "<group>"; };
 		4E7EBC3121DE82012602A42D /* AIConfigurationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIConfigurationView.swift; sourceTree = "<group>"; };
-		50F23F54D344287F00D95C5B /* UserAgreement_en.html */ = {isa = PBXFileReference; includeInIndex = 1; path = UserAgreement_en.html; sourceTree = "<group>"; };
+		50F23F54D344287F00D95C5B /* UserAgreement_en.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = UserAgreement_en.html; sourceTree = "<group>"; };
 		54FC51119086960ECC58F99C /* OpenSourceAcknowledgmentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenSourceAcknowledgmentsView.swift; sourceTree = "<group>"; };
 		56C541D6F62CB3492461A94D /* AboutNotieeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AboutNotieeView.swift; sourceTree = "<group>"; };
 		59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
-		5A77DED6AAB331ADC2FD1B41 /* UserAgreement_zh-Hans.html */ = {isa = PBXFileReference; includeInIndex = 1; path = "UserAgreement_zh-Hans.html"; sourceTree = "<group>"; };
+		5A77DED6AAB331ADC2FD1B41 /* UserAgreement_zh-Hans.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "UserAgreement_zh-Hans.html"; sourceTree = "<group>"; };
 		5D8FE1F6E3F10ED05723F798 /* TodoCreateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCreateTool.swift; sourceTree = "<group>"; };
 		5F6D173C754CEF3505112591 /* FeatureHintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureHintView.swift; sourceTree = "<group>"; };
 		608EC86324B5D9CBDDD224C3 /* UIDevice+ModelName.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIDevice+ModelName.swift"; sourceTree = "<group>"; };
 		612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PastSchedulesView.swift; sourceTree = "<group>"; };
-		6412BE1BD7CEE8A30870EA78 /* PrivacyPolicy_zh-Hant-TW.html */ = {isa = PBXFileReference; includeInIndex = 1; path = "PrivacyPolicy_zh-Hant-TW.html"; sourceTree = "<group>"; };
+		6412BE1BD7CEE8A30870EA78 /* PrivacyPolicy_zh-Hant-TW.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "PrivacyPolicy_zh-Hant-TW.html"; sourceTree = "<group>"; };
 		6932A7AB2B4C28E0C6725414 /* NoteGetDetailTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteGetDetailTool.swift; sourceTree = "<group>"; };
 		69DF6C9022F813EDCB5E9D3D /* ImageSaver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ImageSaver.swift; sourceTree = "<group>"; };
 		6A643FEA7F55221E6A4EF0D4 /* AIPromptProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIPromptProvider.swift; sourceTree = "<group>"; };
 		6A705932D2B69FE2616C7F32 /* NoteSearchToolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteSearchToolTests.swift; sourceTree = "<group>"; };
-		6AE25D10BF81E21044A271C1 /* SparkHistoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkHistoryView.swift; path = SparkHistoryView.swift; sourceTree = "<group>"; };
+		6AE25D10BF81E21044A271C1 /* SparkHistoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkHistoryView.swift; sourceTree = "<group>"; };
 		6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpecialDayEvent.swift; sourceTree = "<group>"; };
 		70532E6B568AB1E2C463DC41 /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		716D25BBAE5952F2A204A2E1 /* NoteUpdateTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteUpdateTool.swift; sourceTree = "<group>"; };
 		72E53801E091F5B2CB2FDF5C /* AgentToolRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AgentToolRegistry.swift; sourceTree = "<group>"; };
 		765F6A2CE3063A63773F40BF /* RecordSourceDecodingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordSourceDecodingTests.swift; sourceTree = "<group>"; };
-		77936A21AC8DE2E39C1AF0E2 /* UserAgreement_zh-Hant-TW.html */ = {isa = PBXFileReference; includeInIndex = 1; path = "UserAgreement_zh-Hant-TW.html"; sourceTree = "<group>"; };
+		77936A21AC8DE2E39C1AF0E2 /* UserAgreement_zh-Hant-TW.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "UserAgreement_zh-Hant-TW.html"; sourceTree = "<group>"; };
 		793B134A802E2B48548F0F06 /* TodoBucketer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoBucketer.swift; sourceTree = "<group>"; };
 		7F8B25934CD853078C1F734F /* WelcomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
-		809810EE943DED7F3FB0382C /* AIPipelineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/AIPipelineManager.swift; sourceTree = "<group>"; };
+		809810EE943DED7F3FB0382C /* Managers/AIPipelineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/AIPipelineManager.swift; sourceTree = "<group>"; };
 		82877F4ACD877D140D13DE81 /* HighlightedText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HighlightedText.swift; sourceTree = "<group>"; };
-		84233399EB935792F9A2F7BA /* RecordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/RecordManager.swift; sourceTree = "<group>"; };
+		84233399EB935792F9A2F7BA /* Managers/RecordManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/RecordManager.swift; sourceTree = "<group>"; };
 		868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduledEventStore.swift; sourceTree = "<group>"; };
 		885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingService.swift; sourceTree = "<group>"; };
 		88784320EF16FC6225923813 /* NotieeColors.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotieeColors.swift; sourceTree = "<group>"; };
 		8993B3331CCFAA2B3E52D4F3 /* LiveActivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageStore.swift; sourceTree = "<group>"; };
-		900B8AF6927729C413BE6706 /* SparkModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkModels.swift; path = SparkModels.swift; sourceTree = "<group>"; };
+		900B8AF6927729C413BE6706 /* SparkModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModels.swift; sourceTree = "<group>"; };
 		9163A3ED86E9CA4AE31E1A64 /* NotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		9469DF6F1FBDEDAF986815A0 /* RecordManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordManagerTests.swift; sourceTree = "<group>"; };
 		9498AF5A115D7044C4936431 /* TMNImportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNImportService.swift; sourceTree = "<group>"; };
@@ -410,17 +432,17 @@
 		AEEB3C2A7E47A7AC4ECA6614 /* CustomFolder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolder.swift; sourceTree = "<group>"; };
 		B2C3D4E5F60718293A4B5C6D /* NoteCreateToolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteCreateToolTests.swift; sourceTree = "<group>"; };
 		B6831A4C49B77927F1E760DD /* ICloudSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ICloudSyncService.swift; sourceTree = "<group>"; };
-		B7220C7898CD80E70D5812F6 /* SparkCitationRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkCitationRow.swift; path = SparkCitationRow.swift; sourceTree = "<group>"; };
+		B7220C7898CD80E70D5812F6 /* SparkCitationRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkCitationRow.swift; sourceTree = "<group>"; };
 		B72552C09CF292FA6C3C36EE /* SettingsMainView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsMainView.swift; sourceTree = "<group>"; };
-		B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkPrivacySheet.swift; path = SparkPrivacySheet.swift; sourceTree = "<group>"; };
+		B731B57575F6D5CF37F09029 /* SparkPrivacySheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPrivacySheet.swift; sourceTree = "<group>"; };
 		B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkStyleSettingsView.swift; sourceTree = "<group>"; };
 		B7E620797C134376A9E304BE /* SparkMemoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkMemoryView.swift; sourceTree = "<group>"; };
-		B8995D0E7F5AAD82729CBB0D /* PrivacyPolicy_zh-Hant-HK.html */ = {isa = PBXFileReference; includeInIndex = 1; path = "PrivacyPolicy_zh-Hant-HK.html"; sourceTree = "<group>"; };
+		B8995D0E7F5AAD82729CBB0D /* PrivacyPolicy_zh-Hant-HK.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "PrivacyPolicy_zh-Hant-HK.html"; sourceTree = "<group>"; };
 		BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
 		BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TagEditSheet.swift; sourceTree = "<group>"; };
-		BFED0688BDB304E80624D4F8 /* PrivacyPolicy_zh-Hans.html */ = {isa = PBXFileReference; includeInIndex = 1; path = "PrivacyPolicy_zh-Hans.html"; sourceTree = "<group>"; };
-		C0042F63F4A1CFF675CA5D6D /* SparkBackgroundView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkBackgroundView.swift; path = SparkBackgroundView.swift; sourceTree = "<group>"; };
-		C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationRepository.swift; path = SparkConversationRepository.swift; sourceTree = "<group>"; };
+		BFED0688BDB304E80624D4F8 /* PrivacyPolicy_zh-Hans.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "PrivacyPolicy_zh-Hans.html"; sourceTree = "<group>"; };
+		C0042F63F4A1CFF675CA5D6D /* SparkBackgroundView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkBackgroundView.swift; sourceTree = "<group>"; };
+		C0DEDEADBEEFCAFE00000002 /* SparkConversationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkConversationRepository.swift; sourceTree = "<group>"; };
 		C0DEDEADBEEFCAFE00000003 /* SparkConversationRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkConversationRepositoryTests.swift; sourceTree = "<group>"; };
 		C0DEDEADBEEFCAFE00000005 /* SparkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkViewModelTests.swift; sourceTree = "<group>"; };
 		C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticRankerTests.swift; sourceTree = "<group>"; };
@@ -453,24 +475,24 @@
 		CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingCapabilityTests.swift; sourceTree = "<group>"; };
 		CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModelPreferences.swift; sourceTree = "<group>"; };
 		CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkModelPreferencesTests.swift; sourceTree = "<group>"; };
-		D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
+		D1EB226E33EFE9B71D52BAFE /* Managers/FolderTagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/FolderTagManager.swift; sourceTree = "<group>"; };
 		D21C812ADB4127CDBBA65D6D /* SemanticSearchEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticSearchEngineTests.swift; sourceTree = "<group>"; };
 		D2B749F891001D84C8491707 /* SparkPromptFragmentsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragmentsTests.swift; sourceTree = "<group>"; };
 		D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelThinkingPolicyTests.swift; sourceTree = "<group>"; };
-		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkConversationStore.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
+		D380D3F674AB3AF2582B0A77 /* SparkConversationStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkConversationStore.swift; sourceTree = "<group>"; };
 		D395AC82E97090501EA8D180 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D50780AC855D14A170154CD6 /* TMNExportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNExportService.swift; sourceTree = "<group>"; };
 		D6C23EF23D8944E5A0E6D009 /* LocalOCRService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalOCRService.swift; sourceTree = "<group>"; };
 		D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MemoryManageTool.swift; sourceTree = "<group>"; };
-		DBE516C2778B82D7C50D438C /* SparkViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkViewModel.swift; path = SparkViewModel.swift; sourceTree = "<group>"; };
+		DBE516C2778B82D7C50D438C /* SparkViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkViewModel.swift; sourceTree = "<group>"; };
 		DD92F2978DC6F8D130BB8FB5 /* TodoCompleteTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCompleteTool.swift; sourceTree = "<group>"; };
 		DDCCBBAA5544332211770088 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		DFD32C9D35304E3BB6D4FE4F /* JSONNoteTodoStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JSONNoteTodoStore.swift; sourceTree = "<group>"; };
-		E07B50625730EE33FF521449 /* SparkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkView.swift; path = SparkView.swift; sourceTree = "<group>"; };
+		E07B50625730EE33FF521449 /* SparkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkView.swift; sourceTree = "<group>"; };
 		E382FAEB20AB862699A7CFFA /* CustomFolderStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomFolderStore.swift; sourceTree = "<group>"; };
-		E555B84B89970B1E6511440D /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CalendarManager.swift; sourceTree = "<group>"; };
+		E555B84B89970B1E6511440D /* Managers/CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CalendarManager.swift; sourceTree = "<group>"; };
 		E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AIFeatureSettingsView.swift; sourceTree = "<group>"; };
-		EADCB9A01D16F3542265C00F /* SparkMemoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkMemoryStore.swift; path = SparkMemoryStore.swift; sourceTree = "<group>"; };
+		EADCB9A01D16F3542265C00F /* SparkMemoryStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkMemoryStore.swift; sourceTree = "<group>"; };
 		ECDE5052175A438A3502DE6C /* SparkScheduleContextTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkScheduleContextTests.swift; sourceTree = "<group>"; };
 		EFB5DBCCB1BD85E56C6BE9CA /* TodoRowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoRowView.swift; sourceTree = "<group>"; };
 		EFE89570F6F6F70A7B8F8DCB /* EmbeddingIndex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingIndex.swift; sourceTree = "<group>"; };
@@ -484,12 +506,12 @@
 		FA37C8BEE05770A01BB243BC /* SyncQueue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncQueue.swift; sourceTree = "<group>"; };
 		FBA0681874EEFBE79820D18B /* TodoCreateToolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodoCreateToolTests.swift; sourceTree = "<group>"; };
 		FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingIndexTests.swift; sourceTree = "<group>"; };
-		FF966F65697B0EC727F3655D /* SparkChatBubble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SparkChatBubble.swift; path = SparkChatBubble.swift; sourceTree = "<group>"; };
+		FF966F65697B0EC727F3655D /* SparkChatBubble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkChatBubble.swift; sourceTree = "<group>"; };
 		FFDDCCBB5544332211009988 /* CourseCalendarSelectionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CourseCalendarSelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		18B83FEC2FC0A058002A7EC9 /* Exceptions for "NotieeWidget" folder in "NotieeWidgetExtension" target */ = {
+		18B83FEC2FC0A058002A7EC9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -499,18 +521,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		18B83FDC2FC0A057002A7EC9 /* NotieeWidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				18B83FEC2FC0A058002A7EC9 /* Exceptions for "NotieeWidget" folder in "NotieeWidgetExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = NotieeWidget;
-			sourceTree = "<group>";
-		};
+		18B83FDC2FC0A057002A7EC9 /* NotieeWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (18B83FEC2FC0A058002A7EC9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = NotieeWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -595,16 +606,16 @@
 		000000000000000000000010 /* Features */ = {
 			isa = PBXGroup;
 			children = (
-				000000000000000000000011 /* Today */,
+				000000000000000000000011 /* Notiee/Features/Today */,
 				000000000000000000000012 /* Capture */,
 				000000000000000000000013 /* Records */,
-				000000000000000000000014 /* Settings */,
+				000000000000000000000014 /* Notiee/Features/Settings */,
 				35D99F6FBA9F91562D973DEA /* Spark */,
 			);
 			path = Features;
 			sourceTree = "<group>";
 		};
-		000000000000000000000011 /* Today */ = {
+		000000000000000000000011 /* Notiee/Features/Today */ = {
 			isa = PBXGroup;
 			children = (
 				100000000000000000000003 /* TodayView.swift */,
@@ -641,7 +652,7 @@
 			path = Records;
 			sourceTree = "<group>";
 		};
-		000000000000000000000014 /* Settings */ = {
+		000000000000000000000014 /* Notiee/Features/Settings */ = {
 			isa = PBXGroup;
 			children = (
 				100000000000000000000006 /* SettingsView.swift */,
@@ -739,6 +750,13 @@
 				F03763E897A27D755A3FF8DA /* VectorMathTests.swift */,
 				014BFAC4D8EB390A975D3642 /* RecordEmbeddingTextTests.swift */,
 				FC9D098DDC6944DE43097ACA /* EmbeddingIndexTests.swift */,
+				BAB75EAAF9AA4F4FAF329B42 /* NoteTodoDecodingTests.swift */,
+				48A52C183F894D49954936B2 /* PersistenceRecoveryTests.swift */,
+				68D85D61BD1A4102BABF2208 /* LocalImageStoreDeleteTests.swift */,
+				F0FB67777201499DB63BAA9C /* RecordDeletionHookTests.swift */,
+				C741750FBD0A450E8C2F2FDD /* CustomModelKeychainTests.swift */,
+				97137A9D615941E4BF67CEC0 /* TMNPathSafetyTests.swift */,
+				E9CA5D14EFCB4C58A501EDF4 /* AgentUndoDeleteToolsTests.swift */,
 				C5E7D257342A953A584D5A5E /* SemanticRankerTests.swift */,
 				4B26D79729A742911FBD4BE2 /* LocalEmbeddingServiceTests.swift */,
 				D21C812ADB4127CDBBA65D6D /* SemanticSearchEngineTests.swift */,
@@ -757,6 +775,7 @@
 			children = (
 				BCD06B30ECD94C27BE5882E4 /* CalendarService.swift */,
 				8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */,
+				3C1EBF5A4A2B4B338E3DC72A /* PersistenceRecovery.swift */,
 				C7F441ADF365412A945FE92D /* CameraManager.swift */,
 				100000000000000000000012 /* ScheduleMatcher.swift */,
 				99000000000000000000000B /* RealAIProcessingService.swift */,
@@ -764,10 +783,10 @@
 				99000000000000000000000F /* AIProcessingService.swift */,
 				100000000000000000000019 /* JSONNoteRecordStore.swift */,
 				100000000000000000000020 /* NotieeStore.swift */,
-				84233399EB935792F9A2F7BA /* RecordManager.swift */,
-				E555B84B89970B1E6511440D /* CalendarManager.swift */,
-				D1EB226E33EFE9B71D52BAFE /* FolderTagManager.swift */,
-				809810EE943DED7F3FB0382C /* AIPipelineManager.swift */,
+				84233399EB935792F9A2F7BA /* Managers/RecordManager.swift */,
+				E555B84B89970B1E6511440D /* Managers/CalendarManager.swift */,
+				D1EB226E33EFE9B71D52BAFE /* Managers/FolderTagManager.swift */,
+				809810EE943DED7F3FB0382C /* Managers/AIPipelineManager.swift */,
 				100000000000000000000027 /* UserDefaultsAppSettingsStore.swift */,
 				100000000000000000000029 /* MockAIProcessingService.swift */,
 				8993B3331CCFAA2B3E52D4F3 /* LiveActivityManager.swift */,
@@ -827,7 +846,6 @@
 				0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */,
 				CAFE000000SMPRF00000002 /* SparkModelPreferences.swift */,
 			);
-			name = Spark;
 			path = Spark;
 			sourceTree = "<group>";
 		};
@@ -863,8 +881,10 @@
 				CAFE000000074444DDDD0002 /* DateInfoTool.swift */,
 				D88F37FB70DB3641EF9E6222 /* MemoryManageTool.swift */,
 				F00A05167291C6F2A627F2A6 /* WebFetchTool.swift */,
+				34D2B43D9E734FE78350B0C1 /* NoteDeleteTool.swift */,
+				410006A21CC84DC78404C1CC /* TodoDeleteTool.swift */,
+				9AE5465068F34D5192CF8F34 /* ScheduleDeleteTool.swift */,
 			);
-			name = Tools;
 			path = Tools;
 			sourceTree = "<group>";
 		};
@@ -880,7 +900,6 @@
 				2D458A6ABF9D7D35D2BDAA69 /* UserAgreement_zh-Hant-HK.html */,
 				77936A21AC8DE2E39C1AF0E2 /* UserAgreement_zh-Hant-TW.html */,
 			);
-			name = Legal;
 			path = Legal;
 			sourceTree = "<group>";
 		};
@@ -909,7 +928,6 @@
 				A17F392B6C73F6F8C0AC9A7C /* AgentToolProtocol.swift */,
 				CAFE000000006666FFFF0002 /* AgentToolPresentation.swift */,
 			);
-			name = Agent;
 			path = Agent;
 			sourceTree = "<group>";
 		};
@@ -1021,10 +1039,6 @@
 					18B83FD52FC0A057002A7EC9 = {
 						CreatedOnToolsVersion = 26.5;
 					};
-					DD34B6B25D6BFCA3E89EBB5A = {
-						SystemCapabilities = {
-						};
-					};
 				};
 			};
 			buildConfigurationList = 700000000000000000000001 /* Build configuration list for PBXProject "Notiee" */;
@@ -1115,6 +1129,10 @@
 				1874632278E7417482471181 /* CalendarService.swift in Sources */,
 				ED2D0F8DBBF44F72A43B8CDB /* CameraPreviewView.swift in Sources */,
 				3BB1D5E728444436B55577CB /* LocalImageStore.swift in Sources */,
+				7817E5B2EDFC4125B5F52DBE /* PersistenceRecovery.swift in Sources */,
+				051B8D9BC31243C09651CCBE /* NoteDeleteTool.swift in Sources */,
+				460D4B22983B4EC9A1C6CD07 /* TodoDeleteTool.swift in Sources */,
+				78F0FC3C5888414DA58947B8 /* ScheduleDeleteTool.swift in Sources */,
 				005674D4A95B4F47BD281A87 /* CameraManager.swift in Sources */,
 				200000000000000000000001 /* NotieeApp.swift in Sources */,
 				200000000000000000000002 /* RootTabView.swift in Sources */,
@@ -1134,10 +1152,10 @@
 				200000000000000000000012 /* ScheduleMatcher.swift in Sources */,
 				200000000000000000000019 /* JSONNoteRecordStore.swift in Sources */,
 				200000000000000000000020 /* NotieeStore.swift in Sources */,
-				1AC220ACD789258E119ADE8C /* RecordManager.swift in Sources */,
-				59691F6C242A13293928B152 /* CalendarManager.swift in Sources */,
-				D8FC4EF5B5823FE100560D4F /* FolderTagManager.swift in Sources */,
-				88FE8511C00D6740483676E5 /* AIPipelineManager.swift in Sources */,
+				1AC220ACD789258E119ADE8C /* Managers/RecordManager.swift in Sources */,
+				59691F6C242A13293928B152 /* Managers/CalendarManager.swift in Sources */,
+				D8FC4EF5B5823FE100560D4F /* Managers/FolderTagManager.swift in Sources */,
+				88FE8511C00D6740483676E5 /* Managers/AIPipelineManager.swift in Sources */,
 				200000000000000000000027 /* UserDefaultsAppSettingsStore.swift in Sources */,
 				200000000000000000000015 /* TodayViewModel.swift in Sources */,
 				200000000000000000000035 /* CreateItemSheet.swift in Sources */,
@@ -1300,6 +1318,13 @@
 				410AF681CD08C47089A0F9A5 /* VectorMathTests.swift in Sources */,
 				CC4D232D1E4481C07C756165 /* RecordEmbeddingTextTests.swift in Sources */,
 				97B6EEA9A7A96CD1F554231D /* EmbeddingIndexTests.swift in Sources */,
+				15E69104C860461B9F78C1A8 /* NoteTodoDecodingTests.swift in Sources */,
+				5EB247180BF141768490D310 /* PersistenceRecoveryTests.swift in Sources */,
+				4419DB2E435B4FD19F0D76C1 /* LocalImageStoreDeleteTests.swift in Sources */,
+				AA0850A9942444469E4267C1 /* RecordDeletionHookTests.swift in Sources */,
+				33181439E235441A8BE490E8 /* CustomModelKeychainTests.swift in Sources */,
+				FEBA392ACC604F37899060D5 /* TMNPathSafetyTests.swift in Sources */,
+				C15CBEFD15434819B39E2AC5 /* AgentUndoDeleteToolsTests.swift in Sources */,
 				E4E63E917C5C6F36A4C759B6 /* SemanticRankerTests.swift in Sources */,
 				7A244F40A7A1108C5293684E /* LocalEmbeddingServiceTests.swift in Sources */,
 				0EB872E642A660D986D3218F /* SemanticSearchEngineTests.swift in Sources */,

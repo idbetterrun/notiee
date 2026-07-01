@@ -534,7 +534,10 @@ final class SparkViewModel: ObservableObject {
             ScheduleCreateTool(calendarManager: calendarManager),
             ScheduleUpdateTool(calendarManager: calendarManager),
             MemoryManageTool(memoryStore: SparkMemoryStore.live),
-            WebFetchTool()
+            WebFetchTool(),
+            NoteDeleteTool(recordManager: recordManager),
+            TodoDeleteTool(recordManager: recordManager),
+            ScheduleDeleteTool(calendarManager: calendarManager)
         ]
         let registry = AgentToolRegistry(tools: tools)
         let trustManager = AgentTrustManager(settingsStore: settingsStore)

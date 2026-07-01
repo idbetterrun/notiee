@@ -166,15 +166,12 @@ final class AgentExecutor {
     }
 
     func undoAction(_ undoAction: AgentUndoActionData) async throws {
-        if let path = undoAction.snapshotPath {
-            let snapshotData = try actionStore.readSnapshot(path: path)
-            _ = try JSONDecoder().decode([NoteRecord].self, from: snapshotData)
-            try actionStore.deleteSnapshot(path: path)
-        } else {
-            guard let tool = toolRegistry.get(undoAction.toolName) else {
-                throw AgentActionStoreError.toolNotFound
-            }
-            _ = try await tool.execute(parameters: undoAction.undoParametersDict)
+        guard undoAction.snapshotPath == nil else {
+            throw AgentActionStoreError.notUndoable
         }
+        guard let tool = toolRegistry.get(undoAction.toolName) else {
+            throw AgentActionStoreError.toolNotFound
+        }
+        _ = try await tool.execute(parameters: undoAction.undoParametersDict)
     }
 }

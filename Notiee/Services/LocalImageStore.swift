@@ -53,4 +53,11 @@ final class LocalImageStore {
         guard let data = Self.readImageData(path: path) else { return nil }
         return UIImage(data: data)
     }
+
+    nonisolated static func deleteImage(path: String) {
+        guard !path.hasPrefix("mock://") else { return }
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = documentsDirectory.appendingPathComponent(path)
+        try? FileManager.default.removeItem(at: fileURL)
+    }
 }

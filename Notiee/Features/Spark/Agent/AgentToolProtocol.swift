@@ -10,8 +10,13 @@ protocol AgentTool: Sendable {
     var name: String { get }
     var description: String { get }
     var permission: AgentToolPermission { get }
+    var visibleToModel: Bool { get }
     var parametersSchema: AgentToolParametersSchema { get }
     func execute(parameters: [String: Any]) async throws -> AgentToolResult
+}
+
+extension AgentTool {
+    var visibleToModel: Bool { true }
 }
 
 struct AgentToolParametersSchema: Sendable {

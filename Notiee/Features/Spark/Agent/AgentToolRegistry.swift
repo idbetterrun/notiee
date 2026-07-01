@@ -16,7 +16,7 @@ final class AgentToolRegistry: @unchecked Sendable {
     }
 
     func allTools(for trustLevel: AgentTrustLevel) -> [any AgentTool] {
-        tools.values.filter { $0.permission.isAllowed(by: trustLevel) }
+        tools.values.filter { $0.visibleToModel && $0.permission.isAllowed(by: trustLevel) }
     }
 
     func openAITools(for trustLevel: AgentTrustLevel) -> [[String: Any]] {

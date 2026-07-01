@@ -397,10 +397,10 @@ final class NotieeStore: ObservableObject {
         let tagJSONStore = JSONEventTagStore.live
         let eventJSONStore = JSONScheduledEventStore.live
 
-        let persistedRecords = (try? recordJSONStore.loadRecords()) ?? []
-        let persistedTodos = (try? todoJSONStore.loadTodos()) ?? []
-        let persistedFolders = (try? folderJSONStore.loadFolders()) ?? []
-        let persistedTags = (try? tagJSONStore.loadTags()) ?? []
+        let persistedRecords = PersistenceRecovery.loadOrQuarantine(fileURL: recordJSONStore.fileURL) { try recordJSONStore.loadRecords() } ?? []
+        let persistedTodos = PersistenceRecovery.loadOrQuarantine(fileURL: todoJSONStore.fileURL) { try todoJSONStore.loadTodos() } ?? []
+        let persistedFolders = PersistenceRecovery.loadOrQuarantine(fileURL: folderJSONStore.fileURL) { try folderJSONStore.loadFolders() } ?? []
+        let persistedTags = PersistenceRecovery.loadOrQuarantine(fileURL: tagJSONStore.fileURL) { try tagJSONStore.loadTags() } ?? []
 
         let customTags = persistedTags.filter { !$0.name.hasPrefix("mapping_") }
         var mapping: [String: UUID] = [:]
@@ -412,7 +412,7 @@ final class NotieeStore: ObservableObject {
         }
 
         let finalTags = EventTag.systemTags + customTags
-        let customEvents = (try? eventJSONStore.loadEvents()) ?? []
+        let customEvents = PersistenceRecovery.loadOrQuarantine(fileURL: eventJSONStore.fileURL) { try eventJSONStore.loadEvents() } ?? []
 
         let recordMgr = RecordManager(
             records: persistedRecords,
@@ -420,6 +420,12 @@ final class NotieeStore: ObservableObject {
             recordStore: recordJSONStore,
             todoStore: todoJSONStore
         )
+        recordMgr.onRecordsDeleted = { ids in
+            for id in ids {
+                EmbeddingIndex.live.remove(id: id)
+                EmbeddingIndex.relatedNotes.remove(id: id)
+            }
+        }
         let folderTagMgr = FolderTagManager(
             customFolders: persistedFolders,
             customTags: finalTags,

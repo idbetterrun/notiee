@@ -8,6 +8,17 @@ protocol EmbeddingService: Sendable {
     func embed(_ text: String) async throws -> [Float]
 }
 
+struct EmbeddingResult: Sendable {
+    let vector: [Float]
+    let model: String
+}
+
+extension EmbeddingService {
+    func embedTagged(_ text: String) async throws -> EmbeddingResult {
+        EmbeddingResult(vector: try await embed(text), model: modelIdentifier)
+    }
+}
+
 enum EmbeddingError: LocalizedError {
     case unavailable
     case cannotEmbed

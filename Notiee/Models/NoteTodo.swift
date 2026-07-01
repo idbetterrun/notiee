@@ -26,4 +26,19 @@ struct NoteTodo: Identifiable, Equatable, Sendable, Codable {
         self.dueDate = dueDate
         self.hasReminder = hasReminder
     }
+
+    enum CodingKeys: String, CodingKey {
+        case id, recordID, content, isCompleted, createdAt, dueDate, hasReminder
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        recordID = try c.decodeIfPresent(UUID.self, forKey: .recordID)
+        content = try c.decodeIfPresent(String.self, forKey: .content) ?? ""
+        isCompleted = try c.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
+        createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        dueDate = try c.decodeIfPresent(Date.self, forKey: .dueDate)
+        hasReminder = try c.decodeIfPresent(Bool.self, forKey: .hasReminder) ?? false
+    }
 }

@@ -119,16 +119,48 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
         userDefaults.set(value, forKey: key)
     }
 
+    private func customModelKeychainKey(_ id: UUID) -> String {
+        "customModel.apiKey.\(id.uuidString)"
+    }
+
     func loadCustomModels() -> [CustomAIModel] {
         guard let data = userDefaults.data(forKey: UDK.customModels),
-              let models = try? JSONDecoder().decode([CustomAIModel].self, from: data) else {
+              var models = try? JSONDecoder().decode([CustomAIModel].self, from: data) else {
             return []
+        }
+        var needsMigration = false
+        for i in models.indices {
+            if let stored = secretStore.string(forKey: customModelKeychainKey(models[i].id)) {
+                models[i].apiKey = stored
+            } else if !models[i].apiKey.isEmpty {
+                needsMigration = true
+            }
+        }
+        if needsMigration {
+            saveCustomModels(models)
         }
         return models
     }
 
     func saveCustomModels(_ models: [CustomAIModel]) {
-        if let data = try? JSONEncoder().encode(models) {
+        if let oldData = userDefaults.data(forKey: UDK.customModels),
+           let oldModels = try? JSONDecoder().decode([CustomAIModel].self, from: oldData) {
+            let newIDs = Set(models.map { $0.id })
+            for old in oldModels where !newIDs.contains(old.id) {
+                try? secretStore.removeString(forKey: customModelKeychainKey(old.id))
+            }
+        }
+        var sanitized = models
+        for i in sanitized.indices {
+            let key = customModelKeychainKey(sanitized[i].id)
+            if sanitized[i].apiKey.isEmpty {
+                try? secretStore.removeString(forKey: key)
+            } else {
+                try? secretStore.setString(sanitized[i].apiKey, forKey: key)
+            }
+            sanitized[i].apiKey = ""
+        }
+        if let data = try? JSONEncoder().encode(sanitized) {
             userDefaults.set(data, forKey: UDK.customModels)
         }
     }

@@ -4,6 +4,17 @@ import ZIPFoundation
 
 @MainActor
 final class TMNImportService {
+    /// 把归档清单里的相对路径限制在解压根目录内，阻断 `..` 路径穿越。
+    static func secureResolve(base: URL, relative: String) throws -> URL {
+        let resolved = base.appendingPathComponent(relative).standardizedFileURL
+        let root = base.standardizedFileURL.path
+        guard resolved.path == root || resolved.path.hasPrefix(root + "/") else {
+            throw NSError(domain: "TMNImport", code: 2,
+                          userInfo: [NSLocalizedDescriptionKey: "归档内非法路径：\(relative)"])
+        }
+        return resolved
+    }
+
     static func importTMN(url: URL) async throws -> (NoteRecord, [NoteTodo]) {
         let isAccessing = url.startAccessingSecurityScopedResource()
         defer { if isAccessing { url.stopAccessingSecurityScopedResource() } }
@@ -21,14 +32,14 @@ final class TMNImportService {
             throw NSError(domain: "TMNImport", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unsupported format"])
         }
         
-        let contentURL = tempDir.appendingPathComponent(manifest.content.main)
+        let contentURL = try Self.secureResolve(base: tempDir, relative: manifest.content.main)
         let contentData = try Data(contentsOf: contentURL)
         let content = try JSONDecoder().decode(TMNContent.self, from: contentData)
         
         var localImagePaths: [String] = []
         if let refs = content.content.attachmentsRefs {
             for ref in refs {
-                let sourcePath = tempDir.appendingPathComponent(ref.path)
+                guard let sourcePath = try? Self.secureResolve(base: tempDir, relative: ref.path) else { continue }
                 if FileManager.default.fileExists(atPath: sourcePath.path) {
                     if let imgData = try? Data(contentsOf: sourcePath), let image = UIImage(data: imgData) {
                         if let destPath = try? LocalImageStore.shared.saveImage(image) {

@@ -7,6 +7,8 @@ final class RecordManager: ObservableObject {
     @Published var todos: [NoteTodo]
     @Published var lastPersistenceError: String?
 
+    var onRecordsDeleted: (([UUID]) -> Void)?
+
     let recordStore: NoteRecordPersisting
     let todoStore: NoteTodoPersisting
     let calendar: Calendar
@@ -194,7 +196,7 @@ final class RecordManager: ObservableObject {
         }
 
         for path in record.localImagePaths {
-            try? FileManager.default.removeItem(atPath: path)
+            LocalImageStore.deleteImage(path: path)
         }
 
         todos.removeAll { $0.recordID == id }
@@ -202,6 +204,7 @@ final class RecordManager: ObservableObject {
         records.remove(at: index)
         persistRecords()
         persistTodos()
+        onRecordsDeleted?([id])
     }
 
     func toggleDeletedMultiple(ids: Set<UUID>, isDeleted: Bool) {
@@ -218,21 +221,24 @@ final class RecordManager: ObservableObject {
     }
 
     func permanentlyDeleteMultiple(ids: Set<UUID>) {
+        var deletedIDs: [UUID] = []
         records.removeAll { record in
             if ids.contains(record.id) {
                 if !record.isDeleted {
                     accumulateDeletedTokens(record.tokenUsage)
                 }
                 for path in record.localImagePaths {
-                    try? FileManager.default.removeItem(atPath: path)
+                    LocalImageStore.deleteImage(path: path)
                 }
                 todos.removeAll { $0.recordID == record.id }
+                deletedIDs.append(record.id)
                 return true
             }
             return false
         }
         persistRecords()
         persistTodos()
+        onRecordsDeleted?(deletedIDs)
     }
 
     func updateRecordEvent(recordID: UUID, newEventID: UUID?) {
