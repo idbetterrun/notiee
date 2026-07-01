@@ -37,6 +37,35 @@ struct AIConfigurationView: View {
                 }
             }
 
+            let customs = viewModel.customModels(for: kind)
+            if !customs.isEmpty {
+                Section {
+                    ForEach(customs) { model in
+                        Button {
+                            viewModel.applyCustomModel(model, for: kind)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(model.name).foregroundColor(.primary)
+                                    Text(model.modelIdentifier)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                if viewModel.activeCustomModel(for: kind)?.id == model.id {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("我的自定义模型")
+                } footer: {
+                    Text("在「高级设置 → 管理自定义模型」中新增或修改。选中后即刻生效。")
+                }
+            }
+
             if configuration.wrappedValue.providerType != .custom {
                 Section("模型设置") {
                     let currentProvider = configuration.wrappedValue.providerType
