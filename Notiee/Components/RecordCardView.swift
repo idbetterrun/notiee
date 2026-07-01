@@ -12,7 +12,13 @@ struct RecordCardView: View {
                     .font(.headline)
                     .lineLimit(1)
 
-                if !record.summary.isEmpty {
+                if record.isEncrypted {
+                    Label("已加密拍记", systemImage: "lock.fill")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                if !record.isEncrypted, !record.summary.isEmpty {
                     Text(record.summary)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
