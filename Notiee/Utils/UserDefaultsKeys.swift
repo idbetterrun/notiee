@@ -87,6 +87,11 @@ enum UDK {
     static let sparkModelOverride = "spark_model_override"
     static let sparkThinkingLevel = "spark_thinking_level"
 
+    // MARK: - Security
+    static let securityAppLockEnabled = "notiee.security.appLockEnabled"
+    static let securityBiometricEnabled = "notiee.security.biometricEnabled"
+    static let securityAutoLockGraceSeconds = "notiee.security.autoLockGraceSeconds"
+
     // MARK: - Lab Features
     static let labMarkdownRenderingEnabled = "labMarkdownRenderingEnabled"
     static let labFullVisionModeEnabled = "labFullVisionModeEnabled"

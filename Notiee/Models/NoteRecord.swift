@@ -30,6 +30,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     var aiRetryCount: Int
     var deviceName: String?
     var source: RecordSource
+    var isEncrypted: Bool
 
     init(
         id: UUID = UUID(),
@@ -51,7 +52,8 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         tokenUsage: Int = 0,
         aiRetryCount: Int = 0,
         deviceName: String? = UIDevice.current.modelName,
-        source: RecordSource = .photo
+        source: RecordSource = .photo,
+        isEncrypted: Bool = false
     ) {
         self.id = id
         self.eventID = eventID
@@ -73,6 +75,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.aiRetryCount = aiRetryCount
         self.deviceName = deviceName
         self.source = source
+        self.isEncrypted = isEncrypted
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -80,6 +83,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         case ocrText, summary, detailedContent, processingState
         case keyPoints, definitions, isFavorite, isDeleted, editedAt
         case modelsUsed, tokenUsage, aiRetryCount, deviceName, source
+        case isEncrypted
     }
 
     init(from decoder: Decoder) throws {
@@ -104,6 +108,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         aiRetryCount = try c.decodeIfPresent(Int.self, forKey: .aiRetryCount) ?? 0
         deviceName = try c.decodeIfPresent(String.self, forKey: .deviceName)
         source = try c.decodeIfPresent(RecordSource.self, forKey: .source) ?? .photo
+        isEncrypted = try c.decodeIfPresent(Bool.self, forKey: .isEncrypted) ?? false
     }
 }
 
