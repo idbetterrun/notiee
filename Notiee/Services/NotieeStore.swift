@@ -368,6 +368,58 @@ final class NotieeStore: ObservableObject {
         recordManager.updateRecordEvent(recordID: recordID, newEventID: newEventID)
     }
 
+    // MARK: - Encryption
+
+    /// Encrypts a single record in place: writes the ciphertext blob, redacts the
+    /// persisted record, and clears its todos from the todo store.
+    func encryptRecord(id: UUID) {
+        guard let record = records.first(where: { $0.id == id }), !record.isEncrypted else { return }
+        let codec = SecureRecordCodec(crypto: CryptoService.shared())
+        let recordTodos = todos(for: record)
+        do {
+            let (redacted, blob) = try codec.encrypt(record: record, todos: recordTodos)
+            try codec.writeBlob(blob, for: id)
+            replaceTodos(for: id, with: [])
+            updateRecord(redacted)
+        } catch {
+            lastPersistenceError = "加密失败：\(error.localizedDescription)"
+        }
+    }
+
+    /// Permanently decrypts a record: restores text, todos, and image files; removes the blob.
+    func decryptRecord(id: UUID) {
+        guard let record = records.first(where: { $0.id == id }), record.isEncrypted else { return }
+        let codec = SecureRecordCodec(crypto: CryptoService.shared())
+        guard let blob = codec.readBlob(for: id) else {
+            lastPersistenceError = "找不到加密数据。"
+            return
+        }
+        do {
+            let (restored, restoredTodos) = try codec.decrypt(record: record, blob: blob)
+            updateRecord(restored)
+            replaceTodos(for: id, with: restoredTodos)
+            codec.deleteBlob(for: id)
+        } catch {
+            lastPersistenceError = "解密失败：\(error.localizedDescription)"
+        }
+    }
+
+    /// In-memory decrypt for viewing an encrypted record without persisting plaintext.
+    func decryptedForViewing(_ record: NoteRecord) -> (record: NoteRecord, todos: [NoteTodo])? {
+        guard record.isEncrypted else { return (record, todos(for: record)) }
+        let codec = SecureRecordCodec(crypto: CryptoService.shared())
+        guard let blob = codec.readBlob(for: record.id),
+              let result = try? codec.decryptForViewing(record: record, blob: blob) else { return nil }
+        return result
+    }
+
+    /// Decrypts all encrypted records (used when disabling the security feature).
+    func decryptAllRecords() {
+        for record in records where record.isEncrypted {
+            decryptRecord(id: record.id)
+        }
+    }
+
     // MARK: - Sample / Live
 
     static func sample(currentDate: Date = Date()) -> NotieeStore {
