@@ -9,6 +9,7 @@ struct LabFeaturesView: View {
     @AppStorage(UDK.labDeepAssociationModeEnabled) private var deepAssociationModeEnabled = false
     @AppStorage(UDK.labLowConsumptionModeEnabled) private var lowConsumptionModeEnabled = false
     @AppStorage("spark.semanticSearch.useCloud") private var useCloudEmbedding = false
+    @AppStorage(UDK.labRecordOutputLanguage) private var recordOutputLanguage = "auto"
 
     @State private var showDeepAssociationDetail = false
     
@@ -93,6 +94,24 @@ struct LabFeaturesView: View {
                 Text("默认在本机计算语义向量（离线、不外传）。开启后用你配置的 AI 服务商接口计算，检索更准但会把拍记文本发送到该服务。")
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+
+            Section {
+                Picker("总结与识别语言", selection: $recordOutputLanguage) {
+                    Text("自动（跟随内容）").tag("auto")
+                    Text("简体中文").tag("zh-Hans")
+                    Text("繁體中文").tag("zh-Hant")
+                    Text("English").tag("en")
+                    Text("한국어").tag("ko")
+                    Text("日本語").tag("ja")
+                    Text("Français").tag("fr")
+                    Text("Deutsch").tag("de")
+                    Text("Español").tag("es")
+                }
+            } header: {
+                Text("拍记输出语言")
+            } footer: {
+                Text("控制拍记的标题、摘要、详细内容用哪种语言呈现。「自动」会识别图片/文字的主要语言并用同种语言总结（例如拍英文出英文、拍韩文出韩文）；也可固定为某一种语言强制翻译。只影响新的 AI 处理，已有记录不变。")
             }
 
             Section {
