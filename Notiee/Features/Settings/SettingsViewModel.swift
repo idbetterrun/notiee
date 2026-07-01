@@ -178,6 +178,21 @@ final class SettingsViewModel: ObservableObject {
         saveConfiguration(for: kind)
     }
 
+    /// Custom models that apply to a given model slot (text vs. vision).
+    func customModels(for kind: AIModelKind) -> [CustomAIModel] {
+        customModels.filter { $0.kind == kind }
+    }
+
+    /// The custom model currently backing a slot, if the slot uses a custom provider
+    /// whose endpoint+model match one of the saved custom models.
+    func activeCustomModel(for kind: AIModelKind) -> CustomAIModel? {
+        let config = (kind == .text) ? textConfiguration : visionConfiguration
+        guard config.providerType == .custom else { return nil }
+        return customModels(for: kind).first {
+            $0.endpoint == config.customEndpoint && $0.modelIdentifier == config.modelName
+        }
+    }
+
     func testConnection(for kind: AIModelKind) {
         let configuration = configuration(for: kind).normalized
         guard configuration.isComplete else {
