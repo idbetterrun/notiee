@@ -21,33 +21,54 @@ struct NotieeApp: App {
 
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
+    @StateObject private var appLock = AppLockManager.shared
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
-            Group {
-                if !hasAgreedToPrivacy {
-                    PrivacyAgreementView(hasAgreed: $hasAgreedToPrivacy)
-                } else if !hasSeenWelcome {
-                    WelcomeView {
-                        SystemPermissionManager.shared.requestAllPermissions {
-                            hasSeenWelcome = true
-                        }
-                    }
-                } else if lastAppVersion != "" && lastAppVersion != currentAppVersion {
-                    WhatsNewContainerView {
-                        lastAppVersion = currentAppVersion
-                    }
-                } else {
-                    RootTabView()
-                        .onAppear {
-                            if lastAppVersion == "" {
-                                lastAppVersion = currentAppVersion
+            ZStack {
+                Group {
+                    if !hasAgreedToPrivacy {
+                        PrivacyAgreementView(hasAgreed: $hasAgreedToPrivacy)
+                    } else if !hasSeenWelcome {
+                        WelcomeView {
+                            SystemPermissionManager.shared.requestAllPermissions {
+                                hasSeenWelcome = true
                             }
                         }
+                    } else if lastAppVersion != "" && lastAppVersion != currentAppVersion {
+                        WhatsNewContainerView {
+                            lastAppVersion = currentAppVersion
+                        }
+                    } else {
+                        RootTabView()
+                            .onAppear {
+                                if lastAppVersion == "" {
+                                    lastAppVersion = currentAppVersion
+                                }
+                            }
+                    }
+                }
+
+                if appLock.isLocked {
+                    AppLockView(lock: appLock)
+                        .transition(.opacity)
+                        .zIndex(1)
                 }
             }
             .preferredColorScheme(colorScheme)
             .tint(appTint)
             .environment(\.sizeCategory, contentSizeCategory)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .background:
+                appLock.appDidEnterBackground()
+            case .active:
+                appLock.appWillEnterForeground()
+            default:
+                break
+            }
         }
     }
 
