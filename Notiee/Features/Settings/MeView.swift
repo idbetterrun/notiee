@@ -55,7 +55,7 @@ struct MeView: View {
                                 .foregroundColor(.accentColor)
 
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("登录您的 TomaGo 账户")
+                                Text("登录您的 Apple 账户")
                                     .font(.headline)
                                     .foregroundColor(.primary)
 

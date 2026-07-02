@@ -1,7 +1,7 @@
 # Notiee Terms of Service
 
-**Version: v1.0.5**
-**Effective Date: June 24, 2026**
+**Version: v1.0.6**
+**Effective Date: July 2, 2026**
 
 ---
 
@@ -21,7 +21,7 @@ Welcome to Notiee. Please read the following Terms of Service (hereinafter refer
 | Item | Description |
 |------|-------------|
 | Application Name | Notiee |
-| Current Version | v1.0.5 |
+| Current Version | v1.0.6 |
 | Core Features | Calendar-aware photo recording, plain text recording, AI knowledge extraction (OCR / Summaries / Key Points / To-Dos), calendar and schedule tag management, to-do management (due dates / reminders), Spark AI Assistant (chat + Agent actions), semantic search and deep association (related note recommendations) |
 | Service Nature | Local tool-based application, not a cloud service |
 | System Requirements | iOS 18.0 and above, iPhone devices |
@@ -135,6 +135,7 @@ For any questions or suggestions, please contact us through the following channe
 ---
 
 > **Version History**
+> - v1.0.6 (2026-07-02): Added encrypted notes and privacy lock (Face ID / passcode) terms; added per-note multi-language output and custom AI model terms; noted the Notiee+ edition
 > - v1.0.5 (2026-06-24): Added plain text recording, deep association (related note recommendations), schedule color tag terms; clarified to-do local persistence and deep association localization
 > - v1.0.4 (2026-06-24, unreleased): Added local account, Spark Agent extended tools (WebFetch / DateInfo / ScheduleUpdate), semantic search, full to-do management, iOS 26 Liquid Glass adaptation, and other term updates
 > - v1.0.3 (2026-06-04): Added Spark AI Assistant, Agent mode, multi-language adaptation, and other terms

@@ -88,7 +88,7 @@ struct LoginView: View {
         .alert("连接超时", isPresented: $showTimeoutAlert) {
             Button("确定", role: .cancel) {}
         } message: {
-            Text("无法连接到 TomaGo 服务，请稍后重试。")
+            Text("无法完成 Apple 登录，请稍后重试。")
         }
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
@@ -130,33 +130,28 @@ struct LoginView: View {
     // MARK: - Primary Button
 
     private var primaryLoginButton: some View {
-        Button {
+        // Apple's guidelines require the Apple mark be shown via the system-provided
+        // `applelogo` SF Symbol (never a bitmap copy), on the standard black/white
+        // "Sign in with Apple" button treatment.
+        let foreground: Color = isDark ? .black : .white
+        let background: Color = isDark ? .white : .black
+        return Button {
             attemptLogin()
         } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "person.fill.checkmark")
-                    .font(.system(size: 14, weight: .semibold))
-                Text("通过 TomaGo 登录")
+            HStack(spacing: 8) {
+                Image(systemName: "applelogo")
+                    .font(.system(size: 17, weight: .medium))
+                Text("通过 Apple 登录")
                     .font(.body.weight(.semibold))
             }
-            .foregroundColor(.white)
+            .foregroundColor(foreground)
             .frame(maxWidth: .infinity)
             .frame(height: 54)
             .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(NotieeColors.primary)
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(
-                            LinearGradient(
-                                colors: [.white.opacity(0.15), .clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                }
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(background)
             )
-            .shadow(color: NotieeColors.primary.opacity(0.3), radius: 12, y: 4)
+            .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
         }
         .scaleEffect(isLoggingIn ? 0.97 : 1)
         .animation(.easeInOut(duration: 0.2), value: isLoggingIn)
@@ -230,7 +225,7 @@ struct LoginView: View {
                 }
 
                 VStack(spacing: 4) {
-                    Text("正在连接 TomaGo")
+                    Text("正在通过 Apple 登录")
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(.white.opacity(0.9))
                     Text("请稍候…")

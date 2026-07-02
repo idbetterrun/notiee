@@ -1,7 +1,7 @@
 # Notiee Privacy Policy
 
-**Version: v1.0.5**
-**Effective Date: June 24, 2026**
+**Version: v1.0.6**
+**Effective Date: July 2, 2026**
 
 ---
 
@@ -202,6 +202,7 @@ Capture → Local Storage → [User Triggers AI Processing] → Send to AI Servi
 ---
 
 > **Version History**
+> - v1.0.6 (2026-07-02): Added encrypted notes (AES-GCM on-device encryption, key stored in the system Keychain) and biometric/passcode privacy lock (credentials never leave the device) description; encrypted notes are excluded from export, sync, search, and indexing; added data-flow description for custom AI models
 > - v1.0.5 (2026-06-24): Added "Deep Connect" on-device semantic related notes (local vectors, independent local index, no external transmission) description; to-do item local persistence; added plain text record data description
 > - v1.0.4 (2026-06-24, unreleased): Added Spark Agent WebFetch privacy disclosure, cloud semantic retrieval description, local account data description, WebFetch security measures, etc.
 > - v1.0.3 (2026-06-04): Added Spark AI Assistant conversation data description
