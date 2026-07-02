@@ -6,20 +6,20 @@ struct WelcomeView: View {
     private let features = [
         WelcomeFeature(
             title: "极速拍记",
-            subtitle: "打开相机就能记录课堂、会议和现场灵感。",
+            subtitle: "相机、语音、文字，想记就记。",
             systemImage: "camera.viewfinder",
             tint: .blue
         ),
         WelcomeFeature(
             title: "AI 整理",
-            subtitle: "自动识别图片文字，生成标题、摘要和待办。",
+            subtitle: "识别图片文字，自动生成标题、摘要和待办。",
             systemImage: "sparkles",
             tint: .cyan
         ),
         WelcomeFeature(
-            title: "日程归档",
-            subtitle: "按课程、会议、文件夹与关键词找回每一次拍记。",
-            systemImage: "folder.badge.gearshape",
+            title: "加密归档，一搜即回",
+            subtitle: "数据只在本机和你的 iCloud，随时找得到。",
+            systemImage: "lock.shield.fill",
             tint: .teal
         )
     ]
@@ -54,19 +54,19 @@ struct WelcomeView: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
 
-                    Text("Notiee")
+                    Text(AppBranding.appName)
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                 }
             }
 
             VStack(alignment: .leading, spacing: 10) {
-                Text("把每一张板书，变成可搜索的知识流")
+                Text("拍下来，剩下的交给 \(AppBranding.appName)")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Notiee 会把拍下来的课堂、会议与灵感自动整理进对应场景，让记录不用再堆成一团。")
+                Text("课堂、会议、灵感随手一拍，AI 帮你理好标题和待办，还能加密存好、随时搜回来。")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
@@ -159,9 +159,9 @@ private struct WelcomeBackground: View {
 
 private struct CaptureJourneyPreview: View {
     private let steps = [
-        JourneyStep(title: "拍下", detail: "课堂板书", systemImage: "camera.fill", tint: Color.blue),
+        JourneyStep(title: "拍下", detail: "板书·语音", systemImage: "camera.fill", tint: Color.blue),
         JourneyStep(title: "提炼", detail: "摘要待办", systemImage: "wand.and.stars", tint: Color.cyan),
-        JourneyStep(title: "归档", detail: "日程文件夹", systemImage: "tray.full.fill", tint: Color.teal)
+        JourneyStep(title: "归档", detail: "加密·可搜", systemImage: "lock.fill", tint: Color.teal)
     ]
 
     var body: some View {
@@ -190,11 +190,11 @@ private struct CaptureJourneyPreview: View {
                             .background(step.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
 
                         VStack(spacing: 2) {
-                            Text(step.title)
+                            Text(LocalizedStringKey(step.title))
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.primary)
 
-                            Text(step.detail)
+                            Text(LocalizedStringKey(step.detail))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
@@ -226,11 +226,11 @@ private struct WelcomeFeatureRow: View {
                 .background(feature.tint.opacity(0.12), in: Circle())
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(feature.title)
+                Text(LocalizedStringKey(feature.title))
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text(feature.subtitle)
+                Text(LocalizedStringKey(feature.subtitle))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

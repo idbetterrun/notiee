@@ -111,6 +111,7 @@
 		1803E3D72FF4EBEA004FEE5F /* GlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* GlassStyle.swift */; };
 		1803E3D82FF4EBEA004FEE5F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70532E6B568AB1E2C463DC41 /* Logger.swift */; };
 		1803E3D92FF4EBEA004FEE5F /* NotieeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88784320EF16FC6225923813 /* NotieeColors.swift */; };
+		9E4277D206AF4DBF8867196D /* AppBranding.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6C0D20B8354634A8E8AEDD /* AppBranding.swift */; };
 		1803E3DA2FF4EBEA004FEE5F /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9163A3ED86E9CA4AE31E1A64 /* NotificationManager.swift */; };
 		1803E3DB2FF4EBEA004FEE5F /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A190C07C4E8989824EEB7D /* UserDefaultsKeys.swift */; };
 		1803E3DC2FF4EBEA004FEE5F /* EventCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E0702491A101A08018209F /* EventCardView.swift */; };
@@ -203,7 +204,7 @@
 		1803E4312FF4EBEA004FEE5F /* UserAgreement_en.html in Resources */ = {isa = PBXBuildFile; fileRef = 50F23F54D344287F00D95C5B /* UserAgreement_en.html */; };
 		1803E4322FF4EBEA004FEE5F /* UserAgreement_zh-Hant-HK.html in Resources */ = {isa = PBXBuildFile; fileRef = 2D458A6ABF9D7D35D2BDAA69 /* UserAgreement_zh-Hant-HK.html */; };
 		1803E4332FF4EBEA004FEE5F /* UserAgreement_zh-Hant-TW.html in Resources */ = {isa = PBXBuildFile; fileRef = 77936A21AC8DE2E39C1AF0E2 /* UserAgreement_zh-Hant-TW.html */; };
-		1803E4352FF4EBEA004FEE5F /* NotieeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 18B83FD62FC0A057002A7EC9 /* NotieeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1803E4352FF4EBEA004FEE5F /* Notiee+WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1803E4462FF4EDA9004FEE5F /* Notiee+WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1803E43E2FF4EDA9004FEE5F /* ScheduleActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9662B4112C4CF1225CC5E9B4 /* ScheduleActivityAttributes.swift */; };
 		1803E4402FF4EDA9004FEE5F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B83FDA2FC0A057002A7EC9 /* SwiftUI.framework */; };
 		1803E4412FF4EDA9004FEE5F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18B83FD82FC0A057002A7EC9 /* WidgetKit.framework */; };
@@ -300,6 +301,7 @@
 		651E739CD247600EE7816C96 /* SparkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE516C2778B82D7C50D438C /* SparkViewModel.swift */; };
 		6A36836E2C70559CF95D9C9F /* SpecialDayEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DEAA134D487BCA77D37E113 /* SpecialDayEvent.swift */; };
 		6A6B481651E79E00EBA96444 /* NotieeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88784320EF16FC6225923813 /* NotieeColors.swift */; };
+		87F12D0E92A64AEAB4C07873 /* AppBranding.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6C0D20B8354634A8E8AEDD /* AppBranding.swift */; };
 		6B34EADC616086132DD8F5E5 /* SemanticSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CED309E4EABF3F56BA55181 /* SemanticSearchEngine.swift */; };
 		6B4CE97BB8E9A6A4F30EC939 /* TodoRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB5DBCCB1BD85E56C6BE9CA /* TodoRowView.swift */; };
 		6BC7FA702ECDD56739271A2B /* LocalEmbeddingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */; };
@@ -439,8 +441,8 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 000000000000000000000001 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 18B83FD52FC0A057002A7EC9;
-			remoteInfo = NotieeWidgetExtension;
+			remoteGlobalIDString = 1803E43C2FF4EDA9004FEE5F;
+			remoteInfo = "Notiee+WidgetExtension";
 		};
 		18B83FE62FC0A058002A7EC9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -465,7 +467,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1803E4352FF4EBEA004FEE5F /* NotieeWidgetExtension.appex in Embed Foundation Extensions */,
+				1803E4352FF4EBEA004FEE5F /* Notiee+WidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -631,6 +633,7 @@
 		868EAB9B3C281E9910B200A6 /* ScheduledEventStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScheduledEventStore.swift; sourceTree = "<group>"; };
 		885D3C34DDCA25AA91DC2ABD /* EmbeddingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EmbeddingService.swift; sourceTree = "<group>"; };
 		88784320EF16FC6225923813 /* NotieeColors.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotieeColors.swift; sourceTree = "<group>"; };
+		EE6C0D20B8354634A8E8AEDD /* AppBranding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppBranding.swift; sourceTree = "<group>"; };
 		8993B3331CCFAA2B3E52D4F3 /* LiveActivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		8E64B7BA5DB549F6AB3974F8 /* LocalImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalImageStore.swift; sourceTree = "<group>"; };
 		900B8AF6927729C413BE6706 /* SparkModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkModels.swift; sourceTree = "<group>"; };
@@ -1230,6 +1233,7 @@
 		FC3CB46CD56BFEC370283AE0 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				EE6C0D20B8354634A8E8AEDD /* AppBranding.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* GlassStyle.swift */,
 				70532E6B568AB1E2C463DC41 /* Logger.swift */,
 				88784320EF16FC6225923813 /* NotieeColors.swift */,
@@ -1564,6 +1568,7 @@
 				1803E3D72FF4EBEA004FEE5F /* GlassStyle.swift in Sources */,
 				1803E3D82FF4EBEA004FEE5F /* Logger.swift in Sources */,
 				1803E3D92FF4EBEA004FEE5F /* NotieeColors.swift in Sources */,
+				9E4277D206AF4DBF8867196D /* AppBranding.swift in Sources */,
 				1803E3DA2FF4EBEA004FEE5F /* NotificationManager.swift in Sources */,
 				1803E3DB2FF4EBEA004FEE5F /* UserDefaultsKeys.swift in Sources */,
 				1803E3DC2FF4EBEA004FEE5F /* EventCardView.swift in Sources */,
@@ -1753,6 +1758,7 @@
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* GlassStyle.swift in Sources */,
 				C5C0AAAB46567881AB8A3746 /* Logger.swift in Sources */,
 				6A6B481651E79E00EBA96444 /* NotieeColors.swift in Sources */,
+				87F12D0E92A64AEAB4C07873 /* AppBranding.swift in Sources */,
 				F9EA39691258F8B4EE0DCF2E /* NotificationManager.swift in Sources */,
 				1C100501D4B43F9FC9EC1BFE /* UserDefaultsKeys.swift in Sources */,
 				A2A5F3EB64CB3E3FB4C301A9 /* EventCardView.swift in Sources */,
@@ -1896,7 +1902,7 @@
 /* Begin PBXTargetDependency section */
 		1803E3772FF4EBEA004FEE5F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 18B83FD52FC0A057002A7EC9 /* NotieeWidgetExtension */;
+			target = 1803E43C2FF4EDA9004FEE5F /* Notiee+WidgetExtension */;
 			targetProxy = 1803E3782FF4EBEA004FEE5F /* PBXContainerItemProxy */;
 		};
 		18B83FE72FC0A058002A7EC9 /* PBXTargetDependency */ = {
@@ -2023,7 +2029,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG NOTIEE_PLUS $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -2057,6 +2063,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = NOTIEE_PLUS;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;

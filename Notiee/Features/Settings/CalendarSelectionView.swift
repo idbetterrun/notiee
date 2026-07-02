@@ -49,7 +49,7 @@ struct CalendarSelectionView: View {
                     }
                 }
             } footer: {
-                Text("取消勾选某个日历后，Notiee 将不再读取该日历中的日程。系统日历（如节假日、生日等）默认显示在 Today 页面。")
+                Text("取消勾选某个日历后，\(AppBranding.appName) 将不再读取该日历中的日程。系统日历（如节假日、生日等）默认显示在 Today 页面。")
             }
         }
         .navigationTitle("日程")

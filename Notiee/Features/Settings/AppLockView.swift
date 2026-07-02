@@ -10,8 +10,8 @@ struct AppLockView: View {
         PasscodeUnlockView(
             lock: lock,
             title: "已锁定",
-            subtitle: "输入密码解锁 Notiee",
-            reason: "解锁 Notiee",
+            subtitle: "输入密码解锁 \(AppBranding.appName)",
+            reason: "解锁 \(AppBranding.appName)",
             autoPromptBiometric: true,
             onAuthenticated: { lock.isLocked = false }
         )

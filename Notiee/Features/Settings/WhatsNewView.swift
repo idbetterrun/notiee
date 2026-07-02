@@ -80,7 +80,7 @@ struct WhatsNewContainerView: View {
             NotieeLogoMark(size: 68, cornerRadius: 17)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Notiee 更新了")
+                Text("\(AppBranding.appName) 更新了")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
 

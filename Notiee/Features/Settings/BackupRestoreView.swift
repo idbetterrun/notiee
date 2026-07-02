@@ -88,7 +88,7 @@ struct BackupRestoreView: View {
                 }
                 .disabled(isExporting || isImporting)
             } footer: {
-                Text(".tmn 是 Notiee 及关联应用专属的结构化导出格式，支持图文完整记录的无损迁移。")
+                Text(".tmn 是 \(AppBranding.appName) 及关联应用专属的结构化导出格式，支持图文完整记录的无损迁移。")
             }
         }
         .navigationTitle("备份与恢复")

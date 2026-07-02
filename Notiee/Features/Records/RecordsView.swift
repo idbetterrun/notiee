@@ -187,10 +187,21 @@ struct RecordsView: View {
                                 .tint(.orange)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: !appLock.shouldAuthForDeleting(record)) {
-                                Button(role: .destructive) {
-                                    requestDelete(record) { store.toggleDeleted(id: record.id) }
-                                } label: {
-                                    Label("删除", systemImage: "trash")
+                                if appLock.shouldAuthForDeleting(record) {
+                                    // Non-destructive role: avoid SwiftUI's optimistic row removal,
+                                    // since the actual delete only happens after auth succeeds.
+                                    Button {
+                                        requestDelete(record) { store.toggleDeleted(id: record.id) }
+                                    } label: {
+                                        Label("删除", systemImage: "trash")
+                                    }
+                                    .tint(.red)
+                                } else {
+                                    Button(role: .destructive) {
+                                        store.toggleDeleted(id: record.id)
+                                    } label: {
+                                        Label("删除", systemImage: "trash")
+                                    }
                                 }
                             }
                         }
@@ -359,10 +370,16 @@ struct RecordListRow: View {
                         .foregroundStyle(.secondary)
                 }
 
-                let summaryText = record.summary.isEmpty ? record.processingState.displayName : record.summary
-                HighlightedText(text: summaryText, query: searchText, font: .subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
+                if record.isEncrypted {
+                    Label("已加密拍记", systemImage: "lock.fill")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                } else {
+                    let summaryText = record.summary.isEmpty ? record.processingState.displayName : record.summary
+                    HighlightedText(text: summaryText, query: searchText, font: .subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
 
                 HStack(spacing: 4) {
                     Image(systemName: eventTitle == nil ? "tray" : "calendar")
@@ -414,16 +431,28 @@ struct GenericRecordListView: View {
                     }
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: !appLock.shouldAuthForDeleting(record)) {
-                    if !isTrash {
+                    if appLock.shouldAuthForDeleting(record) {
+                        // Non-destructive role: defer removal until auth succeeds so the
+                        // row isn't optimistically hidden by SwiftUI.
+                        Button {
+                            requestDelete([record]) {
+                                if isTrash { store.permanentlyDelete(id: record.id) }
+                                else { store.toggleDeleted(id: record.id) }
+                            }
+                        } label: {
+                            Label(isTrash ? "彻底删除" : "删除", systemImage: isTrash ? "trash.fill" : "trash")
+                        }
+                        .tint(.red)
+                    } else if !isTrash {
                         Button(role: .destructive) {
-                            requestDelete([record]) { store.toggleDeleted(id: record.id) }
+                            store.toggleDeleted(id: record.id)
                         } label: {
                             Label("删除", systemImage: "trash")
                         }
                         .tint(.red)
                     } else {
                         Button(role: .destructive) {
-                            requestDelete([record]) { store.permanentlyDelete(id: record.id) }
+                            store.permanentlyDelete(id: record.id)
                         } label: {
                             Label("彻底删除", systemImage: "trash.fill")
                         }

@@ -179,7 +179,7 @@ struct SettingsMainView: View {
                     AboutNotieeView()
                 } label: {
                     HStack {
-                        Text("关于 Notiee")
+                        Text("关于 \(AppBranding.appName)")
                         Spacer()
                     }
                 }

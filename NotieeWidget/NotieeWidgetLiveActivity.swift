@@ -59,8 +59,14 @@ struct NotieeWidgetLiveActivity: Widget {
                     HStack {
                         Image(systemName: context.attributes.eventKind == "course" ? "book.fill" : "calendar")
                             .foregroundColor(.blue)
-                        Text("Notiee")
-                            .font(.headline)
+                        Group {
+                            #if NOTIEE_PLUS
+                            Text("Notiee+")
+                            #else
+                            Text("Notiee")
+                            #endif
+                        }
+                        .font(.headline)
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {

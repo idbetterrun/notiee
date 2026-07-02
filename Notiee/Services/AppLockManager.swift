@@ -139,7 +139,7 @@ final class AppLockManager: ObservableObject {
     /// `isLocked` — callers decide what a success unlocks (the app, a record, a delete…).
     /// Returns `false` (letting the UI fall back to passcode) if biometrics are
     /// disabled or unavailable.
-    func authenticateWithBiometrics(reason: String = "解锁 Notiee") async -> Bool {
+    func authenticateWithBiometrics(reason: String = "解锁 \(AppBranding.appName)") async -> Bool {
         let ctx = LAContext()
         guard biometricEnabled, ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
             return false

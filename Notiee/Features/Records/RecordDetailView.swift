@@ -61,7 +61,7 @@ struct RecordDetailView: View {
                     ShareLink(
                         item: buildShareContent(),
                         subject: Text(viewModel.record.title),
-                        message: Text("分享一条 Notiee 记录")
+                        message: Text("分享一条 \(AppBranding.appName) 记录")
                     ) {
                         Label("分享...", systemImage: "square.and.arrow.up")
                     }

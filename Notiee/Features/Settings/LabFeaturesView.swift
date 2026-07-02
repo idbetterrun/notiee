@@ -72,7 +72,7 @@ struct LabFeaturesView: View {
                 }
             } footer: {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("在笔记之间发现隐藏的关联，让 Notiee 帮你串联知识。")
+                    Text("在笔记之间发现隐藏的关联，让 \(AppBranding.appName) 帮你串联知识。")
                     Button {
                         withAnimation { showDeepAssociationDetail.toggle() }
                     } label: {

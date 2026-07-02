@@ -25,6 +25,8 @@ struct NotieeApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var isSplashActive = true
+    @State private var isContentReady = false
+    @State private var isMinimumHoldElapsed = false
 
     var body: some Scene {
         WindowGroup {
@@ -51,6 +53,11 @@ struct NotieeApp: App {
                             }
                     }
                 }
+                // Fires once the visible branch has finished its (possibly heavy,
+                // synchronous) init and laid out — used to gate the splash dismissal
+                // so the fade animation never runs while the main thread is still
+                // busy loading data, which is what made it look instant/hard-cut.
+                .onAppear { isContentReady = true }
 
                 if appLock.isLocked {
                     AppLockView(lock: appLock)
@@ -60,7 +67,7 @@ struct NotieeApp: App {
 
                 if isSplashActive {
                     SplashView()
-                        .transition(.opacity)
+                        .transition(.opacity.combined(with: .scale(scale: 1.04)))
                         .zIndex(2)
                 }
             }
@@ -69,12 +76,16 @@ struct NotieeApp: App {
             .tint(appTint)
             .environment(\.sizeCategory, contentSizeCategory)
             .task {
-                // Cover cold-launch initialization with the branded splash,
-                // then fade to the app once the first frame is settled.
-                try? await Task.sleep(nanoseconds: 800_000_000)
-                withAnimation(.easeOut(duration: 0.35)) {
-                    isSplashActive = false
-                }
+                // Keep the branded splash up for a minimum, pleasant duration...
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                isMinimumHoldElapsed = true
+                dismissSplashIfReady()
+            }
+            .onChange(of: isContentReady) { _, _ in
+                // ...but never start the fade until the content behind it has
+                // actually appeared, so the animation doesn't compete with
+                // cold-launch data loading for the main thread.
+                dismissSplashIfReady()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -108,6 +119,13 @@ struct NotieeApp: App {
         case "large": return .extraLarge
         case "extraLarge": return .accessibilityExtraLarge
         default: return .large
+        }
+    }
+
+    private func dismissSplashIfReady() {
+        guard isContentReady, isMinimumHoldElapsed, isSplashActive else { return }
+        withAnimation(.easeInOut(duration: 0.45)) {
+            isSplashActive = false
         }
     }
 }

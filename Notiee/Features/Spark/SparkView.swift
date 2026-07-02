@@ -204,7 +204,7 @@ struct SparkView: View {
             )
             .padding(.horizontal, 16)
 
-            Text("内容由AI生成，Notiee不会把拍记内容用于任何模型训练")
+            Text("内容由AI生成，\(AppBranding.appName)不会把拍记内容用于任何模型训练")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .padding(.top, 4)

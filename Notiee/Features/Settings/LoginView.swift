@@ -115,7 +115,7 @@ struct LoginView: View {
             }
 
             VStack(spacing: 10) {
-                Text("Notiee")
+                Text(AppBranding.appName)
                     .font(.system(size: 38, weight: .bold, design: .rounded))
                     .foregroundColor(isDark ? .white : .primary)
 

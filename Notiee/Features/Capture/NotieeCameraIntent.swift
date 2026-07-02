@@ -3,8 +3,13 @@ import AppIntents
 
 @available(iOS 18.0, *)
 struct NotieeCameraIntent: CameraCaptureIntent {
+    #if NOTIEE_PLUS
+    static var title: LocalizedStringResource = "Notiee+ 拍记"
+    static var description: IntentDescription = "快速启动 Notiee+ 并进入拍记页"
+    #else
     static var title: LocalizedStringResource = "Notiee 拍记"
     static var description: IntentDescription = "快速启动 Notiee 并进入拍记页"
+    #endif
     
     @MainActor
     func perform() async throws -> some IntentResult {

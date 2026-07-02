@@ -12,7 +12,7 @@ struct AboutNotieeView: View {
                 VStack(spacing: 12) {
                     NotieeLogoMark(size: 100, cornerRadius: 22)
 
-                    Text("Notiee")
+                    Text(AppBranding.appName)
                         .font(.title.weight(.bold))
                 }
                 .padding(.top, 40)
@@ -96,7 +96,7 @@ struct AboutNotieeView: View {
             }
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle("关于 Notiee")
+        .navigationTitle("关于 \(AppBranding.appName)")
         .navigationBarTitleDisplayMode(.inline)
     }
 
