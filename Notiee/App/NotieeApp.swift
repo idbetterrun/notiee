@@ -28,6 +28,17 @@ struct NotieeApp: App {
     @State private var isContentReady = false
     @State private var isMinimumHoldElapsed = false
 
+    // Single boolean drives the whole reveal. We deliberately animate via the
+    // declarative `.animation(_:value:)` modifier rather than an imperative
+    // `withAnimation` block: the dismissal is triggered from inside a `.task`
+    // after `await Task.sleep`, and `withAnimation` fired from that async
+    // continuation would frequently NOT animate (the transaction wasn't picked
+    // up), producing the hard cut. `.animation(_:value:)` animates reliably
+    // whenever the bound value flips, regardless of where the mutation happened.
+    @State private var splashDismissed = false
+
+    private let splashRevealDuration: TimeInterval = 0.6
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -58,6 +69,11 @@ struct NotieeApp: App {
                 // so the fade animation never runs while the main thread is still
                 // busy loading data, which is what made it look instant/hard-cut.
                 .onAppear { isContentReady = true }
+                // Content grows in as the splash zooms out, so the reveal reads as
+                // one coordinated motion rather than a lid being peeled off.
+                .opacity(splashDismissed ? 1 : 0)
+                .scaleEffect(splashDismissed ? 1 : 0.92)
+                .animation(.easeInOut(duration: splashRevealDuration), value: splashDismissed)
 
                 if appLock.isLocked {
                     AppLockView(lock: appLock)
@@ -67,8 +83,11 @@ struct NotieeApp: App {
 
                 if isSplashActive {
                     SplashView()
-                        .transition(.opacity.combined(with: .scale(scale: 1.04)))
+                        .opacity(splashDismissed ? 0 : 1)
+                        .scaleEffect(splashDismissed ? 1.12 : 1)
+                        .animation(.easeInOut(duration: splashRevealDuration), value: splashDismissed)
                         .zIndex(2)
+                        .allowsHitTesting(false)
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: appLock.isLocked)
@@ -76,8 +95,11 @@ struct NotieeApp: App {
             .tint(appTint)
             .environment(\.sizeCategory, contentSizeCategory)
             .task {
-                // Keep the branded splash up for a minimum, pleasant duration...
-                try? await Task.sleep(nanoseconds: 500_000_000)
+                // Keep the branded splash up for a minimum, clearly perceptible
+                // duration — this used to be 500ms, which on a fast cold launch
+                // (small/local dataset) meant the fade could start almost
+                // immediately, making the whole thing feel like a flash.
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
                 isMinimumHoldElapsed = true
                 dismissSplashIfReady()
             }
@@ -123,8 +145,14 @@ struct NotieeApp: App {
     }
 
     private func dismissSplashIfReady() {
-        guard isContentReady, isMinimumHoldElapsed, isSplashActive else { return }
-        withAnimation(.easeInOut(duration: 0.45)) {
+        guard isContentReady, isMinimumHoldElapsed, !splashDismissed else { return }
+
+        // Flip the flag; `.animation(_:value:)` on both layers drives the crossfade.
+        splashDismissed = true
+
+        // Drop the splash from the tree only after the crossfade has finished, so
+        // the fade actually plays out instead of the view vanishing mid-animation.
+        DispatchQueue.main.asyncAfter(deadline: .now() + splashRevealDuration) {
             isSplashActive = false
         }
     }
@@ -134,6 +162,10 @@ struct NotieeApp: App {
 /// cold launch. Follows light/dark automatically and picks the brand image per
 /// target (Notiee vs. Notiee+).
 private struct SplashView: View {
+    // Very subtle breathing scale so the hold doesn't read as a dead/frozen
+    // frame while we wait out the minimum display duration.
+    @State private var isBreathing = false
+
     private var imageName: String {
         #if NOTIEE_PLUS
         "LaunchNotieePlus"
@@ -149,8 +181,14 @@ private struct SplashView: View {
                 .scaledToFill()
                 .frame(width: proxy.size.width, height: proxy.size.height)
                 .clipped()
+                .scaleEffect(isBreathing ? 1.015 : 1.0)
         }
         .ignoresSafeArea()
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
+                isBreathing = true
+            }
+        }
     }
 }
 
