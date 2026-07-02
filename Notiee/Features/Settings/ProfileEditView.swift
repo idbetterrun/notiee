@@ -11,7 +11,7 @@ struct ProfileEditView: View {
     private var methodText: String {
         switch account.profile?.loginMethod {
         case .local: return String(localized: "本地")
-        case .tomago: return "Apple"
+        case .apple, .tomago: return "Apple"
         case nil: return ""
         }
     }

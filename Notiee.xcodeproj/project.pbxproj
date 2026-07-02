@@ -516,6 +516,7 @@
 		0D0BC8015C77D7B9EC247A02 /* SparkPromptFragments.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptFragments.swift; sourceTree = "<group>"; };
 		0EE6CCB71D9D0D3C030B5935 /* TMNImportPreviewSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TMNImportPreviewSheet.swift; sourceTree = "<group>"; };
 		100000000000000000000001 /* NotieeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeApp.swift; sourceTree = "<group>"; };
+		14C06E5A6EC949EC91B85235 /* Notiee.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Notiee.entitlements; sourceTree = "<group>"; };
 		100000000000000000000002 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		100000000000000000000003 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		100000000000000000000004 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
@@ -862,6 +863,7 @@
 		000000000000000000000008 /* Notiee */ = {
 			isa = PBXGroup;
 			children = (
+				14C06E5A6EC949EC91B85235 /* Notiee.entitlements */,
 				000000000000000000000009 /* App */,
 				000000000000000000000010 /* Features */,
 				000000000000000000000015 /* Models */,
@@ -1951,6 +1953,7 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Notiee 需要访问相册以便您能导入图片进行记录。";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Notiee 需要使用语音识别技术将您的语音转换为文本记录。";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				CODE_SIGN_ENTITLEMENTS = Notiee/Notiee.entitlements;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1988,6 +1991,7 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Notiee 需要访问相册以便您能导入图片进行记录。";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Notiee 需要使用语音识别技术将您的语音转换为文本记录。";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				CODE_SIGN_ENTITLEMENTS = Notiee/Notiee.entitlements;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2275,6 +2279,7 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Notiee 需要访问相册以便您能导入图片进行记录。";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Notiee 需要使用语音识别技术将您的语音转换为文本记录。";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				CODE_SIGN_ENTITLEMENTS = Notiee/Notiee.entitlements;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2311,6 +2316,7 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Notiee 需要访问相册以便您能导入图片进行记录。";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Notiee 需要使用语音识别技术将您的语音转换为文本记录。";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				CODE_SIGN_ENTITLEMENTS = Notiee/Notiee.entitlements;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (

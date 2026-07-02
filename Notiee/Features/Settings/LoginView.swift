@@ -1,18 +1,16 @@
 import SwiftUI
+import AuthenticationServices
 
 struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @ObservedObject private var account = AccountStore.live
     @State private var hasAgreed = false
-    @State private var isLoggingIn = false
-    @State private var showTimeoutAlert = false
     @State private var showAgreementReminder = false
     @State private var appear = false
     @State private var shakeCount = 0
     @State private var reminderBounces = false
-
-    private let timeoutSeconds: UInt64 = 3
+    @State private var loginErrorMessage: String?
 
     private var isDark: Bool { colorScheme == .dark }
 
@@ -76,19 +74,15 @@ struct LoginView: View {
                 Spacer().frame(height: 44)
             }
 
-            if isLoggingIn {
-                loginOverlay
-            }
         }
         .animation(.spring(response: 0.7, dampingFraction: 0.8), value: appear)
-        .animation(.easeInOut(duration: 0.25), value: isLoggingIn)
         .navigationTitle("登录")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(false)
-        .alert("连接超时", isPresented: $showTimeoutAlert) {
+        .alert("登录失败", isPresented: Binding(get: { loginErrorMessage != nil }, set: { if !$0 { loginErrorMessage = nil } })) {
             Button("确定", role: .cancel) {}
         } message: {
-            Text("无法完成 Apple 登录，请稍后重试。")
+            Text(loginErrorMessage ?? "")
         }
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
@@ -130,31 +124,26 @@ struct LoginView: View {
     // MARK: - Primary Button
 
     private var primaryLoginButton: some View {
-        // Apple's guidelines require the Apple mark be shown via the system-provided
-        // `applelogo` SF Symbol (never a bitmap copy), on the standard black/white
-        // "Sign in with Apple" button treatment.
-        let foreground: Color = isDark ? .black : .white
-        let background: Color = isDark ? .white : .black
-        return Button {
-            attemptLogin()
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "applelogo")
-                    .font(.system(size: 17, weight: .medium))
-                Text("通过 Apple 登录")
-                    .font(.body.weight(.semibold))
-            }
-            .foregroundColor(foreground)
-            .frame(maxWidth: .infinity)
-            .frame(height: 54)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(background)
-            )
-            .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+        // Apple's official button (auto-localized label + correct Apple mark),
+        // which is the compliant way to present Sign in with Apple.
+        SignInWithAppleButton(.signIn) { request in
+            request.requestedScopes = [.fullName]
+        } onCompletion: { result in
+            handleAppleResult(result)
         }
-        .scaleEffect(isLoggingIn ? 0.97 : 1)
-        .animation(.easeInOut(duration: 0.2), value: isLoggingIn)
+        .signInWithAppleButtonStyle(isDark ? .white : .black)
+        .frame(height: 54)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            // Until the user accepts the terms, intercept taps and nudge them to
+            // the agreement instead of opening the system sheet.
+            if !hasAgreed {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.black.opacity(0.001))
+                    .contentShape(RoundedRectangle(cornerRadius: 16))
+                    .onTapGesture { promptAgreement() }
+            }
+        }
     }
 
     // MARK: - Agreement
@@ -202,67 +191,44 @@ struct LoginView: View {
         .padding(.bottom, 4)
     }
 
-    // MARK: - Login Overlay
+    // MARK: - Actions
 
-    private var loginOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.55)
-                .ignoresSafeArea()
-                .transition(.opacity)
-
-            VStack(spacing: 20) {
-                ZStack {
-                    Circle()
-                        .stroke(.white.opacity(0.1), lineWidth: 3)
-                        .frame(width: 64, height: 64)
-
-                    Circle()
-                        .trim(from: 0, to: 0.75)
-                        .stroke(NotieeColors.primary, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                        .frame(width: 64, height: 64)
-                        .rotationEffect(.degrees(isLoggingIn ? 360 : 0))
-                        .animation(.linear(duration: 1).repeatForever(autoreverses: false), value: isLoggingIn)
-                }
-
-                VStack(spacing: 4) {
-                    Text("正在通过 Apple 登录")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundColor(.white.opacity(0.9))
-                    Text("请稍候…")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
-                }
-            }
-            .frame(width: 180, height: 180)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
-            .transition(.scale.combined(with: .opacity))
+    /// Shake + nudge the user toward the agreement checkbox when they try to sign
+    /// in before accepting the terms.
+    private func promptAgreement() {
+        withAnimation(.linear(duration: 0)) {
+            shakeCount += 1
+        }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+            reminderBounces = true
+            showAgreementReminder = true
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(300))
+            reminderBounces = false
         }
     }
 
-    // MARK: - Actions
-
-    private func attemptLogin() {
-        guard hasAgreed else {
-            withAnimation(.linear(duration: 0)) {
-                shakeCount += 1
+    private func handleAppleResult(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+                loginErrorMessage = String(localized: "无法完成 Apple 登录，请稍后重试。")
+                return
             }
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                reminderBounces = true
-                showAgreementReminder = true
+            // fullName is only provided on the first authorization for this Apple ID.
+            let name = credential.fullName.flatMap { components -> String? in
+                let formatted = PersonNameComponentsFormatter().string(from: components)
+                return formatted.isEmpty ? nil : formatted
             }
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(300))
-                reminderBounces = false
+            account.appleLogin(userID: credential.user, name: name)
+            // account.isLoggedIn flips to true → onChange dismisses this view.
+        case .failure(let error):
+            // Silently ignore a user-initiated cancel.
+            if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+                return
             }
-            return
-        }
-        isLoggingIn = true
-        Task {
-            try? await Task.sleep(nanoseconds: timeoutSeconds * 1_000_000_000)
-            await MainActor.run {
-                isLoggingIn = false
-                showTimeoutAlert = true
-            }
+            loginErrorMessage = String(localized: "无法完成 Apple 登录，请稍后重试。")
         }
     }
 

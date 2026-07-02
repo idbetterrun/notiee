@@ -27,7 +27,19 @@ final class AccountStore: ObservableObject {
 
     func localLogin(name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        profile = UserProfile(displayName: trimmed, loginMethod: .local, avatarRelativePath: profile?.avatarRelativePath)
+        profile = UserProfile(displayName: trimmed, loginMethod: .local, avatarRelativePath: profile?.avatarRelativePath, appleUserID: nil)
+        save()
+    }
+
+    /// Sign in with Apple. `name` is only supplied by Apple on the very first
+    /// authorization for a given Apple ID, so we fall back to any existing name
+    /// (re-login) and finally a generic label.
+    func appleLogin(userID: String, name: String?) {
+        let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolved = (trimmed?.isEmpty == false ? trimmed : nil)
+            ?? profile?.displayName
+            ?? String(localized: "Apple 用户")
+        profile = UserProfile(displayName: resolved, loginMethod: .apple, avatarRelativePath: profile?.avatarRelativePath, appleUserID: userID)
         save()
     }
 
