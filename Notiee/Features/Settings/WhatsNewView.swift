@@ -5,52 +5,34 @@ struct WhatsNewContainerView: View {
 
     private let highlights = [
         WhatsNewHighlight(
-            title: "Spark Agent 全面增强",
-            subtitle: "Agent 模式新增日程修改、日期查询、网页抓取等工具，还能切换模型与思考强度，生成中可随时终止回复。",
-            systemImage: "sparkles",
-            tint: .orange
-        ),
-        WhatsNewHighlight(
-            title: "语义检索 + 深度联想",
-            subtitle: "拍记搜索升级为语义理解，不再只靠关键词；详情页底部按内容相关度智能推荐相关历史笔记。默认全程在设备本地计算，不外传。",
-            systemImage: "brain.head.profile.fill",
-            tint: .pink
-        ),
-        WhatsNewHighlight(
-            title: "全量待办管理",
-            subtitle: "全新待办页面，按截止日分桶（逾期 / 今天 / 明天 / 本周 / 更晚）；待办与截止日期现已稳定保存，重启不丢。",
-            systemImage: "checklist",
-            tint: .green
-        ),
-        WhatsNewHighlight(
-            title: "本地账户",
-            subtitle: "设置昵称与头像，拥有专属身份标识。所有资料仅存本机，不上传任何服务器。",
-            systemImage: "person.crop.circle.fill",
+            title: "加密拍记 + 隐私锁",
+            subtitle: "单条拍记可一键加密，内容以 AES-GCM 本地加密存储；开启隐私锁后用 Face ID 或密码解锁，加密拍记不会出现在导出、同步、搜索与索引中。",
+            systemImage: "lock.shield.fill",
             tint: .blue
         ),
         WhatsNewHighlight(
-            title: "纯文本记录",
-            subtitle: "不止拍照，现在也能直接新建文字笔记，随手记录想法。",
-            systemImage: "square.and.pencil",
+            title: "多语言输出",
+            subtitle: "可在「实验室」为拍记设定输出语言（自动跟随或指定），AI 整理会按你选的语言生成标题、摘要与待办。",
+            systemImage: "character.bubble.fill",
             tint: .teal
         ),
         WhatsNewHighlight(
-            title: "记录详情焕新",
-            subtitle: "详情页按来源智能呈现内容，去除冗余区块；Spark 生成的记录带真摘要不再与正文重复；Markdown 渲染开关移至「设置 → 外观」。",
-            systemImage: "doc.text.image",
-            tint: .indigo
+            title: "自定义模型",
+            subtitle: "在设置中新增的自定义模型现已能正确出现在文本与视觉模型选择器里，按需为不同任务挑选模型。",
+            systemImage: "cpu.fill",
+            tint: .orange
         ),
         WhatsNewHighlight(
-            title: "日程颜色标签",
-            subtitle: "给日程打上彩色标签（工作 / 课程 / 临时等），现已稳定保存，重启后颜色不再丢失。",
-            systemImage: "tag.fill",
-            tint: .purple
+            title: "焕新的开屏与引导",
+            subtitle: "开屏品牌画面加入平滑的淡入过渡，隐私协议页也重新设计，首次启动的观感更顺、更清晰。",
+            systemImage: "sparkles",
+            tint: .pink
         ),
         WhatsNewHighlight(
-            title: "备份与稳定性",
-            subtitle: "单个 .tmn 文件导入移至「备份与恢复」；修复多项数据持久化问题，让你的记录更安心。",
-            systemImage: "externaldrive.fill.badge.checkmark",
-            tint: .gray
+            title: "稳定性与体验优化",
+            subtitle: "对加密拍记执行滑动删除时会先要求验证身份，避免误删；并修复多处细节问题，让整体使用更稳。",
+            systemImage: "checkmark.seal.fill",
+            tint: .green
         )
     ]
 
@@ -84,7 +66,7 @@ struct WhatsNewContainerView: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
 
-                Text("Spark 更聪明了，待办与记录更稳更全：语义检索、深度联想、全量待办、本地账户与纯文本记录一次到位。")
+                Text("这一版更注重隐私与掌控：加密拍记、Face ID 隐私锁、多语言输出与自定义模型一次到位，开屏与引导也焕然一新。")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
@@ -100,11 +82,11 @@ struct WhatsNewContainerView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.green)
 
-                Text("更聪明，也更稳了")
+                Text("更私密，也更懂你")
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                Text("语义检索 · 深度联想 · 全量待办")
+                Text("加密拍记 · 隐私锁 · 多语言")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
