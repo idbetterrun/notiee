@@ -13,3 +13,7 @@ tmn/
 
 # Android port docs — local staging, will be moved to the Android repo
 docs/android/
+
+# Xcode Organizer archive export output (.ipa + export logs)
+*.ipa
+Notiee+ 20*/
