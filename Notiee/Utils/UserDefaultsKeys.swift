@@ -27,6 +27,17 @@ enum UDK {
     static let courseCalendarIdentifiers = "notiee.courseCalendarIdentifiers"
     static let ignoredCalendarEventKeys = "notiee.ignoredCalendarEventKeys"
 
+    // MARK: - Backend (Notiee free version)
+    /// Optional runtime override for the backend base URL (e.g. a LAN dev box).
+    /// Empty/unset → compile-time default in `BackendAPIClient`.
+    static let backendBaseURL = "notiee.backendBaseURL"
+
+    // MARK: - Curated model selection (Notiee free version)
+    /// 免费版选中的文本 / 视觉模型 ID（对应后端 MODEL_CATALOG 的 key）。
+    /// 未设置或对当前档位非法时，读取端会夹取回免费默认模型。
+    static let selectedTextModel = "notiee.selectedTextModel"
+    static let selectedVisionModel = "notiee.selectedVisionModel"
+
     // MARK: - AI Settings
     static let aiEnabled = "notiee.aiEnabled"
     static let autoProcessAfterCapture = "notiee.autoProcessAfterCapture"

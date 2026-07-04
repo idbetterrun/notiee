@@ -71,6 +71,7 @@ struct SettingsMainView: View {
                 if viewModel.aiEnabled {
                     Toggle("拍记完后立即分析", isOn: $viewModel.autoProcessAfterCapture)
 
+                    #if NOTIEE_PLUS
                     NavigationLink {
                         AIConfigurationView(viewModel: viewModel, kind: .text)
                     } label: {
@@ -90,6 +91,13 @@ struct SettingsMainView: View {
                             configuration: viewModel.visionConfiguration
                         )
                     }
+                    #else
+                    NavigationLink {
+                        ModelPickerView()
+                    } label: {
+                        Label("模型选择", systemImage: "cpu")
+                    }
+                    #endif
 
                     NavigationLink {
                         SparkSettingsView(viewModel: viewModel)
@@ -103,6 +111,7 @@ struct SettingsMainView: View {
                         Label("大模型功能", systemImage: "gearshape.2")
                     }
 
+                    #if NOTIEE_PLUS
                     Button("测试双端连接") {
                         viewModel.testConnection(for: .text)
                         viewModel.testConnection(for: .vision)
@@ -126,6 +135,7 @@ struct SettingsMainView: View {
                         Link("DeepSeek 文档", destination: URL(string: "https://api-docs.deepseek.com/zh-cn/")!)
                         Link("MiniMax 文档", destination: URL(string: "https://platform.minimaxi.com/docs/guides/text-generation")!)
                     }
+                    #endif
                 }
             }
             .onChange(of: viewModel.aiEnabled) { _, _ in viewModel.saveAll() }
@@ -161,11 +171,13 @@ struct SettingsMainView: View {
             .onChange(of: viewModel.tokenWarningThreshold) { _, _ in viewModel.saveAll() }
 
             Section("高级设置") {
+                #if NOTIEE_PLUS
                 NavigationLink {
                     CustomModelsListView(viewModel: viewModel)
                 } label: {
                     Label("管理自定义模型", systemImage: "slider.horizontal.3")
                 }
+                #endif
 
                 NavigationLink {
                     SecuritySettingsView(store: store)
