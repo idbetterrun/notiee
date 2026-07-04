@@ -21,11 +21,7 @@ struct ModelPickerView: View {
             selectedText = selection.textModelID(for: tier)
             selectedVision = selection.visionModelID(for: tier)
         }
-        .alert("Pro 专属模型", isPresented: $showProAlert) {
-            Button("知道了", role: .cancel) {}
-        } message: {
-            Text("该模型为 Pro 会员专属，升级后即可使用。")
-        }
+        .paywallSheet(isPresented: $showProAlert)
     }
 
     @ViewBuilder

@@ -74,6 +74,15 @@ struct CuratedModelSelection {
     }
 }
 
+/// 当前档位。**门控总闸**：Phase 4 起由后端真值驱动（`EntitlementStore` 写入），
+/// 持久化到 UserDefaults 以便跨启动即时、且可从非主线程同步读取。默认 `.free`。
+/// 客户端档位仅解锁 UI；后端对每次 AI 调用二次校验，改这里骗不到额度。
 enum CurrentEntitlement {
-    static var tier: ModelTier { .free }
+    /// 可注入（测试用）；生产恒为 `.standard`。
+    static var defaults: UserDefaults = .standard
+
+    static var tier: ModelTier {
+        get { ModelTier(rawValue: defaults.string(forKey: UDK.entitlementTier) ?? "") ?? .free }
+        set { defaults.set(newValue.rawValue, forKey: UDK.entitlementTier) }
+    }
 }

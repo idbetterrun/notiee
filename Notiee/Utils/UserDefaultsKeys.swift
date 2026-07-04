@@ -38,6 +38,10 @@ enum UDK {
     static let selectedTextModel = "notiee.selectedTextModel"
     static let selectedVisionModel = "notiee.selectedVisionModel"
 
+    /// 当前档位缓存（"free"/"pro"）。持久化，供任意线程同步读取以驱动 UI 门控。
+    /// 真值在后端，仅 UI 用；由 EntitlementStore 写入。
+    static let entitlementTier = "notiee.entitlementTier"
+
     // MARK: - AI Settings
     static let aiEnabled = "notiee.aiEnabled"
     static let autoProcessAfterCapture = "notiee.autoProcessAfterCapture"

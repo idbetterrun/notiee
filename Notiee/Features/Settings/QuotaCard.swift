@@ -28,12 +28,7 @@ struct QuotaCard: View {
         }
         .padding(.vertical, 4)
         .task { await entitlement.refresh() }
-        .alert("升级 Pro 会员", isPresented: $showProUpsell) {
-            Button("知道了", role: .cancel) {}
-            // TODO(Phase 4): present PaywallView
-        } message: {
-            Text("升级 Pro 即可大幅提升每月额度，并解锁全部模型。")
-        }
+        .paywallSheet(isPresented: $showProUpsell)
     }
 
     @ViewBuilder

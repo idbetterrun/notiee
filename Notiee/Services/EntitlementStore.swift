@@ -9,7 +9,9 @@ import Combine
 final class EntitlementStore: ObservableObject {
     static let shared = EntitlementStore()
 
-    @Published private(set) var quota: BackendQuota?
+    @Published private(set) var quota: BackendQuota? {
+        didSet { CurrentEntitlement.tier = (quota?.isPro == true) ? .pro : .free }
+    }
     @Published private(set) var isLoading = false
     @Published private(set) var loadError: String?
 

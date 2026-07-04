@@ -176,12 +176,9 @@ struct SparkView: View {
                     locked: !SparkTierLimits.isAgentAllowed,
                     onLockedTap: { showProUpsell = true }
                 )
-                .alert("升级 Pro 会员", isPresented: $showProUpsell) {
-                    Button("知道了", role: .cancel) {}
-                    // TODO(Phase 4): 改为 present PaywallView
-                } message: {
-                    Text("升级 Pro 即可解锁 Agent 智能体、更强模型与更长对话。")
-                }
+                #if !NOTIEE_PLUS
+                .paywallSheet(isPresented: $showProUpsell)
+                #endif
 
                 #if NOTIEE_PLUS
                 if !viewModel.availableModels.isEmpty {
