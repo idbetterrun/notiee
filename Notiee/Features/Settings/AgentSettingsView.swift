@@ -5,6 +5,14 @@ struct AgentSettingsView: View {
 
     var body: some View {
         Form {
+            if !SparkTierLimits.isAgentAllowed {
+                Section {
+                    Label("Agent 模式为 Pro 会员专属", systemImage: "lock.fill")
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                }
+            }
+
             Section {
                 Text("Agent 模式可在 Spark 对话界面随时手动开关。以下设置控制 Agent 执行时的行为。")
                     .font(.footnote)

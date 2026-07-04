@@ -13,6 +13,8 @@ final class SparkViewModel: ObservableObject {
     @Published var isGeneratingTitle: Bool = false
     @Published var injectionWarning: String?
     @Published var memoryActionText: String?
+    /// 免费档单会话轮数触顶（Notiee+ 恒 false）。View 据此显示「开启新会话 / 升级 Pro」横幅。
+    @Published var sessionLimitReached: Bool = false
     @Published var isAgentModeEnabled: Bool = false
     @Published var currentToolName: String?
     @Published var agentActions: [AgentAction] = []
@@ -73,7 +75,7 @@ final class SparkViewModel: ObservableObject {
     private var titleGenerated = false
 
     init(
-        aiService: any SparkAIServing = SparkAIService(),
+        aiService: any SparkAIServing = SparkAIServiceFactory.makeDefault(),
         repository: any SparkConversationCoordinating = SparkConversationRepository.live,
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
         recordManager: RecordManager? = nil,
@@ -151,6 +153,11 @@ final class SparkViewModel: ObservableObject {
             return
         }
         injectionWarning = nil
+
+        if SparkTierLimits.sessionRoundLimitReached(currentRounds: roundCount) {
+            sessionLimitReached = true
+            return
+        }
 
         inputText = ""; state = .loading
         let userMsg = ChatMessage(role: .user, content: t)
@@ -238,10 +245,18 @@ final class SparkViewModel: ObservableObject {
                 agentSuggestionMessageID = nil
             }
 
-            // Memory operations
+            // Memory operations（免费档记忆上限：只对「新键」计数，更新/删除不受限）
             let ms = SparkMemoryStore.live
+            let existing = (try? ms.load()) ?? [:]
+            let newKeys = ops.toSet.keys.filter { existing[$0] == nil }
+            let allowedNewCount = SparkTierLimits.acceptedNewMemoryCount(
+                existingCount: existing.count, incoming: newKeys.count)
+            let acceptedNewKeys = Set(newKeys.prefix(allowedNewCount))
             var memoryCount = 0
-            for (k, v) in ops.toSet { ms.set(k, value: v); memoryCount += 1 }
+            for (k, v) in ops.toSet {
+                if existing[k] == nil, !acceptedNewKeys.contains(k) { continue } // 超上限的新记忆丢弃
+                ms.set(k, value: v); memoryCount += 1
+            }
             for (k, v) in ops.toUpdate { ms.set(k, value: v); memoryCount += 1 }
             for k in ops.toDelete { ms.delete(k); memoryCount += 1 }
             if memoryCount > 0 {
@@ -438,6 +453,7 @@ final class SparkViewModel: ObservableObject {
             try? repository.upsertHistory(from: msgs, id: convId, title: title)
         }
 
+        sessionLimitReached = false
         messages = []
         try? repository.clearDraft()
         state = .idle; inputText = ""

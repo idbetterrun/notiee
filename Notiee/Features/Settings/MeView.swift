@@ -71,6 +71,12 @@ struct MeView: View {
                 }
             }
             
+            #if !NOTIEE_PLUS
+            Section {
+                QuotaCard()
+            }
+            #endif
+
             Section {
                 NavigationLink {
                     AllSchedulesView(store: store)
@@ -96,7 +102,11 @@ struct MeView: View {
             
             Section {
                 NavigationLink {
+                    #if NOTIEE_PLUS
                     ReviewView(store: store)
+                    #else
+                    UsageReviewView(store: store)
+                    #endif
                 } label: {
                     Label("回顾", systemImage: "chart.pie.fill")
                         .foregroundColor(NotieeColors.themed(.blue))

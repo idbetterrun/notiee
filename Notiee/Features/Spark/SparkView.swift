@@ -19,6 +19,7 @@ struct SparkView: View {
     let store: NotieeStore
     @State private var activeSheet: SparkSheet?
     @FocusState private var isFocused: Bool
+    @State private var showProUpsell = false
 
     init(store: NotieeStore) {
         self.store = store
@@ -154,9 +155,35 @@ struct SparkView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 
-            HStack(spacing: 8) {
-                SparkAgentChip(isOn: $viewModel.isAgentModeEnabled)
+            if viewModel.sessionLimitReached {
+                HStack(spacing: 12) {
+                    Text("本次对话已达上限（\(SparkTierLimits.maxSessionRounds ?? 0) 轮）")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("开启新会话") { viewModel.newConversation() }
+                        .font(.caption.weight(.semibold))
+                    Button("升级 Pro") { showProUpsell = true }
+                        .font(.caption.weight(.semibold))
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 6)
+            }
 
+            HStack(spacing: 8) {
+                SparkAgentChip(
+                    isOn: $viewModel.isAgentModeEnabled,
+                    locked: !SparkTierLimits.isAgentAllowed,
+                    onLockedTap: { showProUpsell = true }
+                )
+                .alert("升级 Pro 会员", isPresented: $showProUpsell) {
+                    Button("知道了", role: .cancel) {}
+                    // TODO(Phase 4): 改为 present PaywallView
+                } message: {
+                    Text("升级 Pro 即可解锁 Agent 智能体、更强模型与更长对话。")
+                }
+
+                #if NOTIEE_PLUS
                 if !viewModel.availableModels.isEmpty {
                     SparkModelChip(
                         title: viewModel.effectiveModelName,
@@ -166,6 +193,7 @@ struct SparkView: View {
                         onSelect: { viewModel.selectModel($0) }
                     )
                 }
+                #endif
 
                 if !viewModel.thinkingLevels.isEmpty {
                     if let locked = viewModel.lockedThinkingLevelID {
