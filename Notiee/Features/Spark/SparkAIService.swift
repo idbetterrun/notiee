@@ -52,7 +52,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     private let settingsStore: AppSettingsPersisting
     private let memoryStore: SparkMemoryPersisting
     private let modelPrefs = SparkModelPreferences()
-    private let maxRecordsInPrompt = 150
+    static let maxRecordsInPrompt = 150
 
     static let memoryTriggerRoundCount = 10
 
@@ -192,7 +192,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         let activeRecords = allRecords
             .filter { !$0.isDeleted }
             .sorted { $0.capturedAt > $1.capturedAt }
-            .prefix(maxRecordsInPrompt)
+            .prefix(Self.maxRecordsInPrompt)
 
         Logger.spark.debug("[ask] building systemPrompt, recs=\(activeRecords.count) rounds=\(recentRounds.count)")
         let systemPrompt = buildSystemPrompt(records: Array(activeRecords), recentRounds: recentRounds, upcomingEvents: upcomingEvents)
@@ -470,7 +470,9 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - System Prompt Builder
 
-    private func buildSystemPrompt(records: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) -> String {
+    /// Internal (not private) so `BackendSparkAIService` can reuse the exact same
+    /// system prompt when routing `ask` through the backend `/ai/chat`.
+    func buildSystemPrompt(records: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) -> String {
         Logger.spark.debug("[buildSystemPrompt] loading memory...")
         let mem = (try? memoryStore.load()) ?? [:]
         Logger.spark.debug("[buildSystemPrompt] memory loaded, count=\(mem.count)")
@@ -647,5 +649,18 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         }
 
         return AgentChatResponse(text: result.text, toolCalls: toolCalls, tokensUsed: result.tokens)
+    }
+}
+
+/// Single compile-flag gate for the Spark backend. Notiee+ keeps BYOK
+/// (`SparkAIService`); Notiee (free) routes through the backend `/ai/chat`
+/// (`BackendSparkAIService`). Mirrors `AIProcessingServiceFactory`.
+enum SparkAIServiceFactory {
+    static func makeDefault() -> any SparkAIServing {
+        #if NOTIEE_PLUS
+        SparkAIService()
+        #else
+        BackendSparkAIService()
+        #endif
     }
 }

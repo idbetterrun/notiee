@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notiee 隐私政策 / Privacy Policy</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --card: #ffffff;
+    --text: #1c1c1e;
+    --muted: #6e6e73;
+    --border: #e5e5ea;
+    --accent: #0071e3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.7;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(247,247,248,0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+  .lang-switch {
+    display: flex;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  .lang-switch button {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .lang-switch button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px clamp(20px, 5vw, 48px);
+  }
+  .policy { display: none; }
+  .policy.active { display: block; }
+  h1.doc-title { font-size: 26px; margin-top: 0; }
+  h2 { font-size: 19px; margin-top: 2.2em; border-top: 1px solid var(--border); padding-top: 1em; }
+  h3 { font-size: 16px; margin-top: 1.6em; }
+  p, li { color: var(--text); }
+  p strong:first-child { color: var(--text); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #f2f2f4; }
+  blockquote {
+    margin: 1em 0;
+    padding: 10px 16px;
+    border-left: 3px solid var(--accent);
+    background: #f2f8ff;
+    color: var(--muted);
+    border-radius: 0 8px 8px 0;
+  }
+  pre {
+    background: #f2f2f4;
+    padding: 14px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 12.5px;
+  }
+  code { font-family: "SF Mono", Menlo, monospace; }
+  a { color: var(--accent); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Notiee</h1>
+  <div class="lang-switch" role="tablist">
+    <button data-lang="zh-Hans" class="active">简体中文</button>
+    <button data-lang="zh-Hant">繁體中文</button>
+    <button data-lang="en">English</button>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <section id="policy-zh-Hans" class="policy active">
+      <h1>Notiee 隐私政策</h1>
+      <p><strong>版本：v1.0.6</strong>
+      <strong>生效日期：2026 年 7 月 2 日</strong></p>
+      <hr />
+      <h2>一、引言</h2>
+      <p>我们非常重视您的隐私。本隐私政策旨在向您透明地说明 Notiee（以下简称"本应用"）收集哪些信息、如何使用这些信息、以及如何保护您的数据安全。</p>
+      <p><strong>核心理念：数据都在你手里。</strong> 本应用是一款本地优先的工具应用，您的所有记录、笔记和对话都保存在您自己的设备上。</p>
+      <hr />
+      <h2>二、信息收集与使用</h2>
+      <h3>2.1 我们不收集的信息</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>信息类型</th>
+      <th>说明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>个人身份信息</td>
+      <td>无网络账户系统，不收集姓名、邮箱、手机号等身份信息</td>
+      </tr>
+      <tr>
+      <td>位置信息</td>
+      <td>不请求定位权限，不收集 GPS 坐标</td>
+      </tr>
+      <tr>
+      <td>设备标识符</td>
+      <td>不收集 IDFA、IDFV 或其他设备标识符</td>
+      </tr>
+      <tr>
+      <td>使用行为分析</td>
+      <td>不集成任何分析/统计 SDK，无埋点追踪</td>
+      </tr>
+      <tr>
+      <td>广告标识</td>
+      <td>不集成广告 SDK，无广告追踪</td>
+      </tr>
+      <tr>
+      <td>网络日志</td>
+      <td>不记录用户的网络请求日志</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3>2.2 存储在设备本地的信息</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>信息类型</th>
+      <th>存储位置</th>
+      <th>用途</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>拍摄的照片</td>
+      <td>设备本地文件系统</td>
+      <td>记录内容展示与回顾</td>
+      </tr>
+      <tr>
+      <td>OCR 文本、AI 摘要、要点</td>
+      <td>本地 JSON 文件</td>
+      <td>搜索与知识回顾</td>
+      </tr>
+      <tr>
+      <td>纯文本记录</td>
+      <td>本地 JSON 文件</td>
+      <td>手动文字笔记</td>
+      </tr>
+      <tr>
+      <td>待办事项</td>
+      <td>本地 JSON 文件</td>
+      <td>任务管理（含截止日期、提醒标记）</td>
+      </tr>
+      <tr>
+      <td>自定义文件夹、标签、日程标签</td>
+      <td>本地 JSON 文件</td>
+      <td>分类与日程着色</td>
+      </tr>
+      <tr>
+      <td>Spark 对话历史</td>
+      <td>本地 JSON 文件</td>
+      <td>AI 对话记录保存与搜索</td>
+      </tr>
+      <tr>
+      <td>Spark 长期记忆</td>
+      <td>本地 JSON 文件</td>
+      <td>AI 助手个性化记忆</td>
+      </tr>
+      <tr>
+      <td>本地账户资料（昵称、头像）</td>
+      <td>本地文件系统</td>
+      <td>个人资料展示</td>
+      </tr>
+      <tr>
+      <td>语义向量索引（搜索 / 深度联想）</td>
+      <td>本地文件系统</td>
+      <td>拍记语义搜索与相关笔记推荐（端侧向量）</td>
+      </tr>
+      <tr>
+      <td>API Key（AI 密钥）</td>
+      <td>iOS Keychain（硬件级加密）</td>
+      <td>调用 AI 服务</td>
+      </tr>
+      <tr>
+      <td>App 设置偏好（主题、语言、模型配置等）</td>
+      <td>UserDefaults</td>
+      <td>个性化体验</td>
+      </tr>
+      <tr>
+      <td>日历日程信息</td>
+      <td>内存中处理，不长期存储</td>
+      <td>拍照时匹配日程上下文</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3>2.3 发送至第三方的信息</h3>
+      <p>以下场景中，数据会发送至用户<strong>自行配置</strong>的第三方 AI 服务商：</p>
+      <table>
+      <thead>
+      <tr>
+      <th>场景</th>
+      <th>发送内容</th>
+      <th>接收方</th>
+      <th>用户控制</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>AI 拍记处理</td>
+      <td>照片图片数据 + 文本提示词</td>
+      <td>用户配置的 AI 服务商</td>
+      <td>用户主动触发拍照后自动处理，可关闭 AI 功能</td>
+      </tr>
+      <tr>
+      <td>Spark 对话</td>
+      <td>用户消息 + 对话历史上下文</td>
+      <td>用户配置的 AI 服务商</td>
+      <td>用户主动发起对话</td>
+      </tr>
+      <tr>
+      <td>Spark Agent 操作</td>
+      <td>用户指令 + 相关拍记/日程/待办数据</td>
+      <td>用户配置的 AI 服务商</td>
+      <td>用户主动使用 Agent 模式</td>
+      </tr>
+      <tr>
+      <td>WebFetch 网页抓取</td>
+      <td>目标 URL（由用户提供）</td>
+      <td>目标网页所在服务器</td>
+      <td>仅在 Agent 模式下由用户指令触发</td>
+      </tr>
+      <tr>
+      <td>云端语义检索（可选）</td>
+      <td>拍记文本摘要</td>
+      <td>用户配置的 AI 服务商 Embedding 接口</td>
+      <td><strong>默认关闭</strong>，需在实验室中手动开启</td>
+      </tr>
+      <tr>
+      <td>iCloud 同步（如开启）</td>
+      <td>.tmn 加密归档文件</td>
+      <td>Apple iCloud Drive</td>
+      <td>用户手动触发</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p><strong>重要说明</strong>：以上所有 AI 服务调用均使用用户<strong>自行提供</strong>的 API Key，发送至用户<strong>自行选择</strong>的 AI 服务商。Notiee 不运营自有服务器，不截留、不存储任何发送至第三方的数据。<strong>详情页的「深度联想」相关笔记推荐默认完全在设备本地计算，不向任何服务器发送数据。</strong></p>
+      </blockquote>
+      <hr />
+      <h2>三、权限使用说明</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>权限</th>
+      <th>用途</th>
+      <th>是否必需</th>
+      <th>可否撤回</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>相机</td>
+      <td>拍摄课堂笔记、会议记录、白板内容</td>
+      <td>核心功能，必需</td>
+      <td>可在系统设置中关闭</td>
+      </tr>
+      <tr>
+      <td>麦克风</td>
+      <td>语音记录（如开启）</td>
+      <td>可选</td>
+      <td>可在系统设置中关闭</td>
+      </tr>
+      <tr>
+      <td>相册</td>
+      <td>导入已有图片</td>
+      <td>可选</td>
+      <td>可在系统设置中关闭</td>
+      </tr>
+      <tr>
+      <td>日历</td>
+      <td>读取系统日历，匹配当前日程上下文</td>
+      <td>可选（关闭后可手动选择日程）</td>
+      <td>可在系统设置中关闭</td>
+      </tr>
+      <tr>
+      <td>语音识别</td>
+      <td>语音转文字</td>
+      <td>可选</td>
+      <td>可在系统设置中关闭</td>
+      </tr>
+      <tr>
+      <td>通知</td>
+      <td>日程提醒、待办提醒</td>
+      <td>可选</td>
+      <td>可在系统设置中关闭</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p>本应用不请求定位权限、蓝牙权限、通讯录权限或任何其他未列出的系统权限。</p>
+      </blockquote>
+      <hr />
+      <h2>四、数据存储与安全</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>措施</th>
+      <th>说明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>本地优先</td>
+      <td>所有记录默认存储在设备本地，不依赖云端</td>
+      </tr>
+      <tr>
+      <td>Keychain 加密</td>
+      <td>API Key 使用 iOS Keychain（硬件级安全区域加密）存储，不写入普通文件，App 卸载后自动清除</td>
+      </tr>
+      <tr>
+      <td>HTTPS 传输</td>
+      <td>所有 AI 服务调用使用 HTTPS 加密传输</td>
+      </tr>
+      <tr>
+      <td>无云端留存</td>
+      <td>Notiee 不运营自有服务器，不收集、不存储用户内容数据</td>
+      </tr>
+      <tr>
+      <td>iCloud 安全</td>
+      <td>如用户手动启用 iCloud 同步，数据存储在用户个人的 iCloud Drive，受 Apple 安全体系保护</td>
+      </tr>
+      <tr>
+      <td>WebFetch 安全</td>
+      <td>使用临时网络会话（不持久化 Cookie/缓存），内置 SSRF 防护，禁止访问本地及内网地址（localhost、10.x、172.16-31.x、192.168.x 等）</td>
+      </tr>
+      <tr>
+      <td>语义检索本地化</td>
+      <td>默认使用 Apple NLEmbedding 端侧向量引擎，所有向量计算在设备本地完成，不上传至任何服务器</td>
+      </tr>
+      <tr>
+      <td>无网络自发请求</td>
+      <td>除用户主动触发 AI 处理、Spark 对话、WebFetch 或 iCloud 同步外，本应用不会自发向任何服务器发送数据</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>五、数据分享与披露</h2>
+      <p>5.1 <strong>不向第三方出售、出租或交易用户数据。</strong>
+      5.2 仅在以下情况可能披露用户数据：
+         - 法律法规要求
+         - 保护开发者或他人的合法权益
+         - 用户明确同意
+      5.3 AI 服务调用数据发送至用户自行选择的 AI 服务商，受该服务商自身的隐私政策约束，与本应用无关。
+      5.4 WebFetch 抓取的网页内容由目标网站提供，受该网站的使用条款约束。</p>
+      <hr />
+      <h2>六、用户权利</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>权利</th>
+      <th>说明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>访问权</td>
+      <td>所有数据在 App 内可直接查看，包括拍记、待办、Spark 对话、个人资料等</td>
+      </tr>
+      <tr>
+      <td>导出权</td>
+      <td>支持一键导出所有记录为 <code>.tmn</code> 归档文件</td>
+      </tr>
+      <tr>
+      <td>删除权</td>
+      <td>可在 App 内删除单条记录、单条对话或清空全部数据</td>
+      </tr>
+      <tr>
+      <td>搜索权</td>
+      <td>支持对拍记、Spark 对话进行全文搜索和语义搜索</td>
+      </tr>
+      <tr>
+      <td>撤回同意</td>
+      <td>可在系统设置中关闭任意权限</td>
+      </tr>
+      <tr>
+      <td>注销</td>
+      <td>当前为本地账户，卸载 App 即清除所有本地数据（iCloud 同步的文件需在 iCloud 中手动删除）</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>七、未成年人保护</h2>
+      <p>7.1 本应用面向学生和职场人士，不专门面向 14 岁以下儿童设计。
+      7.2 如监护人发现未成年人未经同意使用本应用，可通过本政策末尾的联系方式联系我们删除数据。</p>
+      <hr />
+      <h2>八、Spark AI 助手隐私说明</h2>
+      <p>Spark 是本应用内置的 AI 助手，具有以下隐私特性：</p>
+      <p>8.1 <strong>对话内容</strong>：Spark 的对话消息（用户输入和 AI 回复）会发送至用户配置的 AI 服务商进行处理。对话历史保存在设备本地。
+      8.2 <strong>Agent 模式</strong>：当用户使用 Agent 模式时，Spark 可能读取用户的拍记、日程、待办等本地数据作为操作上下文，相关数据可能随请求发送至 AI 服务商。
+      8.3 <strong>WebFetch</strong>：Agent 模式下可根据用户指令抓取网页内容，使用临时安全会话，不持久化任何网络数据。
+      8.4 <strong>长期记忆</strong>：Spark 的记忆系统（用户偏好、习惯等）保存在设备本地，不上传至任何服务器。
+      8.5 <strong>隐私同意</strong>：首次使用 Spark 时，用户需阅读并同意 Spark 隐私同意书。</p>
+      <hr />
+      <h2>九、政策更新</h2>
+      <p>9.1 我们保留随时更新本隐私政策的权利。
+      9.2 重大变更将通过应用内弹窗通知用户。
+      9.3 更新后继续使用本应用即视为您同意受更新后政策的约束。</p>
+      <hr />
+      <h2>十、第三方服务隐私政策引用</h2>
+      <p>我们建议您在配置 AI 服务时阅读对应服务商的隐私政策：</p>
+      <table>
+      <thead>
+      <tr>
+      <th>服务商</th>
+      <th>隐私政策链接</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>OpenAI</td>
+      <td>https://openai.com/policies/privacy-policy</td>
+      </tr>
+      <tr>
+      <td>Anthropic</td>
+      <td>https://www.anthropic.com/privacy</td>
+      </tr>
+      <tr>
+      <td>DeepSeek</td>
+      <td>https://www.deepseek.com/policies/privacy</td>
+      </tr>
+      <tr>
+      <td>阿里云百炼</td>
+      <td>https://help.aliyun.com/document_detail/</td>
+      </tr>
+      <tr>
+      <td>火山引擎</td>
+      <td>https://www.volcengine.com/docs/</td>
+      </tr>
+      <tr>
+      <td>MiniMax</td>
+      <td>https://platform.minimaxi.com/document</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>十一、联系方式</h2>
+      <p>如有任何隐私相关问题，请通过以下方式联系我们：</p>
+      <ul>
+      <li><strong>邮箱</strong>：woxiantao@icloud.com</li>
+      <li><strong>开发者网页</strong>：https://tanqinghua.asia</li>
+      <li><strong>响应承诺</strong>：我们将在收到隐私相关咨询后 15 个工作日内予以回复</li>
+      </ul>
+      <hr />
+      <h2>附录 A：数据生命周期</h2>
+      <pre><code>拍摄 → 本地存储 → [用户触发 AI 处理] → 发送至 AI 服务商 → 返回结果 → 本地存储
+                                      ↓
+                              [Spark 对话] → 发送至 AI 服务商 → 返回结果 → 本地存储
+                                      ↓
+                              [Agent 操作] → 读取本地数据 → 发送至 AI 服务商 → 执行操作
+                                      ↓
+                              [WebFetch] → 临时抓取网页 → 返回正文 → 不持久化
+                                      ↓
+                              [云端语义检索（可选）] → 发送文本至 Embedding 接口 → 返回向量 → 本地存储
+                                      ↓
+                              [iCloud 同步] → 发送至 iCloud Drive
+                                      ↓
+                              [用户删除] → 本地文件移除 + AI 服务商端依其政策处理
+      </code></pre>
+      <h2>附录 B：技术实现隐私要点</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>实现</th>
+      <th>说明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>无埋点</td>
+      <td>不集成任何分析/统计 SDK</td>
+      </tr>
+      <tr>
+      <td>无广告</td>
+      <td>不集成广告 SDK</td>
+      </tr>
+      <tr>
+      <td>无网络自发请求</td>
+      <td>除用户主动触发外，不自发向任何服务器发送数据</td>
+      </tr>
+      <tr>
+      <td>API Key 本地化</td>
+      <td>存储在 Keychain，App 卸载后自动清除</td>
+      </tr>
+      <tr>
+      <td>传输加密</td>
+      <td>所有 AI 请求使用 HTTPS</td>
+      </tr>
+      <tr>
+      <td>WebFetch 临时会话</td>
+      <td>使用 <code>URLSessionConfiguration.ephemeral</code>，不持久化 Cookie/缓存</td>
+      </tr>
+      <tr>
+      <td>WebFetch SSRF 防护</td>
+      <td>禁止 localhost、内网 IP、IPv6 本地地址</td>
+      </tr>
+      <tr>
+      <td>端侧向量引擎</td>
+      <td>默认使用 Apple NLEmbedding，语义计算在设备本地完成</td>
+      </tr>
+      <tr>
+      <td>云端检索可选</td>
+      <td>云端 Embedding 默认关闭，需用户手动开启</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <blockquote>
+      <p><strong>版本历史</strong>
+      - v1.0.6（2026-07-02）：新增加密拍记（AES-GCM 端侧加密、密钥存于系统钥匙串）与生物识别 / 密码隐私锁（凭据不离开设备）说明；加密拍记不纳入导出、同步、搜索与索引；新增自定义 AI 模型的数据流向说明
+      - v1.0.5（2026-06-24）：新增「深度联想」端侧语义相关笔记（本地向量、独立本地索引、不外传）说明；待办事项本地持久化；新增纯文本记录数据说明
+      - v1.0.4（2026-06-24，未公开发布）：新增 Spark Agent WebFetch 隐私说明、云端语义检索说明、本地账户数据说明、WebFetch 安全措施等
+      - v1.0.3（2026-06-04）：新增 Spark AI 助手对话数据说明
+      - v1.0.1：初始版本</p>
+      </blockquote>
+    </section>
+    <section id="policy-zh-Hant" class="policy">
+      <h1>Notiee 隱私權政策</h1>
+      <p><strong>版本：v1.0.6</strong>
+      <strong>生效日期：2026 年 7 月 2 日</strong></p>
+      <hr />
+      <h2>一、引言</h2>
+      <p>我們非常重視您的隱私。本隱私權政策旨在向您透明地說明 Notiee（以下簡稱「本應用程式」）收集哪些資訊、如何使用這些資訊、以及如何保護您的資料安全。</p>
+      <p><strong>核心理念：資料都在你手裡。</strong> 本應用程式是一款本地優先的工具應用程式，您的所有記錄、筆記和對話都保存在您自己的裝置上。</p>
+      <hr />
+      <h2>二、資訊收集與使用</h2>
+      <h3>2.1 我們不收集的資訊</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>資訊類型</th>
+      <th>說明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>個人身份資訊</td>
+      <td>無網路帳戶系統，不收集姓名、電子郵件、手機號碼等身份資訊</td>
+      </tr>
+      <tr>
+      <td>位置資訊</td>
+      <td>不請求定位權限，不收集 GPS 座標</td>
+      </tr>
+      <tr>
+      <td>裝置識別碼</td>
+      <td>不收集 IDFA、IDFV 或其他裝置識別碼</td>
+      </tr>
+      <tr>
+      <td>使用行為分析</td>
+      <td>不整合任何分析/統計 SDK，無埋點追蹤</td>
+      </tr>
+      <tr>
+      <td>廣告識別碼</td>
+      <td>不整合廣告 SDK，無廣告追蹤</td>
+      </tr>
+      <tr>
+      <td>網路日誌</td>
+      <td>不記錄使用者的網路請求日誌</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3>2.2 儲存在裝置本地的資訊</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>資訊類型</th>
+      <th>儲存位置</th>
+      <th>用途</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>拍攝的照片</td>
+      <td>裝置本地檔案系統</td>
+      <td>記錄內容展示與回顧</td>
+      </tr>
+      <tr>
+      <td>OCR 文字、AI 摘要、要點</td>
+      <td>本地 JSON 檔案</td>
+      <td>搜尋與知識回顧</td>
+      </tr>
+      <tr>
+      <td>純文字記錄</td>
+      <td>本地 JSON 檔案</td>
+      <td>手動文字筆記</td>
+      </tr>
+      <tr>
+      <td>待辦事項</td>
+      <td>本地 JSON 檔案</td>
+      <td>任務管理（含截止日期、提醒標記）</td>
+      </tr>
+      <tr>
+      <td>自訂資料夾、標籤、日程標籤</td>
+      <td>本地 JSON 檔案</td>
+      <td>分類與日程著色</td>
+      </tr>
+      <tr>
+      <td>Spark 對話歷史</td>
+      <td>本地 JSON 檔案</td>
+      <td>AI 對話記錄儲存與搜尋</td>
+      </tr>
+      <tr>
+      <td>Spark 長期記憶</td>
+      <td>本地 JSON 檔案</td>
+      <td>AI 助手個人化記憶</td>
+      </tr>
+      <tr>
+      <td>本地帳戶資料（暱稱、頭像）</td>
+      <td>本地檔案系統</td>
+      <td>個人資料展示</td>
+      </tr>
+      <tr>
+      <td>語義向量索引（搜尋 / 深度聯想）</td>
+      <td>本地檔案系統</td>
+      <td>拍記語義搜尋與相關筆記推薦（端側向量）</td>
+      </tr>
+      <tr>
+      <td>API Key（AI 金鑰）</td>
+      <td>iOS Keychain（硬體級加密）</td>
+      <td>呼叫 AI 服務</td>
+      </tr>
+      <tr>
+      <td>App 設定偏好（主題、語言、模型配置等）</td>
+      <td>UserDefaults</td>
+      <td>個人化體驗</td>
+      </tr>
+      <tr>
+      <td>日曆日程資訊</td>
+      <td>記憶體中處理，不長期儲存</td>
+      <td>拍照時匹配日程上下文</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3>2.3 傳送至第三方的資訊</h3>
+      <p>以下場景中，資料會傳送至使用者<strong>自行配置</strong>的第三方 AI 服務商：</p>
+      <table>
+      <thead>
+      <tr>
+      <th>場景</th>
+      <th>傳送內容</th>
+      <th>接收方</th>
+      <th>使用者控制</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>AI 拍記處理</td>
+      <td>照片圖片資料 + 文字提示詞</td>
+      <td>使用者配置的 AI 服務商</td>
+      <td>使用者主動觸發拍照後自動處理，可關閉 AI 功能</td>
+      </tr>
+      <tr>
+      <td>Spark 對話</td>
+      <td>使用者訊息 + 對話歷史上下文</td>
+      <td>使用者配置的 AI 服務商</td>
+      <td>使用者主動發起對話</td>
+      </tr>
+      <tr>
+      <td>Spark Agent 操作</td>
+      <td>使用者指令 + 相關拍記/日程/待辦資料</td>
+      <td>使用者配置的 AI 服務商</td>
+      <td>使用者主動使用 Agent 模式</td>
+      </tr>
+      <tr>
+      <td>WebFetch 網頁抓取</td>
+      <td>目標 URL（由使用者提供）</td>
+      <td>目標網頁所在伺服器</td>
+      <td>僅在 Agent 模式下由使用者指令觸發</td>
+      </tr>
+      <tr>
+      <td>雲端語義檢索（可選）</td>
+      <td>拍記文字摘要</td>
+      <td>使用者配置的 AI 服務商 Embedding 介面</td>
+      <td><strong>預設關閉</strong>，需在實驗室中手動開啟</td>
+      </tr>
+      <tr>
+      <td>iCloud 同步（如開啟）</td>
+      <td>.tmn 加密歸檔檔案</td>
+      <td>Apple iCloud Drive</td>
+      <td>使用者手動觸發</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p><strong>重要說明</strong>：以上所有 AI 服務呼叫均使用使用者<strong>自行提供</strong>的 API Key，傳送至使用者<strong>自行選擇</strong>的 AI 服務商。Notiee 不營運自有伺服器，不截留、不儲存任何傳送至第三方的資料。<strong>詳情頁的「深度聯想」相關筆記推薦預設完全在裝置本地計算，不向任何伺服器傳送資料。</strong></p>
+      </blockquote>
+      <hr />
+      <h2>三、權限使用說明</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>權限</th>
+      <th>用途</th>
+      <th>是否必需</th>
+      <th>可否撤回</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>相機</td>
+      <td>拍攝課堂筆記、會議記錄、白板內容</td>
+      <td>核心功能，必需</td>
+      <td>可在系統設定中關閉</td>
+      </tr>
+      <tr>
+      <td>麥克風</td>
+      <td>語音記錄（如開啟）</td>
+      <td>可選</td>
+      <td>可在系統設定中關閉</td>
+      </tr>
+      <tr>
+      <td>相簿</td>
+      <td>匯入已有圖片</td>
+      <td>可選</td>
+      <td>可在系統設定中關閉</td>
+      </tr>
+      <tr>
+      <td>日曆</td>
+      <td>讀取系統日曆，匹配當前日程上下文</td>
+      <td>可選（關閉後可手動選擇日程）</td>
+      <td>可在系統設定中關閉</td>
+      </tr>
+      <tr>
+      <td>語音辨識</td>
+      <td>語音轉文字</td>
+      <td>可選</td>
+      <td>可在系統設定中關閉</td>
+      </tr>
+      <tr>
+      <td>通知</td>
+      <td>日程提醒、待辦提醒</td>
+      <td>可選</td>
+      <td>可在系統設定中關閉</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p>本應用程式不請求定位權限、藍牙權限、通訊錄權限或任何其他未列出的系統權限。</p>
+      </blockquote>
+      <hr />
+      <h2>四、資料儲存與安全</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>措施</th>
+      <th>說明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>本地優先</td>
+      <td>所有記錄預設儲存在裝置本地，不依賴雲端</td>
+      </tr>
+      <tr>
+      <td>Keychain 加密</td>
+      <td>API Key 使用 iOS Keychain（硬體級安全區域加密）儲存，不寫入一般檔案，App 解除安裝後自動清除</td>
+      </tr>
+      <tr>
+      <td>HTTPS 傳輸</td>
+      <td>所有 AI 服務呼叫使用 HTTPS 加密傳輸</td>
+      </tr>
+      <tr>
+      <td>無雲端留存</td>
+      <td>Notiee 不營運自有伺服器，不收集、不儲存使用者內容資料</td>
+      </tr>
+      <tr>
+      <td>iCloud 安全</td>
+      <td>如使用者手動啟用 iCloud 同步，資料儲存在使用者個人的 iCloud Drive，受 Apple 安全體系保護</td>
+      </tr>
+      <tr>
+      <td>WebFetch 安全</td>
+      <td>使用臨時網路會話（不持久化 Cookie/快取），內建 SSRF 防護，禁止存取本地及內網位址（localhost、10.x、172.16-31.x、192.168.x 等）</td>
+      </tr>
+      <tr>
+      <td>語義檢索本地化</td>
+      <td>預設使用 Apple NLEmbedding 端側向量引擎，所有向量計算在裝置本地完成，不上傳至任何伺服器</td>
+      </tr>
+      <tr>
+      <td>無網路自發請求</td>
+      <td>除使用者主動觸發 AI 處理、Spark 對話、WebFetch 或 iCloud 同步外，本應用程式不會自發向任何伺服器傳送資料</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>五、資料分享與揭露</h2>
+      <p>5.1 <strong>不向第三方出售、出租或交易使用者資料。</strong>
+      5.2 僅在以下情況可能揭露使用者資料：
+         - 法律法規要求
+         - 保護開發者或他人的合法權益
+         - 使用者明確同意
+      5.3 AI 服務呼叫資料傳送至使用者自行選擇的 AI 服務商，受該服務商自身的隱私權政策約束，與本應用程式無關。
+      5.4 WebFetch 抓取的網頁內容由目標網站提供，受該網站的使用條款約束。</p>
+      <hr />
+      <h2>六、使用者權利</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>權利</th>
+      <th>說明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>存取權</td>
+      <td>所有資料在 App 內可直接檢視，包括拍記、待辦、Spark 對話、個人資料等</td>
+      </tr>
+      <tr>
+      <td>匯出權</td>
+      <td>支援一鍵匯出所有記錄為 <code>.tmn</code> 歸檔檔案</td>
+      </tr>
+      <tr>
+      <td>刪除權</td>
+      <td>可在 App 內刪除單筆記錄、單筆對話或清空全部資料</td>
+      </tr>
+      <tr>
+      <td>搜尋權</td>
+      <td>支援對拍記、Spark 對話進行全文搜尋和語義搜尋</td>
+      </tr>
+      <tr>
+      <td>撤回同意</td>
+      <td>可在系統設定中關閉任意權限</td>
+      </tr>
+      <tr>
+      <td>註銷</td>
+      <td>目前為本地帳戶，解除安裝 App 即清除所有本地資料（iCloud 同步的檔案需在 iCloud 中手動刪除）</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>七、未成年人保護</h2>
+      <p>7.1 本應用程式面向學生和職場人士，不專門面向 14 歲以下兒童設計。
+      7.2 如監護人發現未成年人未經同意使用本應用程式，可透過本政策末尾的聯繫方式聯繫我們刪除資料。</p>
+      <hr />
+      <h2>八、Spark AI 助手隱私權說明</h2>
+      <p>Spark 是本應用程式內建的 AI 助手，具有以下隱私權特性：</p>
+      <p>8.1 <strong>對話內容</strong>：Spark 的對話訊息（使用者輸入和 AI 回覆）會傳送至使用者配置的 AI 服務商進行處理。對話歷史儲存在裝置本地。
+      8.2 <strong>Agent 模式</strong>：當使用者使用 Agent 模式時，Spark 可能讀取使用者的拍記、日程、待辦等本地資料作為操作上下文，相關資料可能隨請求傳送至 AI 服務商。
+      8.3 <strong>WebFetch</strong>：Agent 模式下可根據使用者指令抓取網頁內容，使用臨時安全會話，不持久化任何網路資料。
+      8.4 <strong>長期記憶</strong>：Spark 的記憶系統（使用者偏好、習慣等）儲存在裝置本地，不上傳至任何伺服器。
+      8.5 <strong>隱私同意</strong>：首次使用 Spark 時，使用者需閱讀並同意 Spark 隱私同意書。</p>
+      <hr />
+      <h2>九、政策更新</h2>
+      <p>9.1 我們保留隨時更新本隱私權政策的權利。
+      9.2 重大變更將透過應用程式內彈窗通知使用者。
+      9.3 更新後繼續使用本應用程式即視為您同意受更新後政策的約束。</p>
+      <hr />
+      <h2>十、第三方服務隱私權政策引用</h2>
+      <p>我們建議您在配置 AI 服務時閱讀對應服務商的隱私權政策：</p>
+      <table>
+      <thead>
+      <tr>
+      <th>服務商</th>
+      <th>隱私權政策連結</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>OpenAI</td>
+      <td>https://openai.com/policies/privacy-policy</td>
+      </tr>
+      <tr>
+      <td>Anthropic</td>
+      <td>https://www.anthropic.com/privacy</td>
+      </tr>
+      <tr>
+      <td>DeepSeek</td>
+      <td>https://www.deepseek.com/policies/privacy</td>
+      </tr>
+      <tr>
+      <td>阿里雲百鍊</td>
+      <td>https://help.aliyun.com/document_detail/</td>
+      </tr>
+      <tr>
+      <td>火山引擎</td>
+      <td>https://www.volcengine.com/docs/</td>
+      </tr>
+      <tr>
+      <td>MiniMax</td>
+      <td>https://platform.minimaxi.com/document</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>十一、聯繫方式</h2>
+      <p>如有任何隱私相關問題，請透過以下方式聯繫我們：</p>
+      <ul>
+      <li><strong>電子郵件</strong>：woxiantao@icloud.com</li>
+      <li><strong>開發者網頁</strong>：https://tanqinghua.asia</li>
+      <li><strong>回應承諾</strong>：我們將在收到隱私相關諮詢後 15 個工作日內予以回覆</li>
+      </ul>
+      <hr />
+      <h2>附錄 A：資料生命週期</h2>
+      <pre><code>拍攝 → 本地儲存 → [使用者觸發 AI 處理] → 傳送至 AI 服務商 → 返回結果 → 本地儲存
+                                      ↓
+                              [Spark 對話] → 傳送至 AI 服務商 → 返回結果 → 本地儲存
+                                      ↓
+                              [Agent 操作] → 讀取本地資料 → 傳送至 AI 服務商 → 執行操作
+                                      ↓
+                              [WebFetch] → 臨時抓取網頁 → 返回正文 → 不持久化
+                                      ↓
+                              [雲端語義檢索（可選）] → 傳送文字至 Embedding 介面 → 返回向量 → 本地儲存
+                                      ↓
+                              [iCloud 同步] → 傳送至 iCloud Drive
+                                      ↓
+                              [使用者刪除] → 本地檔案移除 + AI 服務商端依其政策處理
+      </code></pre>
+      <h2>附錄 B：技術實現隱私權要點</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>實現</th>
+      <th>說明</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>無埋點</td>
+      <td>不整合任何分析/統計 SDK</td>
+      </tr>
+      <tr>
+      <td>無廣告</td>
+      <td>不整合廣告 SDK</td>
+      </tr>
+      <tr>
+      <td>無網路自發請求</td>
+      <td>除使用者主動觸發外，不自發向任何伺服器傳送資料</td>
+      </tr>
+      <tr>
+      <td>API Key 本地化</td>
+      <td>儲存在 Keychain，App 解除安裝後自動清除</td>
+      </tr>
+      <tr>
+      <td>傳輸加密</td>
+      <td>所有 AI 請求使用 HTTPS</td>
+      </tr>
+      <tr>
+      <td>WebFetch 臨時會話</td>
+      <td>使用 <code>URLSessionConfiguration.ephemeral</code>，不持久化 Cookie/快取</td>
+      </tr>
+      <tr>
+      <td>WebFetch SSRF 防護</td>
+      <td>禁止 localhost、內網 IP、IPv6 本地位址</td>
+      </tr>
+      <tr>
+      <td>端側向量引擎</td>
+      <td>預設使用 Apple NLEmbedding，語義計算在裝置本地完成</td>
+      </tr>
+      <tr>
+      <td>雲端檢索可選</td>
+      <td>雲端 Embedding 預設關閉，需使用者手動開啟</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <blockquote>
+      <p><strong>版本歷史</strong>
+      - v1.0.6（2026-07-02）：新增加密拍記（AES-GCM 端側加密、金鑰存於系統鑰匙圈）與生物辨識 / 密碼隱私鎖（憑證不離開裝置）說明；加密拍記不納入匯出、同步、搜尋與索引；新增自訂 AI 模型的資料流向說明
+      - v1.0.5（2026-06-24）：新增「深度聯想」端側語義相關筆記（本地向量、獨立本地索引、不外傳）說明；待辦事項本地持久化；新增純文字記錄資料說明
+      - v1.0.4（2026-06-24，未公開發佈）：新增 Spark Agent WebFetch 隱私權說明、雲端語義檢索說明、本地帳戶資料說明、WebFetch 安全措施等
+      - v1.0.3（2026-06-04）：新增 Spark AI 助手對話資料說明
+      - v1.0.1：初始版本</p>
+      </blockquote>
+    </section>
+    <section id="policy-en" class="policy">
+      <h1>Notiee Privacy Policy</h1>
+      <p><strong>Version: v1.0.6</strong>
+      <strong>Effective Date: July 2, 2026</strong></p>
+      <hr />
+      <h2>1. Introduction</h2>
+      <p>We take your privacy very seriously. This Privacy Policy aims to transparently explain what information Notiee (hereinafter referred to as "the App") collects, how it uses that information, and how your data security is protected.</p>
+      <p><strong>Core Principle: Your data remains in your hands.</strong> The App is a local-first tool application. All your records, notes, and conversations are stored on your own device.</p>
+      <hr />
+      <h2>2. Information Collection and Use</h2>
+      <h3>2.1 Information We Do NOT Collect</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Information Type</th>
+      <th>Description</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Personal Identity Information</td>
+      <td>No online account system; we do not collect names, email addresses, phone numbers, or other identity information</td>
+      </tr>
+      <tr>
+      <td>Location Information</td>
+      <td>No location permission requested; GPS coordinates are not collected</td>
+      </tr>
+      <tr>
+      <td>Device Identifiers</td>
+      <td>IDFA, IDFV, or other device identifiers are not collected</td>
+      </tr>
+      <tr>
+      <td>Usage Behavior Analytics</td>
+      <td>No analytics/statistics SDKs integrated; no event tracking</td>
+      </tr>
+      <tr>
+      <td>Advertising Identifiers</td>
+      <td>No advertising SDKs integrated; no ad tracking</td>
+      </tr>
+      <tr>
+      <td>Network Logs</td>
+      <td>User network request logs are not recorded</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3>2.2 Information Stored Locally on the Device</h3>
+      <table>
+      <thead>
+      <tr>
+      <th>Information Type</th>
+      <th>Storage Location</th>
+      <th>Purpose</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Captured Photos</td>
+      <td>Device local file system</td>
+      <td>Record content display and review</td>
+      </tr>
+      <tr>
+      <td>OCR Text, AI Summaries, Key Points</td>
+      <td>Local JSON files</td>
+      <td>Search and knowledge review</td>
+      </tr>
+      <tr>
+      <td>Plain Text Records</td>
+      <td>Local JSON files</td>
+      <td>Manual text notes</td>
+      </tr>
+      <tr>
+      <td>To-Do Items</td>
+      <td>Local JSON files</td>
+      <td>Task management (including due dates and reminder markers)</td>
+      </tr>
+      <tr>
+      <td>Custom Folders, Tags, Schedule Tags</td>
+      <td>Local JSON files</td>
+      <td>Categorization and schedule color coding</td>
+      </tr>
+      <tr>
+      <td>Spark Conversation History</td>
+      <td>Local JSON files</td>
+      <td>AI conversation record storage and search</td>
+      </tr>
+      <tr>
+      <td>Spark Long-Term Memory</td>
+      <td>Local JSON files</td>
+      <td>AI assistant personalized memory</td>
+      </tr>
+      <tr>
+      <td>Local Account Profile (Nickname, Avatar)</td>
+      <td>Local file system</td>
+      <td>Profile display</td>
+      </tr>
+      <tr>
+      <td>Semantic Vector Index (Search / Deep Connect)</td>
+      <td>Local file system</td>
+      <td>Semantic search of camera notes and related note recommendations (on-device vectors)</td>
+      </tr>
+      <tr>
+      <td>API Key (AI Key)</td>
+      <td>iOS Keychain (hardware-grade encryption)</td>
+      <td>AI service invocation</td>
+      </tr>
+      <tr>
+      <td>App Settings Preferences (Theme, Language, Model Config, etc.)</td>
+      <td>UserDefaults</td>
+      <td>Personalized experience</td>
+      </tr>
+      <tr>
+      <td>Calendar Event Information</td>
+      <td>Processed in memory; not stored long-term</td>
+      <td>Matching schedule context when capturing photos</td>
+      </tr>
+      </tbody>
+      </table>
+      <h3>2.3 Information Sent to Third Parties</h3>
+      <p>In the following scenarios, data is sent to third-party AI service providers <strong>configured by the user</strong>:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Scenario</th>
+      <th>Content Sent</th>
+      <th>Recipient</th>
+      <th>User Control</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>AI Camera Note Processing</td>
+      <td>Photo image data + text prompts</td>
+      <td>User-configured AI service provider</td>
+      <td>Automatically processed after user-initiated capture; AI functionality can be disabled</td>
+      </tr>
+      <tr>
+      <td>Spark Conversations</td>
+      <td>User messages + conversation history context</td>
+      <td>User-configured AI service provider</td>
+      <td>User-initiated conversations</td>
+      </tr>
+      <tr>
+      <td>Spark Agent Actions</td>
+      <td>User instructions + related camera note/schedule/to-do data</td>
+      <td>User-configured AI service provider</td>
+      <td>User-initiated Agent mode usage</td>
+      </tr>
+      <tr>
+      <td>WebFetch Web Scraping</td>
+      <td>Target URL (provided by user)</td>
+      <td>Server hosting the target webpage</td>
+      <td>Triggered only by user instructions in Agent mode</td>
+      </tr>
+      <tr>
+      <td>Cloud Semantic Retrieval (Optional)</td>
+      <td>Camera note text summaries</td>
+      <td>User-configured AI service provider Embedding API</td>
+      <td><strong>Disabled by default</strong>; must be manually enabled in Labs</td>
+      </tr>
+      <tr>
+      <td>iCloud Sync (If Enabled)</td>
+      <td>.tmn encrypted archive files</td>
+      <td>Apple iCloud Drive</td>
+      <td>User-initiated manual trigger</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p><strong>Important Note</strong>: All AI service calls above use the API Key <strong>provided by the user</strong> and are sent to the AI service provider <strong>chosen by the user</strong>. Notiee does not operate its own servers, and does not intercept or store any data sent to third parties. <strong>The "Deep Connect" related note recommendations on the detail page are, by default, computed entirely on-device, with no data sent to any server.</strong></p>
+      </blockquote>
+      <hr />
+      <h2>3. Permission Usage</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Permission</th>
+      <th>Purpose</th>
+      <th>Required</th>
+      <th>Revocable</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Camera</td>
+      <td>Capture class notes, meeting minutes, whiteboard content</td>
+      <td>Core functionality; required</td>
+      <td>Can be disabled in System Settings</td>
+      </tr>
+      <tr>
+      <td>Microphone</td>
+      <td>Voice recording (if enabled)</td>
+      <td>Optional</td>
+      <td>Can be disabled in System Settings</td>
+      </tr>
+      <tr>
+      <td>Photo Library</td>
+      <td>Import existing images</td>
+      <td>Optional</td>
+      <td>Can be disabled in System Settings</td>
+      </tr>
+      <tr>
+      <td>Calendar</td>
+      <td>Read system calendar to match current schedule context</td>
+      <td>Optional (manual schedule selection available when disabled)</td>
+      <td>Can be disabled in System Settings</td>
+      </tr>
+      <tr>
+      <td>Speech Recognition</td>
+      <td>Voice-to-text transcription</td>
+      <td>Optional</td>
+      <td>Can be disabled in System Settings</td>
+      </tr>
+      <tr>
+      <td>Notifications</td>
+      <td>Schedule reminders, to-do reminders</td>
+      <td>Optional</td>
+      <td>Can be disabled in System Settings</td>
+      </tr>
+      </tbody>
+      </table>
+      <blockquote>
+      <p>The App does not request location permission, Bluetooth permission, Contacts permission, or any other system permissions not listed above.</p>
+      </blockquote>
+      <hr />
+      <h2>4. Data Storage and Security</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Measure</th>
+      <th>Description</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Local First</td>
+      <td>All records are stored locally on the device by default, without cloud dependency</td>
+      </tr>
+      <tr>
+      <td>Keychain Encryption</td>
+      <td>API Keys are stored using iOS Keychain (hardware-grade Secure Enclave encryption), not written to regular files, and are automatically removed upon App uninstallation</td>
+      </tr>
+      <tr>
+      <td>HTTPS Transport</td>
+      <td>All AI service calls use HTTPS encrypted transport</td>
+      </tr>
+      <tr>
+      <td>No Cloud Retention</td>
+      <td>Notiee does not operate its own servers; it does not collect or store user content data</td>
+      </tr>
+      <tr>
+      <td>iCloud Security</td>
+      <td>If the user manually enables iCloud Sync, data is stored in the user's personal iCloud Drive, protected by Apple's security infrastructure</td>
+      </tr>
+      <tr>
+      <td>WebFetch Security</td>
+      <td>Uses ephemeral network sessions (no persistent cookies/cache), with built-in SSRF protection that blocks access to local and internal network addresses (localhost, 10.x, 172.16-31.x, 192.168.x, etc.)</td>
+      </tr>
+      <tr>
+      <td>Local Semantic Retrieval</td>
+      <td>Uses Apple NLEmbedding on-device vector engine by default; all vector computations are performed locally on the device and not uploaded to any server</td>
+      </tr>
+      <tr>
+      <td>No Unsolicited Network Requests</td>
+      <td>The App does not spontaneously send data to any server except for user-initiated AI processing, Spark conversations, WebFetch, or iCloud Sync</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>5. Data Sharing and Disclosure</h2>
+      <p>5.1 <strong>User data is not sold, rented, or traded to third parties.</strong>
+      5.2 User data may be disclosed only under the following circumstances:
+         - As required by laws and regulations
+         - To protect the legitimate rights and interests of the developer or others
+         - With the user's explicit consent
+      5.3 AI service call data is sent to the AI service provider chosen by the user and is subject to that provider's own privacy policy, independent of this App.
+      5.4 Web content scraped via WebFetch is provided by the target website and is subject to that website's terms of use.</p>
+      <hr />
+      <h2>6. User Rights</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Right</th>
+      <th>Description</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>Right of Access</td>
+      <td>All data is directly viewable within the App, including camera notes, to-dos, Spark conversations, profile information, etc.</td>
+      </tr>
+      <tr>
+      <td>Right of Export</td>
+      <td>One-tap export of all records as a <code>.tmn</code> archive file is supported</td>
+      </tr>
+      <tr>
+      <td>Right of Deletion</td>
+      <td>Individual records, individual conversations, or all data can be deleted within the App</td>
+      </tr>
+      <tr>
+      <td>Right of Search</td>
+      <td>Full-text search and semantic search of camera notes and Spark conversations are supported</td>
+      </tr>
+      <tr>
+      <td>Right to Withdraw Consent</td>
+      <td>Any permission can be revoked in System Settings</td>
+      </tr>
+      <tr>
+      <td>Account Deactivation</td>
+      <td>The App currently uses a local account; uninstalling the App clears all local data (iCloud-synced files must be manually deleted in iCloud)</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>7. Protection of Minors</h2>
+      <p>7.1 The App is designed for students and professionals and is not specifically targeted at children under the age of 14.
+      7.2 If a guardian discovers that a minor has used the App without consent, they may contact us through the contact information at the end of this policy to request data deletion.</p>
+      <hr />
+      <h2>8. Spark AI Assistant Privacy</h2>
+      <p>Spark is the AI assistant built into the App and has the following privacy characteristics:</p>
+      <p>8.1 <strong>Conversation Content</strong>: Spark conversation messages (user input and AI responses) are sent to the user-configured AI service provider for processing. Conversation history is stored locally on the device.
+      8.2 <strong>Agent Mode</strong>: When using Agent mode, Spark may read the user's camera notes, schedules, to-dos, and other local data as operational context; relevant data may be sent to the AI service provider with the request.
+      8.3 <strong>WebFetch</strong>: In Agent mode, web content may be fetched based on user instructions, using ephemeral secure sessions; no network data is persisted.
+      8.4 <strong>Long-Term Memory</strong>: Spark's memory system (user preferences, habits, etc.) is stored locally on the device and is not uploaded to any server.
+      8.5 <strong>Privacy Consent</strong>: Upon first use of Spark, the user must read and agree to the Spark Privacy Consent form.</p>
+      <hr />
+      <h2>9. Policy Updates</h2>
+      <p>9.1 We reserve the right to update this Privacy Policy at any time.
+      9.2 Material changes will be notified to users via in-app pop-up.
+      9.3 Continued use of the App after an update constitutes your agreement to be bound by the updated policy.</p>
+      <hr />
+      <h2>10. Third-Party Privacy Policies</h2>
+      <p>We recommend reading the privacy policies of the corresponding service providers when configuring AI services:</p>
+      <table>
+      <thead>
+      <tr>
+      <th>Service Provider</th>
+      <th>Privacy Policy Link</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>OpenAI</td>
+      <td>https://openai.com/policies/privacy-policy</td>
+      </tr>
+      <tr>
+      <td>Anthropic</td>
+      <td>https://www.anthropic.com/privacy</td>
+      </tr>
+      <tr>
+      <td>DeepSeek</td>
+      <td>https://www.deepseek.com/policies/privacy</td>
+      </tr>
+      <tr>
+      <td>Alibaba Cloud Bailian</td>
+      <td>https://help.aliyun.com/document_detail/</td>
+      </tr>
+      <tr>
+      <td>Volcengine</td>
+      <td>https://www.volcengine.com/docs/</td>
+      </tr>
+      <tr>
+      <td>MiniMax</td>
+      <td>https://platform.minimaxi.com/document</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <h2>11. Contact</h2>
+      <p>For any privacy-related questions, please contact us through the following channels:</p>
+      <ul>
+      <li><strong>Email</strong>: woxiantao@icloud.com</li>
+      <li><strong>Developer Website</strong>: https://tanqinghua.asia</li>
+      <li><strong>Response Commitment</strong>: We will respond to privacy-related inquiries within 15 business days</li>
+      </ul>
+      <hr />
+      <h2>Appendix A: Data Lifecycle</h2>
+      <pre><code>Capture → Local Storage → [User Triggers AI Processing] → Send to AI Service Provider → Return Results → Local Storage
+                                      ↓
+                              [Spark Conversation] → Send to AI Service Provider → Return Results → Local Storage
+                                      ↓
+                              [Agent Action] → Read Local Data → Send to AI Service Provider → Execute Action
+                                      ↓
+                              [WebFetch] → Temporary Web Scraping → Return Body Text → Not Persisted
+                                      ↓
+                              [Cloud Semantic Retrieval (Optional)] → Send Text to Embedding API → Return Vectors → Local Storage
+                                      ↓
+                              [iCloud Sync] → Send to iCloud Drive
+                                      ↓
+                              [User Deletion] → Local File Removal + AI Service Provider Side Processed Per Its Policy
+      </code></pre>
+      <h2>Appendix B: Technical Implementation Privacy Highlights</h2>
+      <table>
+      <thead>
+      <tr>
+      <th>Implementation</th>
+      <th>Description</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td>No Event Tracking</td>
+      <td>No analytics/statistics SDKs integrated</td>
+      </tr>
+      <tr>
+      <td>No Advertising</td>
+      <td>No advertising SDKs integrated</td>
+      </tr>
+      <tr>
+      <td>No Unsolicited Network Requests</td>
+      <td>No data is spontaneously sent to any server except for user-initiated actions</td>
+      </tr>
+      <tr>
+      <td>API Key Localization</td>
+      <td>Stored in Keychain; automatically removed upon App uninstallation</td>
+      </tr>
+      <tr>
+      <td>Transport Encryption</td>
+      <td>All AI requests use HTTPS</td>
+      </tr>
+      <tr>
+      <td>WebFetch Ephemeral Sessions</td>
+      <td>Uses <code>URLSessionConfiguration.ephemeral</code>; no persistent cookies/cache</td>
+      </tr>
+      <tr>
+      <td>WebFetch SSRF Protection</td>
+      <td>Blocks localhost, internal network IPs, IPv6 local addresses</td>
+      </tr>
+      <tr>
+      <td>On-Device Vector Engine</td>
+      <td>Uses Apple NLEmbedding by default; semantic computation performed locally on device</td>
+      </tr>
+      <tr>
+      <td>Cloud Retrieval Optional</td>
+      <td>Cloud Embedding is disabled by default; requires manual user activation</td>
+      </tr>
+      </tbody>
+      </table>
+      <hr />
+      <blockquote>
+      <p><strong>Version History</strong>
+      - v1.0.6 (2026-07-02): Added encrypted notes (AES-GCM on-device encryption, key stored in the system Keychain) and biometric/passcode privacy lock (credentials never leave the device) description; encrypted notes are excluded from export, sync, search, and indexing; added data-flow description for custom AI models
+      - v1.0.5 (2026-06-24): Added "Deep Connect" on-device semantic related notes (local vectors, independent local index, no external transmission) description; to-do item local persistence; added plain text record data description
+      - v1.0.4 (2026-06-24, unreleased): Added Spark Agent WebFetch privacy disclosure, cloud semantic retrieval description, local account data description, WebFetch security measures, etc.
+      - v1.0.3 (2026-06-04): Added Spark AI Assistant conversation data description
+      - v1.0.1: Initial version</p>
+      </blockquote>
+    </section>
+  </div>
+  <footer>Notiee &middot; woxiantao@icloud.com &middot; https://tanqinghua.asia</footer>
+</main>
+<script>
+  var buttons = document.querySelectorAll('.lang-switch button');
+  var panels = document.querySelectorAll('.policy');
+  var langMap = {'zh-Hans': 'zh-Hans', 'zh-Hant': 'zh-Hant', 'en': 'en'};
+
+  function activate(lang) {
+    buttons.forEach(function (b) { b.classList.toggle('active', b.dataset.lang === lang); });
+    panels.forEach(function (p) { p.classList.toggle('active', p.id === 'policy-' + lang); });
+    document.documentElement.lang = lang;
+    document.title = lang === 'en' ? 'Notiee Privacy Policy' : (lang === 'zh-Hant' ? 'Notiee 隱私權政策' : 'Notiee 隐私政策');
+    try { localStorage.setItem('notiee-privacy-lang', lang); } catch (e) {}
+    history.replaceState(null, '', '#' + lang);
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { activate(b.dataset.lang); });
+  });
+
+  (function init() {
+    var fromHash = location.hash.replace('#', '');
+    var stored = null;
+    try { stored = localStorage.getItem('notiee-privacy-lang'); } catch (e) {}
+    var preferred = fromHash || stored;
+    if (!preferred) {
+      var nav = (navigator.language || 'zh-Hans');
+      if (nav.indexOf('Hant') !== -1 || nav.indexOf('TW') !== -1 || nav.indexOf('HK') !== -1) preferred = 'zh-Hant';
+      else if (nav.indexOf('zh') !== -1) preferred = 'zh-Hans';
+      else preferred = 'en';
+    }
+    if (!langMap[preferred]) preferred = 'zh-Hans';
+    activate(preferred);
+  })();
+</script>
+</body>
+</html>

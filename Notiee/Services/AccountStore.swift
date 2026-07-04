@@ -34,12 +34,24 @@ final class AccountStore: ObservableObject {
     /// Sign in with Apple. `name` is only supplied by Apple on the very first
     /// authorization for a given Apple ID, so we fall back to any existing name
     /// (re-login) and finally a generic label.
-    func appleLogin(userID: String, name: String?) {
+    ///
+    /// `backendUserID`/`email` are supplied by the Notiee (free) version after the
+    /// backend token exchange; both default to `nil` for Notiee+ (BYOK, no
+    /// backend account). Like `name`, they fall back to the stored value so a
+    /// re-login — where Apple omits the email — doesn't wipe the first-login one.
+    func appleLogin(userID: String, name: String?, backendUserID: String? = nil, email: String? = nil) {
         let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines)
         let resolved = (trimmed?.isEmpty == false ? trimmed : nil)
             ?? profile?.displayName
             ?? String(localized: "Apple 用户")
-        profile = UserProfile(displayName: resolved, loginMethod: .apple, avatarRelativePath: profile?.avatarRelativePath, appleUserID: userID)
+        profile = UserProfile(
+            displayName: resolved,
+            loginMethod: .apple,
+            avatarRelativePath: profile?.avatarRelativePath,
+            appleUserID: userID,
+            backendUserID: backendUserID ?? profile?.backendUserID,
+            email: email ?? profile?.email
+        )
         save()
     }
 

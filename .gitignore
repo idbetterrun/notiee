@@ -17,3 +17,10 @@ docs/android/
 # Xcode Organizer archive export output (.ipa + export logs)
 *.ipa
 Notiee+ 20*/
+
+# Backend (Tencent SCF) — separate deploy target, not part of the iOS repo
+notiee-ping-stream/
+notiee-ping-stream*.zip
+
+# Xcode build output (local artifact, 28M+)
+build/

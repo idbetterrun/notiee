@@ -13,4 +13,8 @@ struct UserProfile: Codable, Equatable, Sendable {
     /// Stable Sign in with Apple user identifier. Optional so older stored
     /// profiles (which predate this field) continue to decode as `nil`.
     var appleUserID: String?
+    /// Backend account id (Notiee free version). `nil` for Notiee+ (no backend).
+    var backendUserID: String? = nil
+    /// Email, only returned by Apple on the first authorization. `nil` otherwise.
+    var email: String? = nil
 }

@@ -195,6 +195,13 @@ private struct SplashView: View {
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         try? SparkConversationRepository.live.clearDraft()
+        #if !NOTIEE_PLUS && DEBUG
+        // Phase 0 convenience: swap a stable fake identity token for a real
+        // backend JWT so the AI pipeline is testable before Sign in with Apple is
+        // exercised. No-op once a real session (Phase 1) exists. Requires the
+        // backend running with ALLOW_FAKE_APPLE=1.
+        Task { try? await AuthService.shared.devLoginIfNeeded() }
+        #endif
         #if canImport(FirebaseCore)
         FirebaseApp.configure()
         #endif

@@ -11,6 +11,10 @@ struct LoginView: View {
     @State private var shakeCount = 0
     @State private var reminderBounces = false
     @State private var loginErrorMessage: String?
+    #if !NOTIEE_PLUS
+    // Free version: one-shot nonce for the current Sign in with Apple attempt.
+    @State private var loginNonce: LoginNonce?
+    #endif
 
     private var isDark: Bool { colorScheme == .dark }
 
@@ -128,6 +132,14 @@ struct LoginView: View {
         // which is the compliant way to present Sign in with Apple.
         SignInWithAppleButton(.signIn) { request in
             request.requestedScopes = [.fullName]
+            #if !NOTIEE_PLUS
+            // Free version: request email (backend needs it on first login) and
+            // bind a nonce so the identity token can't be replayed at the backend.
+            request.requestedScopes = [.fullName, .email]
+            let nonce = AuthService.shared.makeLoginNonce()
+            loginNonce = nonce
+            request.nonce = nonce.hashed
+            #endif
         } onCompletion: { result in
             handleAppleResult(result)
         }
@@ -221,8 +233,14 @@ struct LoginView: View {
                 let formatted = PersonNameComponentsFormatter().string(from: components)
                 return formatted.isEmpty ? nil : formatted
             }
+            #if NOTIEE_PLUS
             account.appleLogin(userID: credential.user, name: name)
             // account.isLoggedIn flips to true → onChange dismisses this view.
+            #else
+            // Free version: exchange the identity token for a backend session
+            // before marking the user logged in.
+            handleBackendAppleLogin(credential: credential, name: name)
+            #endif
         case .failure(let error):
             // Silently ignore a user-initiated cancel.
             if let authError = error as? ASAuthorizationError, authError.code == .canceled {
@@ -231,6 +249,30 @@ struct LoginView: View {
             loginErrorMessage = String(localized: "无法完成 Apple 登录，请稍后重试。")
         }
     }
+
+    #if !NOTIEE_PLUS
+    /// Free version: exchange the Apple identity token for a backend JWT, then
+    /// associate the local profile with the backend account. Runs in the
+    /// authorization callback while the identity token is still fresh.
+    private func handleBackendAppleLogin(credential: ASAuthorizationAppleIDCredential, name: String?) {
+        guard let tokenData = credential.identityToken,
+              let identityToken = String(data: tokenData, encoding: .utf8) else {
+            loginErrorMessage = String(localized: "无法完成 Apple 登录，请稍后重试。")
+            return
+        }
+        let rawNonce = loginNonce?.raw
+        let userID = credential.user
+        Task { @MainActor in
+            do {
+                let session = try await AuthService.shared.appleLogin(identityToken: identityToken, rawNonce: rawNonce)
+                account.appleLogin(userID: userID, name: name, backendUserID: session.userId, email: session.email)
+                // account.isLoggedIn flips to true → onChange dismisses this view.
+            } catch {
+                loginErrorMessage = String(localized: "登录失败，请检查网络后重试。")
+            }
+        }
+    }
+    #endif
 
     private func legalHTMLViewForLogin(base: String, title: String) -> some View {
         Group {

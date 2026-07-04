@@ -87,7 +87,7 @@ final class NotieeStore: ObservableObject {
         tagStore: EventTagPersisting = JSONEventTagStore.live,
         eventStore: ScheduledEventPersisting = JSONScheduledEventStore.live,
         scheduleMatcher: ScheduleMatcher = ScheduleMatcher(),
-        aiService: any AIProcessingService = RealAIProcessingService(),
+        aiService: any AIProcessingService = AIProcessingServiceFactory.makeDefault(),
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
         autoProcess: Bool = false
     ) {
@@ -486,7 +486,7 @@ final class NotieeStore: ObservableObject {
             tagStore: tagJSONStore
         )
         let aiPipelineMgr = AIPipelineManager(
-            aiService: RealAIProcessingService(),
+            aiService: AIProcessingServiceFactory.makeDefault(),
             settingsStore: settingsStore
         )
         let calendarMgr = CalendarManager(

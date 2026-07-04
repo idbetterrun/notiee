@@ -21,7 +21,7 @@ struct RealAIProcessingService: AIProcessingService {
         for path in imagePaths {
             guard let data = LocalImageStore.readImageData(path: path),
                   let image = UIImage(data: data) else { continue }
-            if let data = resizeAndCompress(image: image) {
+            if let data = Self.resizeAndCompress(image: image) {
                 base64Images.append(data.base64EncodedString())
             }
         }
@@ -58,7 +58,9 @@ struct RealAIProcessingService: AIProcessingService {
         )
     }
 
-    private func resizeAndCompress(image: UIImage) -> Data? {
+    /// Resize + JPEG-compress for upload. `static` so the backend-backed service
+    /// (`BackendAIProcessingService`) reuses the exact same encoding.
+    static func resizeAndCompress(image: UIImage) -> Data? {
         let maxDimension: CGFloat = 1024
         var size = image.size
         if size.width > maxDimension || size.height > maxDimension {
@@ -191,6 +193,19 @@ struct RealAIProcessingService: AIProcessingService {
             tokens = res.1
         }
 
+        let result = try Self.parseStructuredNote(
+            responseJSON: responseJSON,
+            ocrText: ocrText,
+            modelsUsed: [visionConfig.modelName, config.modelName]
+        )
+        return (result, tokens)
+    }
+
+    /// Parses the text model's structured-JSON reply into an `AIProcessingResult`.
+    /// `static` + shared so both the BYOK (`RealAIProcessingService`) and the
+    /// backend-backed (`BackendAIProcessingService`) paths decode identically.
+    /// `tokenUsage` is left 0 for the caller to fill.
+    static func parseStructuredNote(responseJSON: String, ocrText: String, modelsUsed: [String]) throws -> AIProcessingResult {
         let extractedJSON = extractJSONObject(from: responseJSON)
 
         guard let data = extractedJSON.data(using: .utf8) else {
@@ -214,7 +229,7 @@ struct RealAIProcessingService: AIProcessingService {
 
         do {
             let parsed = try JSONDecoder().decode(ParsedOutput.self, from: data)
-            let result = AIProcessingResult(
+            return AIProcessingResult(
                 title: parsed.title,
                 ocrText: ocrText,
                 summary: parsed.summary,
@@ -222,17 +237,16 @@ struct RealAIProcessingService: AIProcessingService {
                 todos: parsed.todos,
                 keyPoints: parsed.keyPoints ?? [],
                 definitions: (parsed.definitions ?? []).map { KeyDefinition(term: $0.term, explanation: $0.explanation) },
-                modelsUsed: [visionConfig.modelName, config.modelName],
+                modelsUsed: modelsUsed,
                 tokenUsage: 0
             )
-            return (result, tokens)
         } catch {
             print("Failed to decode JSON: \(error). Cleaned JSON: \(String(extractedJSON.prefix(300)))")
             throw AIError.parsingFailed
         }
     }
 
-    private func extractJSONObject(from text: String) -> String {
+    static func extractJSONObject(from text: String) -> String {
         var cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if let range = cleaned.range(of: "```json") {
             cleaned = String(cleaned[range.upperBound...])

@@ -15,3 +15,17 @@ struct AIProcessingResult: Sendable {
 protocol AIProcessingService: Sendable {
     func process(imagePaths: [String], eventTitle: String?) async throws -> AIProcessingResult
 }
+
+/// Single compile-flag gate for which note-processing backend the app uses.
+/// Notiee+ (BYOK) keeps the direct-to-provider `RealAIProcessingService`; Notiee
+/// (free) routes through the self-hosted backend. Confining the `#if` here keeps
+/// injection sites (`NotieeStore`) branch-free — the `AppBranding` philosophy.
+enum AIProcessingServiceFactory {
+    static func makeDefault() -> any AIProcessingService {
+        #if NOTIEE_PLUS
+        RealAIProcessingService()
+        #else
+        BackendAIProcessingService()
+        #endif
+    }
+}
