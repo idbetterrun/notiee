@@ -215,7 +215,9 @@ final class SparkViewModel: ObservableObject {
             let service = aiService
             let all = allRecs.filter { !$0.isDeleted }.sorted { $0.capturedAt > $1.capturedAt }
             let (clean, ops, cits) = await Task.detached {
-                let (clean, ops) = service.extractMemory(from: full)
+                // Strip inline <think> reasoning before anything else sees the text.
+                let visible = SparkAIService.stripThinkTags(full)
+                let (clean, ops) = service.extractMemory(from: visible)
                 var cIdx = service.extractCitations(from: clean, recordCount: all.count)
                 if cIdx.isEmpty {
                     cIdx = service.extractCitationsFallback(from: clean, records: all)
@@ -551,6 +553,7 @@ final class SparkViewModel: ObservableObject {
             ScheduleUpdateTool(calendarManager: calendarManager),
             MemoryManageTool(memoryStore: SparkMemoryStore.live),
             WebFetchTool(),
+            WebSearchTool(settingsStore: settingsStore),
             NoteDeleteTool(recordManager: recordManager),
             TodoDeleteTool(recordManager: recordManager),
             ScheduleDeleteTool(calendarManager: calendarManager)
@@ -586,7 +589,7 @@ final class SparkViewModel: ObservableObject {
 
             if Task.isCancelled { return }
 
-            messages.append(ChatMessage(role: .assistant, content: text))
+            messages.append(ChatMessage(role: .assistant, content: SparkAIService.stripThinkTags(text)))
             state = .loaded
             saveCurrentDraft()
             Task {

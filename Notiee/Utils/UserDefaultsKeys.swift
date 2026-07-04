@@ -101,6 +101,8 @@ enum UDK {
     static let sparkAgentTokenWarning = "spark_agent_token_warning"
     static let sparkModelOverride = "spark_model_override"
     static let sparkThinkingLevel = "spark_thinking_level"
+    /// Keychain account for the Bocha web-search API key (BYOK, Plus-only).
+    static let bochaSearchAPIKey = "spark.websearch.bocha.apiKey"
 
     // MARK: - Security
     static let securityAppLockEnabled = "notiee.security.appLockEnabled"

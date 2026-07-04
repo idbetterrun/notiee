@@ -13,7 +13,11 @@ protocol AppSettingsPersisting {
     func saveInt(_ value: Int, forKey key: String)
     func loadString(forKey key: String, defaultValue: String) -> String
     func saveString(_ value: String, forKey key: String)
-    
+
+    // Keychain-backed secrets (API keys etc.)
+    func loadSecret(forKey key: String) -> String
+    func saveSecret(_ value: String, forKey key: String)
+
     // Custom models
     func loadCustomModels() -> [CustomAIModel]
     func saveCustomModels(_ models: [CustomAIModel])
@@ -117,6 +121,19 @@ struct UserDefaultsAppSettingsStore: AppSettingsPersisting {
     
     func saveString(_ value: String, forKey key: String) {
         userDefaults.set(value, forKey: key)
+    }
+
+    func loadSecret(forKey key: String) -> String {
+        secretStore.string(forKey: key) ?? ""
+    }
+
+    func saveSecret(_ value: String, forKey key: String) {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            try? secretStore.removeString(forKey: key)
+        } else {
+            try? secretStore.setString(trimmed, forKey: key)
+        }
     }
 
     private func customModelKeychainKey(_ id: UUID) -> String {

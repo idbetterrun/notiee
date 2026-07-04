@@ -409,6 +409,30 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         }
     }
 
+    // MARK: - Reasoning (<think>) Stripping
+
+    /// Some reasoning models (e.g. MiniMax) inline their chain-of-thought in the
+    /// message `content` wrapped in `<think>…</think>` rather than a separate
+    /// `reasoning_content` field. Strip it before the text is ever shown.
+    ///
+    /// Handles three cases so nothing leaks:
+    /// 1. Complete `<think>…</think>` blocks (across newlines).
+    /// 2. A dangling unclosed `<think>` (truncated / mid-stream) → drop to end.
+    /// 3. Orphan `<think>` / `</think>` tags with no partner.
+    static func stripThinkTags(_ text: String) -> String {
+        var s = text
+        // 1. Full blocks. (?is) = case-insensitive + dotall.
+        s = s.replacingOccurrences(
+            of: "(?is)<think>.*?</think>", with: "", options: .regularExpression)
+        // 2. Unclosed opener: everything from the last stray <think> onward.
+        s = s.replacingOccurrences(
+            of: "(?is)<think>.*\\z", with: "", options: .regularExpression)
+        // 3. Any leftover orphan tags.
+        s = s.replacingOccurrences(
+            of: "(?i)</?think>", with: "", options: .regularExpression)
+        return s.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     // MARK: - Citation Marker Stripping
 
     /// 移除正文中的 [来源N] 引用标记（引用改为只在底部卡片展示）。

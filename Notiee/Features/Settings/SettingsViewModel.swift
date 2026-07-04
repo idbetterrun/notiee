@@ -41,7 +41,9 @@ final class SettingsViewModel: ObservableObject {
     @Published var agentTrustLevel: String
     @Published var agentMaxIterations: Int
     @Published var agentMaxToolsPerRound: Int
-    
+    /// Bocha web-search API key (Keychain-backed; empty = web_search disabled).
+    @Published var bochaSearchAPIKey: String
+
     // Calendar Selection
     @Published var availableCalendars: [EKCalendar] = []
     @Published var selectedCalendarIDs: Set<String> = []
@@ -83,6 +85,7 @@ final class SettingsViewModel: ObservableObject {
         agentTrustLevel = settingsStore.loadString(forKey: UDK.sparkAgentTrustLevel, defaultValue: "standard")
         agentMaxIterations = settingsStore.loadInt(forKey: UDK.sparkAgentMaxIterations, defaultValue: 5)
         agentMaxToolsPerRound = settingsStore.loadInt(forKey: UDK.sparkAgentMaxToolsPerRound, defaultValue: 3)
+        bochaSearchAPIKey = settingsStore.loadSecret(forKey: UDK.bochaSearchAPIKey)
         
         customModels = settingsStore.loadCustomModels()
         loadCalendarSelection()
@@ -138,7 +141,8 @@ final class SettingsViewModel: ObservableObject {
         settingsStore.saveString(agentTrustLevel, forKey: UDK.sparkAgentTrustLevel)
         settingsStore.saveInt(agentMaxIterations, forKey: UDK.sparkAgentMaxIterations)
         settingsStore.saveInt(agentMaxToolsPerRound, forKey: UDK.sparkAgentMaxToolsPerRound)
-        
+        settingsStore.saveSecret(bochaSearchAPIKey, forKey: UDK.bochaSearchAPIKey)
+
         settingsStore.saveCustomModels(customModels)
         
         if notificationEnabled {

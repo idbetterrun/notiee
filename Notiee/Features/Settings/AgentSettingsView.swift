@@ -28,11 +28,28 @@ struct AgentSettingsView: View {
                 Stepper("回路最大轮数: \(viewModel.agentMaxIterations)", value: $viewModel.agentMaxIterations, in: 1...10)
                 Stepper("单轮工具上限: \(viewModel.agentMaxToolsPerRound)", value: $viewModel.agentMaxToolsPerRound, in: 1...5)
             }
+
+            // BYOK only: on the free build the Bocha key lives server-side, so
+            // users never enter it here. web_search there routes through the backend.
+            #if NOTIEE_PLUS
+            Section {
+                SecureField("博查搜索 API Key", text: $viewModel.bochaSearchAPIKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            } header: {
+                Text("联网搜索")
+            } footer: {
+                Text("填写后 Agent 可联网搜索实时信息（新闻、赛果、天气等）。使用博查（bochaai.com）搜索服务，需自行申请 API Key，按调用量计费。留空则关闭联网搜索。")
+            }
+            #endif
         }
         .navigationTitle("Agent 设置")
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: viewModel.agentTrustLevel) { _, _ in viewModel.saveAll() }
         .onChange(of: viewModel.agentMaxIterations) { _, _ in viewModel.saveAll() }
         .onChange(of: viewModel.agentMaxToolsPerRound) { _, _ in viewModel.saveAll() }
+        #if NOTIEE_PLUS
+        .onChange(of: viewModel.bochaSearchAPIKey) { _, _ in viewModel.saveAll() }
+        #endif
     }
 }
