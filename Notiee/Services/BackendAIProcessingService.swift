@@ -30,32 +30,43 @@ struct BackendAIProcessingService: AIProcessingService {
         let visionModel = selection.visionModelID(for: CurrentEntitlement.tier)
         let textModel = selection.textModelID(for: CurrentEntitlement.tier)
 
-        // 1) Encode images (reuse RealAIProcessingService's resize/compress).
-        let base64Images = encodeImages(imagePaths: imagePaths)
-        guard !base64Images.isEmpty else { throw AIError.imageProcessingFailed }
-
-        // 2) Assemble prompts client-side (sharing AIPromptProvider). The backend
-        //    concatenates textPrompt + OCR result itself, so we pass an empty
-        //    OCR placeholder here.
-        let isFullVisionManual = UserDefaults.standard.bool(forKey: UDK.labFullVisionModeEnabled)
-        let useFullVision = preset.visionStrategy == .fullVision || isFullVisionManual
-        let (visionUserPrompt, visionSystemPrompt) = AIPromptProvider.visionPrompt(
-            fullVision: useFullVision, latex: preset.enableLaTeX)
-
+        // 文本提示两条路径都要（后端把它与 OCR 结果拼接；这里传空占位）。
         let enableSummary = settingsStore.loadBool(forKey: UDK.aiEnableSummary, defaultValue: true)
         let enableDetailedContent = settingsStore.loadBool(forKey: UDK.aiEnableDetailedContent, defaultValue: true)
         let textPrompt = AIPromptProvider.textPrompt(
             ocrText: "", enableSummary: enableSummary,
             enableDetailedContent: enableDetailedContent, preset: preset)
 
-        let body: [String: Any] = [
-            "images": base64Images,
-            "visionModel": visionModel,
-            "textModel": textModel,
-            "visionPrompt": visionUserPrompt,
-            "textPrompt": textPrompt,
-            "systemVision": visionSystemPrompt,
-        ]
+        // 低消耗模式：本地 OCR 替代云端视觉，只把文本发后端整理（省视觉成本、更快）。
+        let isLowConsumption = UserDefaults.standard.bool(forKey: UDK.labLowConsumptionModeEnabled)
+
+        let body: [String: Any]
+        if isLowConsumption {
+            let localOCR = try await LocalOCRService.batchRecognize(imagePaths: imagePaths)
+            body = [
+                "ocrText": localOCR,
+                "textModel": textModel,
+                "textPrompt": textPrompt,
+            ]
+        } else {
+            // 云端视觉：编码图片（复用 RealAIProcessingService 的 resize/compress）。
+            let base64Images = encodeImages(imagePaths: imagePaths)
+            guard !base64Images.isEmpty else { throw AIError.imageProcessingFailed }
+
+            let isFullVisionManual = UserDefaults.standard.bool(forKey: UDK.labFullVisionModeEnabled)
+            let useFullVision = preset.visionStrategy == .fullVision || isFullVisionManual
+            let (visionUserPrompt, visionSystemPrompt) = AIPromptProvider.visionPrompt(
+                fullVision: useFullVision, latex: preset.enableLaTeX)
+
+            body = [
+                "images": base64Images,
+                "visionModel": visionModel,
+                "textModel": textModel,
+                "visionPrompt": visionUserPrompt,
+                "textPrompt": textPrompt,
+                "systemVision": visionSystemPrompt,
+            ]
+        }
 
         // 3) Call the backend. Long timeout: two upstream calls run serially.
         let json: [String: Any]
@@ -83,7 +94,7 @@ struct BackendAIProcessingService: AIProcessingService {
 
         let result = try RealAIProcessingService.parseStructuredNote(
             responseJSON: content, ocrText: ocrText,
-            modelsUsed: [visionModel, textModel])
+            modelsUsed: isLowConsumption ? ["local-ocr", textModel] : [visionModel, textModel])
 
         return AIProcessingResult(
             title: result.title,

@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- App 仅使用标准 HTTPS（豁免加密），声明为 false 免去每次 TestFlight/上传的出口合规询问。 -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<!-- Allows loopback/.local connections (the DEBUG backend at 127.0.0.1) without
 	     permitting arbitrary insecure internet loads. App-Store-safe; production
 	     talks to the backend over HTTPS. -->

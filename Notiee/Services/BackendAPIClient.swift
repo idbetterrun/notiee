@@ -118,8 +118,8 @@ final class BackendAPIClient: @unchecked Sendable {
         // Mac's LAN IP.
         return "http://127.0.0.1:9000"
         #else
-        // TODO: replace with the production SCF/API-gateway URL before shipping.
-        return "https://api.notiee.app"
+        // 生产/TestFlight：腾讯 SCF 函数 URL（后续接自定义域名再换）。
+        return "https://1330504927-70mg1o2c4d.ap-guangzhou.tencentscf.com"
         #endif
     }
 
