@@ -32,6 +32,12 @@ enum UDK {
     /// Empty/unset → compile-time default in `BackendAPIClient`.
     static let backendBaseURL = "notiee.backendBaseURL"
 
+    /// Set on the first launch after (re)install. UserDefaults is wiped when the
+    /// app is deleted, but the Keychain is NOT — so its absence marks a fresh
+    /// install and triggers a one-time purge of any stale Keychain session,
+    /// preventing a reinstalled app from appearing "logged in" with old quota.
+    static let hasBootstrappedInstall = "notiee.hasBootstrappedInstall"
+
     // MARK: - Curated model selection (Notiee free version)
     /// 免费版选中的文本 / 视觉模型 ID（对应后端 MODEL_CATALOG 的 key）。
     /// 未设置或对当前档位非法时，读取端会夹取回免费默认模型。

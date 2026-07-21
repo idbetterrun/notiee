@@ -264,8 +264,10 @@ struct LoginView: View {
         let userID = credential.user
         Task { @MainActor in
             do {
-                let session = try await AuthService.shared.appleLogin(identityToken: identityToken, rawNonce: rawNonce)
-                account.appleLogin(userID: userID, name: name, backendUserID: session.userId, email: session.email)
+                let session = try await AuthService.shared.appleLogin(identityToken: identityToken, rawNonce: rawNonce, name: name)
+                // Prefer the backend's stored name: on a reinstall Apple no longer
+                // hands us `fullName`, but the backend still has the first-login one.
+                account.appleLogin(userID: userID, name: session.name ?? name, backendUserID: session.userId, email: session.email)
                 // account.isLoggedIn flips to true → onChange dismisses this view.
             } catch {
                 loginErrorMessage = String(localized: "登录失败，请检查网络后重试。")

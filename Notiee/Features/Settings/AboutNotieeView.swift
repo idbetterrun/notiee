@@ -84,7 +84,7 @@ struct AboutNotieeView: View {
 
                 // Footer
                 VStack(spacing: 8) {
-                    Link("ICP备案号: xxx", destination: URL(string: "https://beian.miit.gov.cn/#/home")!)
+                    Link("湘ICP备2026027627号-1", destination: URL(string: "https://beian.miit.gov.cn/#/home")!)
                         .font(.caption)
                         .foregroundColor(NotieeColors.themed(.blue))
 

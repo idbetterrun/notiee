@@ -195,6 +195,12 @@ private struct SplashView: View {
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         try? SparkConversationRepository.live.clearDraft()
+        #if !NOTIEE_PLUS
+        // First launch after a (re)install: drop any Keychain session the deleted
+        // install left behind, so the app doesn't appear logged-in with stale
+        // quota. Must run before anything reads the token below.
+        AuthService.shared.purgeStaleSessionOnFreshInstall()
+        #endif
         #if !NOTIEE_PLUS && DEBUG
         // Phase 0 convenience: swap a stable fake identity token for a real
         // backend JWT so the AI pipeline is testable before Sign in with Apple is

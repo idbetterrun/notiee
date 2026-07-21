@@ -20,6 +20,11 @@ struct BackendSession: Sendable {
     let userId: String
     /// Apple only returns the email on the very first authorization.
     let email: String?
+    /// Display name resolved by the backend. Apple hands the client `fullName`
+    /// only on the first authorization, so the backend persists it there and
+    /// echoes it back on every subsequent login — this is the authoritative name
+    /// that survives reinstalls. `nil` if the backend has none on file.
+    let name: String?
 }
 
 /// Owns the backend session for the Notiee (free) version: exchanges a Sign in
@@ -82,10 +87,16 @@ final class AuthService: @unchecked Sendable {
 
     /// Exchanges the Apple identity token for a backend JWT. Must be called in the
     /// authorization callback, while `identityToken` is still fresh.
+    ///
+    /// `name` is Apple's `fullName`, present only on the first authorization. We
+    /// forward it so the backend can persist it on first login and echo it back
+    /// (via `BackendSession.name`) on every future login — the source of truth
+    /// that outlives reinstalls, since Apple won't hand it to the client again.
     @discardableResult
-    func appleLogin(identityToken: String, rawNonce: String?) async throws -> BackendSession {
+    func appleLogin(identityToken: String, rawNonce: String?, name: String? = nil) async throws -> BackendSession {
         var body: [String: Any] = ["identityToken": identityToken]
         if let rawNonce { body["rawNonce"] = rawNonce }
+        if let name, !name.isEmpty { body["name"] = name }
         let json = try await BackendAPIClient.shared.postJSON(path: "auth/apple", body: body, authorized: false)
         return try persistSession(from: json)
     }
@@ -98,7 +109,7 @@ final class AuthService: @unchecked Sendable {
     @discardableResult
     func devLoginIfNeeded() async throws -> BackendSession? {
         if let token = bearerToken, let userId = userId {
-            return BackendSession(token: token, userId: userId, email: nil)
+            return BackendSession(token: token, userId: userId, email: nil, name: nil)
         }
         let deviceId = DeviceIdentity.stableInstallID()
         let json = try await BackendAPIClient.shared.postJSON(
@@ -137,6 +148,19 @@ final class AuthService: @unchecked Sendable {
         keychain.delete(account: userIdAccount)
     }
 
+    /// Purge any stale Keychain session left behind by a previous install.
+    ///
+    /// The Keychain survives app deletion, but UserDefaults does not — so on the
+    /// first launch after a (re)install we clear the leftover JWT. Without this a
+    /// reinstalled app reads an old token, is treated as logged-in, and shows the
+    /// previous account's (possibly Pro) quota before the user signs in again.
+    /// No-op on every subsequent launch.
+    func purgeStaleSessionOnFreshInstall(defaults: UserDefaults = .standard) {
+        guard !defaults.bool(forKey: UDK.hasBootstrappedInstall) else { return }
+        defaults.set(true, forKey: UDK.hasBootstrappedInstall)
+        signOut()
+    }
+
     // MARK: - Private
 
     private func persistSession(from json: [String: Any]) throws -> BackendSession {
@@ -145,13 +169,14 @@ final class AuthService: @unchecked Sendable {
             throw BackendError(code: .unknown, message: "登录响应缺少 token", httpStatus: -1, quota: nil)
         }
         let email = json["email"] as? String
+        let name = (json["name"] as? String).flatMap { $0.isEmpty ? nil : $0 }
         lock.lock()
         cachedToken = token
         cachedUserId = userId
         lock.unlock()
         keychain.write(account: tokenAccount, value: token)
         keychain.write(account: userIdAccount, value: userId)
-        return BackendSession(token: token, userId: userId, email: email)
+        return BackendSession(token: token, userId: userId, email: email, name: name)
     }
 }
 
