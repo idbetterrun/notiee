@@ -117,10 +117,64 @@ final class BackendSparkAIService: SparkAIServing, @unchecked Sendable {
         }
     }
 
-    // MARK: - Agent (unsupported on free / no backend tools passthrough yet)
+    // MARK: - Agent (backend tool-calling passthrough)
 
+    /// Runs one Agent turn through the backend `POST /ai/agent` endpoint, which
+    /// forwards `messages` + OpenAI-format `tools` to the model and returns the
+    /// assistant text plus any `tool_calls`. The tool *execution* still happens
+    /// on-device in `AgentExecutor`; the backend only relays the model call so the
+    /// key stays server-side. Mirrors `SparkAIService.agentChat` (BYOK) in shape,
+    /// so the executor consumes both identically.
+    ///
+    /// If the backend hasn't shipped `/ai/agent` yet it replies `NOT_IMPLEMENTED`,
+    /// which we surface as a friendly "coming soon" message rather than a raw error.
     func agentChat(messages: [[String: Any]], tools: [[String: Any]]) async throws -> AgentChatResponse {
-        throw SparkAIError.apiError(String(localized: "Agent 模式暂不支持，敬请期待"))
+        let model = selection.textModelID(for: CurrentEntitlement.tier)
+        var body: [String: Any] = ["messages": messages, "model": model]
+        if !tools.isEmpty { body["tools"] = tools }
+
+        let json: [String: Any]
+        do {
+            json = try await api.postJSON(
+                path: "ai/agent", body: body,
+                authorized: true, timeout: BackendAPIClient.Timeout.aiProcess)
+        } catch let error as BackendError where error.code == .notImplemented || error.httpStatus == 404 {
+            // `/ai/agent` not deployed yet: the backend may reply either a
+            // structured NOT_IMPLEMENTED or a bare 404 (Express default HTML,
+            // "Cannot POST /ai/agent"). Treat both as "coming soon", not a crash.
+            throw SparkAIError.apiError(String(localized: "Agent 模式暂不支持，敬请期待"))
+        }
+
+        let text = json["text"] as? String ?? ""
+        let tokens = json["tokensUsed"] as? Int ?? 0
+        accumulatePublic(tokens)
+
+        let rawToolCalls = json["toolCalls"] as? [[String: Any]] ?? []
+        let toolCalls = Self.parseToolCalls(rawToolCalls)
+
+        return AgentChatResponse(text: text, toolCalls: toolCalls, tokensUsed: tokens)
+    }
+
+    /// Accepts both Anthropic-style (`{id, name, input}`) and OpenAI-style
+    /// (`{id, function:{name, arguments}}`) tool-call shapes, matching the BYOK
+    /// parser so the backend can relay either upstream format unchanged.
+    private static func parseToolCalls(_ raw: [[String: Any]]) -> [AgentToolCall] {
+        raw.compactMap { tc in
+            if tc["input"] != nil {
+                guard let id = tc["id"] as? String,
+                      let name = tc["name"] as? String,
+                      let input = tc["input"] as? [String: Any] else { return nil }
+                return AgentToolCall(id: id, name: name, parameters: input)
+            } else {
+                guard let id = tc["id"] as? String,
+                      let funcInfo = tc["function"] as? [String: Any],
+                      let name = funcInfo["name"] as? String,
+                      let argsStr = funcInfo["arguments"] as? String,
+                      let argsData = argsStr.data(using: .utf8),
+                      let params = try? JSONSerialization.jsonObject(with: argsData) as? [String: Any] else { return nil }
+                return AgentToolCall(id: id, name: name, parameters: params)
+            }
+        }
     }
 
     // MARK: - Local delegation (no network)

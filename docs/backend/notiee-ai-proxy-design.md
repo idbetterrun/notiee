@@ -163,7 +163,24 @@ Notiee 免费/Pro 版内置 AI（拍记总结、Spark 对话、语义搜索）�
 - 成功：**SSE 流**（OpenAI 兼容的 `data: {...}` 分片），末尾带一条包含 `usage` 的事件，供客户端展示 & 后端计量。
 - 失败：非 2xx + 上面的错误结构。
 
-### 6.3 `POST /ai/embed`
+### 6.3 `POST /ai/agent`（Spark Agent，仅 Pro）
+Spark Agent 一轮 Reason-Act 的模型调用。**工具在客户端端上执行**，后端只代跑一次
+模型调用（key 不下发）。客户端 `AgentExecutor` 恒用 **OpenAI 格式**发 `messages` + `tools`，
+后端对 Anthropic 系（minimax）做双向翻译。非流式。不占「篇」额度。
+```json
+// 请求
+{
+  "model": "deepseek-v4-flash",
+  "messages": [ /* OpenAI 格式：含 system / user / assistant(tool_calls) / tool 结果 */ ],
+  "tools": [ { "type": "function", "function": { "name": "...", "description": "...", "parameters": {…} } } ]
+}
+// 成功
+{ "text": "...", "tokensUsed": 123, "toolCalls": [ /* OpenAI(function.arguments) 或 Anthropic(input) 形状，客户端都认 */ ] }
+```
+- 档位：**仅 Pro**（free → `403 UPGRADE_REQUIRED`，与客户端 `SparkTierLimits.isAgentAllowed` 对齐）。
+- 失败：`BAD_REQUEST` / `BAD_MODEL` / `UPGRADE_REQUIRED` / `UPSTREAM_ERROR`，结构同上。
+
+### 6.4 `POST /ai/embed`
 语义搜索用（仅 Pro 走云端；免费走端侧）。
 ```json
 { "model": "embedding-v1", "input": ["文本1","文本2"] }

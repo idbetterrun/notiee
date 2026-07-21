@@ -52,6 +52,13 @@ struct RootTabView: View {
         }
         .onAppear {
             store.syncCalendar()
+            #if !NOTIEE_PLUS
+            // Resolve the entitlement tier on cold launch so gating (e.g. Spark
+            // Agent) reflects Pro *before* the user visits the Me tab. Previously
+            // the tier was only refreshed by QuotaCard/purchase, so a Pro user who
+            // opened Spark first was still treated as free and had Agent locked.
+            Task { await EntitlementStore.shared.refresh() }
+            #endif
         }
         .onOpenURL { url in
             guard url.pathExtension == "tmn" else { return }

@@ -20,6 +20,11 @@ struct SparkView: View {
     @State private var activeSheet: SparkSheet?
     @FocusState private var isFocused: Bool
     @State private var showProUpsell = false
+    #if !NOTIEE_PLUS
+    // Observe the tier so Agent (un)locking re-renders when a cold-launch or
+    // purchase refresh resolves the user as Pro.
+    @ObservedObject private var entitlement = EntitlementStore.shared
+    #endif
 
     init(store: NotieeStore) {
         self.store = store

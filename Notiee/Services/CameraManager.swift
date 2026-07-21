@@ -19,6 +19,11 @@ final class CameraManager: NSObject, ObservableObject {
     private let photoOutput = AVCapturePhotoOutput()
     private let sessionQueue = DispatchQueue(label: "com.notiee.camera.session")
     private var videoDevice: AVCaptureDevice?
+    /// Set once the session has inputs/outputs wired. Guards against a second
+    /// configuration pass (rapid tab re-appear / double call), which would add
+    /// duplicate inputs and wedge the session — the root of the occasional hang.
+    /// Read and written only on `sessionQueue`.
+    private var isConfigured = false
 
     struct LensPreset {
         let factor: CGFloat
@@ -95,6 +100,13 @@ final class CameraManager: NSObject, ObservableObject {
         sessionQueue.async { [weak self] in
             guard let self else { return }
 
+            // Configure exactly once. A second pass would re-add inputs/outputs to
+            // an already-wired session and can deadlock it; just (re)start instead.
+            guard !self.isConfigured else {
+                if !self.session.isRunning { self.session.startRunning() }
+                return
+            }
+
             self.session.beginConfiguration()
             self.session.sessionPreset = .photo
 
@@ -132,19 +144,23 @@ final class CameraManager: NSObject, ObservableObject {
             self.session.addOutput(self.photoOutput)
 
             self.session.commitConfiguration()
+            self.isConfigured = true
+
+            // Start on the session queue right away so the first frame isn't
+            // gated behind a hop to the main actor (which made cold start feel
+            // slow). Publish `.ready` and sync zoom back on the main actor.
+            self.session.startRunning()
 
             Task { @MainActor in
                 self.status = .ready
                 self.syncZoomFactor()
-                self.startSession()
             }
         }
     }
 
     func startSession() {
-        guard status == .ready else { return }
         sessionQueue.async { [weak self] in
-            guard let self = self, !self.session.isRunning else { return }
+            guard let self, self.isConfigured, !self.session.isRunning else { return }
             self.session.startRunning()
         }
     }

@@ -1,9 +1,11 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SparkStyleSettingsView: View {
     @AppStorage(UDK.sparkCustomStyle) private var customStyle: String = ""
     @State private var selectedPreset: SparkStylePreset?
     @State private var showAddSheet = false
+    @State private var showSoulImport = false
 
     enum SparkStylePreset: String, CaseIterable, Identifiable {
         case defaultPreset = "默认"
@@ -116,8 +118,17 @@ struct SparkStyleSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showAddSheet = true
+                Menu {
+                    Button {
+                        showAddSheet = true
+                    } label: {
+                        Label("新建经典风格", systemImage: "square.and.pencil")
+                    }
+                    Button {
+                        showSoulImport = true
+                    } label: {
+                        Label("通过 SOUL.md 导入 beta", systemImage: "doc.badge.plus")
+                    }
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 17, weight: .medium))
@@ -126,6 +137,11 @@ struct SparkStyleSettingsView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddCustomStyleSheet { title, content in
+                addCustomStyle(title: title, content: content)
+            }
+        }
+        .sheet(isPresented: $showSoulImport) {
+            SoulImportSheet { title, content in
                 addCustomStyle(title: title, content: content)
             }
         }
@@ -235,6 +251,139 @@ struct AddCustomStyleSheet: View {
             }
         }
     }
+}
+
+// MARK: - SOUL.md Import Sheet (beta)
+
+/// Import a Spark chat style from a `SOUL.md` file. The uploaded Markdown becomes
+/// the style instruction; the H1 (or filename) becomes the title. A style created
+/// this way lands in the same custom-styles list as a classic one.
+struct SoulImportSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var showFileImporter = false
+    @State private var importedTitle: String = ""
+    @State private var importedContent: String = ""
+    @State private var errorMessage: String?
+    let onComplete: (String, String) -> Void
+
+    private var hasImported: Bool { !importedContent.isEmpty }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Button {
+                        showFileImporter = true
+                    } label: {
+                        Label(hasImported ? "重新选择 SOUL.md 文件" : "上传 SOUL.md 文件",
+                              systemImage: "arrow.up.doc")
+                    }
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                } header: {
+                    Text("导入")
+                } footer: {
+                    Text("选择一个 .md 文件，其内容将作为 Spark 的风格指令。")
+                }
+
+                if hasImported {
+                    Section("预览") {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(importedTitle)
+                                .font(.subheadline.weight(.semibold))
+                            Text(importedContent)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(6)
+                        }
+                    }
+                }
+
+                Section("规范参考") {
+                    Text(Self.specReference)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+            }
+            .navigationTitle("SOUL.md 导入 beta")
+            .navigationBarTitleDisplayMode(.inline)
+            .fileImporter(
+                isPresented: $showFileImporter,
+                allowedContentTypes: [UTType(filenameExtension: "md") ?? .plainText, .text, .plainText, .data],
+                allowsMultipleSelection: false
+            ) { result in
+                handleImport(result)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") {
+                        let t = importedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let c = importedContent.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !t.isEmpty, !c.isEmpty else { return }
+                        onComplete(t, c)
+                        dismiss()
+                    }
+                    .disabled(!hasImported)
+                }
+            }
+        }
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        errorMessage = nil
+        do {
+            guard let url = try result.get().first else { return }
+            let needsAccess = url.startAccessingSecurityScopedResource()
+            defer { if needsAccess { url.stopAccessingSecurityScopedResource() } }
+            let raw = try String(contentsOf: url, encoding: .utf8)
+            let content = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !content.isEmpty else {
+                errorMessage = String(localized: "文件为空，请选择有效的 SOUL.md。")
+                return
+            }
+            importedContent = content
+            importedTitle = Self.deriveTitle(from: content, fallback: url.deletingPathExtension().lastPathComponent)
+        } catch {
+            errorMessage = String(localized: "读取文件失败，请重试。")
+        }
+    }
+
+    /// Title = first Markdown H1 (`# ...`) if present, else the filename.
+    private static func deriveTitle(from content: String, fallback: String) -> String {
+        for line in content.split(separator: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("# ") {
+                return String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return fallback.isEmpty ? String(localized: "SOUL 风格") : fallback
+    }
+
+    private static let specReference = """
+    SOUL.md 是一份描述 Spark 人格与语气的 Markdown 文件。建议包含：
+
+    # 人格名称
+    一句话定位（例如：温柔的学习陪伴者）。
+
+    ## 语气
+    描述说话的口吻、情绪、称呼方式。
+
+    ## 行为准则
+    - 应该做什么（鼓励、追问、给行动建议…）
+    - 不应该做什么（人身攻击、冗长寒暄…）
+
+    ## 示例
+    可选：给一两句符合该人格的示范回复。
+
+    整份文件会作为风格指令注入到 Spark 的系统提示中，请用自然语言、避免与隐私/安全指令冲突。
+    """
 }
 
 #Preview {
