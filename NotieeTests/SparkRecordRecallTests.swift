@@ -44,14 +44,48 @@ final class SparkRecordRecallTests: XCTestCase {
         XCTAssertEqual(out.semanticStartIndex, 1)
         XCTAssertFalse(stub.lastCandidates.contains { $0.id == secret.id }, "加密记录不进语义候选")
     }
+
+    func testWarmUp_backfillsOnce() async {
+        let stub = StubSearch(result: [])
+        let vm = SparkViewModel(
+            aiService: MockAIService(reply: ""),
+            searchEngine: stub
+        )
+        vm.recordsProvider = { [NoteRecord(id: UUID(), capturedAt: Date(), localImagePaths: ["x"], title: "a")] }
+        await vm.warmUpSemanticIndex()
+        await vm.warmUpSemanticIndex()
+        XCTAssertEqual(stub.backfillCount, 1, "只回填一次")
+    }
+}
+
+private final class MockAIService: SparkAIServing {
+    init(reply: String) {}
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
+        ("", 0)
+    }
+    func accumulatePublic(_ tokens: Int) {}
+    func extractMemory(from text: String) -> (cleanText: String, ops: SparkAIService.MemoryOperations) {
+        (text, SparkAIService.MemoryOperations())
+    }
+    func extractCitations(from text: String, recordCount: Int) -> [Int] { [] }
+    func extractCitationsFallback(from text: String, records: [NoteRecord]) -> [Int] { [] }
+    func generateTitle(for message: String) async throws -> String { "" }
+    func generateContextualTitle(from rounds: [ConversationRound]) async throws -> String { "" }
+    func compressMemory(from rounds: [ConversationRound]) async {}
+    func extractMemoryFromInput(userMessage: String, assistantResponse: String) async {}
+    func agentChat(messages: [[String: Any]], tools: [[String: Any]]) async throws -> AgentChatResponse {
+        AgentChatResponse(text: "", toolCalls: [], tokensUsed: 0)
+    }
 }
 
 private final class StubSearch: SemanticSearching {
     let result: [NoteRecord]
     private(set) var lastCandidates: [NoteRecord] = []
+    private(set) var backfillCount = 0
     init(result: [NoteRecord]) { self.result = result }
     func search(query: String, in records: [NoteRecord], limit: Int) async -> [NoteRecord] {
         lastCandidates = records
         return result
     }
+    func backfill(records: [NoteRecord]) async { backfillCount += 1 }
 }

@@ -75,6 +75,7 @@ final class SparkViewModel: ObservableObject {
     private var currentConversationId: UUID = UUID()
     private var roundCount: Int { messages.count / 2 }
     private var titleGenerated = false
+    private var didWarmUpSemantic = false
 
     init(
         aiService: any SparkAIServing = SparkAIServiceFactory.makeDefault(),
@@ -125,6 +126,13 @@ final class SparkViewModel: ObservableObject {
     func markPrivacyNoticeSeen() {
         settingsStore.saveBool(true, forKey: "spark_privacy_notice_seen")
         hasSeenPrivacyNotice = true
+    }
+
+    func warmUpSemanticIndex() async {
+        guard !didWarmUpSemantic else { return }
+        didWarmUpSemantic = true
+        let recs = (recordsProvider?() ?? []).filter { !$0.isDeleted }
+        await recordRecall.engine.backfill(records: recs)
     }
 
     // MARK: - Greeting persistence

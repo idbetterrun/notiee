@@ -107,6 +107,7 @@ struct SparkView: View {
             if !viewModel.hasSeenPrivacyNotice {
                 activeSheet = .privacy
             }
+            Task { await viewModel.warmUpSemanticIndex() }
         }
     }
 

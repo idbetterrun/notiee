@@ -19,6 +19,7 @@ final class NoteSearchToolTests: XCTestCase {
             func search(query: String, in records: [NoteRecord], limit: Int) async -> [NoteRecord] {
                 records.filter { $0.title == hitTitle }
             }
+            func backfill(records: [NoteRecord]) async {}
         }
         let mgr = makeManager(["深度学习", "烹饪"])
         let tool = NoteSearchTool(recordManager: mgr, searchEngine: StubEngine("深度学习"))

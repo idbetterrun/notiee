@@ -4,6 +4,7 @@ import Foundation
 @MainActor
 protocol SemanticSearching {
     func search(query: String, in records: [NoteRecord], limit: Int) async -> [NoteRecord]
+    func backfill(records: [NoteRecord]) async
 }
 
 extension SemanticSearchEngine: SemanticSearching {}
