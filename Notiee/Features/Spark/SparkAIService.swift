@@ -195,7 +195,9 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
             .prefix(Self.maxRecordsInPrompt)
 
         Logger.spark.debug("[ask] building systemPrompt, recs=\(activeRecords.count) rounds=\(recentRounds.count)")
-        let systemPrompt = buildSystemPrompt(records: Array(activeRecords), recentRounds: recentRounds, upcomingEvents: upcomingEvents)
+        let recentRecords = Array(activeRecords)
+        let recall = RecalledRecords(records: recentRecords, semanticStartIndex: recentRecords.count)
+        let systemPrompt = buildSystemPrompt(recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents)
         Logger.spark.debug("[ask] systemPrompt built, len=\(systemPrompt.count)")
         let userPrompt = "用户说：\(question)"
 
@@ -472,7 +474,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     /// Internal (not private) so `BackendSparkAIService` can reuse the exact same
     /// system prompt when routing `ask` through the backend `/ai/chat`.
-    func buildSystemPrompt(records: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) -> String {
+    func buildSystemPrompt(recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) -> String {
         Logger.spark.debug("[buildSystemPrompt] loading memory...")
         let mem = (try? memoryStore.load()) ?? [:]
         Logger.spark.debug("[buildSystemPrompt] memory loaded, count=\(mem.count)")
@@ -483,14 +485,27 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
             memText = "关于用户，你目前记得：\n" + mem.map { "  - \($0.key): \($0.value)" }.joined(separator: "\n")
         }
 
+        let all = recall.records
+        let anchors = Array(all.prefix(recall.semanticStartIndex))
+        let semantic = Array(all.dropFirst(recall.semanticStartIndex))
+
         var recordBlock = ""
-        for (i, r) in records.enumerated() {
+        for (i, r) in anchors.enumerated() {
             let d = r.capturedAt.formatted(date: .abbreviated, time: .shortened)
             let s = r.summary.isEmpty ? "" : "摘要：\(trunc(r.summary, 100))"
             recordBlock += "[记录\(i+1)] \(r.title) | \(d)\n\(s)\n"
         }
-        if !records.isEmpty {
-            recordBlock = "以下拍记按时间从新到旧排列，[记录1]是最近的一条：\n" + recordBlock
+        if !semantic.isEmpty {
+            recordBlock += "\n【与当前问题语义相关的历史记录（可能超出最近范围）】\n"
+            for (j, r) in semantic.enumerated() {
+                let n = recall.semanticStartIndex + j + 1
+                let d = r.capturedAt.formatted(date: .abbreviated, time: .shortened)
+                let body = SparkAIService.recordFullText(r)
+                recordBlock += "[记录\(n)] \(r.title) | \(d)\n\(trunc(body, 800))\n"
+            }
+        }
+        if !all.isEmpty {
+            recordBlock = "以下拍记：[记录1]起为最近的拍记（按时间倒序），之后为语义相关的历史记录。\n" + recordBlock
         }
 
         let recentHistoryText: String
@@ -590,7 +605,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         ## 当前记忆
         \(memText)
 
-        ## 当前拍记（共 \(records.count) 条）
+        ## 当前拍记（共 \(all.count) 条）
         \(recordBlock)
 
         ## 近期日程 (未来\(Self.scheduleWindowDays)天，只读)
@@ -603,6 +618,13 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     private func trunc(_ text: String, _ max: Int) -> String {
         text.count <= max ? text : String(text.prefix(max)) + "..."
+    }
+
+    static func recordFullText(_ r: NoteRecord) -> String {
+        [r.title, r.summary, r.detailedContent, r.ocrText]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
     }
 
     func accumulatePublic(_ tokens: Int) { accumulateTokens(tokens) }

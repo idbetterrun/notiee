@@ -258,6 +258,7 @@
 		24F2845FDFFF93615EC5CF3B /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B25934CD853078C1F734F /* WelcomeView.swift */; };
 		270BA58E600AD71198EA3743 /* SparkTierLimitsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631D567E51955C9047350F93 /* SparkTierLimitsTests.swift */; };
 		270BA58E600AD71198EA3744 /* SparkRecordRecallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E567E51955C9047350F94 /* SparkRecordRecallTests.swift */; };
+		270BA58E600AD71198EA3745 /* SparkPromptRecallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631E567E51955C9047350F95 /* SparkPromptRecallTests.swift */; };
 		2761AC36E84BB7F6EAEEB3F8 /* ModelThinkingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17AB589004E17D6E6EC284C /* ModelThinkingPolicy.swift */; };
 		27D3351E759BC5F0C33BC3D0 /* SparkInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0280CA1A96207DA04B0437A5 /* SparkInputBar.swift */; };
 		281FF9867FF2D6DA7C3DB06D /* TodoDetailSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188416259E85118DAA654838 /* TodoDetailSheetView.swift */; };
@@ -638,6 +639,7 @@
 		612D9C66BE20CD8249547E8D /* PastSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PastSchedulesView.swift; sourceTree = "<group>"; };
 		631D567E51955C9047350F93 /* SparkTierLimitsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkTierLimitsTests.swift; sourceTree = "<group>"; };
 		631E567E51955C9047350F94 /* SparkRecordRecallTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkRecordRecallTests.swift; sourceTree = "<group>"; };
+		631E567E51955C9047350F95 /* SparkPromptRecallTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparkPromptRecallTests.swift; sourceTree = "<group>"; };
 		6412BE1BD7CEE8A30870EA78 /* PrivacyPolicy_zh-Hant-TW.html */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.html; path = "PrivacyPolicy_zh-Hant-TW.html"; sourceTree = "<group>"; };
 		68D85D61BD1A4102BABF2208 /* LocalImageStoreDeleteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalImageStoreDeleteTests.swift; sourceTree = "<group>"; };
 		6932A7AB2B4C28E0C6725414 /* NoteGetDetailTool.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NoteGetDetailTool.swift; sourceTree = "<group>"; };
@@ -1070,6 +1072,7 @@
 				CAFE000000004444DDDD0004 /* SparkIntentDetectorTests.swift */,
 				CAFE0000000099990002BBBB /* SparkCitationStripTests.swift */,
 				631E567E51955C9047350F94 /* SparkRecordRecallTests.swift */,
+				631E567E51955C9047350F95 /* SparkPromptRecallTests.swift */,
 				CAFE0000000B7777C0000004 /* ThinkingCapabilityTests.swift */,
 				CAFE000000SMPRF00000004 /* SparkModelPreferencesTests.swift */,
 				D364C0C1837DF64D4062AF87 /* ModelThinkingPolicyTests.swift */,
@@ -1942,6 +1945,7 @@
 				CAFE000000004444DDDD0003 /* SparkIntentDetectorTests.swift in Sources */,
 				CAFE0000000099990001BBBB /* SparkCitationStripTests.swift in Sources */,
 				270BA58E600AD71198EA3744 /* SparkRecordRecallTests.swift in Sources */,
+				270BA58E600AD71198EA3745 /* SparkPromptRecallTests.swift in Sources */,
 				CAFE0000000B7777C0000003 /* ThinkingCapabilityTests.swift in Sources */,
 				1811D7C11B8715C52E08AB57 /* ModelThinkingPolicyTests.swift in Sources */,
 				DBC70B4FAC3C877675F22867 /* SparkScheduleContextTests.swift in Sources */,

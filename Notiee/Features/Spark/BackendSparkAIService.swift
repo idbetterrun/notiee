@@ -31,8 +31,10 @@ final class BackendSparkAIService: SparkAIServing, @unchecked Sendable {
             .filter { !$0.isDeleted }
             .sorted { $0.capturedAt > $1.capturedAt }
             .prefix(SparkAIService.maxRecordsInPrompt)
+        let recentRecords = Array(activeRecords)
+        let recall = RecalledRecords(records: recentRecords, semanticStartIndex: recentRecords.count)
         let systemPrompt = local.buildSystemPrompt(
-            records: Array(activeRecords), recentRounds: recentRounds, upcomingEvents: upcomingEvents)
+            recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents)
         let userPrompt = "用户说：\(question)"
 
         let result = try await chat(
