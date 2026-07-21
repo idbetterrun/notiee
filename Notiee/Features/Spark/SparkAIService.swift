@@ -439,6 +439,14 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     // MARK: - Citation Extraction
 
     func extractCitations(from text: String, recordCount: Int) -> [Int] {
+        Self.extractCitationIndices(text, recordCount: recordCount)
+    }
+
+    func extractCitationsFallback(from text: String, records: [NoteRecord]) -> [Int] {
+        Self.extractCitationIndicesFallback(text, records: records)
+    }
+
+    nonisolated private static func extractCitationIndices(_ text: String, recordCount: Int) -> [Int] {
         guard let regex = try? NSRegularExpression(pattern: "\\[来源(\\d+)\\]") else { return [] }
         let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
         var indices = Set<Int>()
@@ -450,7 +458,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         return Array(indices).sorted()
     }
 
-    func extractCitationsFallback(from text: String, records: [NoteRecord]) -> [Int] {
+    nonisolated private static func extractCitationIndicesFallback(_ text: String, records: [NoteRecord]) -> [Int] {
         var indices = Set<Int>()
         for (i, record) in records.enumerated() {
             let title = record.title.trimmingCharacters(in: .whitespaces)
@@ -460,6 +468,23 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
             }
         }
         return Array(indices).sorted()
+    }
+
+    /// 从 AI 回复中提取 [来源N] 引用并映射为 Citation 对象。
+    /// - Parameters:
+    ///   - text: AI 回复文本（含 [来源N] 标记，已去 <think> 但尚未去记忆标签）
+    ///   - records: 用于映射引用的记录列表（按 prompt 中 [记录N] 的顺序）
+    /// - Returns: 按 index 升序排列的 Citation 数组
+    nonisolated static func mapCitations(from text: String, records: [NoteRecord]) -> [Citation] {
+        var indices = extractCitationIndices(text, recordCount: records.count)
+        if indices.isEmpty {
+            indices = extractCitationIndicesFallback(text, records: records)
+        }
+        return indices.compactMap { idx in
+            guard idx < records.count else { return nil }
+            let r = records[idx]
+            return Citation(recordID: r.id, title: r.title, capturedAt: r.capturedAt)
+        }
     }
 
     // MARK: - System Prompt Builder

@@ -288,4 +288,17 @@ final class SparkViewModelTests: XCTestCase {
         XCTAssertFalse(vm.messages.contains { $0.role == .assistant && $0.content.isEmpty },
                        "取消应移除空占位助手消息")
     }
+
+    // MARK: - Citation mapping (Task 5 — highest-risk correctness)
+
+    func testCitation_mapsToRecalledRecord_notFullListPosition() {
+        let newest = NoteRecord(id: UUID(), capturedAt: Date(), localImagePaths: ["x"], title: "最新")
+        let mid    = NoteRecord(id: UUID(), capturedAt: Date().addingTimeInterval(-100), localImagePaths: ["x"], title: "中间")
+        let oldHit = NoteRecord(id: UUID(), capturedAt: Date().addingTimeInterval(-9999), localImagePaths: ["x"], title: "老命中")
+
+        let promptRecords = [newest, oldHit]
+        let cites = SparkAIService.mapCitations(from: "见[来源2]", records: promptRecords)
+        XCTAssertEqual(cites.map { $0.recordID }, [oldHit.id],
+            "[来源2] 必须映射到 recall.records[1]=oldHit，而非全量列表第2条=mid")
+    }
 }
