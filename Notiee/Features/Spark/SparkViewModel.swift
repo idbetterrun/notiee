@@ -208,7 +208,8 @@ final class SparkViewModel: ObservableObject {
                 let events = upcoming
                 Task.detached {
                     do {
-                        let result = try await service.ask(question: question, with: recs, recentRounds: rounds, upcomingEvents: events)
+                        let recall = RecalledRecords(records: recs, semanticStartIndex: recs.count)
+                        let result = try await service.ask(question: question, recall: recall, recentRounds: rounds, upcomingEvents: events)
                         cont.resume(returning: result)
                     } catch {
                         cont.resume(throwing: error)

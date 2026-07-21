@@ -36,7 +36,7 @@ struct AgentToolCall: Sendable {
 // MARK: - AI Service Protocol
 
 protocol SparkAIServing: AnyObject, Sendable {
-    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int)
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int)
     func accumulatePublic(_ tokens: Int)
     func extractMemory(from text: String) -> (cleanText: String, ops: SparkAIService.MemoryOperations)
     func extractCitations(from text: String, recordCount: Int) -> [Int]
@@ -52,7 +52,6 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     private let settingsStore: AppSettingsPersisting
     private let memoryStore: SparkMemoryPersisting
     private let modelPrefs = SparkModelPreferences()
-    static let maxRecordsInPrompt = 150
 
     static let memoryTriggerRoundCount = 10
 
@@ -182,21 +181,14 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - Chat (returns full response text)
 
-    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
         Logger.spark.debug("[ask] START")
         let textConfig = settingsStore.loadConfiguration(for: .text)
         guard textConfig.isComplete else {
             Logger.spark.debug("[ask] config incomplete, failing")
             throw SparkAIError.missingConfiguration
         }
-        let activeRecords = allRecords
-            .filter { !$0.isDeleted }
-            .sorted { $0.capturedAt > $1.capturedAt }
-            .prefix(Self.maxRecordsInPrompt)
-
-        Logger.spark.debug("[ask] building systemPrompt, recs=\(activeRecords.count) rounds=\(recentRounds.count)")
-        let recentRecords = Array(activeRecords)
-        let recall = RecalledRecords(records: recentRecords, semanticStartIndex: recentRecords.count)
+        Logger.spark.debug("[ask] building systemPrompt, recs=\(recall.records.count) rounds=\(recentRounds.count)")
         let systemPrompt = buildSystemPrompt(recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents)
         Logger.spark.debug("[ask] systemPrompt built, len=\(systemPrompt.count)")
         let userPrompt = "用户说：\(question)"

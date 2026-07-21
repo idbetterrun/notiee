@@ -26,13 +26,7 @@ final class BackendSparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - Chat
 
-    func ask(question: String, with allRecords: [NoteRecord], recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
-        let activeRecords = allRecords
-            .filter { !$0.isDeleted }
-            .sorted { $0.capturedAt > $1.capturedAt }
-            .prefix(SparkAIService.maxRecordsInPrompt)
-        let recentRecords = Array(activeRecords)
-        let recall = RecalledRecords(records: recentRecords, semanticStartIndex: recentRecords.count)
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
         let systemPrompt = local.buildSystemPrompt(
             recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents)
         let userPrompt = "用户说：\(question)"
