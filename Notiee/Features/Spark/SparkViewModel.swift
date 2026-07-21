@@ -160,6 +160,12 @@ final class SparkViewModel: ObservableObject {
         }
 
         inputText = ""; state = .loading
+        // Clear any leftover Agent run state. The timeline popover shows whenever
+        // `state == .loading && (currentToolName != nil || !agentActions.isEmpty)`,
+        // so stale actions from a previous Agent task would otherwise resurface
+        // during a plain-chat reply (until it finishes and state flips to .loaded).
+        agentActions = []
+        currentToolName = nil
         let userMsg = ChatMessage(role: .user, content: t)
         messages.append(userMsg)
         currentResponseTask = Task { await processQuestion(t, userMsg) }
@@ -527,17 +533,7 @@ final class SparkViewModel: ObservableObject {
     private func makeAgentExecutor() -> AgentExecutor? {
         guard let recordManager, let calendarManager, let folderTagManager else { return nil }
 
-        let embeddingModel = UserDefaults.standard.string(forKey: "spark.semanticSearch.embeddingModel") ?? "text-embedding-3-small"
-        let cloud = CloudEmbeddingService(configProvider: { [settingsStore] in
-            let cfg = settingsStore.loadConfiguration(for: .text)
-            return CloudEmbeddingService.Config(endpoint: cfg.activeEndpoint, apiKey: cfg.apiKey, model: embeddingModel)
-        })
-        let hybrid = HybridEmbeddingService(
-            local: LocalEmbeddingService(),
-            cloud: cloud,
-            preferCloud: { UserDefaults.standard.bool(forKey: "spark.semanticSearch.useCloud") }
-        )
-        let searchEngine = SemanticSearchEngine(embeddingService: hybrid, index: .live)
+        let searchEngine = SemanticSearchEngine.liveForSpark(settingsStore: settingsStore)
 
         let tools: [any AgentTool] = [
             NoteSearchTool(recordManager: recordManager, searchEngine: searchEngine),

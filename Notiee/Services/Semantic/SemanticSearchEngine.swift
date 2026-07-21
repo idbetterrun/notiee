@@ -50,6 +50,21 @@ final class SemanticSearchEngine {
         for record in records where !record.isEncrypted { _ = await ensureVector(for: record) }
     }
 
+    /// Spark 用的标准装配：本地 NLEmbedding + 可选云端（复用文本模型 key）+ 共享索引。
+    static func liveForSpark(settingsStore: AppSettingsPersisting) -> SemanticSearchEngine {
+        let embeddingModel = UserDefaults.standard.string(forKey: "spark.semanticSearch.embeddingModel") ?? "text-embedding-3-small"
+        let cloud = CloudEmbeddingService(configProvider: {
+            let cfg = settingsStore.loadConfiguration(for: .text)
+            return CloudEmbeddingService.Config(endpoint: cfg.activeEndpoint, apiKey: cfg.apiKey, model: embeddingModel)
+        })
+        let hybrid = HybridEmbeddingService(
+            local: LocalEmbeddingService(),
+            cloud: cloud,
+            preferCloud: { UserDefaults.standard.bool(forKey: "spark.semanticSearch.useCloud") }
+        )
+        return SemanticSearchEngine(embeddingService: hybrid, index: .live)
+    }
+
     private func ensureVector(for record: NoteRecord) async -> [Float]? {
         let text = RecordEmbeddingText.compose(record)
         guard !text.isEmpty else { return nil }

@@ -32,4 +32,18 @@ struct SparkRecordRecall {
         let boundary = min(anchors.count, merged.count)
         return RecalledRecords(records: merged, semanticStartIndex: boundary)
     }
+
+    func recall(query: String, from allRecords: [NoteRecord]) async -> RecalledRecords {
+        let live = allRecords.filter { !$0.isDeleted }
+        let anchors = Array(
+            live.sorted { $0.capturedAt > $1.capturedAt }.prefix(anchorCount)
+        )
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return RecalledRecords(records: anchors, semanticStartIndex: anchors.count)
+        }
+        let candidates = live.filter { !$0.isEncrypted }
+        let semantic = await engine.search(query: trimmed, in: candidates, limit: semanticLimit)
+        return Self.merge(anchors: anchors, semantic: semantic, cap: mergedCap)
+    }
 }
