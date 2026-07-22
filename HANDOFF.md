@@ -21,16 +21,187 @@ build commands, reporting rules).
 - **SwiftUI literals are localization keys.** Changing a visible string literal
   (e.g. in `AboutNotieeView`) requires updating the matching key in all three
   `Localizable.strings` files (`en`, `zh-Hans`, `zh-Hant`), or the key/value drift.
-- **Backend is design-doc only in this repo.** `docs/backend/notiee-ai-proxy-design.md`
-  describes it; there is **no backend implementation checked in here**. Client
-  changes that depend on new backend behavior must be forward-compatible (degrade
-  cleanly when the backend hasn't shipped the change yet).
+- **Backend IS checked in — `notiee-ping-stream/`** (Express + Tencent SCF + MySQL,
+  non-streaming). It implements Apple login→JWT, `/ai/chat`, `/ai/process` (vision+text,
+  charges 1 "篇" quota), `/ai/agent` (tool relay), `/me/quota`, subscription verify, and
+  App Store server notifications. `docs/backend/notiee-ai-proxy-design.md` is the *design*
+  doc and is now partly behind the code (e.g. `/ai/agent` isn't in it yet). When in doubt,
+  the running contract is `notiee-ping-stream/index.js`, not the design doc. Client changes
+  that depend on *unshipped* backend behavior must still be forward-compatible (degrade
+  cleanly — e.g. `NOT_IMPLEMENTED` → friendly fallback).
 - **Two targets, shared files:** always build BOTH `Notiee` and `Notiee+` when a
   shared file changes, to confirm `#if NOTIEE_PLUS` isolation holds.
 
 ---
 
 ## Work log
+
+### 2026-07-22 — Todo-extraction prompt fix + Spark pinned full-text injection _(both targets)_
+
+**Two independent changes, both in shared files → both targets.**
+
+**Change A: Todo extraction prompt semantic boundary** (`AIPromptProvider.swift`)
+- Root cause: `todos` field prompt said "如果文本中包含任何需要执行的任务" — no subject boundary. News articles contain tasks (police investigate, committee follows up) but executor is a third party, not the user.
+- Fix: All 3 language branches (EN, zh-Hant, zh-Hans) now require: (a) executor must be the user personally; (b) informational content (news, articles, reports) → `todos = []`. Few-shot anti-pattern baked into the new wording.
+- Pure prompt-text change, no logic or interface impact.
+
+**Change B: Short-followup pinned full-text injection** (`SparkAIService`, `BackendSparkAIService`, `SparkViewModel`, `SparkIntentDetector`)
+- Root cause: Anchor-layer records only get title + 100-char summary in system prompt; `detailedContent` is never sent. When user follows up with "翻译一下" on a cited article, Spark has no body to translate.
+- Trigger conditions (all 3 must hold):
+  1. User message < 15 chars AND matches followup patterns (翻译/展开/详细/继续/...), detected by `SparkIntentDetector.isShortFollowup()`
+  2. Last assistant message has non-empty `citations` (from `[来源N]` → `Citation.recordID`)
+  3. Cited record still exists + not deleted/encrypted
+- Injection: `buildSystemPrompt` gains `pinnedRecordIDs: [UUID]` param (default `[]` for backward compat). When non-empty, `buildPinnedFullTextBlock` appends a `## 完整内容` section with `detailedContent` (capped at 4000 chars).
+- Protocol `SparkAIServing.ask` signature changed: added `pinnedRecordIDs: [UUID]`.
+- `BackendSparkAIService.ask` passes through to shared `buildSystemPrompt`.
+- `SparkViewModel.computePinnedRecordIDs()` assembles pinned IDs from last assistant's citations.
+
+**Design notes for future agents:**
+- `[来源N]` → `Citation.recordID` is the **reliable signal** for "which record was just cited" — do NOT attempt title-matching (titles get paraphrased).
+- This is heuristic-based (short + pattern), not semantic. False negatives OK (just won't inject full text); false positives cost unnecessary tokens. Current patterns are intentionally narrow.
+- Only covers last-turn citations (not multi-turn). Future: could extend by walking citations further back in `messages`.
+
+**Tests added:**
+- `SparkIntentDetectorTests`: 3 new tests (short followup detected, not detected on normal questions, not detected on long messages). 7 total.
+- `SparkPromptRecallTests`: 5 new tests (pinned full text injection, empty IDs, record-not-found, multiple records, empty body skip). 7 total.
+- All 29 Spark-related tests (SparkViewModel 13, SparkRecordRecall 4, SparkPromptRecall 7, SparkIntentDetector 7) **PASS**.
+- Both `Notiee` + `Notiee+` schemes **BUILD SUCCEEDED**.
+
+**Pitfalls hit during implementation:**
+- `\bmore\b` regex with NSRegularExpression requires doubled backslashes in Swift string literals.
+- Single-word patterns like "这个" are too broad as followup signals — caused false positives on normal questions. Replaced with more specific compound patterns.
+- Initial `buildPinnedFullTextBlock` returned the header even when all pinned records had empty `detailedContent`. Fixed by building bodyBlock first, then guarding on `!bodyBlock.isEmpty` before adding header.
+
+### 2026-07-21 (13) — Semantic-recall: ALL 7 TASKS COMPLETE, branch approved for merge _(both targets)_
+
+- Subagent-driven development completed. 6 commits, 7 tasks. Each task independently reviewed.
+- **28 tests PASS** (SparkRecordRecall 4, SparkPromptRecall 2, SparkViewModel 13, SemanticSearchEngine + CitationStrip 9). **Both Notiee + Notiee+ BUILD SUCCEEDED.**
+- **Final branch review: APPROVED — ready to merge to main.**
+- Key correctness verified: citation mapping (record.id not position), encrypted record privacy, dedup, cap enforcement.
+- Arch note: `makeAgentExecutor()` creates second engine instance — both share `EmbeddingIndex.live` on disk, vectors shared; architecturally not ideal but safe in practice.
+- Branch: `feature/spark-semantic-recall`. Merge: `git checkout main && git merge --ff-only feature/spark-semantic-recall`.
+
+### 2026-07-21 (12) — Task 6 of Spark semantic recall: cold-start semantic index backfill (DONE)
+
+- Added `backfill(records:)` to `SemanticSearching` protocol in NoteSearchTool.swift.
+- `SemanticSearchEngine` already had `backfill` — protocol conformance auto-satisfied.
+- Added `warmUpSemanticIndex()` to `SparkViewModel` with `didWarmUpSemantic` guard (one-shot).
+- `SparkView.onAppear` triggers warmup: `Task { await viewModel.warmUpSemanticIndex() }`.
+- Uses `recordRecall.engine.backfill` (protocol type) — not `semanticEngine?` which is `nil` with stubs.
+- Fixed `StubEngine` in NoteSearchToolTests to add `backfill` stub (protocol conformance error).
+- Added `StubSearch.backfillCount` + `testWarmUp_backfillsOnce` — verifies backfill fires exactly once.
+- Both schemes BUILD SUCCEEDED. All 4 SparkRecordRecallTests PASS.
+- Committed on `feature/spark-semantic-recall` as `2e498a1`.
+- **Spark semantic recall plan: all 7 tasks COMPLETE.**
+- **Pitfall:** `semanticEngine` property is typed as `SemanticSearchEngine?` (concrete), but the `searchEngine` init param is `SemanticSearching` (protocol). When a stub is passed, `engine as? SemanticSearchEngine` returns `nil` → `semanticEngine?.backfill()` silently no-ops. Fix: use `recordRecall.engine.backfill()` which delegates through the protocol.
+
+### 2026-07-21 (11) — Task 5 of Spark semantic recall: ViewModel wiring + citation fix (DONE)
+
+- Injected `SparkRecordRecall` and `SemanticSearchEngine?` into `SparkViewModel.init` via new `searchEngine`/`anchorCount` params.
+- `processQuestion` now calls `recordRecall.recall(query:from:)` on `@MainActor` before the detached `ask()` task, passing the real `RecalledRecords` (not the flat wrapper).
+- Citation mapping now uses `recall.records` — fixes the position-based bug where a semantically-jumped-in old record would get the wrong `[来源N]` index.
+- Extracted `SparkAIService.mapCitations(from:records:) -> [Citation]` as a `nonisolated static` pure function; instance `extractCitations`/`extractCitationsFallback` now delegate to static helpers.
+- New test `testCitation_mapsToRecalledRecord_notFullListPosition` verifies: 3 records, anchorCount=1, `[来源2]` maps to oldHit not mid.
+- Both schemes BUILD SUCCEEDED. All 13 SparkViewModelTests PASS.
+- Committed on `feature/spark-semantic-recall` as `8f57920`.
+- **Next (Task 6):** Warm-up backfill — call `semanticEngine?.backfill(records:)` at app start.
+
+### 2026-07-21 (10) — Task 4 of Spark semantic recall: ask(recall:) protocol change (DONE)
+
+- Changed protocol `SparkAIServing.ask` signature: `with allRecords: [NoteRecord]` → `recall: RecalledRecords`.
+- `SparkAIService.ask`: removed flat-array filter/sort/prefix computation (7 lines); uses `recall` parameter directly.
+- `BackendSparkAIService.ask`: removed flat-array computation (5 lines); uses `recall` parameter directly.
+- Deleted `static let maxRecordsInPrompt = 150`.
+- Updated `MockAIService.ask` signature in `SparkViewModelTests.swift`.
+- Updated `SparkViewModel.sendMessage()` call site with temporary `RecalledRecords(records: semanticStartIndex:)` wrapper (Task 5 will replace with real recall pipeline).
+- **Pitfall:** pbxproj had duplicate build file ID `1803E40E` for both `SparkRecordRecall.swift` and `SparkPromptFragments.swift` in Notiee+ target, causing "Skipping duplicate build file" and `RecalledRecords` not in scope. Added unique ID `1803E429` for SparkRecordRecall. This was a pre-existing corruption from Task 1.
+- Both schemes (`Notiee` + `Notiee+`) BUILD SUCCEEDED. All 12 SparkViewModelTests pass.
+- Committed on `feature/spark-semantic-recall` as `027a8e5`.
+- **Next (Task 5):** ViewModel wiring — replace temporary `RecalledRecords(records: semanticStartIndex: recs.count)` in `sendMessage()` with real recall from `SparkRecordRecall.recall(query:from:)`.
+
+### 2026-07-21 (9) — Task 3 of Spark semantic recall: layered record block render (DONE)
+
+- Changed `buildSystemPrompt` signature from `records: [NoteRecord]` to `recall: RecalledRecords`.
+- Record block now renders two layers: anchor (title+100char summary, continuous from [记录1]) and semantic (full text via `recordFullText`, 800char truncated, numbered after anchors).
+- Added `static func recordFullText(_ r: NoteRecord) -> String` — joins title/summary/detailedContent/ocrText, same sourcing as vector embedding for hit consistency.
+- Template count changed from `records.count` to `all.count`.
+- Updated `SparkAIService.ask` and `BackendSparkAIService.ask` callers to wrap existing `activeRecords` array in `RecalledRecords(records:semanticStartIndex: records.count)` (all treated as anchors, no semantic layer yet — Task 4 will replace with real recall).
+- Created `NotieeTests/SparkPromptRecallTests.swift` — 2 tests: layered rendering with continuous numbering, empty recall safety. Both pass.
+- Added test file to pbxproj (BuildFile, FileReference, group, Sources build phase — 4 entries). Notiee scheme BUILD + TEST SUCCEEDED.
+- Committed on `feature/spark-semantic-recall` as `6f83cc1`.
+- **⚠️ For Task 4:** The `semanticStartIndex: recentRecords.count` placeholder in `ask()` callers means semantic layer is empty. Task 4 should replace with real `recall` from `SparkRecordRecall`.
+
+
+- Added `recall(query:from:) async -> RecalledRecords` to `SparkRecordRecall` — filters deleted/encrypted, sorts anchors by recency, delegates semantic search to engine, calls merge.
+- Added `SemanticSearchEngine.liveForSpark(settingsStore:)` static factory — encapsulates cloud/hybrid embedding assembly, DRY'd from `SparkViewModel.makeAgentExecutor()`.
+- `SparkViewModel.makeAgentExecutor()`: 5 lines of manual engine assembly replaced with single `SemanticSearchEngine.liveForSpark(settingsStore:)` call.
+- Added `StubSearch` stub engine + `testRecall_mergesAnchorsAndSemantic_excludesEncryptedFromCandidates` async test (3 tests total, all pass).
+- Both schemes (`Notiee` + `Notiee+`) BUILD SUCCEEDED.
+- Committed on `feature/spark-semantic-recall` as `166d81c`.
+- **Pitfall:** Edit tool replaced `private func ensureVector` prefix without keeping the remainder of the signature, causing `}(for record: NoteRecord) async -> [Float]? {` — fixed by replacing the fused line with proper closing `}` + full method signature.
+
+### 2026-07-21 (7) — Task 1 of Spark semantic recall: RecalledRecords + merge (DONE)
+
+- Created `Notiee/Features/Spark/SparkRecordRecall.swift` — `RecalledRecords` value type + `SparkRecordRecall` struct with `merge(anchors:semantic:cap:) -> RecalledRecords` static pure function.
+- Created `NotieeTests/SparkRecordRecallTests.swift` — 2 tests: duplicate exclusion + boundary reporting, cap truncation + boundary clamping. Both pass.
+- Added both files manually to `project.pbxproj` for both Notiee and Notiee+ targets, plus test target. Both schemes BUILD SUCCEEDED.
+- Committed on `feature/spark-semantic-recall` as `8db0b9e`.
+- **Pitfall:** `PBXFileSystemSynchronizedRootGroup` only applies to `NotieeWidget` — main app and tests still require manual pbxproj entries. Budget ~72 lines of pbxproj per new shared file.
+- `merge` is `@MainActor` (struct-level annotation) but operates on pure data; nonisolated refactor is safe but low priority.
+
+### 2026-07-21 (6) — Semantic-recall IMPLEMENTATION PLAN ready to hand off
+
+- Motivation confirmed by user: plain chat's newest-150 dump means records past
+  150 are invisible + ~10k tokens/turn (metered-backend cost blowup).
+- **Executable plan written** (writing-plans skill, TDD, 7 tasks):
+  `docs/superpowers/plans/2026-07-21-spark-semantic-recall.md`. Spec/background:
+  `docs/Spark语义召回改造方案.md`.
+- Approach: layered hybrid (anchor top-15 title+summary + semantic top-K full
+  text), merged into one ordered `RecalledRecords`; recall runs in the @MainActor
+  ViewModel (engine is @MainActor), `ask()` stays off-main and pure.
+- **Handoff:** user will assign this to someone else. Plan assumes zero context —
+  exact paths, real code, per-task commit + `iPhone 17` build/test commands.
+  Start on branch `feature/spark-semantic-recall`; both schemes must stay green.
+- **Highest-risk task = Task 5** (`[来源N]` citation remap by `record.id`, not
+  list position). Has a dedicated correctness test. Do not skip it.
+- Engine already exists and is used by Agent `note_search` + detail "related notes";
+  this plan just wires it into plain chat and DRYs the assembly into
+  `SemanticSearchEngine.liveForSpark(settingsStore:)`.
+- NOT started — plan only. No source changed by this step (see (5) for the bug fix
+  that WAS applied and built).
+
+### 2026-07-21 (5) — Agent timeline leaked into plain chat + semantic-recall plan
+
+**Bug fix — stale Agent timeline in plain chat** _(both targets)_
+- Symptom: after running one Agent task, turning Agent mode OFF and sending a
+  plain message still popped the tool-call timeline (same tools as the prior
+  Agent run), which vanished once the reply arrived.
+- Root cause: timeline shows when `state == .loading && (currentToolName != nil
+  || !agentActions.isEmpty)`. `sendOrRun()` (Agent path) clears `agentActions`,
+  but `sendMessage()` (plain path) did not — so the previous run's actions
+  lingered during the plain reply.
+- Fix (`SparkViewModel.sendMessage`): clear `agentActions = []` and
+  `currentToolName = nil` when starting a plain reply. Free scheme BUILD SUCCEEDED.
+
+**Plan (NOT implemented) — Spark plain-chat semantic recall**
+- Wrote `docs/Spark语义召回改造方案.md`. Motivation (from user): current plain
+  chat dumps the newest 150 records every turn → (a) records past 150 are invisible
+  forever, (b) ~10k tokens/turn = cost blowup on the metered free backend.
+- Recommendation: **layered hybrid**, NOT full switch to semantic. Anchor layer
+  (top ~15 recent, title+summary) preserves browse/timeline queries; semantic
+  layer (top-K, full text via existing `SemanticSearchEngine`) breaks the 150 cap
+  and deepens answers. Net tokens DROP (~3k vs ~10k).
+- Engine already exists (`Services/Semantic/`, wired into Agent `note_search` +
+  detail "related notes"); plain chat just never used it. Changes are in shared
+  `SparkAIService.ask`/`buildSystemPrompt` (both targets); embedding source is the
+  only fork (BYOK cloud vs free local `NLEmbedding`), absorbed by
+  `HybridEmbeddingService.preferCloud` — no `#if` needed.
+- **⚠️ Highest-risk part when implementing: `[来源N]` citation mapping.** Today it
+  relies on records being a prefix of the full sorted array (position-based). A
+  hybrid merged list (with jumped-in old records) breaks that — must remap
+  citations by explicit `record.id`, not position. See plan §4.3.
+- Free-tier cloud embeddings deferred: local `NLEmbedding` first (anchor layer is
+  the safety net), open backend `/ai/embed` later as a smooth upgrade.
 
 ### 2026-07-21 (4) — Backend `/ai/agent` route implemented + 404 fallback _(free + backend)_
 

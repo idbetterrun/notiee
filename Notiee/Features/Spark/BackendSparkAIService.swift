@@ -26,9 +26,9 @@ final class BackendSparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - Chat
 
-    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent], pinnedRecordIDs: [UUID]) async throws -> (text: String, tokens: Int) {
         let systemPrompt = local.buildSystemPrompt(
-            recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents)
+            recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents, pinnedRecordIDs: pinnedRecordIDs)
         let userPrompt = "用户说：\(question)"
 
         let result = try await chat(

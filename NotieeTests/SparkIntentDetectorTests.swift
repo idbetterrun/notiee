@@ -27,4 +27,41 @@ final class SparkIntentDetectorTests: XCTestCase {
             XCTAssertFalse(SparkIntentDetector.looksLikeActionRequest(s), "不应判定为动作请求: \(s)")
         }
     }
+
+    func testShortFollowup_detected() {
+        let yes = [
+            "翻译一下",
+            "展开说说",
+            "详细讲讲",
+            "继续说",
+            "然后呢",
+            "这篇呢",
+            "这个详细",
+            "translate this",
+            "elaborate",
+            "continue",
+            "更多细节",
+            "接着说",
+        ]
+        for s in yes {
+            XCTAssertTrue(SparkIntentDetector.isShortFollowup(s), "应判定为短跟进: \(s)")
+        }
+    }
+
+    func testShortFollowup_notDetected_normalQuestions() {
+        let no = [
+            "今天天气怎么样",
+            "你是谁",
+            "帮我回顾一下最近的笔记",
+            "这个人是谁拍的",
+        ]
+        for s in no {
+            XCTAssertFalse(SparkIntentDetector.isShortFollowup(s), "不应判定为短跟进: \(s)")
+        }
+    }
+
+    func testShortFollowup_notDetected_longMessage() {
+        let long = "请帮我把刚才提到的那篇文章翻译成中文"
+        XCTAssertFalse(SparkIntentDetector.isShortFollowup(long), "长消息不应触发短跟进")
+    }
 }

@@ -60,7 +60,7 @@ final class SparkRecordRecallTests: XCTestCase {
 
 private final class MockAIService: SparkAIServing {
     init(reply: String) {}
-    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent], pinnedRecordIDs: [UUID]) async throws -> (text: String, tokens: Int) {
         ("", 0)
     }
     func accumulatePublic(_ tokens: Int) {}

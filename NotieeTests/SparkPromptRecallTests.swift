@@ -31,4 +31,43 @@ final class SparkPromptRecallTests: XCTestCase {
         let p = makeService().buildSystemPrompt(recall: .empty, recentRounds: [], upcomingEvents: [])
         XCTAssertTrue(p.contains("共 0 条"))
     }
+
+    func testPinnedFullText_injectsDetailedContent() {
+        let r = rec("英文文章", summary: "摘要很短", body: """
+        This is a full article with multiple paragraphs. It contains detailed content
+        that would normally be truncated or not sent at all. The user wants to translate this.
+        """)
+        let block = SparkAIService.buildPinnedFullTextBlock(pinnedIDs: [r.id], from: [r])
+        XCTAssertTrue(block.contains("完整内容"))
+        XCTAssertTrue(block.contains("full article with multiple paragraphs"))
+    }
+
+    func testPinnedFullText_emptyIDs_returnsEmpty() {
+        let r = rec("x", summary: "s", body: "b")
+        let block = SparkAIService.buildPinnedFullTextBlock(pinnedIDs: [], from: [r])
+        XCTAssertEqual(block, "")
+    }
+
+    func testPinnedFullText_recordNotFound_returnsEmpty() {
+        let r = rec("x", summary: "s", body: "b")
+        let otherID = UUID()
+        let block = SparkAIService.buildPinnedFullTextBlock(pinnedIDs: [otherID], from: [r])
+        XCTAssertEqual(block, "")
+    }
+
+    func testPinnedFullText_multipleRecords() {
+        let r1 = rec("文章A", summary: "s1", body: "内容A")
+        let r2 = rec("文章B", summary: "s2", body: "内容B")
+        let block = SparkAIService.buildPinnedFullTextBlock(pinnedIDs: [r1.id, r2.id], from: [r1, r2])
+        XCTAssertTrue(block.contains("拍记 1"))
+        XCTAssertTrue(block.contains("拍记 2"))
+        XCTAssertTrue(block.contains("内容A"))
+        XCTAssertTrue(block.contains("内容B"))
+    }
+
+    func testPinnedFullText_emptyBodySkipped() {
+        let r = rec("无正文", summary: "s", body: "")
+        let block = SparkAIService.buildPinnedFullTextBlock(pinnedIDs: [r.id], from: [r])
+        XCTAssertEqual(block, "")
+    }
 }

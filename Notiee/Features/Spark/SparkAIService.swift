@@ -36,7 +36,7 @@ struct AgentToolCall: Sendable {
 // MARK: - AI Service Protocol
 
 protocol SparkAIServing: AnyObject, Sendable {
-    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int)
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent], pinnedRecordIDs: [UUID]) async throws -> (text: String, tokens: Int)
     func accumulatePublic(_ tokens: Int)
     func extractMemory(from text: String) -> (cleanText: String, ops: SparkAIService.MemoryOperations)
     func extractCitations(from text: String, recordCount: Int) -> [Int]
@@ -181,7 +181,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     // MARK: - Chat (returns full response text)
 
-    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) async throws -> (text: String, tokens: Int) {
+    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent], pinnedRecordIDs: [UUID]) async throws -> (text: String, tokens: Int) {
         Logger.spark.debug("[ask] START")
         let textConfig = settingsStore.loadConfiguration(for: .text)
         guard textConfig.isComplete else {
@@ -189,7 +189,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
             throw SparkAIError.missingConfiguration
         }
         Logger.spark.debug("[ask] building systemPrompt, recs=\(recall.records.count) rounds=\(recentRounds.count)")
-        let systemPrompt = buildSystemPrompt(recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents)
+        let systemPrompt = buildSystemPrompt(recall: recall, recentRounds: recentRounds, upcomingEvents: upcomingEvents, pinnedRecordIDs: pinnedRecordIDs)
         Logger.spark.debug("[ask] systemPrompt built, len=\(systemPrompt.count)")
         let userPrompt = "用户说：\(question)"
 
@@ -491,7 +491,7 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
 
     /// Internal (not private) so `BackendSparkAIService` can reuse the exact same
     /// system prompt when routing `ask` through the backend `/ai/chat`.
-    func buildSystemPrompt(recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent]) -> String {
+    func buildSystemPrompt(recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent], pinnedRecordIDs: [UUID] = []) -> String {
         Logger.spark.debug("[buildSystemPrompt] loading memory...")
         let mem = (try? memoryStore.load()) ?? [:]
         Logger.spark.debug("[buildSystemPrompt] memory loaded, count=\(mem.count)")
@@ -548,6 +548,8 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         }
 
         let scheduleBlock = Self.upcomingScheduleBlock(events: upcomingEvents, now: now, calendar: .current, windowDays: Self.scheduleWindowDays)
+
+        let pinnedFullTextBlock = Self.buildPinnedFullTextBlock(pinnedIDs: pinnedRecordIDs, from: all)
 
         return """
         ## 身份
@@ -625,6 +627,8 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
         ## 当前拍记（共 \(all.count) 条）
         \(recordBlock)
 
+        \(pinnedFullTextBlock)
+
         ## 近期日程 (未来\(Self.scheduleWindowDays)天，只读)
         \(scheduleBlock)
 
@@ -642,6 +646,31 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .joined(separator: "\n")
+    }
+
+    private static let pinnedFullTextMaxChars = 4000
+
+    static func buildPinnedFullTextBlock(pinnedIDs: [UUID], from records: [NoteRecord]) -> String {
+        guard !pinnedIDs.isEmpty else { return "" }
+        let idSet = Set(pinnedIDs)
+        let pinned = records.filter { idSet.contains($0.id) }
+        guard !pinned.isEmpty else { return "" }
+
+        var bodyBlock = ""
+        for (i, r) in pinned.enumerated() {
+            let body = r.detailedContent.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !body.isEmpty else { continue }
+            let capped: String
+            if body.count > Self.pinnedFullTextMaxChars {
+                capped = String(body.prefix(Self.pinnedFullTextMaxChars)) + "…（内容过长已截断）"
+            } else {
+                capped = body
+            }
+            bodyBlock += "\n" + (pinned.count > 1 ? "-- 拍记 \(i+1): \(r.title) --\n" : "")
+            bodyBlock += capped + "\n"
+        }
+        guard !bodyBlock.isEmpty else { return "" }
+        return "## 完整内容（用户正在追问的拍记全文）\n" + bodyBlock
     }
 
     func accumulatePublic(_ tokens: Int) { accumulateTokens(tokens) }

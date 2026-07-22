@@ -216,15 +216,19 @@ final class SparkViewModel: ObservableObject {
             let recentRounds = buildRecentRounds()
             let upcoming = calendarManager?.allEvents ?? []
 
+            let pinnedRecordIDs = Self.computePinnedRecordIDs(
+                followupQuestion: q, messages: messages, allRecords: allRecs)
+
             let (full, tokens) = try await withCheckedThrowingContinuation { cont in
                 let service = aiService
                 let r = recall
                 let rounds = recentRounds
                 let question = q
                 let events = upcoming
+                let pinned = pinnedRecordIDs
                 Task.detached {
                     do {
-                        let result = try await service.ask(question: question, recall: r, recentRounds: rounds, upcomingEvents: events)
+                        let result = try await service.ask(question: question, recall: r, recentRounds: rounds, upcomingEvents: events, pinnedRecordIDs: pinned)
                         cont.resume(returning: result)
                     } catch {
                         cont.resume(throwing: error)
@@ -352,6 +356,16 @@ final class SparkViewModel: ObservableObject {
             } else { i += 1 }
         }
         return rounds
+    }
+
+    private static func computePinnedRecordIDs(
+        followupQuestion: String, messages: [ChatMessage], allRecords: [NoteRecord]
+    ) -> [UUID] {
+        guard SparkIntentDetector.isShortFollowup(followupQuestion) else { return [] }
+        guard let lastAssist = messages.last(where: { $0.role == .assistant }),
+              !lastAssist.citations.isEmpty else { return [] }
+        let validIDs = Set(allRecords.filter { !$0.isDeleted && !$0.isEncrypted }.map { $0.id })
+        return lastAssist.citations.map { $0.recordID }.filter { validIDs.contains($0) }
     }
 
     private func triggerMemoryCompressionIfNeeded() {

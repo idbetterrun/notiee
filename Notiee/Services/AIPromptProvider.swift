@@ -121,7 +121,7 @@ struct AIPromptProvider {
             fieldNum += 1
         }
         if preset.enableTodos {
-            fields += "\(fieldNum). \"todos\": If the text contains any tasks or action items to execute, extract them as an array of strings (if none, return an empty array []).\n"
+            fields += "\(fieldNum). \"todos\": Only extract tasks or action items that the USER themselves needs to personally execute, as an array of strings. Return empty array [] if: (a) the executor is a third party mentioned in the text (news subjects, organizations, other people) rather than the user; (b) the content is informational (news, articles, reports, documentaries) rather than the user's personal notes, meetings, or plans. If no user-owned todos, return empty array [].\n"
             fieldNum += 1
         }
         if preset.enableKeyPoints {
@@ -148,7 +148,7 @@ struct AIPromptProvider {
             fieldNum += 1
         }
         if preset.enableTodos {
-            fields += "\(fieldNum). \"todos\": 如果文本中包含任何需要執行的任務或待辦事項，請提取為一個字符串數組（如果沒有，則返回空數組 []）。\n"
+            fields += "\(fieldNum). \"todos\": 只提取【使用者本人需要親自執行】的任務或待辦事項，提取為字串陣列。以下情況必須返回空陣列 []：（a）任務的執行者是文本中提到的第三方（新聞當事人、機構、他人），而非使用者本人；（b）內容屬於新聞、資訊、文章、紀實等資訊性內容，而非使用者的個人筆記、會議或計劃。如果沒有屬於使用者本人的待辦，返回空陣列 []。\n"
             fieldNum += 1
         }
         if preset.enableKeyPoints {
@@ -175,7 +175,7 @@ struct AIPromptProvider {
             fieldNum += 1
         }
         if preset.enableTodos {
-            fields += "\(fieldNum). \"todos\": 如果文本中包含任何需要执行的任务或待办事项，请提取为一个字符串数组（如果没有，则返回空数组 []）。\n"
+            fields += "\(fieldNum). \"todos\": 只提取【用户本人需要亲自执行】的任务或待办事项，提取为字符串数组。以下情况必须返回空数组 []：（a）任务的执行者是文本中提到的第三方（新闻当事人、机构、他人），而非用户本人；（b）内容属于新闻、资讯、文章、纪实等信息性内容，而非用户的个人笔记、会议或计划。如果没有属于用户本人的待办，返回空数组 []。\n"
             fieldNum += 1
         }
         if preset.enableKeyPoints {
