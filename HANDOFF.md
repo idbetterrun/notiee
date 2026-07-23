@@ -36,6 +36,111 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-07-23 — AI latency root-cause audit _(no product-target change; read-only investigation)_
+
+- **Classification:** no source/product change. The findings apply to the Notiee free-target backend path; the non-streaming Spark UI architecture is shared with Notiee+ (whose transport is direct-to-provider instead of SCF).
+- **Note processing is structurally serial:** free client `BackendAIProcessingService.process` encodes up to 6 JPEG images/base64 and posts one large JSON body. Backend `/ai/process` awaits the vision call before it starts the text call (`vision = await callUpstream(...)`, then `textResult = await callUpstream(...)`). Both calls use the helper default `maxTokens = 4096`, are non-streaming, and each has a 60-second upstream timeout; client allows 180 seconds. Thus a normal visual note cannot complete faster than both complete responses plus image upload/SCF overhead. "Flash" applies only to the second text call; the first is `doubao-seed-2-0-mini` vision.
+- **Spark plain chat is also non-streaming:** `/ai/chat` awaits one complete `callUpstream` result and returns JSON; `SparkViewModel` leaves an empty assistant placeholder until that response has fully arrived. It requests the same 4096 default max output. The UI has no per-hop duration/TTFB telemetry, and the backend has no upstream timings, so production delay cannot currently be attributed numerically between SCF and model.
+- **Spark request work can be substantial before the model call:** every query runs semantic recall over all live records; first/changed records are embedded sequentially. Prompt assembly may include 15 recent anchors, up to 8 semantic full texts (800 chars each), 5 prior rounds (200+500 chars each), and up to 4000 chars of pinned cited content. Cloud embeddings are off by default; if enabled, they add one remote embedding for the query plus each cache miss.
+- **Additional cases:** low-consumption note processing removes cloud vision but does accurate local Vision OCR sequentially per image with language correction across four languages before its one text call. Spark Agent is distinct from plain chat and can make up to 6 full non-streaming model calls (5 tool iterations plus a final summary), with external search/fetch potentially adding more delay.
+- Production `GET /ping-stream` timing could not be measured in the audit environment: sandbox DNS failed and the required one-time unsandboxed read-only curl request was rejected by automatic approval infrastructure. Do not claim production SCF or provider timing until a device/production trace is captured. The checked-in backend may also differ from the deployed SCF artifact.
+
+### 2026-07-23 — Shortcut screenshot input auto-connection fix pending device verification _(both targets)_
+
+- User device feedback exposed a Shortcut UX defect: `NotieeScreenshotIntent` declared its `IntentFile` parameter with the default input behavior, so the action treated it as a standalone image-picker field and reported a missing screenshot instead of consuming the preceding system `Take Screenshot` output.
+- Fixed `Notiee/Features/Capture/NotieeScreenshotIntent.swift` by adding `inputConnectionBehavior: .connectToPreviousIntentResult` to the image `@Parameter`. This is the App Intents API intended to auto-bind the immediately preceding action's result.
+- Updated the screenshot-shortcut spec and implementation plan to require the same behavior. Existing shortcuts may cache their old action metadata; delete and re-add the Notiee action (or recreate the shortcut) after installing the updated build before device testing.
+- Static verification: the source and docs contain the required enum case; `git diff --check` found pre-existing whitespace issues in `SystemPermissionManager.swift` and `en.lproj/Localizable.strings`, not in this intent edit.
+- Both scheme builds were attempted but could not start because Swift Package resolution could not reach GitHub in the sandbox. Escalated Xcode network verification was automatically rejected by the environment. Do not claim a build or device result until a normal Xcode/physical-device validation is run.
+
+### 2026-07-23 — Screenshot shortcut + background processing: ALL 5 TASKS COMPLETE _(both targets)_
+
+- **17/17 tests PASS** (10 MockAIProcessingService + 5 AIPipelineRecovery + 2 ScreenshotImportService)
+- **Both Notiee + Notiee+ BUILD SUCCEEDED**
+- 5 tasks completed via subagent-driven development. Uncommitted on branch `feature/screenshot-shortcut-background`.
+- New files: `AIBackgroundTaskScheduler.swift`, `NotieeProcessingRuntime.swift`, `ScreenshotImportService.swift`, `NotieeScreenshotIntent.swift`, `AIPipelineRecoveryTests.swift`, `ScreenshotImportServiceTests.swift`
+- Modified: `AIProcessingState.swift`, `NoteRecord.swift`, `RecordManager.swift`, `NotieeStore.swift`, `AIPipelineManager.swift`, `NotificationManager.swift`, `SystemPermissionManager.swift`, `NotieeApp.swift`, `RootTabView.swift`, `LocalImageStore.swift`, both Info.plists, 3 Localizable.strings, project.pbxproj
+- **Key architecture:** One shared `NotieeProcessingRuntime` owns a single `NotieeStore` for RootTabView + App Intent + BG task handler. `AIPipelineManager.process()` is the single async worker with in-flight dedup; terminal notifications are idempotent via `ProcessingNotificationState`. `NotieeScreenshotIntent` uses `openAppWhenRun = false`.
+- **Bug fixed:** retry now enqueues directly — no longer changes state to `.pending` before calling a guard that rejects it.
+- Device shortcut test not yet performed — see Task 4 Step 6 in the plan for the acceptance procedure.
+
+### 2026-07-23 — Task 4 of screenshot shortcut: import screenshots via App Intents DONE _(both targets)_
+
+- Created `ScreenshotImportService.swift` — `ScreenshotImportError` enum + `@MainActor struct ScreenshotImportService` with `importScreenshotData(_:) throws -> UUID`.
+- Created `NotieeScreenshotIntent.swift` — `NotieeScreenshotIntent: AppIntent` (`openAppWhenRun = false`, `@Parameter` for image file) + `NotieeShortcuts: AppShortcutsProvider`.
+- Created `ScreenshotImportServiceTests.swift` — `SpyImageSaver` (records calls, returns known path) + 2 tests (valid import saves before scheduling, invalid data throws without creating record).
+- Added `@MainActor protocol ImageSaving` + `extension LocalImageStore: ImageSaving` to `LocalImageStore.swift`.
+- Added 8 localization entries per language (en/zh-Hans/zh-Hant) near existing processing-status entries.
+- Added pbxproj entries for all 3 files (both app targets for production files, test target for tests).
+- **Pitfall:** Task brief pbxproj IDs conflicted with existing CreateItemSheet/ImportScheduleView IDs from Task 3. Used non-conflicting hex IDs (200000000000000000000037-039 / 100000000000000000000037-039).
+- **Pitfall:** `AppShortcutsProvider.appShortcuts` uses `@AppShortcutsBuilder` result builder — single `AppShortcut` element with `[AppShortcut]` return type (not array literal `[AppShortcut(...)]`).
+- **7/7 tests PASS** (2 ScreenshotImportService + 5 AIPipelineRecovery). **Both Notiee + Notiee+ BUILD SUCCEEDED.**
+- Not committed.
+
+### 2026-07-23 — Task 3 of screenshot shortcut: service files registration + Info.plist + tests DONE _(both targets)_
+
+- Added pbxproj entries for `AIBackgroundTaskScheduler.swift` and `NotieeProcessingRuntime.swift` in both Notiee and Notiee+ targets (PBXBuildFile, PBXFileReference, Services group children, Sources build phases).
+- Added `BGTaskSchedulerPermittedIdentifiers` + `UIBackgroundModes` (processing) to both `Notiee/Info.plist` and `Notiee copy-Info.plist`.
+- Added `RecordingScheduler` class and `testRuntimeSchedulesAndRunsPendingProcessing` test to `AIPipelineRecoveryTests.swift`.
+- **Fixed default parameter issue:** `NotieeProcessingRuntime` init had `.live()` and `AIBackgroundTaskScheduler.shared` as defaults — these trigger Swift concurrency warnings/errors because default parameter values are evaluated at the call site, not within the `@MainActor` context. Removed defaults; `shared` now passes both explicitly.
+- **Fixed `scheduleProcessing()`:** now registers the handler with the scheduler before calling `scheduleProcessing()` (was only calling schedule; handler was never set up).
+- **Logger:** `Logger.general.error(...)` in `AIBackgroundTaskScheduler.swift` compiles fine — `Logger` is in the same module and available without import.
+- **5/5 tests PASS** (AIPipelineRecoveryTests). **Both Notiee + Notiee+ BUILD SUCCEEDED.**
+- Not committed.
+
+### 2026-07-23 — Task 2 of screenshot shortcut: terminal notification DONE _(both targets)_
+
+- Added `ProcessingResultNotifying` protocol (`@MainActor`) to `AIPipelineManager.swift`.
+- Added `notifier` property to `AIPipelineManager` (optional, nil by default).
+- `process()` now delivers notification at all 3 terminal code paths (.completed, .failed via error, .failed via aiEnabled==false).
+- `NotificationManager` conforms to `ProcessingResultNotifying`: checks permission, removes duplicate identifier, delivers immediate notification with localized title/body.
+- `SystemPermissionManager` now requests notification permission after photo library in `requestAllPermissions()`.
+- `NotieeStore` convenience init gained `notifier` parameter; `live()` sets `NotificationManager.shared`.
+- 4 new localization entries in all 3 `.strings` files.
+- 2 new tests (completed notification, failed notification) + spy notifier in `AIPipelineRecoveryTests.swift`.
+- **14/14 tests PASS** (4 AIPipelineRecovery + 10 MockAIProcessingService). **Both Notiee + Notiee+ BUILD SUCCEEDED.**
+- Not committed.
+
+### 2026-07-23 — Task 1 of screenshot shortcut: AIPipeline repair + notification state DONE _(both targets)_
+
+- Added `ProcessingNotificationState` enum (none/requested/delivered) to `AIProcessingState.swift`.
+- Added `processingNotificationState` property to `NoteRecord` with safe `decodeIfPresent` fallback `.none`.
+- Added `recordsNeedingAIRecovery()` and `setProcessingNotificationState(_:for:)` to `RecordManager`.
+- Extended `AIPipelineRecordAccess` protocol with `recordsNeedingAIRecovery()`, `setProcessingNotificationState(_:for:)`, `eventTitle(for:)`.
+- Rewrote `AIPipelineManager`: added `inFlightRecordIDs` set to prevent duplicate processing; extracted `process(recordID:localImagePaths:eventTitle:)` async worker with defer cleanup; removed `retryCount` param from `enqueueProcessing`; added `resumePendingProcessing()`.
+- **Fixed retry bug:** `NotieeStore.retryAIProcessing` now guards on `.failed`/`.deadLetter` and calls `enqueueProcessing` directly — no longer changes state to `.pending` before calling `retryAndEnqueue` (whose guard would reject it).
+- Added `NotieeStore.resumePendingAIProcessing()`, `captureShortcutScreenshot(localImagePath:)`, `processImportedScreenshot(recordID:)`.
+- `processImportedScreenshot` always enqueues (skips `autoProcessAfterCapture` gate); `process` worker sets `.failed` when `aiEnabled` is false.
+- Created `NotieeTests/AIPipelineRecoveryTests.swift` with 2 tests + pbxproj entries (test target only).
+- **12/12 tests PASS** (2 new + 10 existing MockAIProcessingServiceTests). **Both Notiee + Notiee+ BUILD SUCCEEDED.**
+- Not committed.
+
+### 2026-07-23 — Corrected SCF deployment ZIP root layout _(free-target backend packaging only)_
+
+- Tencent SCF rejected the first archive with `ResourceNotFound.Entryfile` because it searched for root-level `scf_bootstrap`, while the archive stored it as `notiee-ping-stream/scf_bootstrap`.
+- Rebuilt and replaced the repository-root `notiee-ping-stream.zip` by archiving the **contents** of `notiee-ping-stream/`, not the directory itself. The ZIP root now contains `scf_bootstrap`, `index.js`, `package.json`, and `node_modules/`.
+- Verified `unzip -tq` succeeds and `scf_bootstrap` retains executable mode (`-rwxr-xr-x`). The corrected upload artifact is 3.6 MB. Use this replacement archive for SCF.
+
+### 2026-07-23 — Backend deployment ZIP created _(free-target backend packaging only)_
+
+- Created `notiee-ping-stream.zip` at the repository root for Tencent SCF upload. It includes the complete `notiee-ping-stream/` directory, including `node_modules`, `index.js`, `scf_bootstrap`, `schema.sql`, package metadata, certificates, and the Node tests.
+- ZIP validation via `unzip -tq` succeeded. Archive size is 3.7 MB (source directory is 17 MB).
+- The archive matches the existing `.gitignore` rule `notiee-ping-stream*.zip`; it is deliberately not visible in normal Git status. Set `BOCHA_API_KEY` in SCF before deploying it.
+
+### 2026-07-23 — Bocha search proxy implemented _(free-target backend only)_
+
+- Implemented `POST /ai/search` in `notiee-ping-stream/index.js`. It requires the existing backend JWT and a `pro` user tier, validates `query` / `count` (1-10) / `freshness`, sends `summary: true` to `https://api.bochaai.com/v1/web-search`, and maps only `name`, `url`, `summary`, `snippet`, `siteName`, and `datePublished` into `{ results }`.
+- Set `BOCHA_API_KEY` in the Tencent SCF function environment before deployment. Missing key returns `503 CONFIGURATION_ERROR`; a Bocha timeout/rejection returns `502 UPSTREAM_ERROR`; neither response includes the secret.
+- Added Node built-in test coverage at `notiee-ping-stream/test/index.test.js`, plus `npm test` script. `node --check index.js && npm test` passed: **6/6 tests**. Tests are in-process and stub `fetch`; no outbound Bocha call is made.
+- The backend directory is excluded wholesale by the repository `.gitignore` (`notiee-ping-stream/`), so its source and tests do **not** appear in `git status` and will not be included by a normal Git commit. Deploy/copy the edited directory explicitly; do not assume a mobile-app commit ships it.
+- Notiee+ remains unchanged and continues to call Bocha directly with the user's Keychain-stored key. No iOS source changed and no Xcode build was needed.
+
+### 2026-07-23 — Bocha backend proxy contract is not implemented _(no product-target change; read-only audit)_
+
+- `Notiee/Features/Spark/Agent/Tools/WebSearchTool.swift` has a free-build path that calls authenticated `POST /ai/search` with `{ query, count, freshness }` and expects `{ results: [...] }`.
+- `notiee-ping-stream/index.js` currently has no `/ai/search` route and no `bocha`/`BOCHA` configuration, provider, or upstream call. The backend proxy is therefore **not** present; free-build `web_search` will receive a 404 until it is added.
+- Notiee+ is already wired independently: it calls `https://api.bochaai.com/v1/web-search` directly with the user's Keychain-stored API key.
+
 ### 2026-07-23 — Screenshot Shortcut + background processing plan ready _(both targets; planning only)_
 
 - User-approved workflow: a user-authored Shortcut passes the output of iOS `Take Screenshot` to a new Notiee App Intent; it must save the image and create a record without foregrounding the app, then perform AI work in the background and send a terminal local notification.

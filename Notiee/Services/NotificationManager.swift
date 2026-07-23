@@ -51,3 +51,34 @@ final class NotificationManager: ObservableObject {
         }
     }
 }
+
+extension NotificationManager: ProcessingResultNotifying {
+    func notify(recordID: UUID, outcome: AIProcessingState) async -> Bool {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else {
+            return true
+        }
+
+        let identifier = "notiee.ai-processing.\(recordID.uuidString)"
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        center.removeDeliveredNotifications(withIdentifiers: [identifier])
+
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: outcome == .completed
+            ? "截图已整理完成"
+            : "截图已保存，但整理暂未完成")
+        content.body = String(localized: outcome == .completed
+            ? "已生成拍记摘要。"
+            : "原图和拍记已保留，可稍后重试。")
+        content.sound = .default
+
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+
+        return await withCheckedContinuation { continuation in
+            center.add(request) { error in
+                continuation.resume(returning: error == nil)
+            }
+        }
+    }
+}

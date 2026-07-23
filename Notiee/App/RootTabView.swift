@@ -14,7 +14,7 @@ struct RootTabView: View {
         store: NotieeStore? = nil,
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live
     ) {
-        _store = StateObject(wrappedValue: store ?? NotieeStore.live(settingsStore: settingsStore))
+        _store = StateObject(wrappedValue: store ?? NotieeProcessingRuntime.shared.store)
         _selectedTab = State(initialValue: settingsStore.loadDefaultTab())
         self.settingsStore = settingsStore
     }

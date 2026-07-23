@@ -2,6 +2,7 @@ import Foundation
 import AVFoundation
 import Photos
 import Speech
+import UserNotifications
 
 @MainActor
 final class SystemPermissionManager: ObservableObject {
@@ -16,6 +17,7 @@ final class SystemPermissionManager: ObservableObject {
             await requestCamera()
             await requestMicrophone()
             await requestPhotoLibrary()
+            await requestNotifications()
             await requestSpeech()
             
             isRequesting = false
@@ -54,5 +56,9 @@ final class SystemPermissionManager: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func requestNotifications() async {
+        _ = await NotificationManager.shared.requestPermission()
     }
 }

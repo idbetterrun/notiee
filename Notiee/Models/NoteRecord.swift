@@ -18,6 +18,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
     var summary: String
     var detailedContent: String
     var processingState: AIProcessingState
+    var processingNotificationState: ProcessingNotificationState
     
     var keyPoints: [String]
     var definitions: [KeyDefinition]
@@ -43,6 +44,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         summary: String = "",
         detailedContent: String = "",
         processingState: AIProcessingState = .pending,
+        processingNotificationState: ProcessingNotificationState = .none,
         keyPoints: [String] = [],
         definitions: [KeyDefinition] = [],
         isFavorite: Bool = false,
@@ -65,6 +67,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         self.summary = summary
         self.detailedContent = detailedContent
         self.processingState = processingState
+        self.processingNotificationState = processingNotificationState
         self.keyPoints = keyPoints
         self.definitions = definitions
         self.isFavorite = isFavorite
@@ -80,7 +83,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case id, eventID, folderID, capturedAt, localImagePaths, title
-        case ocrText, summary, detailedContent, processingState
+        case ocrText, summary, detailedContent, processingState, processingNotificationState
         case keyPoints, definitions, isFavorite, isDeleted, editedAt
         case modelsUsed, tokenUsage, aiRetryCount, deviceName, source
         case isEncrypted
@@ -98,6 +101,10 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         summary = try c.decodeIfPresent(String.self, forKey: .summary) ?? ""
         detailedContent = try c.decodeIfPresent(String.self, forKey: .detailedContent) ?? ""
         processingState = try c.decodeIfPresent(AIProcessingState.self, forKey: .processingState) ?? .pending
+        processingNotificationState = try c.decodeIfPresent(
+            ProcessingNotificationState.self,
+            forKey: .processingNotificationState
+        ) ?? .none
         keyPoints = try c.decodeIfPresent([String].self, forKey: .keyPoints) ?? []
         definitions = try c.decodeIfPresent([KeyDefinition].self, forKey: .definitions) ?? []
         isFavorite = try c.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false

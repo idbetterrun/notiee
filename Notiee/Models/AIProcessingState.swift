@@ -7,3 +7,9 @@ enum AIProcessingState: String, Equatable, Hashable, Codable, Sendable {
     case failed
     case deadLetter
 }
+
+enum ProcessingNotificationState: String, Equatable, Hashable, Codable, Sendable {
+    case none
+    case requested
+    case delivered
+}

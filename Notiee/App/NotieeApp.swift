@@ -212,6 +212,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         FirebaseApp.configure()
         #endif
         UNUserNotificationCenter.current().delegate = self
+        AIBackgroundTaskScheduler.shared.register {
+            await NotieeProcessingRuntime.shared.runPendingProcessing()
+        }
+        Task { @MainActor in
+            await NotieeProcessingRuntime.shared.runPendingProcessing()
+        }
         return true
     }
 

@@ -577,3 +577,18 @@
 "低强度思考" = "Low";
 "中强度思考" = "Medium";
 "高强度思考" = "High";
+
+"截图已整理完成" = "Screenshot organized";
+"截图已保存，但整理暂未完成" = "Screenshot saved, but organization could not finish";
+"已生成拍记摘要。" = "A note summary is ready.";
+"原图和拍记已保留，可稍后重试。" = "The image and note were saved. You can retry later.";
+
+"保存截图到 Notiee" = "Save Screenshot to Notiee";
+"保存截图到 Notiee+" = "Save Screenshot to Notiee+";
+"将截图保存为拍记并在后台整理" = "Save a screenshot as a note and organize it in the background";
+"截图" = "Screenshot";
+"截图已保存，正在后台整理" = "Screenshot saved. Organizing it in the background.";
+"保存截图" = "Save Screenshot";
+"未提供截图" = "No screenshot was provided.";
+"截图格式无效" = "The screenshot format is invalid.";
+

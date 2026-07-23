@@ -387,4 +387,20 @@ extension RecordManager {
             }
         }
     }
+
+    func recordsNeedingAIRecovery() -> [NoteRecord] {
+        records.filter {
+            !$0.isDeleted && !$0.isEncrypted &&
+            ($0.processingState == .pending || $0.processingState == .processing)
+        }
+    }
+
+    func setProcessingNotificationState(
+        _ state: ProcessingNotificationState,
+        for recordID: UUID
+    ) {
+        guard let index = records.firstIndex(where: { $0.id == recordID }) else { return }
+        records[index].processingNotificationState = state
+        persistRecords()
+    }
 }

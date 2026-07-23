@@ -89,7 +89,8 @@ final class NotieeStore: ObservableObject {
         scheduleMatcher: ScheduleMatcher = ScheduleMatcher(),
         aiService: any AIProcessingService = AIProcessingServiceFactory.makeDefault(),
         settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live,
-        autoProcess: Bool = false
+        autoProcess: Bool = false,
+        notifier: (any ProcessingResultNotifying)? = nil
     ) {
         let recordMgr = RecordManager(
             records: records,
@@ -109,6 +110,7 @@ final class NotieeStore: ObservableObject {
             aiService: aiService,
             settingsStore: settingsStore
         )
+        aiPipelineMgr.notifier = notifier
         let calendarMgr = CalendarManager(
             currentDate: currentDate,
             calendar: calendar,
@@ -247,8 +249,7 @@ final class NotieeStore: ObservableObject {
             aiPipelineManager.enqueueProcessing(
                 recordID: record.id,
                 localImagePaths: record.localImagePaths,
-                eventTitle: title,
-                retryCount: 0
+                eventTitle: title
             )
         }
 
@@ -261,8 +262,7 @@ final class NotieeStore: ObservableObject {
         aiPipelineManager.enqueueProcessing(
             recordID: record.id,
             localImagePaths: record.localImagePaths,
-            eventTitle: title,
-            retryCount: 0
+            eventTitle: title
         )
     }
 
@@ -357,11 +357,47 @@ final class NotieeStore: ObservableObject {
     // MARK: - AI Pipeline
 
     func retryAIProcessing(for recordID: UUID) {
+        guard let record = recordManager.record(id: recordID),
+              record.processingState == .failed || record.processingState == .deadLetter else { return }
+        aiPipelineManager.enqueueProcessing(
+            recordID: record.id,
+            localImagePaths: record.localImagePaths,
+            eventTitle: eventTitle(for: record)
+        )
+    }
+
+    func resumePendingAIProcessing() async {
+        await aiPipelineManager.resumePendingProcessing()
+    }
+
+    func captureShortcutScreenshot(localImagePath: String) -> NoteRecord {
+        let resolvedEventID = currentEvent?.id
+        let resolvedEventTitle: String? = {
+            if let id = resolvedEventID {
+                return events.first(where: { $0.id == id })?.title
+            }
+            return currentEvent?.title
+        }()
+
+        let title = resolvedEventTitle.map { "\($0) 拍记" } ?? "未分类拍记"
+        let record = NoteRecord(
+            eventID: resolvedEventID,
+            localImagePaths: [localImagePath],
+            title: title,
+            processingState: .pending,
+            processingNotificationState: .requested
+        )
+        recordManager.addRecord(record)
+        return record
+    }
+
+    func processImportedScreenshot(recordID: UUID) {
         guard let record = recordManager.record(id: recordID) else { return }
-        guard record.processingState == .failed || record.processingState == .deadLetter else { return }
-        recordManager.setProcessingState(.pending, for: recordID)
-        let title = eventTitle(for: record)
-        aiPipelineManager.retryAndEnqueue(recordID: recordID, eventTitle: title)
+        aiPipelineManager.enqueueProcessing(
+            recordID: record.id,
+            localImagePaths: record.localImagePaths,
+            eventTitle: eventTitle(for: record)
+        )
     }
 
     func updateRecordEvent(recordID: UUID, newEventID: UUID?) {
@@ -489,6 +525,7 @@ final class NotieeStore: ObservableObject {
             aiService: AIProcessingServiceFactory.makeDefault(),
             settingsStore: settingsStore
         )
+        aiPipelineMgr.notifier = NotificationManager.shared
         let calendarMgr = CalendarManager(
             currentDate: currentDate,
             calendar: .current,
@@ -529,6 +566,19 @@ extension NotieeStore: AIPipelineRecordAccess {
 
     func persistRecords() {
         recordManager.persistRecords()
+    }
+
+    func recordsNeedingAIRecovery() -> [NoteRecord] {
+        recordManager.recordsNeedingAIRecovery()
+    }
+
+    func setProcessingNotificationState(_ state: ProcessingNotificationState, for recordID: UUID) {
+        recordManager.setProcessingNotificationState(state, for: recordID)
+    }
+
+    func eventTitle(for recordID: UUID) -> String? {
+        guard let record = recordManager.record(id: recordID) else { return nil }
+        return eventTitle(for: record)
     }
 }
 

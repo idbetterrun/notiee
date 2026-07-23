@@ -7,6 +7,14 @@ protocol AIPipelineRecordAccess: AnyObject {
     func incrementRetryCount(for recordID: UUID)
     func applyAIResult(_ result: AIProcessingResult, to recordID: UUID)
     func persistRecords()
+    func recordsNeedingAIRecovery() -> [NoteRecord]
+    func setProcessingNotificationState(_ state: ProcessingNotificationState, for recordID: UUID)
+    func eventTitle(for recordID: UUID) -> String?
+}
+
+@MainActor
+protocol ProcessingResultNotifying: Sendable {
+    func notify(recordID: UUID, outcome: AIProcessingState) async -> Bool
 }
 
 @MainActor
@@ -14,8 +22,9 @@ final class AIPipelineManager {
     let aiService: any AIProcessingService
     let settingsStore: AppSettingsPersisting
 
-    /// Weak reference to the record accessor (typically the Store).
     weak var recordAccess: AIPipelineRecordAccess?
+    var notifier: (any ProcessingResultNotifying)?
+    private var inFlightRecordIDs = Set<UUID>()
 
     var aiEnabled: Bool {
         settingsStore.loadBool(forKey: UDK.aiEnabled, defaultValue: true)
@@ -32,60 +41,99 @@ final class AIPipelineManager {
 
     // MARK: - Entry Points
 
-    /// Reset a failed/deadLetter record back to pending and re-enqueue.
     func retryAndEnqueue(recordID: UUID, eventTitle: String?) {
         guard let access = recordAccess,
               let record = access.record(id: recordID),
               record.processingState == .failed || record.processingState == .deadLetter else { return }
 
-        // Reset retry count by applying a state change; the Store handles the rest.
         access.setProcessingState(.pending, for: recordID)
         access.persistRecords()
 
         enqueueProcessing(
             recordID: recordID,
             localImagePaths: record.localImagePaths,
-            eventTitle: eventTitle,
-            retryCount: 0
+            eventTitle: eventTitle
         )
     }
 
-    /// Enqueue a record for AI processing.
     func enqueueProcessing(
         recordID: UUID,
         localImagePaths: [String],
-        eventTitle: String?,
-        retryCount: Int? = nil
+        eventTitle: String?
     ) {
-        guard aiEnabled, let access = recordAccess else { return }
+        Task { [weak self] in
+            await self?.process(
+                recordID: recordID,
+                localImagePaths: localImagePaths,
+                eventTitle: eventTitle
+            )
+        }
+    }
 
-        let service = aiService
-        let resolvedTitle = eventTitle
+    func resumePendingProcessing() async {
+        guard let access = recordAccess else { return }
 
-        Task { [weak self, weak access] in
-            guard let self else { return }
+        for record in access.recordsNeedingAIRecovery()
+        where record.processingState == .processing {
+            access.setProcessingState(.pending, for: record.id)
+        }
 
-            await MainActor.run {
-                access?.setProcessingState(.processing, for: recordID)
-                access?.persistRecords()
-            }
+        for record in access.recordsNeedingAIRecovery()
+        where record.processingState == .pending {
+            await process(
+                recordID: record.id,
+                localImagePaths: record.localImagePaths,
+                eventTitle: access.eventTitle(for: record.id)
+            )
+        }
+    }
 
-            do {
-                let result = try await service.process(
-                    imagePaths: localImagePaths,
-                    eventTitle: resolvedTitle
-                )
-                await MainActor.run {
-                    access?.applyAIResult(result, to: recordID)
-                    access?.persistRecords()
-                }
-            } catch {
-                await MainActor.run {
-                    access?.setProcessingState(.failed, for: recordID)
-                    access?.persistRecords()
-                    print("AI Processing failed: \(error.localizedDescription)")
-                }
-            }
+    // MARK: - Private
+
+    private func process(recordID: UUID, localImagePaths: [String], eventTitle: String?) async {
+        guard !inFlightRecordIDs.contains(recordID) else { return }
+        inFlightRecordIDs.insert(recordID)
+        defer { inFlightRecordIDs.remove(recordID) }
+
+        guard let access = recordAccess else { return }
+        guard aiEnabled else {
+            access.setProcessingState(.failed, for: recordID)
+            access.persistRecords()
+            await deliverNotificationIfRequested(recordID: recordID, outcome: .failed, access: access)
+            return
+        }
+
+        access.setProcessingState(.processing, for: recordID)
+        access.persistRecords()
+
+        do {
+            let result = try await aiService.process(
+                imagePaths: localImagePaths,
+                eventTitle: eventTitle
+            )
+            access.applyAIResult(result, to: recordID)
+            access.persistRecords()
+            await deliverNotificationIfRequested(recordID: recordID, outcome: .completed, access: access)
+        } catch {
+            access.setProcessingState(.failed, for: recordID)
+            access.persistRecords()
+            await deliverNotificationIfRequested(recordID: recordID, outcome: .failed, access: access)
+            print("AI Processing failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func deliverNotificationIfRequested(
+        recordID: UUID,
+        outcome: AIProcessingState,
+        access: AIPipelineRecordAccess
+    ) async {
+        guard let record = access.record(id: recordID),
+              record.processingNotificationState == .requested,
+              let notifier = notifier else { return }
+        let delivered = await notifier.notify(recordID: recordID, outcome: outcome)
+        if delivered {
+            access.setProcessingNotificationState(.delivered, for: recordID)
+            access.persistRecords()
         }
     }
 }

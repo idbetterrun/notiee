@@ -2,6 +2,11 @@ import UIKit
 import Foundation
 
 @MainActor
+protocol ImageSaving {
+    func saveImage(_ image: UIImage) throws -> String
+}
+
+@MainActor
 final class LocalImageStore {
     static let shared = LocalImageStore()
 
@@ -61,3 +66,5 @@ final class LocalImageStore {
         try? FileManager.default.removeItem(at: fileURL)
     }
 }
+
+extension LocalImageStore: ImageSaving {}
