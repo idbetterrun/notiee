@@ -1,8 +1,9 @@
 # Notiee Wiki
 
-> **Notiee** — Schedule-Aware AI Rapid Note Capture / 日程感知 AI 极速拍记
-> 一款 iOS 原生 SwiftUI 应用：举起相机拍下白板、课件或会议笔记，自动关联当前日程，
-> 经 AI 流水线完成 OCR、摘要、要点提炼与待办抽取，把碎片化的"拍照"沉淀为结构化的"知识流"。
+> **Notiee** — 用相机来记、用问话来找的私人记忆库
+> 一款 iOS 原生 SwiftUI 应用：看到想记的东西，举起相机拍下就好，不用当场整理。
+> Notiee 自动认出照片里的文字、理成清爽的笔记；真正的价值在以后——这些内容你都能搜到，
+> 也能直接开口问，从自己拍过的东西里得到答案，并溯源回原始那张照片。
 
 | 项目 | 信息 |
 |---|---|
@@ -11,14 +12,14 @@
 | 构建 | Xcode 16.0+ |
 | 架构 | SwiftUI + MVVM + 中心化 Store/Manager 组合 |
 | 数据 | 离线优先（本地 JSON / UserDefaults / Keychain） |
-| 版本 | v1.0.5（含 Spark AI 助手、Agent 工具与语义检索） |
+| 版本 | v1.0.6（含 Spark AI 助手、Agent 工具与语义检索；双版本 Notiee / Notiee+） |
 | 许可 | Proprietary |
 
 ---
 
 ## 目录
 
-1. [产品定位](#1-产品定位)
+1. [产品定位](#1-产品定位) · [1.1 两个版本（Notiee / Notiee+）](#11-两个版本notiee--notiee)
 2. [核心概念](#2-核心概念)
 3. [应用结构（四大模块）](#3-应用结构四大模块)
 4. [记录来源（RecordSource）](#4-记录来源recordsource)
@@ -42,15 +43,63 @@
 
 ## 1. 产品定位
 
-**核心痛点**：学生与职场人在课堂、会议中频繁拍摄 PPT、黑板、白板，课后照片散落在系统相册里，
-难以检索、懒得整理，知识点无法沉淀。
+**一句话**：用相机来记、用问话来找的私人记忆库。看到就拍，需要时再回来找它，或者直接问它。
 
-**解决方案**：
-- **日程对应**：导入系统日历或 `.ics` 课表，在按下快门的瞬间自动把照片关联到当前时间段的课程/会议，赋予照片上下文。
-- **AI 结构化**：后台异步队列调用用户自带的大模型 API，对图片做 OCR（含 LaTeX）、生成摘要、提炼小标题、抽取待办。
+**核心痛点**：过去拍进系统相册的照片——白板、一页书、会议纪要、单据、街上一段话——往往就此
+石沉大海：想不起拍过、也搜不出来，等于扔进黑洞。问题不在"拍"，而在"以后用不上"。
+
+**产品思路（检索优先）**：Notiee 把价值重心从"拍的那一刻"移到"回头找的那一刻"。
+- **拍照只是最省事的输入**：物理世界的信息（纸、屏幕、白板）不用打字，拍一下就进库。
+- **拍完自动理成笔记**：后台异步队列调用大模型做 OCR（含 LaTeX）、生成一句摘要 + 要点 + 待办，
+  你不用当场整理，拍完就走。
+- **落点在检索端**：既能穿透全文搜索（标题 / 摘要 / OCR 原文、命中词高亮），也能直接问 **Spark**——
+  从你自己拍过的内容里给出答案，并附上出处、可跳回原图。这是 Notiee 与"随手拍进相册"之间真正的鸿沟。
 - **离线优先**：无网时本地缓存秒开，网络恢复后自动续跑 AI 处理。
 
-**目标人群**：学生、研究者、需要高频记录的职场人。通过"场景预设"自适应不同人群的解析策略。
+**顺带的能力（不再作为主定位）**：
+- **日程锚点**：拍照瞬间自动挂到当前日程/场景，作为回头查找的时间线索，而非核心卖点。
+- **场景增强**：针对具体使用场景（如学生课堂）可开启知识点提炼、名词解释、LaTeX 等增强，属加分项。
+
+**目标人群**：不设人群门槛——任何人、任何时候，有个懒得打字的视觉信息，拍下即可回头找回或问出。
+学生、研究者、职场人是高频场景，但产品本身不排他；"场景预设"用于自适应不同场景的解析策略，而非圈定人群。
+
+### 1.1 两个版本（Notiee / Notiee+）
+
+同一份源码，通过 **Xcode target + 编译标志隔离**编译出两个独立上架的 App，商业模式与 AI 来源完全不同：
+
+| | **Notiee**（免费内购版） | **Notiee+**（买断 BYOK 版） |
+|---|---|---|
+| 商业模式 | 免费下载 + 订阅 Pro（¥18/月） | 一次性买断 |
+| AI 来源 | 走**自建后端代付**，客户端只送 model ID | 用户自带 endpoint + key，**直连**模型厂商 |
+| API Key 位置 | **后端**（客户端永远拿不到） | 用户设备（Keychain 加密） |
+| 调用链路 | 客户端 → 后端 → 模型厂商 | 客户端 → 模型厂商 |
+| 登录 | **必须 Apple 登录**（鉴权命门） | 可选、轻量本地身份 |
+| Scheme / Product | `Notiee` / `Notiee.app` | `Notiee+` / `NotieePlus.app` |
+| Bundle ID | `com.idbetterrun.notiee` | `com.idbetterrun.notieeplus` |
+| 编译标志 | `#if !NOTIEE_PLUS` | `#if NOTIEE_PLUS` |
+
+**隔离机制**（详见 `AGENTS.md` 与 `docs/Notiee-免费版改造计划.md`）：
+- 免费版**独有**的后端相关文件（`AuthService` / `BackendAPIClient` / `EntitlementStore` /
+  `BackendAIProcessingService` / `BackendSparkAIService` / `StoreKitService` / `QuotaCard` 等）
+  **只勾 `Notiee` target**，Notiee+ 里根本不存在。
+- 两版都要编译、只是走不同分支的共享文件 → 统一用 **`#if NOTIEE_PLUS`**，严禁散落 `if 免费版 {}` 运行时判断。
+- 中心化 `AppBranding`（`#if NOTIEE_PLUS`）是既定范式，品牌名/图标/文案分叉都收敛于此。
+
+**免费版后端**（`notiee-ping-stream/`，Express + 腾讯云 SCF + MySQL，非流式）承担五件事：
+1. **Apple 身份校验**：`identityToken` 验签（含 nonce 防重放）→ 换发自有 30 天 JWT（`/auth/apple`、`/auth/refresh`）。
+2. **AI 代付代理**：`/ai/chat`（Spark 文本问答）、`/ai/process`（视觉 + 文本，占 1 篇额度）、`/ai/agent`（工具调用透传）；
+   按 provider 适配 OpenAI / Anthropic 两种格式，多厂商路由（DeepSeek / MiniMax / 豆包），key 在服务端。
+3. **额度账本**：按「篇」计（一篇拍记扣一篇），月度自然重置，`GET /me/quota` 查询，用尽自动降级本地 OCR 而非硬堵。
+4. **订阅校验**：StoreKit 2 凭证上报（`/subscription/verify`）+ App Store 服务端通知（`/apple/notifications`）维护 Pro 档位。
+5. **防刷**：Spark 按「模型调用次数」频控（不占篇数），DeviceCheck / App Attest 规划中。
+
+**免费档 vs Pro（运行时概念，由后端下发的档位决定，非编译标志）**：额度、可用模型、Spark 能力按档位区分——
+免费档锁定便宜模型（如 `deepseek-v4-flash`）、Spark 记忆上限 5 条、单会话 20 轮、无 Agent 模式；
+Pro 全放开。客户端限制仅为 UX，**后端会按档位再校验一遍**，改包无法绕过。收敛到中心化出口
+`SparkTierLimits`（`#if NOTIEE_PLUS` 分支恒为"不限"，免费版读 `EntitlementStore`）。
+
+> 现状：两个 App（`com.idbetterrun.notiee` / `com.idbetterrun.notieeplus`）均**尚未上架**，
+> 无历史买断用户，因此 EntitlementStore 与后端账户模型不需要老用户 grandfathering 逻辑。
 
 ---
 
@@ -194,7 +243,7 @@ Notiee 1.0.4 起引入 `RecordSource` 枚举（`Models/NoteRecord.swift`），�
 - **`AgentActionStore`**：持久化 Agent 执行过的动作记录。
 - **`AgentToolPresentation`**：把工具调用过程友好地呈现到聊天时间线（`SparkAgentTimelineView`）。
 
-**内置工具（`Features/Spark/Agent/Tools/`） 共 13 个**：
+**内置工具（`Features/Spark/Agent/Tools/`） 共 17 个**：
 
 | 工具 | 能力 | 权限 |
 |---|---|---|
@@ -202,14 +251,18 @@ Notiee 1.0.4 起引入 `RecordSource` 枚举（`Models/NoteRecord.swift`），�
 | `CalendarQueryTool` | 查询日程 | read |
 | `ScheduleCreateTool` | 创建日程 | write |
 | `ScheduleUpdateTool` | 更新日程 | write |
+| `ScheduleDeleteTool` | 删除日程 | write |
 | `NoteSearchTool` | **语义 + 关键词混合检索**拍记（`SemanticSearchEngine`） | read |
 | `NoteGetDetailTool` | 获取笔记详情 | read |
 | `NoteCreateTool` | 创建笔记 | write |
 | `NoteUpdateTool` | 更新笔记 | write |
+| `NoteDeleteTool` | 删除笔记 | write |
 | `TodoListTool` | 列出待办 | read |
 | `TodoCreateTool` | 创建待办 | write |
 | `TodoCompleteTool` | 完成待办 | write |
+| `TodoDeleteTool` | 删除待办 | write |
 | `MemoryManageTool` | 读写 Spark 长期记忆 | write |
+| `WebSearchTool` | 联网搜索（`WebSearchTool`，需在设置中配置搜索能力） | read |
 | `WebFetchTool` | 抓取指定 URL 网页正文（SSRF 防护，仅 http/https 公网，2MB 上限，10s 超时） | read |
 
 > 工具协议见 `AgentToolProtocol.swift`，每个工具声明 `name` / `description` / `parametersSchema` / `permission`。
@@ -430,8 +483,10 @@ Capture → NoteRecord(.pending) → 入队
 | [WhatsNewKit](https://github.com/SvenTiigi/WhatsNewKit) | 版本更新日志 |
 | [ZIPFoundation](https://github.com/weichsel/ZIPFoundation) | `.tmn` 归档压缩 |
 
-> PRD 中描述的云端后端（FastAPI + Redis + PostgreSQL）为产品愿景；
-> 当前实现以**本地离线优先**为主，AI 能力通过用户自带的大模型 API 直连完成。
+> **AI 来源按版本分叉**（见 §1.1）：**Notiee+（BYOK）** 通过用户自带的大模型 API **直连**完成；
+> **Notiee（免费版）** 走自建后端 `notiee-ping-stream/`（Express + 腾讯云 SCF + MySQL，非流式）**代付代理**，
+> key 在服务端。无论哪版，笔记数据均**本地离线优先**存储于设备。
+> （PRD 早期设想的 FastAPI + Redis + PostgreSQL 技术栈未采用，以 `notiee-ping-stream/` 的实际实现为准。）
 
 ---
 
@@ -491,7 +546,7 @@ Notiee/
 │   ├── Settings/                  # 我、设置、登录、备份、Review、Lab、Spark 设置、所有待办 (AllTodosView)
 │   └── Spark/                     # AI 助手
 │       └── Agent/                 # Agent 执行器、注册表、信任、工具
-│           └── Tools/             # 13 个 Agent 工具
+│           └── Tools/             # 17 个 Agent 工具
 ├── Models/                        # 领域模型
 ├── Services/                      # 基础设施
 │   ├── NotieeStore.swift          # 中心状态门面
@@ -607,4 +662,4 @@ Spark 与 Agent 工具（`Spark*Tests`、`*ToolTests`）、思考策略（`Model
 
 ---
 
-<sub>本 Wiki 基于源码通读整理（v1.0.5），反映当前实现：Spark AI 助手 + Agent 13 工具 + 混合语义检索引擎 + 深度联想 + 本地账户系统 + 三种记录来源（照片/Spark/文字）+ 日程彩色标签 + iOS 26 Liquid Glass 适配 + 四语种法务本地化。如与早期 README/PRD 表述不一致，以源码为准。</sub>
+<sub>本 Wiki 基于源码通读整理（v1.0.6），反映当前实现：双版本架构（Notiee 免费后端订阅版 / Notiee+ 买断 BYOK 版，同源码 `#if NOTIEE_PLUS` 隔离）+ 免费版自建后端（`notiee-ping-stream`：Apple 登录 + AI 代付 + 篇数额度 + 订阅校验）+ Spark AI 助手 + Agent 17 工具 + 混合语义检索引擎 + 深度联想 + 本地账户系统 + 三种记录来源（照片/Spark/文字）+ 日程彩色标签 + iOS 26 Liquid Glass 适配 + 四语种法务本地化。如与早期 README/PRD 表述不一致，以源码为准。</sub>

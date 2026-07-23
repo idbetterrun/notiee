@@ -3,14 +3,14 @@
 </p>
 
 <h1 align="center">Notiee</h1>
-<h3 align="center">Schedule-Aware AI Rapid Note Capture</h3>
-<h3 align="center">日程感知 AI 极速拍记</h3>
+<h3 align="center">Capture with your camera, find it by asking</h3>
+<h3 align="center">用相机来记、用问话来找的私人记忆库</h3>
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/Platform-iOS%2018.0+-blue.svg" alt="Platform"></a>
   <a href="#"><img src="https://img.shields.io/badge/Swift-6.0+-orange.svg" alt="Swift"></a>
   <a href="#"><img src="https://img.shields.io/badge/Xcode-16.0+-blue.svg" alt="Xcode"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-1.0.3-green.svg" alt="Version"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-1.0.6-green.svg" alt="Version"></a>
   <a href="#"><img src="https://img.shields.io/badge/License-Proprietary-red.svg" alt="License"></a>
 </p>
 
@@ -22,13 +22,16 @@
 
 ## Overview · 概览
 
-**Notiee** is an iOS-native SwiftUI app for rapid camera note-taking with AI-powered knowledge extraction. Designed for students and professionals.
+**Notiee** is an iOS-native SwiftUI app that turns your camera into a personal memory library: see something worth keeping — a whiteboard, a page, a receipt, a line of text — and just snap it. No typing, no tidying up on the spot.
 
-Aim your camera at a whiteboard, lecture slide, or meeting note — Notiee auto-links it to your current calendar event, runs OCR, generates a summary, extracts key points, and builds a to-do list. Everything is **offline-first**, with an async AI pipeline that resumes when connectivity returns. The built-in **Spark** AI assistant lets you chat with — and act on — your own notes, schedule, and to-dos.
+The real value is *later*. Photos you dump into the camera roll usually vanish into a black hole; in Notiee, everything you capture is searchable and — more importantly — **askable**. Ask *"how did that reimbursement flow go again?"* and Notiee answers from your own captures, with a citation back to the original shot. Snapping is just the fastest way to feed it; capture is auto-OCR'd, summarized, and turned into to-dos in the background. Everything is **offline-first**. Ships as two editions — **Notiee** (free, backend-powered AI + Pro subscription) and **Notiee+** (one-time purchase, bring-your-own model key).
 
-> **中文：** Notiee 是一款 iOS 原生 SwiftUI 应用，面向学生与职场人，用于极速拍照记录并由 AI 提炼知识。
-> 举起相机对准白板、课件或会议笔记，Notiee 会自动把它关联到当前日程，完成 OCR、生成摘要、提炼要点并抽取待办。
-> 整体**离线优先**，AI 流水线在断网时缓存、联网后自动续跑。内置 **Spark** AI 助手可对你自己的拍记、日程与待办进行对话与操作。
+> **中文：** Notiee 是一款 iOS 原生 SwiftUI 应用——用相机来记、用问话来找的私人记忆库。看到想记的东西
+> （白板、一页书、单据、一段话），拍下就好，不用当场整理。真正的价值在以后：拍进相册的照片往往石沉大海，
+> 而在 Notiee 里，拍过的内容都能搜到、更能**直接开口问**，从自己拍过的东西里得到答案并溯源回原图。
+> 拍照只是最省事的输入；拍完后台自动 OCR、生成摘要、抽取待办，整体**离线优先**。分两个版本：
+> **Notiee**（免费，后端代付 AI + Pro 订阅）与 **Notiee+**（一次买断，自带模型 key）。
+> AI 流水线在断网时缓存、联网后自动续跑。内置 **Spark** AI 助手可对你自己的拍记、日程与待办进行对话与操作。
 
 ---
 
@@ -40,7 +43,7 @@ Aim your camera at a whiteboard, lecture slide, or meeting note — Notiee auto-
 | **Snap · 拍记** | Dark immersive camera with zoom presets, flash, burst mode, and schedule-aware auto-categorization; seamless capture with no blocking dialogs. · 暗色沉浸式相机，缩放预设、闪光、连拍、日程感知自动归类；无阻断式弹窗的无缝连拍。 |
 | **Records · 记录** | Full-text search across titles, AI summaries, and OCR; multi-level folders plus system folders (Favorites / Uncategorized / Today / Pending / Trash). · 标题/摘要/OCR 全文检索，多级文件夹 + 系统文件夹（收藏/未分类/今日/待处理/回收站）。 |
 | **Record Detail · 记录详情** | Image viewer, AI summary, detailed content (Markdown), key points, term definitions, to-dos, related-note suggestions; long-press copy/share on all text. · 图片查看、AI 摘要、详细内容（Markdown）、要点、术语定义、待办、相关笔记推荐；全文长按复制/分享。 |
-| **Spark · AI 助手** | In-app AI chat grounded in your notes with inline citations, long-term memory, and an **Agent** mode that calls 12 tools to operate notes / schedule / to-dos. · 接地于拍记的 AI 对话（行内引用）、长期记忆，以及可调用 12 个工具操作笔记/日程/待办的 **Agent** 模式。 |
+| **Spark · AI 助手** | In-app AI chat grounded in your notes with inline citations, long-term memory, and an **Agent** mode that calls 17 tools to operate notes / schedule / to-dos. · 接地于拍记的 AI 对话（行内引用）、长期记忆，以及可调用 17 个工具操作笔记/日程/待办的 **Agent** 模式。 |
 | **Review · 用量** | Token dashboard with per-event pie chart, Top-5 records, accumulated deleted tokens, configurable warning threshold. · token 仪表盘：按事件饼图、Top 5 记录、已删累计、可配置预警阈值。 |
 | **Scene Presets · 场景预设** | Professional / College / High School / Creator — auto-tunes AI parsing, course mode, LaTeX, vision strategy. · 高效职场人 / 大学生·研究生 / 中学生 / 创作者·研究者，自动调整解析策略、课程模式、LaTeX、视觉策略。 |
 | **Live Activities · 实时活动** | Dynamic Island & Lock Screen with real-time event progress and countdown. · 灵动岛 & 锁屏实时事件进度与倒计时。 |
@@ -225,10 +228,11 @@ API keys are encrypted in the iOS **Keychain** and never leave the device. · AP
 
 ## Version & Recent Updates · 版本与近期更新
 
-**v1.0.3** + ongoing Spark integration · 持续集成 Spark
+**v1.0.6** · two editions (Notiee / Notiee+) + backend-powered free tier · 双版本（Notiee / Notiee+）+ 免费版后端代付
 
+- [x] **Two editions** — Notiee (free: self-hosted backend AI + Apple login + Pro subscription) / Notiee+ (one-time BYOK) · **双版本** —— Notiee（免费：自建后端代付 + Apple 登录 + Pro 订阅）/ Notiee+（一次买断 BYOK）
 - [x] **Spark AI assistant** — chat with citations, long-term memory, history · **Spark AI 助手** —— 带引用对话、长期记忆、历史
-- [x] **Spark Agent** — 12 tools, trust levels, 5-iteration reason-act loop · **Spark Agent** —— 12 工具、信任等级、5 轮循环
+- [x] **Spark Agent** — 17 tools, trust levels, 5-iteration reason-act loop · **Spark Agent** —— 17 工具、信任等级、5 轮循环
 - [x] Per-Spark model override + per-provider thinking effort · Spark 局部模型覆盖 + 按服务商思考强度
 - [x] Manager-based store architecture (Record / Calendar / FolderTag / AIPipeline) · 基于 Manager 的状态架构
 - [x] Scene presets (Professional / College / High School / Creator) · 场景预设

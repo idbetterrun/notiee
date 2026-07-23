@@ -73,7 +73,19 @@ xcodebuild build -project Notiee.xcodeproj -scheme Notiee \
 
 ---
 
-## 5. Key facts about this repo
+## 5. Plans & specs (superpowers workflow)
+
+This repo uses the **superpowers** planning framework:
+- **Specs / design docs** → `docs/` or `docs/superpowers/specs/` (the "why" + shape).
+- **Executable implementation plans** → `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`,
+  written with the `writing-plans` skill: bite-sized TDD steps with exact file
+  paths, real code, and per-task commit + build/test commands.
+- Execute a plan task-by-task via `superpowers:subagent-driven-development`
+  (fresh subagent per task, review between) or `superpowers:executing-plans`.
+- When handing work to someone else, point them at the plan file — it assumes zero
+  codebase context. Keep the matching spec doc linked from the plan header.
+
+## 6. Key facts about this repo
 
 - SwiftUI + MVVM; central facade `NotieeStore` composing 4 managers via Combine.
 - Persistence: local JSON stores + UserDefaults (settings) + **Keychain** (secrets).
