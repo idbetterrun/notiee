@@ -36,6 +36,74 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-07-23 — Screenshot Shortcut + background processing plan ready _(both targets; planning only)_
+
+- User-approved workflow: a user-authored Shortcut passes the output of iOS `Take Screenshot` to a new Notiee App Intent; it must save the image and create a record without foregrounding the app, then perform AI work in the background and send a terminal local notification.
+- Formal spec: `docs/superpowers/specs/2026-07-23-screenshot-shortcut-background-processing-design.md`.
+- Executable TDD plan: `docs/superpowers/plans/2026-07-23-screenshot-shortcut-background-processing.md`.
+- The plan deliberately reuses persisted `NoteRecord` state as the durable queue rather than adding a second task database. It adds `BGProcessingTask` recovery for interrupted `.processing` work, but does not promise background timing or automatically retry a request that has already failed.
+- Existing retry defect to fix during implementation: `NotieeStore.retryAIProcessing` currently changes `.failed` to `.pending` before calling `AIPipelineManager.retryAndEnqueue`, whose guard only accepts `.failed`/`.deadLetter`; the retry silently does not enqueue. Images and records already persist before the pipeline, and failures retain them.
+- Do not start implementation, builds, commits, or a physical-device Shortcut test until the user explicitly requests execution. Preserve all existing worktree changes.
+
+### 2026-07-23 — Spark citation full-text continuation fixed _(both targets)_
+
+- Resolved cited record IDs from the immediately preceding assistant reply before appending the current placeholder; removed keyword gating from this path.
+- Filtered deleted and encrypted records; selection uses Citation.recordID only.
+- Full-text rendering now preserves citation order and uses one 4,000-character total body budget.
+- **24 tests PASS** (SparkViewModelTests 15, SparkPromptRecallTests 9). Both Notiee and Notiee+ builds succeeded.
+- Changes span `SparkViewModel.swift` (processQuestion reorder + new computePinnedRecordIDs), `SparkAIService.swift` (buildPinnedFullTextBlock rewritten for citation-order + aggregate budget), and their test files.
+
+### 2026-07-23 — Product idea parked: fixed Today input canvas _(both targets; do not implement yet)_
+
+- User direction: replace the four-tab navigation with custom three-part navigation (Today left, oversized Spark center, Records right) and remove Capture as a tab.
+- Future Today should be a non-scrolling fixed home canvas. Pull down grows a camera circle; crossing about mid-screen fires one haptic and release opens rapid capture. Pull up mirrors this into an audio-recording entry. Audio is entry-only initially, without recording/transcription implementation.
+- Important architecture decision: host vertical gesture state outside the replaceable Today content, not inside its current ScrollView. Do not retrofit the gesture into current scrolling Today; discuss/plan the near-term navigation work separately.
+
+### 2026-07-23 — Task 2 of citation full-text continuation: bound full text across all cited records DONE _(both targets)_
+
+- Replaced `buildPinnedFullTextBlock` in `SparkAIService.swift` with citation-ordered, aggregate-budget version.
+- Old code: iterated `records` array order, capped each record independently at 4,000 chars.
+- New code: iterates `pinnedIDs` order (citation order, dictionary lookup + dedup), shared 4,000-char budget, no per-record minimum guarantee.
+- Added constant `pinnedFullTextTruncationSuffix = "…（内容过长已截断）"`.
+- Labels/headings do NOT consume the 4,000-character budget.
+- Added 2 new tests: `testPinnedFullText_preservesPinnedIDOrder_andCapsTotalBodies` (ordering + aggregate cap), `testPinnedFullText_allBlankBodies_returnsEmpty` (blank body edge case).
+- All 9 SparkPromptRecallTests PASS. Not committed (waiting on user).
+
+### 2026-07-23 — Task 1 of citation full-text continuation: resolve prior-citation IDs DONE _(both targets)_
+
+- Fixed ordering bug: `computePinnedRecordIDs` now runs **before** the empty assistant placeholder is appended in `processQuestion`. Uses `messages.dropLast()` to skip the current turn's just-appended user message.
+- Removed `SparkIntentDetector.isShortFollowup` gate from `computePinnedRecordIDs` — now accepts any immediate prior-assistant citation, not just keyword-triggered followups.
+- New signature: `computePinnedRecordIDs(previousAssistant: ChatMessage?, allRecords: [NoteRecord]) -> [UUID]`.
+- MockAIService gained `receivedPinnedRecordIDs: [[UUID]]` recording array.
+- 2 new ViewModel integration tests: natural confirmation pins cited record; deleted/encrypted records filtered.
+- All 15 SparkViewModelTests pass. Both Notiee + Notiee+ BUILD SUCCEEDED.
+- **Pitfall:** `testImmediateFollowup_doesNotPinDeletedOrEncryptedRecord` passed even in red phase (the bug produced `[]` which matched expected `[]`). The fix's filter logic is correct — the test would have caught a regression.
+- Not committed (waiting on user).
+
+### 2026-07-23 — Citation full-text continuation implementation plan ready _(both targets; no source change)_
+
+- Formal TDD plan: `docs/superpowers/plans/2026-07-23-spark-citation-fulltext-continuation.md`; companion spec: `docs/superpowers/specs/2026-07-23-spark-citation-fulltext-continuation-design.md`.
+- The plan has three independently verifiable tasks: fix prior-citation resolution before placeholder insertion; make full-text injection citation-ordered with one aggregate 4,000-character budget; run Spark tests and build both schemes.
+- User explicitly requested planning only. Do not begin implementation, build, commit, or push unless asked in a later task.
+
+### 2026-07-23 — Citation full-text continuation spec ready _(both targets; no source change)_
+
+- Approved design spec: `docs/superpowers/specs/2026-07-23-spark-citation-fulltext-continuation-design.md`.
+- It replaces keyword-triggered pinning with one-turn, citation-scoped candidate context: on the next normal Spark message, inject valid cited records' full text and let the existing main model use conversation history to determine relevance. No extra LLM classifier, backend API, Agent behavior, or persistent selected-record state.
+- Implementation must fix the placeholder-ordering bug, enforce a **total** 4,000-character pinned-content budget (not 4,000 per cited record), and add ViewModel integration coverage for a natural confirmation such as `对，就是这条`.
+
+### 2026-07-23 — Diagnosed Spark plain-chat full-text follow-up failure _(both targets; no source change)_
+
+- The 2026-07-22 short-followup pinned-full-text feature has a blocking ordering bug in `SparkViewModel.processQuestion`: it appends the current turn's empty assistant placeholder before calling `computePinnedRecordIDs`. That helper uses `messages.last(where: { $0.role == .assistant })`, so it always selects the new empty placeholder (no citations), not the preceding real assistant response. Result: `pinnedRecordIDs` is always empty and detailed content is never injected through this path.
+- The reported confirmation text `对，就是这条` would also fail `SparkIntentDetector.isShortFollowup` even after the ordering bug is fixed, because the intentionally narrow pattern list has no confirmation/selection phrases. The intended test coverage currently tests the detector and the prompt block separately, but no ViewModel integration case catches the placeholder ordering issue.
+- This is shared plain-chat code used by both Notiee and Notiee+; backend transport is not involved. For the first response, title-based citation fallback can still create a `Citation` when the model repeats the exact title, but the placeholder ordering still discards it at the next turn's pin calculation.
+
+### 2026-07-23 — Read-only architecture orientation _(no product-target change)_
+
+- Current branch is `feature/spark-semantic-recall`. The worktree already has user-owned, uncommitted changes in `AGENTS.md`, `README.md`, `docs/Notiee-Wiki.md`, and new Spark-recall design/plan documents. Preserve them; this orientation made no source changes.
+- README is partly stale: it still calls Spark semantic/vector retrieval "planned" and describes the older lexical-only retrieval, but `SparkRecordRecall` + `SemanticSearchEngine` are implemented and wired. Trust current source and the 2026-07-21/22 work-log entries over that section of README.
+- Free-backend planning doc also contains historical TODOs (notably Agent transport), while current backend/client handoff states `/ai/agent` has since been implemented locally. For API-contract work, inspect `notiee-ping-stream/index.js` as directed in the persistent gotchas.
+
 ### 2026-07-22 — Todo-extraction prompt fix + Spark pinned full-text injection _(both targets)_
 
 **Two independent changes, both in shared files → both targets.**

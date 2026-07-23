@@ -70,4 +70,33 @@ final class SparkPromptRecallTests: XCTestCase {
         let block = SparkAIService.buildPinnedFullTextBlock(pinnedIDs: [r.id], from: [r])
         XCTAssertEqual(block, "")
     }
+
+    func testPinnedFullText_preservesPinnedIDOrder_andCapsTotalBodies() throws {
+        let first = rec("第一篇", summary: "s1", body: String(repeating: "A", count: 3_000))
+        let second = rec("第二篇", summary: "s2", body: String(repeating: "B", count: 3_000))
+
+        let block = SparkAIService.buildPinnedFullTextBlock(
+            pinnedIDs: [second.id, first.id],
+            from: [first, second]
+        )
+
+        let secondRange = try! XCTUnwrap(block.range(of: String(repeating: "B", count: 100)))
+        let firstRange = try! XCTUnwrap(block.range(of: String(repeating: "A", count: 100)))
+        XCTAssertLessThan(secondRange.lowerBound, firstRange.lowerBound)
+        XCTAssertEqual(block.filter { $0 == "B" }.count, 3_000)
+        XCTAssertTrue(block.contains("…（内容过长已截断）"))
+
+        let bodyCharacters = block.filter { $0 == "A" || $0 == "B" }.count
+        XCTAssertEqual(bodyCharacters + "…（内容过长已截断）".count, 4_000)
+    }
+
+    func testPinnedFullText_allBlankBodies_returnsEmpty() {
+        let first = rec("空一", summary: "s", body: "")
+        let second = rec("空二", summary: "s", body: "   ")
+        let block = SparkAIService.buildPinnedFullTextBlock(
+            pinnedIDs: [first.id, second.id],
+            from: [first, second]
+        )
+        XCTAssertEqual(block, "")
+    }
 }

@@ -649,26 +649,39 @@ final class SparkAIService: SparkAIServing, @unchecked Sendable {
     }
 
     private static let pinnedFullTextMaxChars = 4000
+    private static let pinnedFullTextTruncationSuffix = "…（内容过长已截断）"
 
     static func buildPinnedFullTextBlock(pinnedIDs: [UUID], from records: [NoteRecord]) -> String {
         guard !pinnedIDs.isEmpty else { return "" }
-        let idSet = Set(pinnedIDs)
-        let pinned = records.filter { idSet.contains($0.id) }
+
+        let recordsByID = Dictionary(uniqueKeysWithValues: records.map { ($0.id, $0) })
+        var seenIDs = Set<UUID>()
+        let pinned = pinnedIDs.compactMap { id -> NoteRecord? in
+            guard seenIDs.insert(id).inserted else { return nil }
+            return recordsByID[id]
+        }
         guard !pinned.isEmpty else { return "" }
 
         var bodyBlock = ""
-        for (i, r) in pinned.enumerated() {
-            let body = r.detailedContent.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !body.isEmpty else { continue }
-            let capped: String
-            if body.count > Self.pinnedFullTextMaxChars {
-                capped = String(body.prefix(Self.pinnedFullTextMaxChars)) + "…（内容过长已截断）"
+        var remainingCharacters = pinnedFullTextMaxChars
+        for (index, record) in pinned.enumerated() {
+            let body = record.detailedContent.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !body.isEmpty, remainingCharacters > 0 else { continue }
+
+            let includedBody: String
+            if body.count <= remainingCharacters {
+                includedBody = body
             } else {
-                capped = body
+                guard remainingCharacters > pinnedFullTextTruncationSuffix.count else { break }
+                let prefixLength = remainingCharacters - pinnedFullTextTruncationSuffix.count
+                includedBody = String(body.prefix(prefixLength)) + pinnedFullTextTruncationSuffix
             }
-            bodyBlock += "\n" + (pinned.count > 1 ? "-- 拍记 \(i+1): \(r.title) --\n" : "")
-            bodyBlock += capped + "\n"
+
+            let label = pinned.count > 1 ? "-- 拍记 \(index + 1): \(record.title) --\n" : ""
+            bodyBlock += "\n" + label + includedBody + "\n"
+            remainingCharacters -= includedBody.count
         }
+
         guard !bodyBlock.isEmpty else { return "" }
         return "## 完整内容（用户正在追问的拍记全文）\n" + bodyBlock
     }

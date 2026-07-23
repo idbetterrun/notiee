@@ -207,17 +207,20 @@ final class SparkViewModel: ObservableObject {
             return
         }
 
+        let allRecs = recordsProvider?() ?? []
+        let previousAssistant = messages.dropLast().last(where: { $0.role == .assistant })
+        let pinnedRecordIDs = Self.computePinnedRecordIDs(
+            previousAssistant: previousAssistant,
+            allRecords: allRecs
+        )
+
         let aid = UUID()
         messages.append(ChatMessage(id: aid, role: .assistant, content: ""))
 
         do {
-            let allRecs = recordsProvider?() ?? []
             let recall = await recordRecall.recall(query: q, from: allRecs)
             let recentRounds = buildRecentRounds()
             let upcoming = calendarManager?.allEvents ?? []
-
-            let pinnedRecordIDs = Self.computePinnedRecordIDs(
-                followupQuestion: q, messages: messages, allRecords: allRecs)
 
             let (full, tokens) = try await withCheckedThrowingContinuation { cont in
                 let service = aiService
@@ -359,13 +362,16 @@ final class SparkViewModel: ObservableObject {
     }
 
     private static func computePinnedRecordIDs(
-        followupQuestion: String, messages: [ChatMessage], allRecords: [NoteRecord]
+        previousAssistant: ChatMessage?,
+        allRecords: [NoteRecord]
     ) -> [UUID] {
-        guard SparkIntentDetector.isShortFollowup(followupQuestion) else { return [] }
-        guard let lastAssist = messages.last(where: { $0.role == .assistant }),
-              !lastAssist.citations.isEmpty else { return [] }
-        let validIDs = Set(allRecords.filter { !$0.isDeleted && !$0.isEncrypted }.map { $0.id })
-        return lastAssist.citations.map { $0.recordID }.filter { validIDs.contains($0) }
+        guard let previousAssistant, !previousAssistant.citations.isEmpty else { return [] }
+        let validIDs = Set(
+            allRecords
+                .filter { !$0.isDeleted && !$0.isEncrypted }
+                .map(\.id)
+        )
+        return previousAssistant.citations.map(\.recordID).filter { validIDs.contains($0) }
     }
 
     private func triggerMemoryCompressionIfNeeded() {

@@ -7,9 +7,17 @@ private final class MockAIService: SparkAIServing {
     var responseText = "Mock response"
     var responseTokens = 42
     var askCallCount = 0
+    private(set) var receivedPinnedRecordIDs: [[UUID]] = []
 
-    func ask(question: String, recall: RecalledRecords, recentRounds: [ConversationRound], upcomingEvents: [ScheduledEvent], pinnedRecordIDs: [UUID]) async throws -> (text: String, tokens: Int) {
+    func ask(
+        question: String,
+        recall: RecalledRecords,
+        recentRounds: [ConversationRound],
+        upcomingEvents: [ScheduledEvent],
+        pinnedRecordIDs: [UUID]
+    ) async throws -> (text: String, tokens: Int) {
         askCallCount += 1
+        receivedPinnedRecordIDs.append(pinnedRecordIDs)
         return (responseText, responseTokens)
     }
 
@@ -300,5 +308,79 @@ final class SparkViewModelTests: XCTestCase {
         let cites = SparkAIService.mapCitations(from: "见[来源2]", records: promptRecords)
         XCTAssertEqual(cites.map { $0.recordID }, [oldHit.id],
             "[来源2] 必须映射到 recall.records[1]=oldHit，而非全量列表第2条=mid")
+    }
+
+    // MARK: - Helpers for citation full-text continuation tests
+
+    private func makeRecord(
+        title: String = "英文文章",
+        detailedContent: String = "A complete English article."
+    ) -> NoteRecord {
+        NoteRecord(
+            id: UUID(),
+            capturedAt: Date(),
+            localImagePaths: ["mock://article"],
+            title: title,
+            detailedContent: detailedContent
+        )
+    }
+
+    private func waitForAskCount(
+        _ expected: Int,
+        service: MockAIService,
+        timeoutIterations: Int = 100
+    ) async throws {
+        for _ in 0..<timeoutIterations {
+            if service.askCallCount >= expected { return }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        XCTFail("Expected \(expected) ask calls, got \(service.askCallCount)")
+    }
+
+    // MARK: - Citation full-text continuation regression
+
+    func testImmediateNaturalFollowup_pinsPriorAssistantCitation() async throws {
+        let mockAI = MockAIService()
+        mockAI.responseText = "找到了这篇英文文章：[来源1]"
+        let record = makeRecord()
+        let vm = SparkViewModel(aiService: mockAI, repository: MockRepository())
+        vm.recordsProvider = { [record] }
+
+        vm.inputText = "有一篇英文拍记，帮我找出来"
+        vm.sendMessage()
+        try await waitForAskCount(1, service: mockAI)
+        XCTAssertEqual(vm.messages.last?.citations.map(\.recordID), [record.id])
+
+        vm.inputText = "对，就是这条"
+        vm.sendMessage()
+        try await waitForAskCount(2, service: mockAI)
+
+        XCTAssertEqual(mockAI.receivedPinnedRecordIDs[0], [])
+        XCTAssertEqual(mockAI.receivedPinnedRecordIDs[1], [record.id])
+    }
+
+    func testImmediateFollowup_doesNotPinDeletedOrEncryptedRecord() async throws {
+        for shouldEncrypt in [false, true] {
+            let mockAI = MockAIService()
+            mockAI.responseText = "找到了这篇英文文章：[来源1]"
+            var currentRecords = [makeRecord()]
+            let vm = SparkViewModel(aiService: mockAI, repository: MockRepository())
+            vm.recordsProvider = { currentRecords }
+
+            vm.inputText = "有一篇英文拍记，帮我找出来"
+            vm.sendMessage()
+            try await waitForAskCount(1, service: mockAI)
+
+            if shouldEncrypt {
+                currentRecords[0].isEncrypted = true
+            } else {
+                currentRecords[0].isDeleted = true
+            }
+            vm.inputText = "对，就是这条"
+            vm.sendMessage()
+            try await waitForAskCount(2, service: mockAI)
+
+            XCTAssertEqual(mockAI.receivedPinnedRecordIDs[1], [])
+        }
     }
 }
