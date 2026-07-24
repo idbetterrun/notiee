@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Protocol through which AIPipelineManager reads and mutates records during processing.
 protocol AIPipelineRecordAccess: AnyObject {
@@ -70,6 +73,16 @@ final class AIPipelineManager {
         }
     }
 
+    /// 直接 await 处理完成——供 App Intent 的 perform() 调用，
+    /// 避免 fire-and-forget Task 在 extension 进程退出时被杀。
+    func processAndWait(
+        recordID: UUID,
+        localImagePaths: [String],
+        eventTitle: String?
+    ) async {
+        await process(recordID: recordID, localImagePaths: localImagePaths, eventTitle: eventTitle)
+    }
+
     func resumePendingProcessing() async {
         guard let access = recordAccess else { return }
 
@@ -94,6 +107,15 @@ final class AIPipelineManager {
         guard !inFlightRecordIDs.contains(recordID) else { return }
         inFlightRecordIDs.insert(recordID)
         defer { inFlightRecordIDs.remove(recordID) }
+
+        // 申请后台执行时间：用户退出 app / 划走后，系统仍给约 30s 让请求跑完，
+        // 避免拍记处理被立刻取消（否则上游返回 499、记录变 .failed 需重试）。
+        #if canImport(UIKit)
+        let bgTask = await UIApplication.shared.beginBackgroundTask(withName: "ai-process-\(recordID)")
+        defer {
+            if bgTask != .invalid { UIApplication.shared.endBackgroundTask(bgTask) }
+        }
+        #endif
 
         guard let access = recordAccess else { return }
         guard aiEnabled else {

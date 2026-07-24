@@ -36,6 +36,21 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-07-24 — Product direction agreed: Spark Emergence _(both targets when implemented; no source change)_
+
+- The planned personal-knowledge discovery feature is named **Emergence** (Chinese UI name: `涌现`), powered by Spark. It must not be branded as “Sprouting” / `发芽`.
+- Report vocabulary is fixed: `起点` (core proposition), `脉络` (connections), `新见` (new insight; replaces “Aha moment”), `回声` (a resonant source sentence and extension), `未竟` (open questions / blind spots), and `来源` (verifiable references). Daily aggregation is `今日涌现`.
+- Product promise: “not merely similar notes”; it explains why selected records connect and what new perspective arises. Copy approved for the feature: “Spark Emergence is Notiee’s personal knowledge-discovery capability: starting from one or more records, it connects historical notes, relevant theory, and trustworthy sources to reveal connections that were not previously explicit.”
+- Entry points: (1) a `涌现` toolbar icon immediately left of Share in a record detail; (2) `涌现` action in record-library multi-select; (3) a conditional daily `今日涌现` notification (default 20:00, user-disableable and only when enough meaningful candidates exist); (4) Spark detects an implicit desire for cross-note connections, patterns, blind spots, or extension and offers a user-confirmed suggestion, never starts analysis automatically.
+- All entry points open one shared native bottom-sheet/floating `涌现` experience, retaining the underlying detail, list, or Spark conversation rather than navigating to a separate Spark screen. The user confirms the selected record scope before generation. The sheet can offer “continue in Spark” after the report. Existing “Deep Association Mode” UI is weak (opaque top-3 semantic-similarity links); retain its local vector capability only as an Emergence candidate-retrieval layer, and replace its user-facing experience rather than exposing raw recommendations.
+- Future implementation is shared UI/domain behavior in both targets. Transport remains isolated: Notiee free calls the SCF-backed Spark/AI path; Notiee+ calls the user-configured provider directly.
+
+### 2026-07-24 — Diagnosed Korean/Japanese vision-note false failures _(free target only; no source change)_
+
+- SCF successfully completed both reported `POST /ai/process` requests (HTTP response with `content`, `tokensUsed`, and quota; 40-55 seconds), so the fault is after the backend response rather than OCR, model generation, quota, or SCF timeout.
+- In both captured model payloads, `definitions` is a JSON array of strings such as `"全国両会：中国の..."` / `"토지대장: ..."`. `RealAIProcessingService.parseStructuredNote` instead decodes it strictly as `[ParsedDefinition]`, where each element must be an object with `term` and `explanation` (`Notiee/Services/RealAIProcessingService.swift`). `JSONDecoder` therefore throws a type mismatch; `BackendAIProcessingService` propagates it and `AIPipelineManager` marks the record `.failed`.
+- The prompt asks for objects, but model output is not schema-enforced, so foreign-language output exposed an existing parser robustness gap rather than a Korean/Japanese OCR problem. A future fix should add a failing parser test using this exact string-array shape, then tolerate both object and string definitions (or omit malformed definitions) without discarding the valid title/body. The shared parser is also used by Notiee+; any parser fix affects both targets, even though this incident is on the free SCF path.
+
 ### 2026-07-23 — AI latency root-cause audit _(no product-target change; read-only investigation)_
 
 - **Classification:** no source/product change. The findings apply to the Notiee free-target backend path; the non-streaming Spark UI architecture is shared with Notiee+ (whose transport is direct-to-provider instead of SCF).

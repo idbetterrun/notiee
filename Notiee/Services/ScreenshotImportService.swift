@@ -29,4 +29,15 @@ struct ScreenshotImportService {
         store.processImportedScreenshot(recordID: record.id)
         return record.id
     }
+
+    /// App Intent 专用：直接 await 处理完成，避免 extension 进程退出时 Task 被杀。
+    func importScreenshotDataAndWait(_ data: Data) async throws -> UUID {
+        guard let image = UIImage(data: data) else {
+            throw ScreenshotImportError.invalidImage
+        }
+        let imagePath = try imageSaver.saveImage(image)
+        let record = store.captureShortcutScreenshot(localImagePath: imagePath)
+        await store.processImportedScreenshotAndWait(recordID: record.id)
+        return record.id
+    }
 }

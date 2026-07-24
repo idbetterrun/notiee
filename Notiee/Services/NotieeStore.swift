@@ -400,6 +400,16 @@ final class NotieeStore: ObservableObject {
         )
     }
 
+    /// 直接 await 处理完成——供 App Intent 的 perform() 调用。
+    func processImportedScreenshotAndWait(recordID: UUID) async {
+        guard let record = recordManager.record(id: recordID) else { return }
+        await aiPipelineManager.processAndWait(
+            recordID: record.id,
+            localImagePaths: record.localImagePaths,
+            eventTitle: eventTitle(for: record)
+        )
+    }
+
     func updateRecordEvent(recordID: UUID, newEventID: UUID?) {
         recordManager.updateRecordEvent(recordID: recordID, newEventID: newEventID)
     }

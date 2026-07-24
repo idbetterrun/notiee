@@ -111,12 +111,10 @@ enum ScenePreset: String, CaseIterable, Codable, Identifiable, Sendable {
 
     static var `default`: ScenePreset { .professional }
 
+    /// 场景预设已下线：统一返回默认预设，忽略历史存储值，
+    /// 保证所有用户走同一套字段配置、输出格式一致。
     static func load() -> ScenePreset {
-        guard let rawValue = UserDefaults.standard.string(forKey: UDK.scenePreset),
-              let preset = ScenePreset(rawValue: rawValue) else {
-            return .default
-        }
-        return preset
+        return .default
     }
 
     func save() {

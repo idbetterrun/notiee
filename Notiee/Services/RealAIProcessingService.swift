@@ -213,36 +213,148 @@ struct RealAIProcessingService: AIProcessingService {
             throw AIError.parsingFailed
         }
 
+        // 所有字段都做容错：模型输出格式非确定性，任何单个字段的形态波动
+        // 都不能拖垮整份有效笔记。缺失/类型不符一律降级为安全默认值。
         struct ParsedOutput: Decodable {
-            let title: String
-            let summary: String
+            let title: String?
+            let summary: String?
             let detailedContent: String?
-            let todos: [String]
-            let keyPoints: [String]?
-            let definitions: [ParsedDefinition]?
-        }
-
-        struct ParsedDefinition: Decodable {
-            let term: String
-            let explanation: String
+            let todos: LenientStringArray?
+            let keyPoints: LenientStringArray?
+            let definitions: LenientDefinitions?
         }
 
         do {
             let parsed = try JSONDecoder().decode(ParsedOutput.self, from: data)
             return AIProcessingResult(
-                title: parsed.title,
+                title: parsed.title?.nonEmpty ?? "无标题",
                 ocrText: ocrText,
-                summary: parsed.summary,
-                detailedContent: parsed.detailedContent ?? "无详细内容",
-                todos: parsed.todos,
-                keyPoints: parsed.keyPoints ?? [],
-                definitions: (parsed.definitions ?? []).map { KeyDefinition(term: $0.term, explanation: $0.explanation) },
+                summary: parsed.summary ?? "",
+                detailedContent: parsed.detailedContent?.nonEmpty ?? "无详细内容",
+                todos: parsed.todos?.values ?? [],
+                keyPoints: parsed.keyPoints?.values ?? [],
+                definitions: (parsed.definitions?.values ?? [])
+                    .filter { !$0.term.isEmpty }
+                    .map { KeyDefinition(term: $0.term, explanation: $0.explanation) },
                 modelsUsed: modelsUsed,
                 tokenUsage: 0
             )
         } catch {
             print("Failed to decode JSON: \(error). Cleaned JSON: \(String(extractedJSON.prefix(300)))")
             throw AIError.parsingFailed
+        }
+    }
+
+    // MARK: - Lenient decoding helpers
+    //
+    // 模型返回的 JSON 字段形态不稳定（同一字段可能是数组/字典/字符串，或干脆缺失）。
+    // 这些包装类型吸收所有已知与未知形态，解不出就退化为空，绝不抛错——
+    // 保证只要顶层 JSON 能解析，笔记就能落地，不因某个次要字段浪费整次 token。
+
+    /// 术语解释。接受 {term, explanation} 对象、"术语：解释" 字符串两种元素形态。
+    struct ParsedDefinition: Decodable {
+        let term: String
+        let explanation: String
+
+        init(term: String, explanation: String) {
+            self.term = term
+            self.explanation = explanation
+        }
+
+        init(from decoder: Decoder) throws {
+            if let single = try? decoder.singleValueContainer(),
+               let raw = try? single.decode(String.self) {
+                let separators: [Character] = ["：", ":", "—", "-"]
+                if let idx = raw.firstIndex(where: { separators.contains($0) }) {
+                    term = String(raw[..<idx]).trimmingCharacters(in: .whitespaces)
+                    explanation = String(raw[raw.index(after: idx)...]).trimmingCharacters(in: .whitespaces)
+                } else {
+                    term = raw.trimmingCharacters(in: .whitespaces)
+                    explanation = ""
+                }
+                return
+            }
+            let obj = try decoder.container(keyedBy: CodingKeys.self)
+            term = try obj.decode(String.self, forKey: .term)
+            explanation = (try? obj.decode(String.self, forKey: .explanation)) ?? ""
+        }
+
+        enum CodingKeys: String, CodingKey { case term, explanation }
+    }
+
+    /// definitions 字段整体容错：接受对象数组、字符串数组、
+    /// 字典 {"术语":"解释"}，或任意无法识别的形态（→ 空）。
+    struct LenientDefinitions: Decodable {
+        let values: [ParsedDefinition]
+
+        init(from decoder: Decoder) throws {
+            // 形态 1：数组（元素为对象或字符串，逐个容错，跳过坏元素）
+            if var arr = try? decoder.unkeyedContainer() {
+                var out: [ParsedDefinition] = []
+                while !arr.isAtEnd {
+                    if let d = try? arr.decode(ParsedDefinition.self) {
+                        out.append(d)
+                    } else {
+                        _ = try? arr.decode(AnyCodable.self) // 消费掉坏元素继续
+                    }
+                }
+                values = out
+                return
+            }
+            // 形态 2：字典 {"术语":"解释", ...}
+            if let dict = try? decoder.singleValueContainer().decode([String: String].self) {
+                values = dict.map { ParsedDefinition(term: $0.key, explanation: $0.value) }
+                return
+            }
+            // 形态 3：无法识别 → 空，绝不抛错
+            values = []
+        }
+    }
+
+    /// todos / keyPoints 字段容错：接受字符串数组，或单个字符串，或其他形态（→ 空）。
+    struct LenientStringArray: Decodable {
+        let values: [String]
+
+        init(from decoder: Decoder) throws {
+            if var arr = try? decoder.unkeyedContainer() {
+                var out: [String] = []
+                while !arr.isAtEnd {
+                    if let s = try? arr.decode(String.self) {
+                        let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !t.isEmpty { out.append(t) }
+                    } else {
+                        _ = try? arr.decode(AnyCodable.self)
+                    }
+                }
+                values = out
+                return
+            }
+            if let single = try? decoder.singleValueContainer(),
+               let s = try? single.decode(String.self) {
+                let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                values = t.isEmpty ? [] : [t]
+                return
+            }
+            values = []
+        }
+    }
+
+    /// 用于安全消费并丢弃任意 JSON 值。
+    private struct AnyCodable: Decodable {
+        init(from decoder: Decoder) throws {
+            if let c = try? decoder.singleValueContainer(), c.decodeNil() { return }
+            if var u = try? decoder.unkeyedContainer() {
+                while !u.isAtEnd { _ = try? u.decode(AnyCodable.self) }
+                return
+            }
+            if let k = try? decoder.container(keyedBy: AnyKey.self) {
+                for key in k.allKeys { _ = try? k.decode(AnyCodable.self, forKey: key) }
+            }
+        }
+        struct AnyKey: CodingKey {
+            var stringValue: String; var intValue: Int?
+            init?(stringValue: String) { self.stringValue = stringValue; intValue = nil }
+            init?(intValue: Int) { self.intValue = intValue; stringValue = String(intValue) }
         }
     }
 
@@ -282,5 +394,13 @@ enum AIError: LocalizedError {
         case .apiError(let msg): return "API 调用失败：\(msg)"
         case .parsingFailed: return "返回结果解析失败"
         }
+    }
+}
+
+fileprivate extension String {
+    /// 去除首尾空白后为空则返回 nil，便于用 `?? 默认值` 兜底。
+    var nonEmpty: String? {
+        let t = trimmingCharacters(in: .whitespacesAndNewlines)
+        return t.isEmpty ? nil : t
     }
 }

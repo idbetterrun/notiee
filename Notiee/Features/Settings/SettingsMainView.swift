@@ -17,12 +17,8 @@ struct SettingsMainView: View {
     var body: some View {
         Form {
             Section("常规") {
-                Picker("使用场景", selection: $viewModel.scenePreset) {
-                    ForEach(ScenePreset.allCases) { preset in
-                        Label(preset.displayName, systemImage: preset.iconName)
-                            .tag(preset)
-                    }
-                }
+                // 使用场景预设已下线：各场景字段差异导致解析格式不稳定，
+                // 统一走默认预设（ScenePreset.default）。
 
                 Picker("App 启动页", selection: $viewModel.defaultTab) {
                     ForEach(AppTab.launchCandidates) { tab in
@@ -62,7 +58,6 @@ struct SettingsMainView: View {
             .onChange(of: viewModel.theme) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.fontSize) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.language) { _, _ in viewModel.saveAll() }
-            .onChange(of: viewModel.scenePreset) { _, _ in viewModel.saveAll() }
             .onChange(of: viewModel.accentColor) { _, _ in viewModel.saveAll() }
 
             Section("大模型") {
