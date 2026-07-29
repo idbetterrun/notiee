@@ -265,6 +265,11 @@
 		200000000000000000000029 /* MockAIProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000029 /* MockAIProcessingService.swift */; };
 		200000000000000000000030 /* MockAIProcessingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000030 /* MockAIProcessingServiceTests.swift */; };
 		200000000000000000000031 /* AIPipelineRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000031 /* AIPipelineRecoveryTests.swift */; };
+		200000000000000000000040 /* TodayDashboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000040 /* TodayDashboardState.swift */; };
+		200000000000000000000041 /* TodayContextResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000041 /* TodayContextResolver.swift */; };
+		200000000000000000000042 /* TodayDashboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000040 /* TodayDashboardState.swift */; };
+		200000000000000000000043 /* TodayContextResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000041 /* TodayContextResolver.swift */; };
+		200000000000000000000044 /* TodayContextResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000042 /* TodayContextResolverTests.swift */; };
 		200000000000000000000032 /* AIBackgroundTaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000032 /* AIBackgroundTaskScheduler.swift */; };
 		200000000000000000000033 /* NotieeProcessingRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000033 /* NotieeProcessingRuntime.swift */; };
 		200000000000000000000034 /* ScreenshotImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000037 /* ScreenshotImportService.swift */; };
@@ -596,6 +601,9 @@
 		100000000000000000000037 /* ScreenshotImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotImportService.swift; sourceTree = "<group>"; };
 		100000000000000000000038 /* NotieeScreenshotIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotieeScreenshotIntent.swift; sourceTree = "<group>"; };
 		100000000000000000000039 /* ScreenshotImportServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotImportServiceTests.swift; sourceTree = "<group>"; };
+		100000000000000000000040 /* TodayDashboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDashboardState.swift; sourceTree = "<group>"; };
+		100000000000000000000041 /* TodayContextResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayContextResolver.swift; sourceTree = "<group>"; };
+		100000000000000000000042 /* TodayContextResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayContextResolverTests.swift; sourceTree = "<group>"; };
 		100000000000000000000035 /* CreateItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateItemSheet.swift; sourceTree = "<group>"; };
 		100000000000000000000036 /* ImportScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportScheduleView.swift; sourceTree = "<group>"; };
 		1127B96E4F67B879911608DB /* LocalEmbeddingService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalEmbeddingService.swift; sourceTree = "<group>"; };
@@ -978,6 +986,8 @@
 				100000000000000000000035 /* CreateItemSheet.swift */,
 				BD860C53F5F1081AFF38C022 /* TagEditSheet.swift */,
 				793B134A802E2B48548F0F06 /* TodoBucketer.swift */,
+				100000000000000000000040 /* TodayDashboardState.swift */,
+				100000000000000000000041 /* TodayContextResolver.swift */,
 			);
 			path = Notiee/Features/Today;
 			sourceTree = SOURCE_ROOT;
@@ -1098,6 +1108,7 @@
 				100000000000000000000011 /* ScheduleMatcherTests.swift */,
 				100000000000000000000031 /* AIPipelineRecoveryTests.swift */,
 				100000000000000000000039 /* ScreenshotImportServiceTests.swift */,
+				100000000000000000000042 /* TodayContextResolverTests.swift */,
 				100000000000000000000013 /* ProjectConfigurationTests.swift */,
 				100000000000000000000014 /* TodayViewModelTests.swift */,
 				100000000000000000000016 /* CaptureViewModelTests.swift */,
@@ -1592,6 +1603,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				200000000000000000000042 /* TodayDashboardState.swift in Sources */,
+				200000000000000000000043 /* TodayContextResolver.swift in Sources */,
 				1803E3822FF4EBEA004FEE5F /* RealAIProcessingService.swift in Sources */,
 				1803E3832FF4EBEA004FEE5F /* AIAPIClient.swift in Sources */,
 				1803E3842FF4EBEA004FEE5F /* AIProcessingService.swift in Sources */,
@@ -1795,6 +1808,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				200000000000000000000040 /* TodayDashboardState.swift in Sources */,
+				200000000000000000000041 /* TodayContextResolver.swift in Sources */,
 				38C4B1B3BE299EA50CFCD535 /* BackendAPIClient.swift in Sources */,
 				5863558BFB0B78D727AC25A4 /* AuthService.swift in Sources */,
 				E9F84FDBFD14269776F3016E /* BackendAIProcessingService.swift in Sources */,
@@ -1996,6 +2011,7 @@
 				200000000000000000000011 /* ScheduleMatcherTests.swift in Sources */,
 				200000000000000000000031 /* AIPipelineRecoveryTests.swift in Sources */,
 				200000000000000000000038 /* ScreenshotImportServiceTests.swift in Sources */,
+				200000000000000000000044 /* TodayContextResolverTests.swift in Sources */,
 				200000000000000000000013 /* ProjectConfigurationTests.swift in Sources */,
 				200000000000000000000014 /* TodayViewModelTests.swift in Sources */,
 				200000000000000000000016 /* CaptureViewModelTests.swift in Sources */,

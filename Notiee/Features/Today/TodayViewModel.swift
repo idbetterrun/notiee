@@ -145,6 +145,21 @@ final class TodayViewModel: ObservableObject {
             .sorted { $0.capturedAt > $1.capturedAt }
     }
 
+    // MARK: - Dashboard State
+
+    private let contextResolver = TodayContextResolver()
+
+    /// Today 2.0 Context Dashboard state: deterministic Hero + bounded supporting data.
+    var dashboardState: TodayDashboardState {
+        contextResolver.resolve(
+            now: currentDate,
+            events: events,
+            todos: todos,
+            records: records,
+            calendar: calendar
+        )
+    }
+
     // MARK: - Formatted Date
 
     var formattedDateWithWeek: String {
