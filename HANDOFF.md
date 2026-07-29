@@ -36,6 +36,29 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-07-29 — Diagnosed NewUIPreview dock buttons needing multiple taps _(both targets; read-only investigation, no fix applied yet)_
+
+- Symptom (user report): the three bottom dock controls in Settings → 实验室 → 新 UI 预览 (Today circle, Spark capsule, Records circle) show press feedback but require several taps before the tab actually switches / Spark expands; feels laggy.
+- Root cause: iOS 26 Liquid Glass touch handling, two compounding factors in `Notiee/Features/Settings/NewUIPreview/`:
+  1. `newUIPreviewGlass(in:interactive: true)` applies `.glassEffect(.clear.interactive(), in:)` to the **label inside** each `Button` (`NewUIPreviewGlass.swift`, used by `NewUIPreviewDock.swift`). Interactive glass has its own touch channel that operates independently of normal hit-testing (Apple Forums thread 816366: it reacts even when `allowsHitTesting(false)`). The visible "press feedback" is largely the glass's built-in micro-interaction, which fires on every touch regardless of whether the `Button`'s tap recognizer gets the sequence — so feedback shows while the action is dropped.
+  2. Three adjacent interactive glass surfaces sit 14 pt apart in one `HStack` with **no `GlassEffectContainer`**. iOS 26 groups adjacent glass surfaces; the grouped gesture handling silently consumes/reroutes touches (documented gotcha), making off-center taps flaky. Explicit shapes (`Circle`/`Capsule`) mitigate but do not eliminate it.
+- Why 100% reproducible here: deployment target is iOS 26, so the `#available(iOS 26)` glass path always runs; the pre-26 `.ultraThinMaterial` fallback has no touch side effects but never executes.
+- Not the cause: `NewUIPreviewPressStyle` (plain isPressed animation), `NewUIPreviewState.select(_:)`'s `withAnimation`, ScrollView overlay ordering (dock is the top ZStack sibling), safe-area placement.
+- Fix directions (NOT applied — user asked for diagnosis only): (a) move `glassEffect` from the label onto the `Button` itself so there is exactly one touch handler; (b) wrap the dock `HStack` in `GlassEffectContainer(spacing: 14)`; (c) optionally drop the custom press style (interactive glass already gives press feedback) or drop `.interactive()` if flakiness persists.
+- Target classification: the six NewUIPreview files are in **both** Notiee and Notiee+ targets (two PBXBuildFile sets in project.pbxproj), so any fix affects both targets. Files are Lab-preview only; main-app UI untouched.
+
+### 2026-07-29 — Read-only audit of `notiee-newfront` prototype _(no product-target change; no product source change)_
+
+- `/Users/dxm/Documents/coding/notiee-newfront` is a separate Git repository containing a small Swift Package prototype for the planned three-part navigation: Today, a prominent central Spark dock, and Records.
+- It contains seven SwiftUI source files (350 lines) implementing an iOS 26 native Liquid Glass dock, placeholder Today/Records content, and a bottom-entering Spark composer. It has no data/service integration, localization resources, tests, or connection to the main Notiee project.
+- `Package.swift` declares only a library product and the sources contain `ContentView` but no `@main App`, so it is not currently a directly runnable iOS application despite `design-qa.md` instructing the reader to run it in a simulator. The reference image recorded in that QA file points to a temporary path that no longer exists.
+- The prototype repository is on `main` at `e3d1114`; its only working-tree change is a tracked `Sources/.DS_Store`. Its ignored local `.build` directory accounts for almost all of the repository's 191 MB disk usage.
+
+### 2026-07-28 — Product copy review: personal intelligence positioning _(no product-target change; no source change)_
+
+- The existing end-state statement correctly emphasizes user-owned knowledge, experiences, and thinking style, but it frames the product as a static “structured memory body.” Future positioning should explicitly retain Spark/Agent capability: it should understand, reason from, converse with, and act through that personal context.
+
+
 ### 2026-07-24 — Product direction agreed: Spark Emergence _(both targets when implemented; no source change)_
 
 - The planned personal-knowledge discovery feature is named **Emergence** (Chinese UI name: `涌现`), powered by Spark. It must not be branded as “Sprouting” / `发芽`.

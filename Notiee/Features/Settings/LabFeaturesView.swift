@@ -35,6 +35,18 @@ struct LabFeaturesView: View {
             }
             
             Section {
+                NavigationLink {
+                    NewUIPreviewRootView()
+                } label: {
+                    Label("新 UI 预览", systemImage: "sparkles.rectangle.stack")
+                }
+            } header: {
+                Text("界面")
+            } footer: {
+                Text("预览下一代导航方向的原型：底部一排玻璃控件 + 中间的 Spark 胶囊。纯静态样例，不接你的真实记录，也不会改变主 App 的界面。进入后点左上角菜单键退出。")
+            }
+
+            Section {
                 Toggle(isOn: $lowConsumptionModeEnabled) {
                     Label("低消耗模式", systemImage: "leaf.fill")
                 }
