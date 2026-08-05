@@ -36,6 +36,33 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-05 — Rebuilt NewUIPreview Records layout containment _(both targets; experimental preview only)_
+
+- Reworked the shared Records preview so the viewport computes one explicit content/column width contract (16 pt page insets, 12 pt column spacing) and passes the resulting width through the masonry layout, every card, and every media template. Accessibility Dynamic Type still switches the same layout to one full-width column.
+- Removed the masonry cache that could reuse stale frames for same-count content changes. The custom `Layout` now remeasures current subviews for both sizing and placement while preserving shorter-column assignment, left-column tie breaking, and source-order accessibility traversal.
+- Cards now enforce an exact outer width and a `cardWidth - 24` content width. Regular card timestamps use contextual precision (time today, month/day within the year, full date across years) and fall back to a vertical status/date arrangement when the horizontal header does not fit. Event/folder metadata is one truncating line.
+- Replaced nested infinitely expanding media stacks with pure, testable CGRect geometry for 0/1/2/3/4/5+ images. Single images clamp aspect ratio and height; two-image, one-large-plus-two, and 2x2 templates use the passed content width; 5+ retains the final `+N` overlay. Images clip only inside their assigned media rectangles.
+- Records now uses a pinned `LazyVStack` section header: the large `记录` title scrolls away, the Glass search field remains pinned, and the pinned band has an opaque semantic background. The navigation-bar background is visible only for the Records destination, preventing lab controls from covering cards; Today keeps its transparent/Aurora treatment. The 124 pt bottom content inset and overlay-based detail navigation remain.
+- Extended `NewUIPreviewMasonryLayoutTests` with 320/375/428 pt-derived column widths, accessibility single-column width, media bounds/non-overlap checks at four content widths, and `UIHostingController.sizeThatFits` checks for completed 6-image, failed, pending, processing, and encrypted cards.
+- Verification: affected Records/model sources type-check against the iOS Simulator SDK in both normal and `NOTIEE_PLUS` configurations; the updated test source type-checks against a temporary testable Notiee module; RootView and tests parse; `git diff --check` and project `plutil -lint` pass. A real scheme build was attempted with cached package checkouts but stopped before source compilation because the managed sandbox cannot access CoreSimulator or SwiftPM caches; the required sandbox escalation service also failed. The updated XCTest suite could not be executed, and simulator/device visual QA remains required.
+- No production Records, data store, persistence, detail data, localization, asset, target membership, backend, or BYOK path changed. No commit or push was created. Existing uncommitted Today/HANDOFF work was preserved.
+
+### 2026-08-05 — Investigated broken Records masonry rendering _(both targets; diagnosis only)_
+
+- The two device screenshots show the same stable failure rather than a transient animation: processing/encrypted cards remain within their columns, while regular, failed, and multi-image cards expand beyond the proposed column width and overlap the adjacent column.
+- Primary cause: `NewUIPreviewMasonryLayout` computes correct equal-width frames, but `placeSubviews` only proposes that width. `NewUIPreviewRecordCard` does not enforce it, and the regular branch contains an unbreakable state/date header plus media views that expand with infinite maximum dimensions. SwiftUI proposals are advisory, so those cards render at their larger ideal width even though the masonry geometry continues placing the next column at the calculated x-coordinate.
+- Secondary structural issues: Records title/search live inside the scrolling content even though the approved plan calls for a persistent search field; the root navigation toolbar background is hidden, so menu/scenario controls visibly cover cards after scrolling. The masonry cache keys only width and subview count, so same-count search replacements or content-size changes can reuse stale heights.
+- Current tests cover only the pure rectangle allocator with synthetic `CGSize` values. They do not integrate the SwiftUI `Layout`, real record cards, localized timestamps, media variants, viewport widths, cache invalidation, or overflow assertions. Simulator visual QA never ran in the managed environment, which is why the integration failure was not caught before the feature commit.
+- Recommended redesign boundary: make the viewport own an explicit content width; have the masonry and every card/media variant accept and enforce the derived column width; compact or vertically restructure the timestamp header; move persistent page chrome outside the scrolling masonry; and add real-card layout/snapshot coverage at small/large iPhones, three locales, and accessibility sizes. Do not treat clipping or smaller fonts as a sufficient fix.
+- No Swift, project, localization, or asset file was changed during this investigation. The issue affects the shared NewUIPreview implementation in both Notiee and Notiee+; production Records remains untouched.
+
+### 2026-08-05 — Made the Today category row non-scrollable _(both targets; experimental preview only)_
+
+- Removed the Today `记录 / 待办 / 日程` selector's horizontal `ScrollViewReader`/`ScrollView`. The three categories now stay visible in one fixed `HStack`, while each button still animates between icon-only and icon-plus-title states.
+- The Hero shortcut rail remains independently horizontally scrollable because it is a separate command row; the lower Today selector no longer requires a swipe to reveal or reach any category.
+- The change is limited to the shared `NewUIPreviewTodayView.swift` and applies to both Notiee and Notiee+. Production Today and all capture/data paths remain untouched.
+- Verification still relies on SDK type checks and static validation because the managed environment cannot run simulator XCTest or visual QA.
+
 ### 2026-08-05 — Refined Today shortcut rail and spacing _(both targets; experimental preview only)_
 
 - Reworked the Hero `记录 / 待办 / 日程` commands into a compact horizontally scrollable capsule rail. Each command now sizes to its icon, title, and optional non-zero count badge instead of being forced into an equal-width tile; this keeps the commands readable while preserving full capsule hit regions and semantic tinting.

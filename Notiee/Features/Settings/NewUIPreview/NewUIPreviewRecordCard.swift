@@ -1,10 +1,32 @@
+import Foundation
 import SwiftUI
+
+enum NewUIPreviewRecordCardPresentation {
+    static func compactTimestamp(
+        for date: Date,
+        relativeTo now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> String {
+        if calendar.isDate(date, inSameDayAs: now) {
+            return date.formatted(.dateTime.hour().minute())
+        }
+
+        if calendar.component(.year, from: date) == calendar.component(.year, from: now) {
+            return date.formatted(.dateTime.month(.abbreviated).day())
+        }
+
+        return date.formatted(.dateTime.year().month(.abbreviated).day())
+    }
+}
 
 struct NewUIPreviewRecordCard: View {
     let fixture: NewUIPreviewRecordFixture
+    let cardWidth: CGFloat
     let action: () -> Void
 
     private var record: NoteRecord { fixture.record }
+    private var safeCardWidth: CGFloat { max(cardWidth, 0) }
+    private var contentWidth: CGFloat { max(safeCardWidth - 24, 0) }
 
     var body: some View {
         Button(action: action) {
@@ -17,8 +39,9 @@ struct NewUIPreviewRecordCard: View {
                     regularContent
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(width: contentWidth, alignment: .leading)
             .padding(12)
+            .frame(width: safeCardWidth, alignment: .leading)
             .background(
                 Color(uiColor: .secondarySystemBackground),
                 in: RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -30,6 +53,7 @@ struct NewUIPreviewRecordCard: View {
             .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(NewUIPreviewRecordCardButtonStyle())
+        .frame(width: safeCardWidth)
         .accessibilityHint("打开记录详情")
     }
 
@@ -53,11 +77,15 @@ struct NewUIPreviewRecordCard: View {
             }
 
             if !fixture.media.isEmpty {
-                NewUIPreviewRecordMediaView(media: fixture.media)
+                NewUIPreviewRecordMediaView(
+                    media: fixture.media,
+                    availableWidth: contentWidth
+                )
             }
 
             metadata
         }
+        .frame(width: contentWidth, alignment: .leading)
     }
 
     private var encryptedContent: some View {
@@ -117,32 +145,43 @@ struct NewUIPreviewRecordCard: View {
     }
 
     private var stateAndTimestamp: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 5) {
-            Label(stateLabel, systemImage: stateSymbol)
-                .foregroundStyle(stateColor)
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                statusLabel
+                Spacer(minLength: 4)
+                timestampLabel
+            }
 
-            Spacer(minLength: 4)
-
-            Text(record.capturedAt.formatted(date: .abbreviated, time: .shortened))
-                .foregroundStyle(Color.newUIPreviewSecondary)
-                .lineLimit(1)
+            VStack(alignment: .leading, spacing: 3) {
+                statusLabel
+                timestampLabel
+            }
         }
         .font(.caption2.weight(.medium))
+        .frame(width: contentWidth, alignment: .leading)
+    }
+
+    private var statusLabel: some View {
+        Label(stateLabel, systemImage: stateSymbol)
+            .foregroundStyle(stateColor)
+            .lineLimit(1)
+    }
+
+    private var timestampLabel: some View {
+        Text(NewUIPreviewRecordCardPresentation.compactTimestamp(for: record.capturedAt))
+            .foregroundStyle(Color.newUIPreviewSecondary)
+            .lineLimit(1)
+            .monospacedDigit()
     }
 
     @ViewBuilder
     private var metadata: some View {
         let values = [fixture.eventName, fixture.folderName].compactMap { $0 }
         if !values.isEmpty {
-            HStack(spacing: 5) {
-                ForEach(values.prefix(2), id: \.self) { value in
-                    Text(value)
-                        .font(.caption2)
-                        .foregroundStyle(Color.newUIPreviewSecondary)
-                        .lineLimit(1)
-                }
-            }
-            .accessibilityElement(children: .combine)
+            Text(values.prefix(2).joined(separator: " · "))
+                .font(.caption2)
+                .foregroundStyle(Color.newUIPreviewSecondary)
+                .lineLimit(1)
         }
     }
 

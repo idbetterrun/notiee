@@ -28,7 +28,10 @@ struct NewUIPreviewRootView: View {
         .navigationBarBackButtonHidden(true)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarBackground(
+            sparkState.destination == .records && sparkState.overlay == nil ? .visible : .hidden,
+            for: .navigationBar
+        )
         .toolbar(sparkState.overlay == nil ? .visible : .hidden, for: .navigationBar)
         .toolbar { labToolbar }
         .onAppear { sparkState.namespace = sparkNamespace }

@@ -1,6 +1,17 @@
 import SwiftUI
 
 struct NewUIPreviewMasonryGeometry {
+    static func columnWidth(
+        containerWidth: CGFloat,
+        columns: Int,
+        spacing: CGFloat
+    ) -> CGFloat {
+        let columnCount = max(columns, 1)
+        let safeSpacing = max(spacing, 0)
+        let availableWidth = max(containerWidth - safeSpacing * CGFloat(columnCount - 1), 0)
+        return availableWidth / CGFloat(columnCount)
+    }
+
     static func frames(
         itemSizes: [CGSize],
         containerWidth: CGFloat,
@@ -11,8 +22,11 @@ struct NewUIPreviewMasonryGeometry {
 
         let columnCount = max(columns, 1)
         let safeSpacing = max(spacing, 0)
-        let availableWidth = max(containerWidth - safeSpacing * CGFloat(columnCount - 1), 0)
-        let columnWidth = availableWidth / CGFloat(columnCount)
+        let columnWidth = columnWidth(
+            containerWidth: containerWidth,
+            columns: columnCount,
+            spacing: safeSpacing
+        )
         var columnHeights = Array(repeating: CGFloat.zero, count: columnCount)
 
         return itemSizes.map { itemSize in
@@ -44,10 +58,7 @@ struct NewUIPreviewMasonryLayout: Layout {
     let columns: Int
     let spacing: CGFloat
 
-    struct Cache {
-        var width: CGFloat = -1
-        var frames: [CGRect] = []
-    }
+    struct Cache {}
 
     init(columns: Int = 2, spacing: CGFloat = 12) {
         self.columns = max(columns, 1)
@@ -63,11 +74,11 @@ struct NewUIPreviewMasonryLayout: Layout {
         subviews: Subviews,
         cache: inout Cache
     ) -> CGSize {
-        let width = resolvedWidth(for: proposal, subviews: subviews)
-        updateCache(&cache, width: width, subviews: subviews)
+        let width = resolvedWidth(for: proposal)
+        let frames = measuredFrames(width: width, subviews: subviews)
         return CGSize(
             width: width,
-            height: NewUIPreviewMasonryGeometry.contentHeight(for: cache.frames)
+            height: NewUIPreviewMasonryGeometry.contentHeight(for: frames)
         )
     }
 
@@ -77,12 +88,10 @@ struct NewUIPreviewMasonryLayout: Layout {
         subviews: Subviews,
         cache: inout Cache
     ) {
-        if abs(cache.width - bounds.width) > 0.5 || cache.frames.count != subviews.count {
-            updateCache(&cache, width: bounds.width, subviews: subviews)
-        }
+        let frames = measuredFrames(width: bounds.width, subviews: subviews)
 
-        for (index, subview) in subviews.enumerated() where index < cache.frames.count {
-            let frame = cache.frames[index]
+        for (index, subview) in subviews.enumerated() where index < frames.count {
+            let frame = frames[index]
             subview.place(
                 at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
                 anchor: .topLeading,
@@ -91,23 +100,19 @@ struct NewUIPreviewMasonryLayout: Layout {
         }
     }
 
-    private func resolvedWidth(for proposal: ProposedViewSize, subviews: Subviews) -> CGFloat {
+    private func resolvedWidth(for proposal: ProposedViewSize) -> CGFloat {
         if let proposedWidth = proposal.width, proposedWidth.isFinite {
             return max(proposedWidth, 0)
         }
-
-        let intrinsicWidth = subviews
-            .map { $0.sizeThatFits(.unspecified).width }
-            .filter(\.isFinite)
-            .max() ?? 0
-        return max(intrinsicWidth, 0)
+        return 0
     }
 
-    private func updateCache(_ cache: inout Cache, width: CGFloat, subviews: Subviews) {
+    private func measuredFrames(width: CGFloat, subviews: Subviews) -> [CGRect] {
         let safeWidth = max(width, 0)
-        let columnWidth = max(
-            (safeWidth - spacing * CGFloat(columns - 1)) / CGFloat(columns),
-            0
+        let columnWidth = NewUIPreviewMasonryGeometry.columnWidth(
+            containerWidth: safeWidth,
+            columns: columns,
+            spacing: spacing
         )
         let itemSizes = subviews.map { subview in
             let measured = subview.sizeThatFits(ProposedViewSize(width: columnWidth, height: nil))
@@ -117,8 +122,7 @@ struct NewUIPreviewMasonryLayout: Layout {
             )
         }
 
-        cache.width = safeWidth
-        cache.frames = NewUIPreviewMasonryGeometry.frames(
+        return NewUIPreviewMasonryGeometry.frames(
             itemSizes: itemSizes,
             containerWidth: safeWidth,
             columns: columns,

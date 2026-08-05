@@ -244,25 +244,13 @@ private struct NewUIPreviewTodaySelector: View {
     let onSelect: (NewUIPreviewTodaySection) -> Void
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(NewUIPreviewTodaySection.allCases) { section in
-                        categoryButton(section)
-                            .id(section.id)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-            .onAppear {
-                proxy.scrollTo(selection.id, anchor: .center)
-            }
-            .onChange(of: selection) { _, newSelection in
-                withAnimation(.snappy(duration: 0.35, extraBounce: 0.08)) {
-                    proxy.scrollTo(newSelection.id, anchor: .center)
-                }
+        HStack(spacing: 10) {
+            ForEach(NewUIPreviewTodaySection.allCases) { section in
+                categoryButton(section)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
     }
 
     private func categoryButton(_ section: NewUIPreviewTodaySection) -> some View {

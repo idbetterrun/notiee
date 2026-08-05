@@ -4,41 +4,78 @@ struct NewUIPreviewRecordsView: View {
     @EnvironmentObject private var previewState: NewUIPreviewState
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    private let horizontalPadding: CGFloat = 16
+    private let columnSpacing: CGFloat = 12
+
     private var columnCount: Int {
         dynamicTypeSize.isAccessibilitySize ? 1 : 2
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text("记录")
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(Color.newUIPreviewPrimary)
+        GeometryReader { proxy in
+            let contentWidth = max(proxy.size.width - horizontalPadding * 2, 0)
+            let columnWidth = NewUIPreviewMasonryGeometry.columnWidth(
+                containerWidth: contentWidth,
+                columns: columnCount,
+                spacing: columnSpacing
+            )
 
-                searchField
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    Text("记录")
+                        .font(.largeTitle.bold())
+                        .foregroundStyle(Color.newUIPreviewPrimary)
+                        .frame(width: contentWidth, alignment: .leading)
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 8)
+                        .padding(.bottom, 10)
 
-                if previewState.filteredRecordFixtures.isEmpty {
-                    emptyState
-                } else {
-                    NewUIPreviewMasonryLayout(columns: columnCount, spacing: 12) {
-                        ForEach(previewState.filteredRecordFixtures) { fixture in
-                            NewUIPreviewRecordCard(fixture: fixture) {
-                                previewState.openRecord(fixture.id)
-                            }
-                        }
+                    Section {
+                        recordsContent(
+                            contentWidth: contentWidth,
+                            columnWidth: columnWidth
+                        )
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 10)
+                        .padding(.bottom, 124)
+                    } header: {
+                        searchHeader
                     }
-                    .frame(maxWidth: .infinity)
-                    .animation(.easeOut(duration: 0.2), value: previewState.filteredRecordFixtures.map(\.id))
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 124)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .scrollIndicators(.hidden)
         }
-        .scrollIndicators(.hidden)
         .background(Color.newUIPreviewBackground)
         .accessibilityIdentifier("new-ui-preview-records")
+    }
+
+    @ViewBuilder
+    private func recordsContent(contentWidth: CGFloat, columnWidth: CGFloat) -> some View {
+        if previewState.filteredRecordFixtures.isEmpty {
+            emptyState
+                .frame(width: contentWidth)
+        } else {
+            NewUIPreviewMasonryLayout(columns: columnCount, spacing: columnSpacing) {
+                ForEach(previewState.filteredRecordFixtures) { fixture in
+                    NewUIPreviewRecordCard(
+                        fixture: fixture,
+                        cardWidth: columnWidth
+                    ) {
+                        previewState.openRecord(fixture.id)
+                    }
+                }
+            }
+            .frame(width: contentWidth, alignment: .leading)
+        }
+    }
+
+    private var searchHeader: some View {
+        searchField
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(Color.newUIPreviewBackground.opacity(0.96))
+            .zIndex(1)
     }
 
     private var searchField: some View {
