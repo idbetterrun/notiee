@@ -36,6 +36,13 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-05 — Refined Today shortcut rail and spacing _(both targets; experimental preview only)_
+
+- Reworked the Hero `记录 / 待办 / 日程` commands into a compact horizontally scrollable capsule rail. Each command now sizes to its icon, title, and optional non-zero count badge instead of being forced into an equal-width tile; this keeps the commands readable while preserving full capsule hit regions and semantic tinting.
+- Kept the lower Today selector as the only content switcher. Added modest vertical spacing between the Hero, shortcut rail, selector, and Today rows so the fixed dashboard feels less cramped without consuming the reserved lower camera/audio gesture runway.
+- The change is limited to `NewUIPreviewTodayView.swift`, shared by the Notiee and Notiee+ app targets. Production Today, Records, persistence, and capture pipelines remain untouched.
+- Verification for this follow-up: the normal and `NOTIEE_PLUS` NewUIPreview SDK type checks, `git diff --check`, and `plutil -lint Notiee.xcodeproj/project.pbxproj` pass. A focused `xcodebuild test` was attempted but stopped before source compilation because CoreSimulator is unavailable and the sandbox cannot resolve the SwiftPM package graph; simulator interaction/visual QA remains pending.
+
 ### 2026-08-05 — Today layout density and Hero shortcut discussion _(both targets; design discussion only)_
 
 - The supplied Today screenshot exposes a hierarchy problem rather than only a spacing problem: the Hero shortcut row currently reads like `9 / 0 / 0` statistics, while the Today selector repeats the same `Records / Todos / Schedule` concepts below it. The fixed Today surface intentionally leaves a lower capture-gesture runway, so that blank area should remain quiet instead of being filled with more cards.

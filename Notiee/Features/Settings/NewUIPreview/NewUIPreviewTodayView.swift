@@ -87,7 +87,7 @@ private struct NewUIPreviewDashboardContent: View {
     @EnvironmentObject private var sparkState: NewUIPreviewState
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 22) {
             hero
             shortcuts
             todaySection
@@ -115,13 +115,17 @@ private struct NewUIPreviewDashboardContent: View {
     }
 
     private var shortcuts: some View {
-        NewUIPreviewGlassContainer {
-            HStack(spacing: 10) {
-                shortcut(section: .records, symbol: "books.vertical.fill", count: sparkState.recordFixtures.count)
-                shortcut(section: .todos, symbol: "checkmark.circle.fill", count: sparkState.actionableTodos.count)
-                shortcut(section: .schedule, symbol: "calendar", count: scheduleItems.count)
+        ScrollView(.horizontal, showsIndicators: false) {
+            NewUIPreviewGlassContainer {
+                HStack(spacing: 8) {
+                    shortcut(section: .records, symbol: "books.vertical.fill", count: sparkState.recordFixtures.count)
+                    shortcut(section: .todos, symbol: "checkmark.circle.fill", count: sparkState.actionableTodos.count)
+                    shortcut(section: .schedule, symbol: "calendar", count: scheduleItems.count)
+                }
             }
+            .padding(.vertical, 2)
         }
+        .scrollIndicators(.hidden)
     }
 
     private func shortcut(section: NewUIPreviewTodaySection, symbol: String, count: Int) -> some View {
@@ -132,21 +136,29 @@ private struct NewUIPreviewDashboardContent: View {
                 sparkState.openModule(section)
             }
         } label: {
-            VStack(spacing: 6) {
+            HStack(spacing: 8) {
                 Image(systemName: symbol)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.newUIPreviewAccent)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(section.tint)
                 Text(section.title)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Color.newUIPreviewPrimary)
-                Text("\(count)")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Color.newUIPreviewSecondary)
+                    .lineLimit(1)
+                if count > 0 {
+                    Text("\(count)")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(section.tint)
+                        .padding(.horizontal, 6)
+                        .frame(minWidth: 22, minHeight: 22)
+                        .background(section.tint.opacity(0.13), in: Capsule())
+                }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 76)
-            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .newUIPreviewGlass(in: RoundedRectangle(cornerRadius: 16, style: .continuous), interactive: true)
+            .padding(.horizontal, 14)
+            .frame(minHeight: 50)
+            .fixedSize(horizontal: true, vertical: false)
+            .contentShape(Capsule())
+            .background(Color(uiColor: .secondarySystemFill), in: Capsule())
+            .newUIPreviewGlass(in: Capsule(), interactive: true)
         }
         .buttonStyle(NewUIPreviewPressStyle())
         .accessibilityLabel(Text(section.title))
@@ -154,7 +166,7 @@ private struct NewUIPreviewDashboardContent: View {
     }
 
     private var todaySection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("今天")
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(Color.newUIPreviewPrimary)
@@ -169,32 +181,34 @@ private struct NewUIPreviewDashboardContent: View {
 
     @ViewBuilder
     private var todayRows: some View {
-        switch sparkState.selectedTodaySection {
-        case .records:
-            if sparkState.todayRecords.isEmpty {
-                emptyRow("今天还没有新记录。")
-            } else {
-                ForEach(sparkState.todayRecords.prefix(3)) { record in
-                    Button { sparkState.openRecord(record.id) } label: {
-                        NewUIPreviewTodayRecordRow(record: record)
+        VStack(alignment: .leading, spacing: 8) {
+            switch sparkState.selectedTodaySection {
+            case .records:
+                if sparkState.todayRecords.isEmpty {
+                    emptyRow("今天还没有新记录。")
+                } else {
+                    ForEach(sparkState.todayRecords.prefix(3)) { record in
+                        Button { sparkState.openRecord(record.id) } label: {
+                            NewUIPreviewTodayRecordRow(record: record)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
-            }
-        case .todos:
-            if sparkState.actionableTodos.isEmpty {
-                emptyRow("今天没有待处理事项。")
-            } else {
-                ForEach(sparkState.actionableTodos.prefix(3)) { item in
-                    NewUIPreviewTodoRow(item: item)
+            case .todos:
+                if sparkState.actionableTodos.isEmpty {
+                    emptyRow("今天没有待处理事项。")
+                } else {
+                    ForEach(sparkState.actionableTodos.prefix(3)) { item in
+                        NewUIPreviewTodoRow(item: item)
+                    }
                 }
-            }
-        case .schedule:
-            if scheduleItems.isEmpty {
-                emptyRow("今天没有日程安排。")
-            } else {
-                ForEach(scheduleItems.prefix(3)) { item in
-                    NewUIPreviewScheduleRow(item: item)
+            case .schedule:
+                if scheduleItems.isEmpty {
+                    emptyRow("今天没有日程安排。")
+                } else {
+                    ForEach(scheduleItems.prefix(3)) { item in
+                        NewUIPreviewScheduleRow(item: item)
+                    }
                 }
             }
         }
