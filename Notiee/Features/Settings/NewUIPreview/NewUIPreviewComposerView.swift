@@ -9,14 +9,14 @@ struct NewUIPreviewComposerView: View {
 
     var body: some View {
         ZStack {
-            Color.black
+            Color.newUIPreviewBackground
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 Button(action: close) {
                     Image(systemName: "xmark")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.newUIPreviewPrimary)
                         .frame(width: 44, height: 44)
                         .newUIPreviewGlass(in: Circle(), interactive: true)
                 }
@@ -28,11 +28,11 @@ struct NewUIPreviewComposerView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Spark")
                         .font(.system(size: 34, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.newUIPreviewPrimary)
 
                     Text(sparkState.dockText)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.64))
+                        .foregroundStyle(Color.newUIPreviewSecondary)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 30)
@@ -56,7 +56,7 @@ struct NewUIPreviewComposerView: View {
             TextField("输入一句话…", text: $inputText)
                 .focused($isInputFocused)
                 .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.newUIPreviewPrimary)
                 .tint(Color.newUIPreviewAccent)
                 .frame(height: 38, alignment: .center)
 
@@ -64,7 +64,7 @@ struct NewUIPreviewComposerView: View {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.black)
-                    .frame(width: 38, height: 38)
+                    .frame(width: 44, height: 44)
                     .background(Circle().fill(Color.newUIPreviewAccent))
             }
             .buttonStyle(NewUIPreviewPressStyle())

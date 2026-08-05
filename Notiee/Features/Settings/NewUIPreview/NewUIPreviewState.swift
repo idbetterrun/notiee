@@ -1,28 +1,209 @@
 import SwiftUI
 import Combine
+import UIKit
 
-// 新 UI 预览：从 notiee-newfront (NotieeSparkDemo) 原样搬入，仅重命名以避免与主 App 符号冲突。
-// 这里的所有类型都只服务于实验室里的「新 UI 预览」，不参与主 App 的任何界面或数据流程。
+// 新 UI 预览：实验室里的 Today 2.0 骨架。不接主 App 的任何数据或界面流程。
+// Hero 规则选择 + bounded slots + 下拉相机 / 上拉音频手势状态机均为 mock 实现，仅用于预览方向。
 
-enum NewUIPreviewTab {
+enum NewUIPreviewTab: Equatable {
     case today
     case records
 }
 
+typealias NewUIPreviewDestination = NewUIPreviewTab
+
+enum NewUIPreviewTodaySection: String, CaseIterable, Identifiable {
+    case records
+    case todos
+    case schedule
+
+    var id: String { rawValue }
+}
+
+enum NewUIPreviewOverlay: Identifiable, Equatable {
+    case module(NewUIPreviewTodaySection)
+    case recordDetail(UUID)
+
+    var id: String {
+        switch self {
+        case .module(let section): return "module-\(section.rawValue)"
+        case .recordDetail(let recordID): return "record-\(recordID.uuidString)"
+        }
+    }
+}
+
+enum NewUIPreviewHeroContext: Equatable {
+    case activeEvent
+    case dueTodo
+    case imminentEvent
+    case recordMomentum
+    case calm
+
+    /// Execution Heroes (an active/imminent event or a due todo) pair with an actionable-todos
+    /// review slot; reflection/calm Heroes pair with a today-records review slot. Mirrors the
+    /// design spec's Hero→review-slot rule (docs/superpowers/specs/2026-07-29-today-2-context-dashboard-design.md).
+    var isExecution: Bool {
+        switch self {
+        case .activeEvent, .dueTodo, .imminentEvent: return true
+        case .recordMomentum, .calm: return false
+        }
+    }
+
+    var recommendedTodaySection: NewUIPreviewTodaySection {
+        switch self {
+        case .activeEvent, .imminentEvent: return .schedule
+        case .dueTodo: return .todos
+        case .recordMomentum, .calm: return .records
+        }
+    }
+}
+
+/// Lets the lab preview jump directly to any of the design spec's five priority-ordered Hero
+/// states, instead of relying on brittle substring matching over mock copy.
+enum NewUIPreviewScenario: String, CaseIterable, Identifiable {
+    case activeEvent
+    case dueTodo
+    case imminentEvent
+    case recordMomentum
+    case calm
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .activeEvent: return String(localized: "进行中的日程")
+        case .dueTodo: return String(localized: "临近截止的待办")
+        case .imminentEvent: return String(localized: "即将开始的日程")
+        case .recordMomentum: return String(localized: "今日记录较多")
+        case .calm: return String(localized: "安静，无紧急事项")
+        }
+    }
+}
+
+struct NewUIPreviewHero: Equatable {
+    let context: NewUIPreviewHeroContext
+    let title: String
+    let supporting: String
+    /// The active event's user-selected tag color. A missing tag intentionally
+    /// falls back to the shared Notiee green inside the Aurora renderer.
+    let auroraColorHex: String?
+
+    init(
+        context: NewUIPreviewHeroContext,
+        title: String,
+        supporting: String,
+        auroraColorHex: String? = nil
+    ) {
+        self.context = context
+        self.title = title
+        self.supporting = supporting
+        self.auroraColorHex = auroraColorHex
+    }
+}
+
+/// Tags a mock urgent item with which spec priority tier it represents, so Hero selection can
+/// switch on structured data instead of matching substrings in display copy.
+enum NewUIPreviewUrgentKind: Equatable {
+    case activeEvent
+    case dueTodo
+    case imminentEvent
+}
+
+struct NewUIPreviewUrgentItem: Identifiable, Equatable {
+    let id: UUID
+    let kind: NewUIPreviewUrgentKind
+    let title: String
+    let detail: String
+}
+
+struct NewUIPreviewTodayRecord: Identifiable, Equatable {
+    let id: UUID
+    let title: String
+    let summary: String
+    let thumbnailImageName: String?
+}
+
+struct NewUIPreviewStatistics: Equatable {
+    let todayCount: Int
+    let consecutiveDays: Int
+}
+
+enum NewUIPreviewSharedReviewSlot {
+    case todos([NewUIPreviewUrgentItem])
+    case todayRecords([NewUIPreviewTodayRecord])
+    case calm
+}
+
+enum NewUIPreviewCapturePhase: Equatable {
+    case idle
+    case preflight
+    case armed
+    case canceling
+}
+
+enum NewUIPreviewCaptureDirection: Equatable {
+    case camera
+    case audio
+}
+
 final class NewUIPreviewState: ObservableObject {
     @Published var isExpanded = false
-    @Published var expansionProgress: CGFloat = 0
     @Published var dockText: String = ""
-    @Published var todayEntryCount = 3
-    @Published var consecutiveDays = 8
-    @Published var selectedTab: NewUIPreviewTab = .today
+    @Published var destination: NewUIPreviewDestination = .today
     var namespace: Namespace.ID? = nil
 
-    private var timer: AnyCancellable?
+    /// Compatibility for the existing preview dock while destination naming becomes explicit.
+    var selectedTab: NewUIPreviewTab {
+        get { destination }
+        set { destination = newValue }
+    }
 
-    init() {
+    @Published var scenario: NewUIPreviewScenario {
+        didSet {
+            guard oldValue != scenario else { return }
+            applyScenario(resetTodaySection: true)
+        }
+    }
+
+    @Published var selectedTodaySection: NewUIPreviewTodaySection = .records
+    @Published var recordsSearchQuery = ""
+    @Published var overlay: NewUIPreviewOverlay?
+
+    @Published var hero: NewUIPreviewHero = NewUIPreviewState.calmHero
+    /// Up to two due/imminent items not already shown as the Hero.
+    @Published var urgentItems: [NewUIPreviewUrgentItem] = []
+    /// Up to three actionable todos, shown when the Hero is an execution context.
+    @Published var actionableTodos: [NewUIPreviewUrgentItem] = []
+    @Published var todayRecords: [NewUIPreviewTodayRecord] = []
+    @Published var statistics: NewUIPreviewStatistics = NewUIPreviewStatistics(todayCount: 0, consecutiveDays: 8)
+
+    let recordFixtures: [NewUIPreviewRecordFixture]
+
+    @Published var captureDirection: NewUIPreviewCaptureDirection?
+    @Published var capturePhase: NewUIPreviewCapturePhase = .idle
+    @Published var captureDragProgress: CGFloat = 0
+    @Published var cameraAffordanceVisible = false
+    @Published var captureActionToast: String?
+
+    static let committedThreshold: CGFloat = 0.6
+    static let cancelGrace: CGFloat = 0.15
+    static let dragThresholdPoints: CGFloat = 140
+
+    private var timer: AnyCancellable?
+    private var toastCancellable: AnyCancellable?
+
+    init(
+        scenario: NewUIPreviewScenario = .calm,
+        recordFixtures: [NewUIPreviewRecordFixture] = NewUIPreviewFixtures.records,
+        startsContextTimer: Bool = true
+    ) {
+        self.scenario = scenario
+        self.recordFixtures = recordFixtures
+        applyScenario(resetTodaySection: true)
         updateDockText()
-        startContextTimer()
+        if startsContextTimer {
+            startContextTimer()
+        }
     }
 
     func toggle() {
@@ -47,21 +228,217 @@ final class NewUIPreviewState: ObservableObject {
 
     func select(_ tab: NewUIPreviewTab) {
         withAnimation(.easeOut(duration: 0.2)) {
-            selectedTab = tab
+            if tab == .today, destination != .today {
+                beginTodayVisit()
+            } else {
+                destination = tab
+            }
         }
+    }
+
+    func beginTodayVisit() {
+        destination = .today
+        selectedTodaySection = hero.context.recommendedTodaySection
+    }
+
+    func selectTodaySection(_ section: NewUIPreviewTodaySection) {
+        selectedTodaySection = section
+    }
+
+    var filteredRecordFixtures: [NewUIPreviewRecordFixture] {
+        NewUIPreviewFixtures.records(matching: recordsSearchQuery, in: recordFixtures)
+    }
+
+    func recordFixture(id: UUID) -> NewUIPreviewRecordFixture? {
+        recordFixtures.first { $0.id == id }
+    }
+
+    func openRecord(_ id: UUID) {
+        guard recordFixture(id: id) != nil else { return }
+        overlay = .recordDetail(id)
+    }
+
+    func openModule(_ section: NewUIPreviewTodaySection) {
+        overlay = .module(section)
+    }
+
+    func dismissOverlay() {
+        overlay = nil
+    }
+
+    /// Sets Hero, urgent items, review-slot content, and statistics to a self-consistent mock
+    /// snapshot for the selected priority tier. Replaces substring-matching over display copy so
+    /// every one of the design spec's five Hero states can be previewed directly.
+    func applyScenario(resetTodaySection: Bool = false) {
+        todayRecords = []
+        switch scenario {
+        case .activeEvent:
+            urgentItems = [
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[0], kind: .dueTodo, title: String(localized: "回复设计 review"), detail: String(localized: "截止今晚 22:00"))
+            ]
+            actionableTodos = [
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[0], kind: .dueTodo, title: String(localized: "回复设计 review"), detail: String(localized: "截止今晚 22:00")),
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[1], kind: .dueTodo, title: String(localized: "提交产品周报"), detail: String(localized: "今天 18:00 前")),
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[2], kind: .imminentEvent, title: String(localized: "和导师的 1:1"), detail: String(localized: "15 分钟后开始"))
+            ]
+            todayRecords = makeTodayRecords(limit: 1)
+            statistics = NewUIPreviewStatistics(todayCount: 1, consecutiveDays: 8)
+            hero = NewUIPreviewHero(
+                context: .activeEvent,
+                title: String(localized: "产品周会"),
+                supporting: String(localized: "进行中 · 还剩 25 分钟"),
+                auroraColorHex: EventTag.work.colorHex
+            )
+        case .dueTodo:
+            urgentItems = [
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[2], kind: .imminentEvent, title: String(localized: "和导师的 1:1"), detail: String(localized: "15 分钟后开始"))
+            ]
+            actionableTodos = [
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[1], kind: .dueTodo, title: String(localized: "提交产品周报"), detail: String(localized: "今天 18:00 前")),
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[2], kind: .imminentEvent, title: String(localized: "和导师的 1:1"), detail: String(localized: "15 分钟后开始"))
+            ]
+            todayRecords = makeTodayRecords(limit: 1)
+            statistics = NewUIPreviewStatistics(todayCount: 1, consecutiveDays: 8)
+            hero = NewUIPreviewHero(context: .dueTodo, title: String(localized: "回复设计 review"), supporting: String(localized: "截止今晚 22:00，还剩不到 2 小时"))
+        case .imminentEvent:
+            urgentItems = []
+            actionableTodos = [
+                NewUIPreviewUrgentItem(id: Self.urgentIDs[2], kind: .imminentEvent, title: String(localized: "和导师的 1:1"), detail: String(localized: "15 分钟后开始"))
+            ]
+            todayRecords = makeTodayRecords(limit: 2)
+            statistics = NewUIPreviewStatistics(todayCount: 2, consecutiveDays: 8)
+            hero = NewUIPreviewHero(context: .imminentEvent, title: String(localized: "和导师的 1:1"), supporting: String(localized: "15 分钟后开始"))
+        case .recordMomentum:
+            urgentItems = []
+            actionableTodos = []
+            todayRecords = makeTodayRecords(limit: 3)
+            statistics = NewUIPreviewStatistics(todayCount: 3, consecutiveDays: 8)
+            hero = NewUIPreviewHero(context: .recordMomentum,
+                                    title: String(localized: "今天已记录 3 条"),
+                                    supporting: String(localized: "继续补充，或问问 Spark"))
+        case .calm:
+            urgentItems = []
+            actionableTodos = []
+            todayRecords = []
+            statistics = NewUIPreviewStatistics(todayCount: 0, consecutiveDays: 8)
+            hero = NewUIPreviewState.calmHero
+        }
+        if resetTodaySection {
+            selectedTodaySection = hero.context.recommendedTodaySection
+        }
+    }
+
+    /// The design spec distinguishes the bounded "urgent items" slot (up to two due/imminent
+    /// items that are *not* the Hero) from the adaptive review slot: an execution Hero reviews up
+    /// to three actionable todos, a reflection/calm Hero reviews up to three of today's records.
+    var sharedReviewSlot: NewUIPreviewSharedReviewSlot {
+        if hero.context.isExecution {
+            return .todos(actionableTodos)
+        } else if !todayRecords.isEmpty {
+            return .todayRecords(todayRecords)
+        } else {
+            return .calm
+        }
+    }
+
+    /// Statistics are the first thing to disappear under height pressure (per spec); the view
+    /// supplies its measured available height via GeometryReader.
+    static let statisticsMinHeight: CGFloat = 680
+
+    func statisticsVisible(availableHeight: CGFloat) -> Bool {
+        availableHeight >= NewUIPreviewState.statisticsMinHeight
+    }
+
+    var captureGestureEnabled: Bool { !isExpanded && overlay == nil && destination == .today }
+
+    func beginCaptureDrag(direction: NewUIPreviewCaptureDirection) {
+        guard captureGestureEnabled, capturePhase == .idle else { return }
+        captureDirection = direction
+        capturePhase = .preflight
+    }
+
+    func updateCaptureDrag(progress: CGFloat) {
+        let clamped = min(max(progress, 0), 1)
+        captureDragProgress = clamped
+        switch capturePhase {
+        case .preflight:
+            if clamped >= NewUIPreviewState.committedThreshold {
+                capturePhase = .armed
+                cameraAffordanceVisible = (captureDirection == .camera)
+                triggerLightHaptic()
+            }
+        case .armed:
+            if clamped < NewUIPreviewState.committedThreshold - NewUIPreviewState.cancelGrace {
+                cancelCapture()
+            }
+        default:
+            break
+        }
+    }
+
+    func endCaptureDrag() {
+        switch (capturePhase, captureDirection) {
+        case (.armed, .camera):
+            openCamera()
+            resetCapture()
+        case (.armed, .audio):
+            openAudioEntry()
+            resetCapture()
+        default:
+            cancelCapture()
+        }
+    }
+
+    func cancelCapture() {
+        guard capturePhase != .idle, capturePhase != .canceling else { return }
+        capturePhase = .canceling
+        cameraAffordanceVisible = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+            guard let self else { return }
+            if self.capturePhase == .canceling {
+                self.resetCapture()
+            }
+        }
+    }
+
+    private func resetCapture() {
+        capturePhase = .idle
+        captureDirection = nil
+        captureDragProgress = 0
+        cameraAffordanceVisible = false
+    }
+
+    private func openCamera() {
+        showCaptureToast(String(localized: "📷 已打开相机（预览）"))
+    }
+
+    private func openAudioEntry() {
+        showCaptureToast(String(localized: "🎙 已打开音频入口（预览）"))
+    }
+
+    private func showCaptureToast(_ text: String) {
+        captureActionToast = text
+        toastCancellable = Timer.publish(every: 1.8, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                self?.captureActionToast = nil
+            }
+    }
+
+    private func triggerLightHaptic() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 
     func updateDockText() {
         let hour = Calendar.current.component(.hour, from: Date())
-
         if hour >= 21 {
-            dockText = "✨ 今天过得怎么样？"
-        } else if todayEntryCount > 0 {
-            dockText = "✨ 已记录 \(todayEntryCount) 条拍记"
-        } else if consecutiveDays > 1 {
-            dockText = "✨ 已陪伴你第 \(consecutiveDays) 天"
+            dockText = String(localized: "✨ 今天过得怎么样？")
+        } else if statistics.todayCount > 0 {
+            dockText = String(localized: "✨ 已记录 \(statistics.todayCount) 条拍记")
+        } else if statistics.consecutiveDays > 1 {
+            dockText = String(localized: "✨ 已陪伴你第 \(statistics.consecutiveDays) 天")
         } else {
-            dockText = "✨ 今天想记录什么？"
+            dockText = String(localized: "✨ 今天想记录什么？")
         }
     }
 
@@ -72,4 +449,28 @@ final class NewUIPreviewState: ObservableObject {
                 self?.updateDockText()
             }
     }
+
+    static let calmHero = NewUIPreviewHero(context: .calm,
+                                           title: String(localized: "此刻很安静"),
+                                           supporting: String(localized: "下拉拍一张，或上拉录一段"))
+
+    private func makeTodayRecords(limit: Int) -> [NewUIPreviewTodayRecord] {
+        recordFixtures
+            .filter { !$0.record.isEncrypted }
+            .prefix(limit)
+            .map {
+                NewUIPreviewTodayRecord(
+                    id: $0.id,
+                    title: $0.record.title,
+                    summary: $0.cardSummary,
+                    thumbnailImageName: $0.media.first?.imageName
+                )
+            }
+    }
+
+    private static let urgentIDs: [UUID] = [
+        UUID(uuidString: "30000000-0000-0000-0000-000000000001")!,
+        UUID(uuidString: "30000000-0000-0000-0000-000000000002")!,
+        UUID(uuidString: "30000000-0000-0000-0000-000000000003")!
+    ]
 }

@@ -87,12 +87,31 @@
 		NEWUIPREVIEWBFA000000004 /* NewUIPreviewTodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000004 /* NewUIPreviewTodayView.swift */; };
 		NEWUIPREVIEWBFA000000005 /* NewUIPreviewComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000005 /* NewUIPreviewComposerView.swift */; };
 		NEWUIPREVIEWBFA000000006 /* NewUIPreviewRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000006 /* NewUIPreviewRootView.swift */; };
+		NEWUIPREVIEWBFA000000007 /* NewUIPreviewAuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000007 /* NewUIPreviewAuroraView.swift */; };
+		NEWUIPREVIEWBFA000000008 /* NewUIPreviewAurora.metal in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000008 /* NewUIPreviewAurora.metal */; };
+		NEWUIPREVIEWBFA000000009 /* NewUIPreviewFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000009 /* NewUIPreviewFixtures.swift */; };
+		NEWUIPREVIEWBFA000000010 /* NewUIPreviewMasonryLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000010 /* NewUIPreviewMasonryLayout.swift */; };
+		NEWUIPREVIEWBFA000000011 /* NewUIPreviewRecordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000011 /* NewUIPreviewRecordsView.swift */; };
+		NEWUIPREVIEWBFA000000012 /* NewUIPreviewRecordCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000012 /* NewUIPreviewRecordCard.swift */; };
+		NEWUIPREVIEWBFA000000013 /* NewUIPreviewRecordMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000013 /* NewUIPreviewRecordMedia.swift */; };
+		NEWUIPREVIEWBFA000000014 /* NewUIPreviewRecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000014 /* NewUIPreviewRecordDetailView.swift */; };
 		NEWUIPREVIEWBFB000000001 /* NewUIPreviewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000001 /* NewUIPreviewState.swift */; };
 		NEWUIPREVIEWBFB000000002 /* NewUIPreviewGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000002 /* NewUIPreviewGlass.swift */; };
 		NEWUIPREVIEWBFB000000003 /* NewUIPreviewDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000003 /* NewUIPreviewDock.swift */; };
 		NEWUIPREVIEWBFB000000004 /* NewUIPreviewTodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000004 /* NewUIPreviewTodayView.swift */; };
 		NEWUIPREVIEWBFB000000005 /* NewUIPreviewComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000005 /* NewUIPreviewComposerView.swift */; };
 		NEWUIPREVIEWBFB000000006 /* NewUIPreviewRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000006 /* NewUIPreviewRootView.swift */; };
+		NEWUIPREVIEWBFB000000007 /* NewUIPreviewAuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000007 /* NewUIPreviewAuroraView.swift */; };
+		NEWUIPREVIEWBFB000000008 /* NewUIPreviewAurora.metal in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000008 /* NewUIPreviewAurora.metal */; };
+		NEWUIPREVIEWBFB000000009 /* NewUIPreviewFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000009 /* NewUIPreviewFixtures.swift */; };
+		NEWUIPREVIEWBFB000000010 /* NewUIPreviewMasonryLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000010 /* NewUIPreviewMasonryLayout.swift */; };
+		NEWUIPREVIEWBFB000000011 /* NewUIPreviewRecordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000011 /* NewUIPreviewRecordsView.swift */; };
+		NEWUIPREVIEWBFB000000012 /* NewUIPreviewRecordCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000012 /* NewUIPreviewRecordCard.swift */; };
+		NEWUIPREVIEWBFB000000013 /* NewUIPreviewRecordMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000013 /* NewUIPreviewRecordMedia.swift */; };
+		NEWUIPREVIEWBFB000000014 /* NewUIPreviewRecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000014 /* NewUIPreviewRecordDetailView.swift */; };
+		NEWUIPREVIEWBFT000000015 /* NewUIPreviewStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */; };
+		NEWUIPREVIEWBFT000000016 /* NewUIPreviewMasonryLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */; };
+		NEWUIPREVIEWBFT000000017 /* NewUIPreviewRecordPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */; };
 		1803E3BB2FF4EBEA004FEE5F /* SparkStyleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */; };
 		1803E3BC2FF4EBEA004FEE5F /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
 		1803E3BD2FF4EBEA004FEE5F /* SparkMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* SparkMemoryView.swift */; };
@@ -634,6 +653,17 @@
 		NEWUIPREVIEWFREF00000004 /* NewUIPreviewTodayView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewTodayView.swift; sourceTree = "<group>"; };
 		NEWUIPREVIEWFREF00000005 /* NewUIPreviewComposerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewComposerView.swift; sourceTree = "<group>"; };
 		NEWUIPREVIEWFREF00000006 /* NewUIPreviewRootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRootView.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000007 /* NewUIPreviewAuroraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewAuroraView.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000008 /* NewUIPreviewAurora.metal */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.metal; path = NewUIPreviewAurora.metal; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000009 /* NewUIPreviewFixtures.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewFixtures.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000010 /* NewUIPreviewMasonryLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewMasonryLayout.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000011 /* NewUIPreviewRecordsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordsView.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000012 /* NewUIPreviewRecordCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordCard.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000013 /* NewUIPreviewRecordMedia.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordMedia.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000014 /* NewUIPreviewRecordDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordDetailView.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewStateTests.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewMasonryLayoutTests.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordPresentationTests.swift; sourceTree = "<group>"; };
 		36FB34A0CEC6AA566D28B479 /* VectorMath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
 		394A5D3E16168120244D779C /* ModelPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelPickerView.swift; sourceTree = "<group>"; };
 		3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventDetailSheetView.swift; sourceTree = "<group>"; };
@@ -1062,6 +1092,14 @@
 				NEWUIPREVIEWFREF00000003 /* NewUIPreviewDock.swift */,
 				NEWUIPREVIEWFREF00000004 /* NewUIPreviewTodayView.swift */,
 				NEWUIPREVIEWFREF00000005 /* NewUIPreviewComposerView.swift */,
+				NEWUIPREVIEWFREF00000007 /* NewUIPreviewAuroraView.swift */,
+				NEWUIPREVIEWFREF00000008 /* NewUIPreviewAurora.metal */,
+				NEWUIPREVIEWFREF00000009 /* NewUIPreviewFixtures.swift */,
+				NEWUIPREVIEWFREF00000010 /* NewUIPreviewMasonryLayout.swift */,
+				NEWUIPREVIEWFREF00000011 /* NewUIPreviewRecordsView.swift */,
+				NEWUIPREVIEWFREF00000012 /* NewUIPreviewRecordCard.swift */,
+				NEWUIPREVIEWFREF00000013 /* NewUIPreviewRecordMedia.swift */,
+				NEWUIPREVIEWFREF00000014 /* NewUIPreviewRecordDetailView.swift */,
 			);
 			path = NewUIPreview;
 			sourceTree = "<group>";
@@ -1098,6 +1136,9 @@
 				100000000000000000000011 /* ScheduleMatcherTests.swift */,
 				100000000000000000000031 /* AIPipelineRecoveryTests.swift */,
 				100000000000000000000039 /* ScreenshotImportServiceTests.swift */,
+				NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */,
+				NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */,
+				NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */,
 				100000000000000000000013 /* ProjectConfigurationTests.swift */,
 				100000000000000000000014 /* TodayViewModelTests.swift */,
 				100000000000000000000016 /* CaptureViewModelTests.swift */,
@@ -1658,6 +1699,14 @@
 				NEWUIPREVIEWBFA000000004 /* NewUIPreviewTodayView.swift in Sources */,
 				NEWUIPREVIEWBFA000000005 /* NewUIPreviewComposerView.swift in Sources */,
 				NEWUIPREVIEWBFA000000006 /* NewUIPreviewRootView.swift in Sources */,
+				NEWUIPREVIEWBFA000000007 /* NewUIPreviewAuroraView.swift in Sources */,
+				NEWUIPREVIEWBFA000000008 /* NewUIPreviewAurora.metal in Sources */,
+				NEWUIPREVIEWBFA000000009 /* NewUIPreviewFixtures.swift in Sources */,
+				NEWUIPREVIEWBFA000000010 /* NewUIPreviewMasonryLayout.swift in Sources */,
+				NEWUIPREVIEWBFA000000011 /* NewUIPreviewRecordsView.swift in Sources */,
+				NEWUIPREVIEWBFA000000012 /* NewUIPreviewRecordCard.swift in Sources */,
+				NEWUIPREVIEWBFA000000013 /* NewUIPreviewRecordMedia.swift in Sources */,
+				NEWUIPREVIEWBFA000000014 /* NewUIPreviewRecordDetailView.swift in Sources */,
 				1803E3BB2FF4EBEA004FEE5F /* SparkStyleSettingsView.swift in Sources */,
 				1803E3BC2FF4EBEA004FEE5F /* AIFeatureSettingsView.swift in Sources */,
 				1803E3BD2FF4EBEA004FEE5F /* SparkMemoryView.swift in Sources */,
@@ -1865,6 +1914,14 @@
 				NEWUIPREVIEWBFB000000004 /* NewUIPreviewTodayView.swift in Sources */,
 				NEWUIPREVIEWBFB000000005 /* NewUIPreviewComposerView.swift in Sources */,
 				NEWUIPREVIEWBFB000000006 /* NewUIPreviewRootView.swift in Sources */,
+				NEWUIPREVIEWBFB000000007 /* NewUIPreviewAuroraView.swift in Sources */,
+				NEWUIPREVIEWBFB000000008 /* NewUIPreviewAurora.metal in Sources */,
+				NEWUIPREVIEWBFB000000009 /* NewUIPreviewFixtures.swift in Sources */,
+				NEWUIPREVIEWBFB000000010 /* NewUIPreviewMasonryLayout.swift in Sources */,
+				NEWUIPREVIEWBFB000000011 /* NewUIPreviewRecordsView.swift in Sources */,
+				NEWUIPREVIEWBFB000000012 /* NewUIPreviewRecordCard.swift in Sources */,
+				NEWUIPREVIEWBFB000000013 /* NewUIPreviewRecordMedia.swift in Sources */,
+				NEWUIPREVIEWBFB000000014 /* NewUIPreviewRecordDetailView.swift in Sources */,
 				B208EB091BB4420BBB3BF191 /* SparkStyleSettingsView.swift in Sources */,
 				DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */,
 				77EC9069E9B54046B3291D00 /* SparkMemoryView.swift in Sources */,
@@ -1996,6 +2053,9 @@
 				200000000000000000000011 /* ScheduleMatcherTests.swift in Sources */,
 				200000000000000000000031 /* AIPipelineRecoveryTests.swift in Sources */,
 				200000000000000000000038 /* ScreenshotImportServiceTests.swift in Sources */,
+				NEWUIPREVIEWBFT000000015 /* NewUIPreviewStateTests.swift in Sources */,
+				NEWUIPREVIEWBFT000000016 /* NewUIPreviewMasonryLayoutTests.swift in Sources */,
+				NEWUIPREVIEWBFT000000017 /* NewUIPreviewRecordPresentationTests.swift in Sources */,
 				200000000000000000000013 /* ProjectConfigurationTests.swift in Sources */,
 				200000000000000000000014 /* TodayViewModelTests.swift in Sources */,
 				200000000000000000000016 /* CaptureViewModelTests.swift in Sources */,

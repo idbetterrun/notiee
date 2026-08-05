@@ -36,6 +36,153 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-05 — Today layout density and Hero shortcut discussion _(both targets; design discussion only)_
+
+- The supplied Today screenshot exposes a hierarchy problem rather than only a spacing problem: the Hero shortcut row currently reads like `9 / 0 / 0` statistics, while the Today selector repeats the same `Records / Todos / Schedule` concepts below it. The fixed Today surface intentionally leaves a lower capture-gesture runway, so that blank area should remain quiet instead of being filled with more cards.
+- Recommended next direction: keep the Hero as title plus factual row, convert its three full-module shortcuts into one compact horizontal action rail (`icon + short title`, with a small non-zero count badge only when useful), and keep the lower expandable selector solely responsible for switching bounded Today content. Use soft semantic fills or restrained Glass grouping for the action rail, with distinct record/todo/schedule tints; do not use icon-only Hero actions because their meaning is ambiguous on iPhone.
+- No Swift or project files were changed for this discussion. Wait for product confirmation of the compact capsule action rail before implementing the layout adjustment. Target classification remains shared Notiee + Notiee+, experimental NewUIPreview only.
+
+### 2026-08-05 — Restored Today capture gesture hit region _(both targets; experimental preview only)_
+
+- Fixed the Today camera/audio drag hit area by applying an explicit full-rectangle `contentShape` after the dashboard's bottom padding and before its parallel gesture. The lower transparent dashboard area now participates in hit testing, while the Dock and child controls remain above it and retain their own taps.
+- The existing state guard still disables capture while the Spark composer, an overlay, or a non-Today destination is active. Both normal and `NOTIEE_PLUS` NewUIPreview SDK type checks pass, and `git diff --check` passes. Simulator gesture QA remains pending because CoreSimulator is unavailable in the managed environment.
+
+### 2026-08-05 — Corrected Today category switcher _(both targets; experimental preview only)_
+
+- Replaced the equal-width Today `记录 / 待办 / 日程` segmented row with a custom horizontally scrollable `ScrollViewReader` picker. Unselected categories render only their SF Symbol; the selected category expands to icon plus localized title, using its own tint and semantic secondary fill for the collapsed state.
+- Selection changes are wrapped in a snappy animation and the selected item is centered through `scrollTo`, so the button width, neighboring positions, and the existing Today content below it transition together. Accessibility labels and selected traits remain explicit.
+- Verification: the full NewUIPreview Swift source set type-checks with both the normal configuration and `NOTIEE_PLUS` defined; `git diff --check` passes. Runtime simulator/visual QA remains subject to the CoreSimulator and SwiftPM sandbox limitations recorded below.
+
+### 2026-08-05 — NewUIPreview Today / Records / detail implementation _(both targets; experimental preview only)_
+
+- Implemented `docs/superpowers/plans/2026-08-05-new-ui-preview-today-records-detail.md` inside the shared `Notiee/Features/Settings/NewUIPreview/` laboratory. Production Today, Records, Record Detail, `NotieeStore`, persistence, backend, subscription, and BYOK transport were not changed. No `#if NOTIEE_PLUS` branch or backend-only dependency was added.
+- Added stable mock fixtures and preview routing/state. Fixed UUIDs and a fixed reference date cover all five Hero contexts, empty/non-empty Today states, 0/1/2/3/4/5/6-image records, landscape/portrait media, empty summary, OCR, todos, pending/processing/failed/encrypted records, summary-only Records search, encrypted redaction, and overlay-based detail navigation that preserves the underlying Records query/scroll view.
+- Rebuilt Today as a non-scrolling, unframed contextual dashboard with light/dark calibrated active-event Aurora, equal Glass module shortcuts, Hero-selected daily tabs, up to three type-specific rows, media thumbnails for daily records, lightweight empty states, and a parallel capture gesture that no longer sits in a hit-testing foreground layer. The full todos/schedule overlays are mock-only and todo IDs are deduplicated.
+- Added the Records destination with a pure shorter-column masonry geometry helper plus SwiftUI `Layout`, Dynamic Type single-column fallback, persistent root Dock, search/empty states, summary-only cards, 0/1/2/3/4/5+ media templates, protected encrypted cards, fixed-size pending/processing placeholders, and navigable failed records.
+- Added the overlay Record Detail reading layer with fixed Glass controls, media hero/pager/full-screen viewer, pinned organized/raw/todos selector, MarkdownUI document projection, duplicate-summary suppression, current-tab search highlighting, encrypted redaction, a 480 pt scroll-to-top threshold, safe bottom content padding, mock append composer, and medium/large Emergence sheet. Toolbar controls were compacted to fit small screens while retaining at least 44 pt icon hit targets.
+- Updated the Glass helper for Reduce Transparency, native iOS 26 `GlassEffectContainer`, and a more opaque iOS 18 `.regularMaterial` fallback. Added all new visible control/status strings to `en`, `zh-Hans`, and `zh-Hant` catalogs. Mock record body text intentionally remains user-content-like fixture data rather than localized product chrome.
+- Added six original offline raster scene illustrations as `NewUIPreviewPhoto01...06` (five 1200x900, one 900x1200). The built-in image-generation tool was unavailable, so AppKit-generated local artwork was used; the stable asset names allow later photo replacements without Swift changes. All asset `Contents.json` files parse and reference valid PNG dimensions.
+- Project membership is registered for both app targets for every new preview Swift file (and the existing preview Aurora Swift/Metal files); the three new test files are registered only in `NotieeTests`. `plutil -lint` passes for the project and all localization catalogs, all asset JSON parses, and `git diff --check` passes.
+- Independent iOS Simulator SDK type checking passes for the real model dependencies plus every NewUIPreview Swift file, both with the normal configuration and with `NOTIEE_PLUS` defined. Swift syntax parsing passes for all three new test files. A real focused `xcodebuild test`, full Notiee tests, and both scheme builds could not reach source compilation: the managed sandbox cannot access CoreSimulator, Xcode's SwiftPM integration cannot start its nested `sandbox-exec`, and the escalation approval service failed. The installed Xcode also reports no downloaded Metal Toolchain. Do not claim XCTest, Metal compilation, app launch, or visual QA as passed.
+- Remaining QA on a normal Xcode host: run the focused tests, full Notiee tests, and both scheme builds; then inspect iPhone 17 plus a smaller simulator in light/dark, accessibility Dynamic Type, VoiceOver, Reduce Motion, and Reduce Transparency. Exercise all five Heroes, capture gestures around every control, all media templates, Records search/empty states, detail sticky selector, pager announcements, scroll-to-top, bottom inset, and preservation after dismissing detail/Emergence.
+- No commit or push was created.
+
+### 2026-08-05 — Consolidated NewUIPreview Today/Records/detail design spec _(both targets; documentation only)_
+
+- Added `docs/superpowers/specs/2026-08-05-new-ui-preview-today-records-detail-design.md`, consolidating the approved discussion into one implementation-ready design specification. No application source or production behavior changed.
+- Scope is shared Notiee + Notiee+, experimental `NewUIPreview` only, mock-data-only. The spec explicitly leaves production Today, `RecordsView`, `RecordDetailView`, persistence, backend, subscription, and BYOK transport untouched.
+- For NewUIPreview, this spec supersedes the old urgent/shared-review/statistics presentation with an unframed contextual Hero, full-module shortcuts, and bounded context-selected Today tabs. Existing Hero priority, capture gestures, active-event Aurora, and Today/Spark/Records shell remain.
+- Records is specified as true two-column masonry with a Dynamic Type single-column fallback. Card body uses only `NoteRecord.summary` (title max two lines, summary max four; no detailed-content/OCR fallback), with real 0/1/2/3/4/5+ image templates and protected processing/encrypted states.
+- Record detail is specified as fixed Glass toolbar + scrolling media/metadata + sticky `整理内容 / 原文 / 待办` selector + unframed document + fixed `追加记录 / 涌现` Glass actions. Single image uses an aspect-aware hero; multiple images use a full-width pager. `涌现` opens a floating sheet and is never called `发芽`.
+- References determine layout only; iOS 26 native Liquid Glass remains the visual language for interactive chrome. Content, photos, masonry cards, and document text remain solid/unframed. The spec includes component boundaries, mock fixtures, accessibility requirements, non-goals, and acceptance criteria for both schemes.
+- This is a design spec, not an executable implementation plan. No build was required; document review, referenced-spec existence checks, and whitespace validation passed.
+
+### 2026-08-05 — NewUIPreview visual language confirmed as iOS 26 Liquid Glass _(both targets; discussion only)_
+
+- The supplied references define layout, hierarchy, and scrolling behavior only. The actual NewUIPreview visual language must remain native iOS 26 Liquid Glass for both Notiee and Notiee+.
+- Apply Glass primarily to interactive chrome: top toolbar controls, search, segmented selectors, secondary shortcuts, floating actions, and the persistent bottom dock. Keep photos, masonry record cards, article text, and the detail document surface visually solid/unframed so content remains legible; do not turn every surface into translucent glass.
+- Use semantic system backgrounds and the existing Notiee accent rather than copying the references' beige/white palette. Light/dark appearance and Reduce Transparency must remain usable.
+- Adjacent Glass controls should use the native iOS 26 grouping/container behavior where appropriate, explicit `contentShape`s, stable control dimensions, and full visible hit regions. This is especially important because the existing preview previously exposed flaky dock taps around incomplete hit regions.
+- For record detail, the fixed toolbar, sticky content selector, bottom `追加记录 / 涌现` dock, and conditional scroll-to-top control are Glass; media, title metadata, and the long-form document scroll beneath them without decorative glass containers.
+- No Swift source, localization, target membership, or production UI changed in this discussion.
+
+### 2026-08-05 — NewUIPreview record-detail direction _(both targets; discussion only)_
+
+- The user supplied three references for the new record-detail visual direction. Any later implementation remains shared between Notiee and Notiee+ but isolated to `NewUIPreview`; production `RecordDetailView` remains unchanged.
+- Recommended scroll hierarchy: a fixed compact toolbar; media, title, creation time/status, and metadata chips scroll normally; a lightweight content-navigation strip becomes sticky; the document body scrolls beneath it; a bottom action dock remains above the safe area and reserves content inset. A scroll-to-top control appears only after meaningful downward progress.
+- Use an unframed document surface with generous typography, Markdown-style headings/lists, and selectable text rather than stacking the current detail sections as rounded cards. The primary article can compose summary, detailed content, key points, definitions, and extracted todos; OCR remains a secondary/raw view rather than overview prose.
+- Single-image detail uses one large aspect-aware hero image. Multi-image detail uses a full-width swipeable pager with position/count feedback so every image can be inspected; the masonry collage rules belong only to the Records overview. A record with no images starts directly at the title without a media placeholder.
+- The reference's `发芽` must map to the already-approved Notiee feature name `涌现`. Preserve the existing product decision that Emergence opens a shared floating sheet over the detail rather than becoming a replacement content page. A suitable bottom dock is `追加记录` plus `涌现`, with no mascot.
+- Metadata chips should derive from fields Notiee actually owns (record source, event, folder, processing state) rather than inventing unsupported AI tags. Search in the fixed toolbar, if retained, should search within the current long record.
+- Open information-architecture choice: use a sticky content strip such as `整理内容 / 原文 / 待办`, while keeping Emergence as an action, versus copying the reference's three labels more literally. The former is recommended because it matches existing Notiee data and the approved Emergence flow.
+- No Swift source, localization, project membership, persistence, or production detail behavior changed in this discussion.
+
+### 2026-08-05 — NewUIPreview Records masonry direction _(both targets; discussion only)_
+
+- The user supplied a reference for a redesigned Records destination and explicitly wants single-image and multi-image records to render differently. Any later implementation remains limited to the shared `NewUIPreview`; the production `RecordsView` is unchanged.
+- Recommended page structure: retain the preview's own top navigation and bottom Today/Spark/Records dock, while borrowing the reference's large Records title, prominent search field, and true two-column masonry body. Do not copy unrelated upgrade controls or the reference app's bottom composer.
+- Cards are content-driven and independently sized, not uniform grid cells. A normal row-aligned `LazyVGrid` would leave gaps beside tall cards; implementation should use a real masonry/custom `Layout` that assigns each card to the currently shorter column. Accessibility text sizes should fall back to one column.
+- Proposed media rules: zero images -> text card; one image -> one focal preview that respects/clamps the source aspect ratio and may dominate an image-only card; two images -> side-by-side pair; three images -> one large plus two stacked; four or more -> 2x2 collage with `+N` on the final tile. Multi-image cards must render actual additional images rather than the production thumbnail's current first-image-plus-gray-stack hint.
+- Card information hierarchy: timestamp/status, title, bounded summary, media, then tags. The overview body must read only `NoteRecord.summary`, with no fallback to `detailedContent` or `ocrText`; omit the body when the summary is empty. Recommended visual caps are two title lines and four summary lines with tail truncation. Encrypted and processing records need dedicated locked/loading templates that do not leak content.
+- Existing `NoteRecord.localImagePaths: [String]` already supports these variants; no persistence migration is needed. Current production `RecordThumbnailView` loads only the first image, so a future production adoption would require a separate multi-image loader, but that is outside this preview-only phase.
+- No Swift source, project membership, localization, or production Records behavior changed in this discussion.
+
+### 2026-08-05 — NewUIPreview Today shortcuts and daily tabs direction _(both targets; discussion only)_
+
+- The user wants to retain three compact secondary shortcuts for Schedule, Todos, and Records, plus a separate three-way switch below the Hero for Today's Records, Today's Todos, and Today's Schedule. Any later implementation remains limited to the shared `NewUIPreview` laboratory UI; production Today is unchanged.
+- Recommended information architecture: Hero answers what matters now; shortcut tiles navigate to the complete content modules; the daily tabs switch only the bounded content shown inside Today. Use explicit full-scope versus today-scope labels where necessary so the two layers do not feel duplicated.
+- The tabbed daily area should replace the current urgent/shared-review/statistics stack rather than be added after it. Hero-relevant content can become the initial selected tab (active/imminent event -> Schedule, due todo -> Todos, record momentum/calm -> Records), while a manual tab selection should remain stable during that visit.
+- Preserve the fixed, non-scrolling dashboard and vertical capture gestures: show at most roughly three items per daily tab, with full results available through the secondary shortcuts. A vertically scrolling tab body would conflict with the existing pull-down camera and pull-up audio gestures.
+- Borrow the references' segmented-switch interaction, but render each content type appropriately: records may use thumbnails, todos need check/state/deadline rows, and schedules need time-oriented rows. Do not force all three into the same image-card grid.
+- Open product detail: confirm whether the context-driven initial tab should be adopted or whether Today's Records should always be the default. No Swift source, target membership, or production behavior changed in this discussion.
+
+### 2026-08-05 — NewUIPreview Today header direction under discussion _(both targets; discussion only)_
+
+- The user supplied a visual reference for the top of Today and explicitly scoped any later implementation to `Notiee/Features/Settings/NewUIPreview/`; production Today remains untouched.
+- Direction so far: borrow the reference's unframed, text-led hierarchy, but omit both the mascot and the large white rounded rectangle. Replace the current icon-bearing Hero card with a large left-aligned contextual headline directly on the page background, followed by a lighter factual/status row.
+- Preserve Today 2.0 semantics rather than copying the reference's memory-count information architecture: the deterministic Hero still answers what matters now; the secondary row can express event progress, deadline, record momentum, or a calm capture invitation. The active-event Aurora remains a background atmosphere behind this header, not a container.
+- Target classification for a later implementation: both Notiee and Notiee+, experimental NewUIPreview only. No Swift source or production UI was changed in this discussion. Open design choices remain the exact secondary-row treatment and whether the header should have a small semantic eyebrow.
+
+### 2026-07-29 — Active-event Aurora implemented in NewUIPreview _(both targets; experimental preview only)_
+
+- Added `NewUIPreviewAuroraView.swift` and `NewUIPreviewAurora.metal`, registered both in the Notiee and Notiee+ source build phases. The SwiftUI wrapper hosts a transparent `MTKView`; the Metal shader ports the supplied Aurora simplex-noise/color-ramp approach and uses premultiplied-alpha blending.
+- `NewUIPreviewTodayView` mounts the Aurora only for `.activeEvent`, under the dashboard content, fixed to the top 280 pt and with hit testing disabled. The fragment shader fades its lower edge so the effect does not become a page background.
+- `NewUIPreviewHero` now carries optional `auroraColorHex`. The active-event fixture supplies `EventTag.work.colorHex`; a missing/invalid value falls back to Notiee green (`#09C576`). Other Hero contexts do not create a renderer. This is still mock-only and does not read `NotieeStore`.
+- Motion is capped at 30 fps. The renderer pauses outside an active scene and freezes a stable frame under Reduce Motion. A missing Metal device/library/pipeline hides the renderer without affecting the dashboard.
+- Verification: `plutil -lint Notiee.xcodeproj/project.pbxproj`, `git diff --check`, Swift syntax parsing, and iOS Simulator SDK type checks for the new renderer/state/Today/Dock/Glass source set all passed. Direct Metal compilation is blocked because this Xcode lacks Metal Toolchain; the component-download approval request was rejected by the tool approval service. Both Notiee and Notiee+ builds were attempted but stopped before source compilation because the sandbox cannot resolve GitHub to fetch `OnboardingKit`. Visual/device QA remains required after installing the Metal Toolchain and restoring dependency access.
+- No commit was created.
+
+### 2026-07-29 — Active-event Aurora design approved for NewUIPreview _(both targets when implemented; documentation only)_
+
+- Added `docs/superpowers/specs/2026-07-29-new-ui-preview-active-event-aurora-design.md`; no application source, target membership, localization, persistence, or backend behavior changed in this design task.
+- Aurora is an experimental top-Hero visual only: it appears only for an active event, derives its single color family from the event tag color, and falls back to Notiee green when the event has no tag. All non-active Hero states render no Aurora.
+- The approved implementation is a native Metal port of the supplied React Bits Aurora shader, hosted by a SwiftUI `MTKView` wrapper. It is capped at 30 fps, is non-interactive, pauses when inactive/offscreen, freezes for Reduce Motion, and fails closed when Metal cannot render.
+- Preview stays mock-data-only. `NewUIPreviewHero.auroraColorHex` will exercise tagged and untagged active-event fixtures; future production Today work may source the same semantic input from `ScheduledEvent.tagID -> EventTag.colorHex`, but that integration is out of scope here.
+- Required later QA: tag-color and fallback-green active events, zero Aurora for non-active contexts, light/dark readability, Reduce Motion, input passthrough, and both app scheme builds. User has not requested a commit.
+
+### 2026-07-29 — Today 2.0 design spec and executable plan written _(both targets when implemented; documentation only)_
+
+- Added `docs/superpowers/specs/2026-07-29-today-2-context-dashboard-design.md` and `docs/superpowers/plans/2026-07-29-today-2-context-dashboard.md`; no application source, project membership, persistence, backend, or localization file changed in this planning task.
+- The plan implements the already agreed fixed-screen Context Dashboard as seven independently verifiable tasks: deterministic Hero resolver, fixed dashboard, two-destination root/migration, persistent Spark composer, camera prepare-vs-start split, pure pull reducer with camera route, then non-recording audio entry plus full verification.
+- Locked phase-one thresholds for testable initial behavior: camera prepare at 18 pt, camera/audio arm at 88 pt, unused prepared-camera release after 750 ms. These are tuning constants requiring physical-device validation, not product copy.
+- The plan explicitly preserves both target Spark transport paths, migrates legacy `capture`/`spark` launch defaults to `today`, and requires both app schemes plus physical iOS 26 gesture/camera QA before completion.
+
+### 2026-07-29 — Today 2.0 skeleton inside NewUIPreview _(both targets; experimental preview only)_
+
+- Implemented the 2026-07-29 product-definition decisions inside the existing `Notiee/Features/Settings/NewUIPreview/` laboratory preview. This is NOT the production Today surface — it only previews the direction.
+- `NewUIPreviewState.swift` rewritten: added `NewUIPreviewHeroContext` (.execution/.reflection/.calm), `NewUIPreviewHero`, `NewUIPreviewUrgentItem`, `NewUIPreviewTodayRecord`, `NewUIPreviewStatistics`, `NewUIPreviewSharedReviewSlot`, `NewUIPreviewCapturePhase` (.idle/.preflight/.armed/.canceling), `NewUIPreviewCaptureDirection`. Hero is rule-selected in `recomputeHero()` (active focus > near deadline > imminent reminder > meaningful today activity > calm). `sharedReviewSlot` adapts to Hero context (todos for execution, todayRecords for reflection, calm invitation otherwise). `statisticsVisible` hides first when space constrained (urgent >= 2).
+- Capture gesture state machine: `beginCaptureDrag` → `.preflight` (preflight camera session concept); crossing `committedThreshold=0.6` → `.armed` + show camera affordance + one light `UIImpactFeedbackGenerator(.light)`; release while armed opens camera/audio-entry (toast only, no real capture); pulling back below `committedThreshold - cancelGrace=0.15` enters `.canceling` with 0.35s grace then resets. `captureGestureEnabled` is false while Spark/keyboard/sheet active (bound to `!isExpanded`).
+- `NewUIPreviewTodayView.swift` rewritten: non-scrolling dashboard (VStack of Hero + urgent slot (max 2) + shared review slot + conditional statistics), bottom dock, transparent full-screen `NewUIPreviewCaptureGestureLayer` with a `DragGesture` that classifies direction by sign of translation.height and feeds progress into the state machine. The dock remains Today | Spark | Records; Spark still expands from bottom as a sheet. No ScrollView on the dashboard content.
+- No production navigation, stored settings, backend behavior, or target-specific code changed. Both `Notiee` and `Notiee+` schemes BUILD SUCCEEDED on iPhone 17 simulator.
+- Next agent: validate on the original iOS 26 device — (1) Hero card reflects the highest-priority mock item; (2) shared slot switches todos→records when Hero context changes; (3) pull down past ~84pt shows camera affordance + haptic, release opens camera toast, pulling back cancels; (4) pull up shows audio toast; (5) gestures disabled while Spark sheet is open. The mock data is static — wiring real `NotieeStore`/records is explicitly out of scope for this preview.
+
+### 2026-07-29 — Today 2.0 product-definition decisions _(both targets when implemented; no source change)_
+
+- Today 2.0 is a fixed-height, non-scrolling Context Dashboard, not a list, feed, or timeline. Its first-second job is to answer what matters most now.
+- Hero is unique and rule-selected: deterministic priority chooses the focus; Spark only writes its title/supporting copy. The initial priority model is active focus > near hard deadline > imminent reminder > meaningful today activity > calm/recording invitation.
+- The page uses bounded slots: Hero always remains; P1 urgent content can show up to two items; the shared review slot adapts to the Hero (execution context favors todos, reflection context favors today records); statistics disappear first when space is constrained.
+- Bottom navigation direction remains Today | persistent central Spark composer | Records. Capture is an action, not a tab. Spark expands from the bottom with focused input and is not a standard tab.
+- Today owns capture gestures. Downward pull opens camera; upward pull opens an audio-record entry only in the first release (no committed recording/transcription behavior). Interactive cards and controls keep gesture precedence; root gestures disable while Spark, a sheet, or keyboard is active.
+- Downward camera gesture state: small downward movement preflights/configures the authorized camera session without activating its sensor; crossing the committed threshold starts the sensor, shows the camera affordance, and gives one light haptic; release while armed opens camera. Pulling back cancels and releases the prepared session after a short grace period. This deliberately balances first-frame latency with the camera privacy indicator.
+
+### 2026-07-29 — New UI preview now follows the App color scheme _(both targets; experimental preview only)_
+
+- Removed the preview's forced black backgrounds and `.preferredColorScheme(.dark)` override. Its background now uses `systemBackground`; primary, secondary, card, dock, and composer foreground colors use dynamic semantic colors.
+- The experimental preview therefore follows the main app's existing light, dark, and system appearance setting. The send-arrow glyph remains black intentionally because it sits on the green circular accent control.
+- No production navigation, stored setting, backend behavior, or target-specific code changed. Swift syntax parsing passed for all five modified preview source files; full Xcode scheme builds remain blocked by the sandbox's unavailable GitHub dependency resolution.
+
+### 2026-07-29 — Corrected NewUIPreview dock hit regions; restored Glass interaction _(both targets; experimental preview only)_
+
+- Follow-up device evidence established that the underlying issue was incomplete button hit regions, not a reason to remove native interactive Glass: the right half of the Spark capsule and the outer areas of both circular controls ignored taps.
+- Restored `interactive: true` on all three dock Glass effects and added explicit `contentShape(Capsule())` / `contentShape(Circle())` to the corresponding button labels. The full visible capsule and circles now define the tappable area while retaining the iOS 26 Liquid Glass press effect.
+- Scope remains shared Notiee + Notiee+ laboratory-preview code only. Validate on the original iOS 26 device by tapping the far-right edge of Spark and the outer edges of both circular controls.
+
+### 2026-07-29 — Applied NewUIPreview dock tap reliability experiment _(both targets; experimental preview only)_
+
+- Applied the smallest reversible change to the reported bottom-dock issue: `NewUIPreviewSparkDock` and `NewUIPreviewCircleButton` now use non-interactive Glass. They retain their visual appearance, hit areas, and `NewUIPreviewPressStyle`; the Spark composer close control remains interactive because it was not reported as unreliable.
+- The change is scoped to the laboratory preview and does not touch `RootTabView`, user records, backend transport, or target-specific behavior. The preview sources are shared by Notiee and Notiee+.
+- Static verification passed: `git diff --check` was clean, and the only remaining interactive-Glass call is the composer close control. A full Notiee build could not start because the sandbox could not resolve `OnboardingKit` from GitHub; one escalated build request was rejected by the approval service before execution. Validate on the original iOS 26 device: one tap each on Today, Spark, and Records should respond consistently.
+
 ### 2026-07-29 — Diagnosed NewUIPreview dock buttons needing multiple taps _(both targets; read-only investigation, no fix applied yet)_
 
 - Symptom (user report): the three bottom dock controls in Settings → 实验室 → 新 UI 预览 (Today circle, Spark capsule, Records circle) show press feedback but require several taps before the tab actually switches / Spark expands; feels laggy.

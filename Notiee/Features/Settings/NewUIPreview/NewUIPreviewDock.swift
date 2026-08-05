@@ -20,13 +20,14 @@ struct NewUIPreviewSparkDock: View {
 
                 Text("问问 Spark...")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.newUIPreviewPrimary)
                     .lineLimit(1)
 
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 18)
             .frame(height: 62)
+            .contentShape(Capsule())
             .newUIPreviewGlass(in: Capsule(), interactive: true)
         }
         .buttonStyle(NewUIPreviewPressStyle())
