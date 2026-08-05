@@ -22,6 +22,8 @@ enum NewUIPreviewRecordCardPresentation {
 struct NewUIPreviewRecordCard: View {
     let fixture: NewUIPreviewRecordFixture
     let cardWidth: CGFloat
+    var transitionOrigin: NewUIPreviewRecordOrigin? = nil
+    var transitionNamespace: Namespace.ID? = nil
     let action: () -> Void
 
     private var record: NoteRecord { fixture.record }
@@ -43,8 +45,14 @@ struct NewUIPreviewRecordCard: View {
             .padding(12)
             .frame(width: safeCardWidth, alignment: .leading)
             .background(
-                Color(uiColor: .secondarySystemBackground),
-                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color(uiColor: .secondarySystemBackground))
+                    .newUIPreviewRecordTransitionSurface(
+                        recordID: fixture.id,
+                        origin: transitionOrigin,
+                        namespace: transitionNamespace,
+                        isSource: true
+                    )
             )
             .overlay {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -74,6 +82,11 @@ struct NewUIPreviewRecordCard: View {
                     .foregroundStyle(Color.newUIPreviewSecondary)
                     .lineLimit(4)
                     .multilineTextAlignment(.leading)
+            }
+
+            if fixture.previewSource == .audio {
+                NewUIPreviewAudioPreview()
+                    .frame(width: contentWidth, height: 72)
             }
 
             if !fixture.media.isEmpty {
@@ -220,19 +233,57 @@ struct NewUIPreviewRecordCard: View {
     }
 
     private var sourceLabel: String {
-        switch record.source {
-        case .photo: return String(localized: "照片")
-        case .spark: return "Spark"
-        case .text: return String(localized: "文字")
-        }
+        fixture.previewSource.title
     }
 
     private var sourceSymbol: String {
-        switch record.source {
-        case .photo: return "photo"
-        case .spark: return "sparkles"
-        case .text: return "doc.text"
+        fixture.previewSource.symbolName
+    }
+}
+
+private struct NewUIPreviewAudioPreview: View {
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(Color.newUIPreviewAccent.opacity(0.11))
+
+            NewUIPreviewAudioWaveform()
+                .stroke(
+                    Color.newUIPreviewAccent.opacity(0.72),
+                    style: StrokeStyle(lineWidth: 2, lineCap: .round)
+                )
+                .padding(.horizontal, 12)
+                .padding(.vertical, 18)
+
+            Image(systemName: "mic.fill")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Color.white)
+                .frame(width: 26, height: 26)
+                .background(Color.newUIPreviewAccent, in: Circle())
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("录音波形")
+    }
+}
+
+private struct NewUIPreviewAudioWaveform: Shape {
+    private let amplitudes: [CGFloat] = [
+        0.30, 0.56, 0.86, 0.48, 0.72, 0.38, 0.92,
+        0.58, 0.34, 0.68, 0.44, 0.80, 0.52
+    ]
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        guard amplitudes.count > 1 else { return path }
+
+        let step = rect.width / CGFloat(amplitudes.count - 1)
+        for (index, amplitude) in amplitudes.enumerated() {
+            let x = rect.minX + CGFloat(index) * step
+            let halfHeight = rect.height * amplitude / 2
+            path.move(to: CGPoint(x: x, y: rect.midY - halfHeight))
+            path.addLine(to: CGPoint(x: x, y: rect.midY + halfHeight))
+        }
+        return path
     }
 }
 

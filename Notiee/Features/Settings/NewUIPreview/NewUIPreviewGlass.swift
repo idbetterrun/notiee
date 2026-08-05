@@ -1,7 +1,21 @@
 import SwiftUI
 
+enum NewUIPreviewBrand {
+    static let accentHex = "#09C576"
+    static let accent = Color(
+        red: 9.0 / 255.0,
+        green: 197.0 / 255.0,
+        blue: 118.0 / 255.0
+    )
+}
+
+struct NewUIPreviewRecordTransitionKey: Hashable {
+    let recordID: UUID
+    let origin: NewUIPreviewRecordOrigin
+}
+
 extension Color {
-    static let newUIPreviewAccent = Color(red: 9.0 / 255.0, green: 197.0 / 255.0, blue: 118.0 / 255.0)
+    static let newUIPreviewAccent = NewUIPreviewBrand.accent
     static let newUIPreviewBackground = Color(uiColor: .systemBackground)
     static let newUIPreviewPrimary = Color.primary
     static let newUIPreviewSecondary = Color.secondary
@@ -10,6 +24,26 @@ extension Color {
 extension View {
     func newUIPreviewGlass<S: Shape>(in shape: S, interactive: Bool = false) -> some View {
         modifier(NewUIPreviewGlassModifier(shape: shape, interactive: interactive))
+    }
+
+    @ViewBuilder
+    func newUIPreviewRecordTransitionSurface(
+        recordID: UUID?,
+        origin: NewUIPreviewRecordOrigin?,
+        namespace: Namespace.ID?,
+        isSource: Bool
+    ) -> some View {
+        if let recordID, let origin, let namespace {
+            matchedGeometryEffect(
+                id: NewUIPreviewRecordTransitionKey(recordID: recordID, origin: origin),
+                in: namespace,
+                properties: .frame,
+                anchor: .center,
+                isSource: isSource
+            )
+        } else {
+            self
+        }
     }
 }
 

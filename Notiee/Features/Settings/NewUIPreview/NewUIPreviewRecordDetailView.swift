@@ -139,6 +139,8 @@ struct NewUIPreviewRecordPresentation {
 
 struct NewUIPreviewRecordDetailView: View {
     let fixture: NewUIPreviewRecordFixture
+    var transitionOrigin: NewUIPreviewRecordOrigin? = nil
+    var transitionNamespace: Namespace.ID? = nil
     let onClose: () -> Void
 
     @State private var selectedSection: NewUIPreviewRecordDetailSection = .organized
@@ -154,36 +156,44 @@ struct NewUIPreviewRecordDetailView: View {
     private let topAnchor = "new-ui-preview-detail-top"
 
     var body: some View {
-        VStack(spacing: 0) {
-            toolbar
+        ZStack {
+            NewUIPreviewRecordDetailBackground(
+                recordID: fixture.id,
+                origin: transitionOrigin,
+                namespace: transitionNamespace
+            )
 
-            ScrollViewReader { proxy in
-                ZStack(alignment: .bottomTrailing) {
-                    detailScroll
+            VStack(spacing: 0) {
+                toolbar
 
-                    if showsScrollToTop {
-                        Button {
-                            withAnimation(.easeOut(duration: 0.28)) {
-                                proxy.scrollTo(topAnchor, anchor: .top)
+                ScrollViewReader { proxy in
+                    ZStack(alignment: .bottomTrailing) {
+                        detailScroll
+
+                        if showsScrollToTop {
+                            Button {
+                                withAnimation(.easeOut(duration: 0.28)) {
+                                    proxy.scrollTo(topAnchor, anchor: .top)
+                                }
+                            } label: {
+                                Image(systemName: "arrow.up")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundStyle(Color.newUIPreviewPrimary)
+                                    .frame(width: 48, height: 48)
+                                    .contentShape(Circle())
+                                    .newUIPreviewGlass(in: Circle(), interactive: true)
                             }
-                        } label: {
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 17, weight: .bold))
-                                .foregroundStyle(Color.newUIPreviewPrimary)
-                                .frame(width: 48, height: 48)
-                                .contentShape(Circle())
-                                .newUIPreviewGlass(in: Circle(), interactive: true)
+                            .buttonStyle(NewUIPreviewPressStyle())
+                            .accessibilityLabel("返回顶部")
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 16)
+                            .transition(.scale.combined(with: .opacity))
                         }
-                        .buttonStyle(NewUIPreviewPressStyle())
-                        .accessibilityLabel("返回顶部")
-                        .padding(.trailing, 20)
-                        .padding(.bottom, 16)
-                        .transition(.scale.combined(with: .opacity))
                     }
                 }
             }
         }
-        .background(Color.newUIPreviewBackground.ignoresSafeArea())
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             actionDock
         }
@@ -622,19 +632,11 @@ struct NewUIPreviewRecordDetailView: View {
     }
 
     private var sourceLabel: String {
-        switch fixture.record.source {
-        case .photo: return String(localized: "照片")
-        case .spark: return "Spark"
-        case .text: return String(localized: "文本")
-        }
+        fixture.previewSource.title
     }
 
     private var sourceSymbol: String {
-        switch fixture.record.source {
-        case .photo: return "photo"
-        case .spark: return "sparkles"
-        case .text: return "text.alignleft"
-        }
+        fixture.previewSource.symbolName
     }
 
     private var statusLabel: String {
@@ -654,6 +656,30 @@ struct NewUIPreviewRecordDetailView: View {
         case .completed: return "checkmark.circle"
         case .failed, .deadLetter: return "exclamationmark.triangle"
         }
+    }
+}
+
+struct NewUIPreviewRecordDetailBackground: View {
+    let recordID: UUID
+    let origin: NewUIPreviewRecordOrigin?
+    let namespace: Namespace.ID?
+
+    var body: some View {
+        ZStack {
+            Color.newUIPreviewBackground
+
+            Rectangle()
+                .fill(Color.newUIPreviewBackground)
+                .newUIPreviewRecordTransitionSurface(
+                    recordID: recordID,
+                    origin: origin,
+                    namespace: namespace,
+                    isSource: false
+                )
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 

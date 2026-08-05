@@ -1,6 +1,9 @@
+import SwiftUI
+import UIKit
 import XCTest
 @testable import Notiee
 
+@MainActor
 final class NewUIPreviewRecordPresentationTests: XCTestCase {
     func testOrganizedMarkdownSuppressesWhitespaceTrimmedDuplicateSummary() {
         let record = makeRecord(
@@ -117,6 +120,34 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
         XCTAssertEqual(NewUIPreviewRecordPresentation.shareText(for: record, todos: todos), "")
     }
 
+    func testDetailBackgroundIsOpaqueForTodayAndRecordsOrigins() {
+        for origin in [NewUIPreviewRecordOrigin.today, .records] {
+            let host = UIHostingController(
+                rootView: DetailBackgroundHarness(origin: origin)
+                    .frame(width: 96, height: 160)
+                    .environment(\.colorScheme, .light)
+            )
+            host.view.frame = CGRect(x: 0, y: 0, width: 96, height: 160)
+            host.view.backgroundColor = .clear
+            host.view.layoutIfNeeded()
+
+            let pixels = renderRGBA(view: host.view, width: 96, height: 160)
+            let points = [
+                CGPoint(x: 1, y: 1),
+                CGPoint(x: 94, y: 1),
+                CGPoint(x: 48, y: 80),
+                CGPoint(x: 1, y: 158),
+                CGPoint(x: 94, y: 158)
+            ]
+
+            for point in points {
+                let index = (Int(point.y) * 96 + Int(point.x)) * 4
+                XCTAssertGreaterThan(pixels[index + 1], 245, "origin: \(origin), point: \(point)")
+                XCTAssertEqual(pixels[index + 3], 255, "origin: \(origin), point: \(point)")
+            }
+        }
+    }
+
     private func makeRecord(
         summary: String,
         detailedContent: String,
@@ -133,5 +164,39 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
             processingState: .completed,
             source: .photo
         )
+    }
+
+    private func renderRGBA(view: UIView, width: Int, height: Int) -> [UInt8] {
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let context = CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        )!
+        view.layer.render(in: context)
+        return pixels
+    }
+}
+
+private struct DetailBackgroundHarness: View {
+    @Namespace private var namespace
+
+    let origin: NewUIPreviewRecordOrigin
+
+    var body: some View {
+        ZStack {
+            Color(red: 1, green: 0, blue: 1)
+
+            NewUIPreviewRecordDetailBackground(
+                recordID: UUID(uuidString: "00000000-0000-0000-0000-000000000941")!,
+                origin: origin,
+                namespace: namespace
+            )
+        }
     }
 }

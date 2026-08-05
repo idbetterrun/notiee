@@ -20,14 +20,40 @@ enum NewUIPreviewTodaySection: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+enum NewUIPreviewRecordsFilter: String, CaseIterable, Identifiable, Hashable {
+    case all
+    case photo
+    case audio
+    case text
+    case spark
+
+    var id: String { rawValue }
+
+    func includes(_ source: NewUIPreviewRecordSource) -> Bool {
+        switch self {
+        case .all: return true
+        case .photo: return source == .photo
+        case .audio: return source == .audio
+        case .text: return source == .text
+        case .spark: return source == .spark
+        }
+    }
+}
+
+enum NewUIPreviewRecordOrigin: String, Hashable {
+    case today
+    case records
+}
+
 enum NewUIPreviewOverlay: Identifiable, Equatable {
     case module(NewUIPreviewTodaySection)
-    case recordDetail(UUID)
+    case recordDetail(recordID: UUID, origin: NewUIPreviewRecordOrigin)
 
     var id: String {
         switch self {
         case .module(let section): return "module-\(section.rawValue)"
-        case .recordDetail(let recordID): return "record-\(recordID.uuidString)"
+        case .recordDetail(let recordID, let origin):
+            return "record-\(origin.rawValue)-\(recordID.uuidString)"
         }
     }
 }
@@ -56,6 +82,8 @@ enum NewUIPreviewHeroContext: Equatable {
         case .recordMomentum, .calm: return .records
         }
     }
+
+    var showsAurora: Bool { self == .activeEvent }
 }
 
 /// Lets the lab preview jump directly to any of the design spec's five priority-ordered Hero
@@ -84,21 +112,6 @@ struct NewUIPreviewHero: Equatable {
     let context: NewUIPreviewHeroContext
     let title: String
     let supporting: String
-    /// The active event's user-selected tag color. A missing tag intentionally
-    /// falls back to the shared Notiee green inside the Aurora renderer.
-    let auroraColorHex: String?
-
-    init(
-        context: NewUIPreviewHeroContext,
-        title: String,
-        supporting: String,
-        auroraColorHex: String? = nil
-    ) {
-        self.context = context
-        self.title = title
-        self.supporting = supporting
-        self.auroraColorHex = auroraColorHex
-    }
 }
 
 /// Tags a mock urgent item with which spec priority tier it represents, so Hero selection can
@@ -167,6 +180,7 @@ final class NewUIPreviewState: ObservableObject {
 
     @Published var selectedTodaySection: NewUIPreviewTodaySection = .records
     @Published var recordsSearchQuery = ""
+    @Published var selectedRecordsFilter: NewUIPreviewRecordsFilter = .all
     @Published var overlay: NewUIPreviewOverlay?
 
     @Published var hero: NewUIPreviewHero = NewUIPreviewState.calmHero
@@ -227,12 +241,10 @@ final class NewUIPreviewState: ObservableObject {
     }
 
     func select(_ tab: NewUIPreviewTab) {
-        withAnimation(.easeOut(duration: 0.2)) {
-            if tab == .today, destination != .today {
-                beginTodayVisit()
-            } else {
-                destination = tab
-            }
+        if tab == .today, destination != .today {
+            beginTodayVisit()
+        } else {
+            destination = tab
         }
     }
 
@@ -246,16 +258,19 @@ final class NewUIPreviewState: ObservableObject {
     }
 
     var filteredRecordFixtures: [NewUIPreviewRecordFixture] {
-        NewUIPreviewFixtures.records(matching: recordsSearchQuery, in: recordFixtures)
+        let sourceMatches = recordFixtures.filter {
+            selectedRecordsFilter.includes($0.previewSource)
+        }
+        return NewUIPreviewFixtures.records(matching: recordsSearchQuery, in: sourceMatches)
     }
 
     func recordFixture(id: UUID) -> NewUIPreviewRecordFixture? {
         recordFixtures.first { $0.id == id }
     }
 
-    func openRecord(_ id: UUID) {
+    func openRecord(_ id: UUID, origin: NewUIPreviewRecordOrigin) {
         guard recordFixture(id: id) != nil else { return }
-        overlay = .recordDetail(id)
+        overlay = .recordDetail(recordID: id, origin: origin)
     }
 
     func openModule(_ section: NewUIPreviewTodaySection) {
@@ -286,8 +301,7 @@ final class NewUIPreviewState: ObservableObject {
             hero = NewUIPreviewHero(
                 context: .activeEvent,
                 title: String(localized: "产品周会"),
-                supporting: String(localized: "进行中 · 还剩 25 分钟"),
-                auroraColorHex: EventTag.work.colorHex
+                supporting: String(localized: "进行中 · 还剩 25 分钟")
             )
         case .dueTodo:
             urgentItems = [
@@ -311,11 +325,18 @@ final class NewUIPreviewState: ObservableObject {
         case .recordMomentum:
             urgentItems = []
             actionableTodos = []
-            todayRecords = makeTodayRecords(limit: 3)
-            statistics = NewUIPreviewStatistics(todayCount: 3, consecutiveDays: 8)
-            hero = NewUIPreviewHero(context: .recordMomentum,
-                                    title: String(localized: "今天已记录 3 条"),
-                                    supporting: String(localized: "继续补充，或问问 Spark"))
+            todayRecords = makeTodayRecords()
+            let todayCount = todayRecords.count
+            statistics = NewUIPreviewStatistics(todayCount: todayCount, consecutiveDays: 8)
+            hero = NewUIPreviewHero(
+                context: .recordMomentum,
+                title: String(
+                    format: String(localized: "今天已记录 %lld 条"),
+                    locale: Locale.current,
+                    Int64(todayCount)
+                ),
+                supporting: String(localized: "继续补充，或问问 Spark")
+            )
         case .calm:
             urgentItems = []
             actionableTodos = []
@@ -328,9 +349,8 @@ final class NewUIPreviewState: ObservableObject {
         }
     }
 
-    /// The design spec distinguishes the bounded "urgent items" slot (up to two due/imminent
-    /// items that are *not* the Hero) from the adaptive review slot: an execution Hero reviews up
-    /// to three actionable todos, a reflection/calm Hero reviews up to three of today's records.
+    /// The design spec distinguishes the bounded urgent slot from the adaptive review slot.
+    /// The Today view decides how much of the selected review data fits without scrolling.
     var sharedReviewSlot: NewUIPreviewSharedReviewSlot {
         if hero.context.isExecution {
             return .todos(actionableTodos)
@@ -454,18 +474,18 @@ final class NewUIPreviewState: ObservableObject {
                                            title: String(localized: "此刻很安静"),
                                            supporting: String(localized: "下拉拍一张，或上拉录一段"))
 
-    private func makeTodayRecords(limit: Int) -> [NewUIPreviewTodayRecord] {
-        recordFixtures
-            .filter { !$0.record.isEncrypted }
-            .prefix(limit)
-            .map {
-                NewUIPreviewTodayRecord(
-                    id: $0.id,
-                    title: $0.record.title,
-                    summary: $0.cardSummary,
-                    thumbnailImageName: $0.media.first?.imageName
-                )
-            }
+    private func makeTodayRecords(limit: Int? = nil) -> [NewUIPreviewTodayRecord] {
+        let safeFixtures = recordFixtures.filter { !$0.record.isEncrypted }
+        let selectedFixtures = limit.map { Array(safeFixtures.prefix($0)) } ?? safeFixtures
+
+        return selectedFixtures.map {
+            NewUIPreviewTodayRecord(
+                id: $0.id,
+                title: $0.record.title,
+                summary: $0.cardSummary,
+                thumbnailImageName: $0.media.first?.imageName
+            )
+        }
     }
 
     private static let urgentIDs: [UUID] = [

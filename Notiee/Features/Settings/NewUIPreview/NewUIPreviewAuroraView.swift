@@ -7,6 +7,7 @@ import SwiftUI
 /// renderer owns GPU lifecycle and motion; SwiftUI supplies only semantic state.
 struct NewUIPreviewAuroraBackdrop: UIViewRepresentable {
     let colorHex: String?
+    let isActive: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -29,7 +30,7 @@ struct NewUIPreviewAuroraBackdrop: UIViewRepresentable {
         context.coordinator.attach(to: view)
         context.coordinator.update(
             colorHex: colorHex,
-            shouldAnimate: !reduceMotion && scenePhase == .active
+            shouldAnimate: isActive && !reduceMotion && scenePhase == .active
         )
         return view
     }
@@ -37,7 +38,7 @@ struct NewUIPreviewAuroraBackdrop: UIViewRepresentable {
     func updateUIView(_ view: MTKView, context: Context) {
         context.coordinator.update(
             colorHex: colorHex,
-            shouldAnimate: !reduceMotion && scenePhase == .active
+            shouldAnimate: isActive && !reduceMotion && scenePhase == .active
         )
     }
 }

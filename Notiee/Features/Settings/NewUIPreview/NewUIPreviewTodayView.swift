@@ -1,5 +1,30 @@
 import SwiftUI
 
+enum NewUIPreviewTodayLayout {
+    static let eyebrowTitle = "Today"
+    static let itemHeight: CGFloat = 68
+    static let itemSpacing: CGFloat = 12
+    static let topPadding: CGFloat = 20
+    static let heroToSectionSpacing: CGFloat = 24
+    static let sectionSpacing: CGFloat = 14
+    static let viewAllHeight: CGFloat = 44
+    static let dockReservedHeight: CGFloat = 104
+
+    static func fittingItemCount(
+        availableHeight: CGFloat,
+        fixedContentHeight: CGFloat,
+        itemCount: Int
+    ) -> Int {
+        guard itemCount > 0 else { return 0 }
+
+        let rowBudget = max(availableHeight - fixedContentHeight, 0)
+        let completeRows = Int(
+            floor((rowBudget + itemSpacing) / (itemHeight + itemSpacing))
+        )
+        return min(itemCount, max(1, completeRows))
+    }
+}
+
 struct NewUIPreviewTodayView: View {
     @EnvironmentObject private var sparkState: NewUIPreviewState
     @Environment(\.colorScheme) private var colorScheme
@@ -8,9 +33,12 @@ struct NewUIPreviewTodayView: View {
         ZStack(alignment: .bottom) {
             Color.newUIPreviewBackground.ignoresSafeArea()
 
-            if sparkState.hero.context == .activeEvent {
+            if sparkState.hero.context.showsAurora {
                 VStack(spacing: 0) {
-                    NewUIPreviewAuroraBackdrop(colorHex: sparkState.hero.auroraColorHex)
+                    NewUIPreviewAuroraBackdrop(
+                        colorHex: NewUIPreviewBrand.accentHex,
+                        isActive: sparkState.destination == .today
+                    )
                         .frame(height: 300)
                         .opacity(colorScheme == .dark ? 0.62 : 0.78)
                     Spacer(minLength: 0)
@@ -19,17 +47,22 @@ struct NewUIPreviewTodayView: View {
                 .allowsHitTesting(false)
             }
 
-            NewUIPreviewDashboardContent()
-                .environmentObject(sparkState)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .padding(.bottom, 104)
-                .contentShape(Rectangle())
-                .simultaneousGesture(captureGesture, including: .gesture)
+            GeometryReader { proxy in
+                NewUIPreviewDashboardContent(
+                    availableHeight: max(
+                        proxy.size.height - NewUIPreviewTodayLayout.dockReservedHeight,
+                        0
+                    )
+                )
+                    .environmentObject(sparkState)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.bottom, NewUIPreviewTodayLayout.dockReservedHeight)
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(captureGesture, including: .gesture)
+            }
 
             captureFeedback
                 .allowsHitTesting(false)
-
-            NewUIPreviewDockBar()
         }
     }
 
@@ -86,87 +119,65 @@ struct NewUIPreviewTodayView: View {
 private struct NewUIPreviewDashboardContent: View {
     @EnvironmentObject private var sparkState: NewUIPreviewState
 
+    let availableHeight: CGFloat
+
+    @State private var measuredHeroHeight: CGFloat = 92
+    @State private var measuredTodayHeaderHeight: CGFloat = 97
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: NewUIPreviewTodayLayout.heroToSectionSpacing) {
             hero
-            shortcuts
             todaySection
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 28)
+        .padding(.top, NewUIPreviewTodayLayout.topPadding)
         .animation(.easeInOut(duration: 0.22), value: sparkState.hero.context)
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(verbatim: NewUIPreviewTodayLayout.eyebrowTitle)
+                .font(.system(size: 15, weight: .light))
+                .foregroundStyle(Color.newUIPreviewSecondary)
+                .lineLimit(1)
+
             Text(sparkState.hero.title)
                 .font(.system(size: 31, weight: .bold))
                 .foregroundStyle(Color.newUIPreviewPrimary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
+
             Text(sparkState.hero.supporting)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(Color.newUIPreviewSecondary)
                 .lineLimit(2)
+                .padding(.top, 2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-    }
-
-    private var shortcuts: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            NewUIPreviewGlassContainer {
-                HStack(spacing: 8) {
-                    shortcut(section: .records, symbol: "books.vertical.fill", count: sparkState.recordFixtures.count)
-                    shortcut(section: .todos, symbol: "checkmark.circle.fill", count: sparkState.actionableTodos.count)
-                    shortcut(section: .schedule, symbol: "calendar", count: scheduleItems.count)
-                }
-            }
-            .padding(.vertical, 2)
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.height
+        } action: { height in
+            updateMeasuredHeight(height, target: $measuredHeroHeight)
         }
-        .scrollIndicators(.hidden)
-    }
-
-    private func shortcut(section: NewUIPreviewTodaySection, symbol: String, count: Int) -> some View {
-        Button {
-            if section == .records {
-                sparkState.select(.records)
-            } else {
-                sparkState.openModule(section)
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(section.tint)
-                Text(section.title)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.newUIPreviewPrimary)
-                    .lineLimit(1)
-                if count > 0 {
-                    Text("\(count)")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(section.tint)
-                        .padding(.horizontal, 6)
-                        .frame(minWidth: 22, minHeight: 22)
-                        .background(section.tint.opacity(0.13), in: Capsule())
-                }
-            }
-            .padding(.horizontal, 14)
-            .frame(minHeight: 50)
-            .fixedSize(horizontal: true, vertical: false)
-            .contentShape(Capsule())
-            .background(Color(uiColor: .secondarySystemFill), in: Capsule())
-            .newUIPreviewGlass(in: Capsule(), interactive: true)
-        }
-        .buttonStyle(NewUIPreviewPressStyle())
-        .accessibilityLabel(Text(section.title))
-        .accessibilityValue(Text("\(count)"))
     }
 
     private var todaySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: NewUIPreviewTodayLayout.sectionSpacing) {
+            todayHeader
+
+            todayRows
+
+            NewUIPreviewViewAllButton(
+                section: sparkState.selectedTodaySection,
+                action: openFullSection
+            )
+        }
+    }
+
+    private var todayHeader: some View {
+        VStack(alignment: .leading, spacing: NewUIPreviewTodayLayout.sectionSpacing) {
             Text("今天")
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(Color.newUIPreviewPrimary)
@@ -174,44 +185,72 @@ private struct NewUIPreviewDashboardContent: View {
             NewUIPreviewTodaySelector(selection: sparkState.selectedTodaySection) { section in
                 sparkState.selectTodaySection(section)
             }
-
-            todayRows
+        }
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.height
+        } action: { height in
+            updateMeasuredHeight(height, target: $measuredTodayHeaderHeight)
         }
     }
 
     @ViewBuilder
     private var todayRows: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: NewUIPreviewTodayLayout.itemSpacing) {
             switch sparkState.selectedTodaySection {
             case .records:
                 if sparkState.todayRecords.isEmpty {
                     emptyRow("今天还没有新记录。")
                 } else {
-                    ForEach(sparkState.todayRecords.prefix(3)) { record in
-                        Button { sparkState.openRecord(record.id) } label: {
-                            NewUIPreviewTodayRecordRow(record: record)
+                    ForEach(sparkState.todayRecords.prefix(visibleItemCount)) { record in
+                        Button {
+                            sparkState.openRecord(record.id, origin: .today)
+                        } label: {
+                            NewUIPreviewTodayItemCard(
+                                title: record.title,
+                                detail: record.summary,
+                                style: .record(imageName: record.thumbnailImageName),
+                                recordID: record.id,
+                                transitionOrigin: .today,
+                                transitionNamespace: sparkState.namespace
+                            )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(NewUIPreviewPressStyle())
                     }
                 }
             case .todos:
                 if sparkState.actionableTodos.isEmpty {
                     emptyRow("今天没有待处理事项。")
                 } else {
-                    ForEach(sparkState.actionableTodos.prefix(3)) { item in
-                        NewUIPreviewTodoRow(item: item)
+                    ForEach(sparkState.actionableTodos.prefix(visibleItemCount)) { item in
+                        Button { sparkState.openModule(.todos) } label: {
+                            NewUIPreviewTodayItemCard(
+                                title: item.title,
+                                detail: item.detail,
+                                style: .todo
+                            )
+                        }
+                        .buttonStyle(NewUIPreviewPressStyle())
                     }
                 }
             case .schedule:
                 if scheduleItems.isEmpty {
                     emptyRow("今天没有日程安排。")
                 } else {
-                    ForEach(scheduleItems.prefix(3)) { item in
-                        NewUIPreviewScheduleRow(item: item)
+                    ForEach(scheduleItems.prefix(visibleItemCount)) { item in
+                        Button { sparkState.openModule(.schedule) } label: {
+                            NewUIPreviewTodayItemCard(
+                                title: item.title,
+                                detail: item.detail,
+                                style: .schedule(isNow: item.kind == .activeEvent)
+                            )
+                        }
+                        .buttonStyle(NewUIPreviewPressStyle())
                     }
                 }
             }
         }
+        .id(sparkState.selectedTodaySection)
+        .transition(.opacity)
     }
 
     private func emptyRow(_ title: LocalizedStringKey) -> some View {
@@ -219,7 +258,52 @@ private struct NewUIPreviewDashboardContent: View {
             .font(.system(size: 14, weight: .medium))
             .foregroundStyle(Color.newUIPreviewSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 10)
+            .frame(height: NewUIPreviewTodayLayout.itemHeight)
+    }
+
+    private var fixedContentHeight: CGFloat {
+        NewUIPreviewTodayLayout.topPadding
+            + measuredHeroHeight
+            + NewUIPreviewTodayLayout.heroToSectionSpacing
+            + measuredTodayHeaderHeight
+            + NewUIPreviewTodayLayout.sectionSpacing * 2
+            + NewUIPreviewTodayLayout.viewAllHeight
+    }
+
+    private var visibleItemCount: Int {
+        NewUIPreviewTodayLayout.fittingItemCount(
+            availableHeight: availableHeight,
+            fixedContentHeight: fixedContentHeight,
+            itemCount: selectedItemCount
+        )
+    }
+
+    private var selectedItemCount: Int {
+        switch sparkState.selectedTodaySection {
+        case .records: return sparkState.todayRecords.count
+        case .todos: return sparkState.actionableTodos.count
+        case .schedule: return scheduleItems.count
+        }
+    }
+
+    private func openFullSection() {
+        switch sparkState.selectedTodaySection {
+        case .records:
+            sparkState.select(.records)
+        case .todos:
+            sparkState.openModule(.todos)
+        case .schedule:
+            sparkState.openModule(.schedule)
+        }
+    }
+
+    private func updateMeasuredHeight(_ height: CGFloat, target: Binding<CGFloat>) {
+        guard height > 0, abs(target.wrappedValue - height) > 0.5 else { return }
+        var transaction = Transaction(animation: nil)
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            target.wrappedValue = height
+        }
     }
 
     private var scheduleItems: [NewUIPreviewUrgentItem] {
@@ -236,6 +320,45 @@ private struct NewUIPreviewDashboardContent: View {
             )
         }
         return items
+    }
+}
+
+struct NewUIPreviewViewAllButton: View {
+    let section: NewUIPreviewTodaySection
+    let action: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                Image(systemName: section.symbolName)
+                    .font(.system(size: 15, weight: .semibold))
+                Text(section.viewAllTitle)
+                    .font(.system(size: 14, weight: .semibold))
+                    .lineLimit(1)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .accessibilityHidden(true)
+            }
+            .foregroundStyle(section.tint)
+            .padding(.horizontal, 16)
+            .frame(height: NewUIPreviewTodayLayout.viewAllHeight)
+            .background(pillBacking, in: Capsule())
+            .contentShape(Capsule())
+            .newUIPreviewGlass(in: Capsule())
+        }
+        .buttonStyle(NewUIPreviewPressStyle())
+        .fixedSize(horizontal: true, vertical: false)
+        .accessibilityHint("打开完整列表")
+    }
+
+    private var pillBacking: Color {
+        if reduceTransparency {
+            return Color(uiColor: .secondarySystemBackground)
+        }
+        return Color.white.opacity(colorScheme == .dark ? 0.10 : 0.42)
     }
 }
 
@@ -294,90 +417,115 @@ private struct NewUIPreviewTodaySelector: View {
     }
 }
 
-private struct NewUIPreviewTodoRow: View {
-    let item: NewUIPreviewUrgentItem
-
-    var body: some View {
-        HStack(spacing: 11) {
-            Image(systemName: "circle")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Color.newUIPreviewAccent)
-            rowText
-        }
-        .frame(minHeight: 44)
-        .accessibilityElement(children: .combine)
-    }
-
-    private var rowText: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(item.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
-            Text(item.detail).font(.system(size: 12, weight: .medium)).foregroundStyle(Color.newUIPreviewSecondary).lineLimit(1)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
+enum NewUIPreviewTodayItemStyle: Equatable {
+    case record(imageName: String?)
+    case todo
+    case schedule(isNow: Bool)
 }
 
-private struct NewUIPreviewScheduleRow: View {
-    let item: NewUIPreviewUrgentItem
+struct NewUIPreviewTodayItemCard: View {
+    let title: String
+    let detail: String
+    let style: NewUIPreviewTodayItemStyle
+    var recordID: UUID? = nil
+    var transitionOrigin: NewUIPreviewRecordOrigin? = nil
+    var transitionNamespace: Namespace.ID? = nil
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(item.kind == .activeEvent ? "现在" : "稍后")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Color.newUIPreviewAccent)
-                .frame(width: 34, alignment: .leading)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
-                Text(item.detail).font(.system(size: 12, weight: .medium)).foregroundStyle(Color.newUIPreviewSecondary).lineLimit(1)
-            }
-            Spacer(minLength: 0)
-        }
-        .frame(minHeight: 44)
-        .accessibilityElement(children: .combine)
-    }
-}
+            leadingVisual
 
-struct NewUIPreviewTodayRecordRow: View {
-    let record: NewUIPreviewTodayRecord
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.newUIPreviewPrimary)
+                    .lineLimit(1)
 
-    var body: some View {
-        HStack(spacing: 11) {
-            thumbnail
-            VStack(alignment: .leading, spacing: 2) {
-                Text(record.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
-                if !record.summary.isEmpty {
-                    Text(record.summary)
+                if !detail.isEmpty {
+                    Text(detail)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Color.newUIPreviewSecondary)
                         .lineLimit(1)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Spacer(minLength: 0)
+
             Image(systemName: "chevron.right")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Color.newUIPreviewSecondary)
+                .accessibilityHidden(true)
         }
-        .frame(minHeight: 44)
-        .contentShape(Rectangle())
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity)
+        .frame(height: NewUIPreviewTodayLayout.itemHeight)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color(uiColor: .secondarySystemBackground))
+                .newUIPreviewRecordTransitionSurface(
+                    recordID: recordID,
+                    origin: transitionOrigin,
+                    namespace: transitionNamespace,
+                    isSource: true
+                )
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.07), lineWidth: 0.5)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder
-    private var thumbnail: some View {
-        if let imageName = record.thumbnailImageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 40, height: 40)
-                .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                .accessibilityHidden(true)
-        } else {
-            Image(systemName: "note.text")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.newUIPreviewAccent)
-                .frame(width: 40, height: 40)
-                .accessibilityHidden(true)
+    private var leadingVisual: some View {
+        switch style {
+        case .record(let imageName):
+            if let imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 44, height: 44)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .accessibilityHidden(true)
+            } else {
+                iconTile(symbol: "note.text", tint: .newUIPreviewAccent)
+            }
+        case .todo:
+            iconTile(symbol: "circle", tint: .orange)
+        case .schedule(let isNow):
+            VStack(spacing: 2) {
+                Image(systemName: isNow ? "play.fill" : "calendar")
+                    .font(.system(size: 13, weight: .bold))
+                Text(isNow ? "现在" : "稍后")
+                    .font(.system(size: 9, weight: .bold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(Color.blue)
+            .frame(width: 44, height: 44)
+            .background(Color.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .accessibilityHidden(true)
+        }
+    }
+
+    private func iconTile(symbol: String, tint: Color) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 18, weight: .semibold))
+            .foregroundStyle(tint)
+            .frame(width: 44, height: 44)
+            .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .accessibilityHidden(true)
+    }
+}
+
+private extension NewUIPreviewTodaySection {
+    var viewAllTitle: LocalizedStringKey {
+        switch self {
+        case .records: return "查看全部记录"
+        case .todos: return "查看全部待办"
+        case .schedule: return "查看全部日程"
         }
     }
 }

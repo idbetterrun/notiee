@@ -6,6 +6,7 @@ struct NewUIPreviewRecordsView: View {
 
     private let horizontalPadding: CGFloat = 16
     private let columnSpacing: CGFloat = 12
+    private let topAnchor = "new-ui-preview-records-top"
 
     private var columnCount: Int {
         dynamicTypeSize.isAccessibilitySize ? 1 : 2
@@ -20,30 +21,28 @@ struct NewUIPreviewRecordsView: View {
                 spacing: columnSpacing
             )
 
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
-                    Text("记录")
-                        .font(.largeTitle.bold())
-                        .foregroundStyle(Color.newUIPreviewPrimary)
-                        .frame(width: contentWidth, alignment: .leading)
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.top, 8)
-                        .padding(.bottom, 10)
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        Color.clear
+                            .frame(height: 1)
+                            .id(topAnchor)
 
-                    Section {
-                        recordsContent(
-                            contentWidth: contentWidth,
-                            columnWidth: columnWidth
-                        )
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.top, 10)
-                        .padding(.bottom, 124)
-                    } header: {
-                        searchHeader
+                        Section {
+                            recordsContent(
+                                contentWidth: contentWidth,
+                                columnWidth: columnWidth
+                            )
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.top, 12)
+                            .padding(.bottom, 124)
+                        } header: {
+                            searchHeader(scrollProxy: scrollProxy)
+                        }
                     }
                 }
+                .scrollIndicators(.hidden)
             }
-            .scrollIndicators(.hidden)
         }
         .background(Color.newUIPreviewBackground)
         .accessibilityIdentifier("new-ui-preview-records")
@@ -59,9 +58,11 @@ struct NewUIPreviewRecordsView: View {
                 ForEach(previewState.filteredRecordFixtures) { fixture in
                     NewUIPreviewRecordCard(
                         fixture: fixture,
-                        cardWidth: columnWidth
+                        cardWidth: columnWidth,
+                        transitionOrigin: .records,
+                        transitionNamespace: previewState.namespace
                     ) {
-                        previewState.openRecord(fixture.id)
+                        previewState.openRecord(fixture.id, origin: .records)
                     }
                 }
             }
@@ -69,12 +70,23 @@ struct NewUIPreviewRecordsView: View {
         }
     }
 
-    private var searchHeader: some View {
-        searchField
+    private func searchHeader(scrollProxy: ScrollViewProxy) -> some View {
+        VStack(spacing: 8) {
+            searchField
+
+            NewUIPreviewRecordsFilterPicker(
+                selection: previewState.selectedRecordsFilter
+            ) { filter in
+                guard previewState.selectedRecordsFilter != filter else { return }
+                previewState.selectedRecordsFilter = filter
+                withAnimation(.snappy(duration: 0.32, extraBounce: 0)) {
+                    scrollProxy.scrollTo(topAnchor, anchor: .top)
+                }
+            }
+        }
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
-            .background(Color.newUIPreviewBackground.opacity(0.96))
             .zIndex(1)
     }
 
@@ -116,7 +128,7 @@ struct NewUIPreviewRecordsView: View {
                 .foregroundStyle(Color.newUIPreviewSecondary)
                 .accessibilityHidden(true)
 
-            Text(LocalizedStringKey(previewState.recordsSearchQuery.isEmpty ? "还没有记录" : "没有匹配的记录"))
+            Text(emptyStateTitle)
                 .font(.headline)
                 .foregroundStyle(Color.newUIPreviewPrimary)
 
@@ -130,5 +142,151 @@ struct NewUIPreviewRecordsView: View {
         .frame(maxWidth: .infinity)
         .padding(.top, 72)
         .padding(.horizontal, 24)
+    }
+
+    private var emptyStateTitle: LocalizedStringKey {
+        if !previewState.recordsSearchQuery.isEmpty {
+            return "没有匹配的记录"
+        }
+        if previewState.selectedRecordsFilter != .all {
+            return "此分类还没有记录"
+        }
+        return "还没有记录"
+    }
+}
+
+struct NewUIPreviewRecordsFilterPicker: View {
+    let selection: NewUIPreviewRecordsFilter
+    let onSelect: (NewUIPreviewRecordsFilter) -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(NewUIPreviewRecordsFilter.allCases) { filter in
+                        filterButton(filter)
+                            .id(filter.id)
+                    }
+                }
+                .padding(.horizontal, 1)
+                .padding(.vertical, 2)
+            }
+            .onChange(of: selection) { _, newSelection in
+                withAnimation(.snappy(duration: 0.35, extraBounce: 0.08)) {
+                    proxy.scrollTo(newSelection.id, anchor: .center)
+                }
+            }
+        }
+        .frame(height: 48)
+    }
+
+    private func filterButton(_ filter: NewUIPreviewRecordsFilter) -> some View {
+        let isSelected = selection == filter
+
+        return Button {
+            withAnimation(.snappy(duration: 0.35, extraBounce: 0.08)) {
+                onSelect(filter)
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: filter.symbolName)
+                    .font(.system(size: 16, weight: .semibold))
+
+                if isSelected {
+                    Text(filter.title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .transition(.opacity.combined(with: .scale(scale: 0.92)))
+                }
+            }
+            .foregroundStyle(isSelected ? Color.white : filter.tint)
+            .frame(minWidth: 44, minHeight: 44)
+            .padding(.horizontal, isSelected ? 14 : 0)
+            .background { filterBackground(filter, isSelected: isSelected) }
+            .contentShape(Capsule())
+            .animation(.snappy(duration: 0.35, extraBounce: 0.08), value: isSelected)
+        }
+        .buttonStyle(NewUIPreviewPressStyle())
+        .accessibilityLabel(Text(filter.title))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func filterBackground(
+        _ filter: NewUIPreviewRecordsFilter,
+        isSelected: Bool
+    ) -> some View {
+        let maskOpacity = NewUIPreviewRecordsFilterAppearance.whiteMaskOpacity(
+            isSelected: isSelected,
+            colorScheme: colorScheme,
+            reduceTransparency: reduceTransparency
+        )
+
+        return ZStack {
+            Capsule().fill(
+                isSelected
+                    ? filter.tint
+                    : Color(
+                        uiColor: reduceTransparency
+                            ? .secondarySystemBackground
+                            : .secondarySystemFill
+                    )
+            )
+
+            if maskOpacity > 0 {
+                Capsule()
+                    .fill(Color.white.opacity(maskOpacity))
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+}
+
+enum NewUIPreviewRecordsFilterAppearance {
+    static func whiteMaskOpacity(
+        isSelected: Bool,
+        colorScheme: ColorScheme,
+        reduceTransparency: Bool
+    ) -> Double {
+        guard !isSelected else { return 0 }
+        if reduceTransparency {
+            return colorScheme == .dark ? 0.20 : 0.70
+        }
+        return colorScheme == .dark ? 0.12 : 0.46
+    }
+}
+
+private extension NewUIPreviewRecordsFilter {
+    var title: LocalizedStringKey {
+        switch self {
+        case .all: return "全部"
+        case .photo: return "照片"
+        case .audio: return "录音"
+        case .text: return "文字"
+        case .spark: return "来自 Spark"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .all: return "square.grid.2x2"
+        case .photo: return "photo"
+        case .audio: return "waveform"
+        case .text: return "doc.text"
+        case .spark: return "sparkles"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .all: return .newUIPreviewAccent
+        case .photo: return .blue
+        case .audio: return .red
+        case .text: return .indigo
+        case .spark: return .purple
+        }
     }
 }

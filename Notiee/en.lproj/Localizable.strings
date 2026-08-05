@@ -608,7 +608,7 @@
 "产品周会" = "Product sync";
 "进行中 · 还剩 25 分钟" = "In progress · 25 minutes left";
 "截止今晚 22:00，还剩不到 2 小时" = "Due by 10:00 PM, less than 2 hours left";
-"今天已记录 3 条" = "3 records captured today";
+"今天已记录 %lld 条" = "%lld records captured today";
 "继续补充，或问问 Spark" = "Keep adding, or ask Spark";
 "此刻很安静" = "It is quiet right now";
 "下拉拍一张，或上拉录一段" = "Pull down for camera, or pull up for audio";
@@ -679,3 +679,12 @@
 "✨ 已记录 %lld 条拍记" = "✨ %lld records captured";
 "✨ 已陪伴你第 %lld 天" = "✨ Day %lld together";
 "✨ 今天想记录什么？" = "✨ What would you like to capture?";
+"全部" = "All";
+"录音" = "Audio";
+"来自 Spark" = "From Spark";
+"此分类还没有记录" = "No records in this category";
+"查看全部记录" = "View All Records";
+"查看全部待办" = "View All Todos";
+"查看全部日程" = "View Full Schedule";
+"打开完整列表" = "Open the full list";
+"录音波形" = "Audio waveform";

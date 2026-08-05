@@ -2,14 +2,27 @@ import SwiftUI
 
 struct NewUIPreviewRootView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var sparkState = NewUIPreviewState()
     @Namespace private var sparkNamespace
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             Color.newUIPreviewBackground.ignoresSafeArea()
 
-            destination
+            destinationPages
+                .scaleEffect(
+                    !hasModuleOverlay || reduceMotion ? 1 : 0.985,
+                    anchor: .center
+                )
+                .offset(x: !hasModuleOverlay || reduceMotion ? 0 : -12)
+
+            if sparkState.overlay == nil {
+                NewUIPreviewDockBar()
+                    .allowsHitTesting(!sparkState.isExpanded)
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
 
             if sparkState.isExpanded {
                 NewUIPreviewComposerView()
@@ -24,10 +37,12 @@ struct NewUIPreviewRootView: View {
             overlay
                 .zIndex(3)
         }
+        .animation(pageAnimation, value: sparkState.destination)
+        .animation(overlayAnimation, value: sparkState.overlay)
         .environmentObject(sparkState)
         .navigationBarBackButtonHidden(true)
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(recordsNavigationIsActive ? String(localized: "记录") : "")
+        .navigationBarTitleDisplayMode(recordsNavigationIsActive ? .large : .inline)
         .toolbarBackground(
             sparkState.destination == .records && sparkState.overlay == nil ? .visible : .hidden,
             for: .navigationBar
@@ -37,16 +52,21 @@ struct NewUIPreviewRootView: View {
         .onAppear { sparkState.namespace = sparkNamespace }
     }
 
-    @ViewBuilder
-    private var destination: some View {
-        switch sparkState.destination {
-        case .today:
+    private var destinationPages: some View {
+        ZStack {
             NewUIPreviewTodayView()
-        case .records:
-            ZStack(alignment: .bottom) {
-                NewUIPreviewRecordsView()
-                NewUIPreviewDockBar()
-            }
+                .opacity(pageIsVisible(.today) ? 1 : 0)
+                .offset(x: pageOffset(for: .today))
+                .allowsHitTesting(sparkState.destination == .today && sparkState.overlay == nil)
+                .accessibilityHidden(sparkState.destination != .today || sparkState.overlay != nil)
+                .zIndex(sparkState.destination == .today ? 1 : 0)
+
+            NewUIPreviewRecordsView()
+                .opacity(pageIsVisible(.records) ? 1 : 0)
+                .offset(x: pageOffset(for: .records))
+                .allowsHitTesting(sparkState.destination == .records && sparkState.overlay == nil)
+                .accessibilityHidden(sparkState.destination != .records || sparkState.overlay != nil)
+                .zIndex(sparkState.destination == .records ? 1 : 0)
         }
     }
 
@@ -57,16 +77,65 @@ struct NewUIPreviewRootView: View {
             NewUIPreviewModuleView(section: section) {
                 sparkState.dismissOverlay()
             }
-            .transition(.move(edge: .trailing).combined(with: .opacity))
-        case .recordDetail(let recordID):
+            .transition(childPageTransition)
+        case .recordDetail(let recordID, let origin):
             if let fixture = sparkState.recordFixture(id: recordID) {
-                NewUIPreviewRecordDetailView(fixture: fixture) {
+                NewUIPreviewRecordDetailView(
+                    fixture: fixture,
+                    transitionOrigin: origin,
+                    transitionNamespace: reduceMotion ? nil : sparkNamespace
+                ) {
                     sparkState.dismissOverlay()
                 }
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .transition(.opacity)
             }
         case nil:
             EmptyView()
+        }
+    }
+
+    private var recordsNavigationIsActive: Bool {
+        sparkState.destination == .records && sparkState.overlay == nil
+    }
+
+    private var hasModuleOverlay: Bool {
+        guard case .module = sparkState.overlay else { return false }
+        return true
+    }
+
+    private var hasRecordDetailOverlay: Bool {
+        guard case .recordDetail = sparkState.overlay else { return false }
+        return true
+    }
+
+    private func pageIsVisible(_ destination: NewUIPreviewDestination) -> Bool {
+        sparkState.destination == destination && !hasRecordDetailOverlay
+    }
+
+    private var pageAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.18)
+            : .snappy(duration: 0.32, extraBounce: 0)
+    }
+
+    private var overlayAnimation: Animation {
+        reduceMotion
+            ? .easeOut(duration: 0.18)
+            : .snappy(duration: 0.38, extraBounce: 0.02)
+    }
+
+    private var childPageTransition: AnyTransition {
+        reduceMotion
+            ? .opacity
+            : .move(edge: .trailing).combined(with: .opacity)
+    }
+
+    private func pageOffset(for destination: NewUIPreviewDestination) -> CGFloat {
+        guard !reduceMotion else { return 0 }
+        switch (destination, sparkState.destination) {
+        case (.today, .today), (.records, .records): return 0
+        case (.today, .records): return -18
+        case (.records, .today): return 18
         }
     }
 

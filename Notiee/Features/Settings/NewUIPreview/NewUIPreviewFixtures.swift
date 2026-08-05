@@ -1,6 +1,33 @@
 import CoreGraphics
 import Foundation
 
+enum NewUIPreviewRecordSource: String, CaseIterable, Identifiable, Hashable {
+    case photo
+    case audio
+    case text
+    case spark
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .photo: return String(localized: "照片")
+        case .audio: return String(localized: "录音")
+        case .text: return String(localized: "文字")
+        case .spark: return String(localized: "来自 Spark")
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .photo: return "photo"
+        case .audio: return "waveform"
+        case .text: return "doc.text"
+        case .spark: return "sparkles"
+        }
+    }
+}
+
 struct NewUIPreviewMedia: Identifiable, Equatable {
     let id: UUID
     let imageName: String
@@ -14,6 +41,7 @@ struct NewUIPreviewMedia: Identifiable, Equatable {
 
 struct NewUIPreviewRecordFixture: Identifiable, Equatable {
     let record: NoteRecord
+    let previewSource: NewUIPreviewRecordSource
     let media: [NewUIPreviewMedia]
     let eventName: String?
     let folderName: String?
@@ -126,6 +154,30 @@ enum NewUIPreviewFixtures {
             eventName: "私人日程",
             folderName: "保险箱",
             todos: ["private todo sentinel"]
+        ),
+        fixture(
+            id: "10000000-0000-0000-0000-000000000010",
+            minutesAgo: 360,
+            mediaCount: 0,
+            title: "散步时的语音备忘",
+            ocrText: "重新整理首页层级，让最重要的信息先出现。",
+            summary: "一段关于首页信息层级和留白的语音想法。",
+            detailedContent: "先确认页面的主任务，再决定每个模块应该占据多少空间。",
+            source: .text,
+            previewSource: .audio,
+            folderName: "灵感",
+            todos: ["整理成界面草图"]
+        ),
+        fixture(
+            id: "10000000-0000-0000-0000-000000000011",
+            minutesAgo: 420,
+            mediaCount: 0,
+            title: "Spark 整理的发布复盘",
+            summary: "Spark 汇总了发布过程中的决策、反馈和后续问题。",
+            detailedContent: "## 复盘\n\n保留有效决策，同时继续验证首次体验。",
+            source: .spark,
+            previewSource: .spark,
+            folderName: "工作"
         )
     ]
 
@@ -152,6 +204,7 @@ enum NewUIPreviewFixtures {
         keyPoints: [String] = [],
         definitions: [KeyDefinition] = [],
         source: RecordSource = .photo,
+        previewSource: NewUIPreviewRecordSource? = nil,
         isEncrypted: Bool = false,
         eventName: String? = nil,
         folderName: String? = nil,
@@ -176,11 +229,20 @@ enum NewUIPreviewFixtures {
         )
         return NewUIPreviewRecordFixture(
             record: record,
+            previewSource: previewSource ?? defaultPreviewSource(for: source),
             media: media,
             eventName: eventName,
             folderName: folderName,
             todos: todos
         )
+    }
+
+    private static func defaultPreviewSource(for source: RecordSource) -> NewUIPreviewRecordSource {
+        switch source {
+        case .photo: return .photo
+        case .spark: return .spark
+        case .text: return .text
+        }
     }
 
     private static func mediaFixture(recordID: String, index: Int) -> NewUIPreviewMedia {

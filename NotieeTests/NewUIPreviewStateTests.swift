@@ -60,6 +60,7 @@ final class NewUIPreviewStateTests: XCTestCase {
         XCTAssertTrue(fixtures.contains { $0.record.isEncrypted })
         XCTAssertTrue(fixtures.contains { !$0.record.ocrText.isEmpty })
         XCTAssertTrue(fixtures.contains { !$0.todos.isEmpty })
+        XCTAssertEqual(Set(fixtures.map(\.previewSource)), Set(NewUIPreviewRecordSource.allCases))
     }
 
     func testCardSummaryNeverFallsBackToDetailOrOCR() throws {
@@ -77,6 +78,16 @@ final class NewUIPreviewStateTests: XCTestCase {
 
         XCTAssertEqual(projected.summary, fixture.record.summary)
         XCTAssertEqual(projected.thumbnailImageName, fixture.media.first?.imageName)
+    }
+
+    func testRecordMomentumUsesAllSafeTodayFixturesAndKeepsHeroCountConsistent() {
+        let state = makeState(scenario: .recordMomentum)
+        let safeFixtureCount = state.recordFixtures.filter { !$0.record.isEncrypted }.count
+
+        XCTAssertGreaterThan(state.todayRecords.count, 3)
+        XCTAssertEqual(state.todayRecords.count, safeFixtureCount)
+        XCTAssertEqual(state.statistics.todayCount, state.todayRecords.count)
+        XCTAssertTrue(state.hero.title.contains("\(state.todayRecords.count)"))
     }
 
     func testSearchMatchesOnlyTitleAndSummary() {
@@ -108,12 +119,80 @@ final class NewUIPreviewStateTests: XCTestCase {
         XCTAssertTrue(state.filteredRecordFixtures.contains { $0.record.isEncrypted })
     }
 
+    func testRecordsFilterIncludesOnlyTheSelectedPreviewSource() {
+        let state = makeState()
+
+        for filter in NewUIPreviewRecordsFilter.allCases where filter != .all {
+            state.selectedRecordsFilter = filter
+
+            XCTAssertFalse(state.filteredRecordFixtures.isEmpty, "filter: \(filter)")
+            XCTAssertTrue(
+                state.filteredRecordFixtures.allSatisfy { filter.includes($0.previewSource) },
+                "filter: \(filter)"
+            )
+        }
+    }
+
+    func testRecordsSearchAndFilterAreCombined() {
+        let state = makeState()
+        state.selectedRecordsFilter = .photo
+        state.recordsSearchQuery = "路线图"
+
+        XCTAssertEqual(state.filteredRecordFixtures.map(\.record.title), ["产品周会：Q3 路线图"])
+
+        state.selectedRecordsFilter = .audio
+        XCTAssertTrue(state.filteredRecordFixtures.isEmpty)
+
+        state.recordsSearchQuery = "语音"
+        XCTAssertEqual(state.filteredRecordFixtures.map(\.previewSource), [.audio])
+    }
+
+    func testPreviewUsesTheCanonicalBrandGreen() {
+        XCTAssertEqual(NewUIPreviewBrand.accentHex, "#09C576")
+        XCTAssertTrue(NewUIPreviewHeroContext.activeEvent.showsAurora)
+        XCTAssertTrue(
+            [
+                NewUIPreviewHeroContext.dueTodo,
+                .imminentEvent,
+                .recordMomentum,
+                .calm
+            ].allSatisfy { !$0.showsAurora }
+        )
+    }
+
+    func testAudioAndSparkFixturesUseStablePreviewSources() throws {
+        let audio = try XCTUnwrap(NewUIPreviewFixtures.records.first { $0.previewSource == .audio })
+        let spark = try XCTUnwrap(NewUIPreviewFixtures.records.first { $0.previewSource == .spark })
+
+        XCTAssertTrue(audio.media.isEmpty)
+        XCTAssertEqual(audio.id, UUID(uuidString: "10000000-0000-0000-0000-000000000010"))
+        XCTAssertEqual(spark.id, UUID(uuidString: "10000000-0000-0000-0000-000000000011"))
+    }
+
+    func testRecordsStateSurvivesSiblingAndDetailRoundTrips() throws {
+        let state = makeState()
+        state.select(.records)
+        state.selectedRecordsFilter = .audio
+        state.recordsSearchQuery = "语音"
+        let recordID = try XCTUnwrap(state.filteredRecordFixtures.first?.id)
+
+        state.openRecord(recordID, origin: .records)
+        state.dismissOverlay()
+        state.select(.today)
+        state.select(.records)
+
+        XCTAssertEqual(state.destination, .records)
+        XCTAssertEqual(state.selectedRecordsFilter, .audio)
+        XCTAssertEqual(state.recordsSearchQuery, "语音")
+        XCTAssertEqual(state.filteredRecordFixtures.map(\.id), [recordID])
+    }
+
     func testOverlayRoutingUsesKnownFixturesAndCanDismiss() throws {
         let state = makeState()
         let recordID = try XCTUnwrap(state.recordFixtures.first?.id)
 
-        state.openRecord(recordID)
-        XCTAssertEqual(state.overlay, .recordDetail(recordID))
+        state.openRecord(recordID, origin: .records)
+        XCTAssertEqual(state.overlay, .recordDetail(recordID: recordID, origin: .records))
 
         state.openModule(.todos)
         XCTAssertEqual(state.overlay, .module(.todos))
@@ -121,7 +200,10 @@ final class NewUIPreviewStateTests: XCTestCase {
         state.dismissOverlay()
         XCTAssertNil(state.overlay)
 
-        state.openRecord(UUID(uuidString: "99999999-0000-0000-0000-000000000001")!)
+        state.openRecord(
+            UUID(uuidString: "99999999-0000-0000-0000-000000000001")!,
+            origin: .today
+        )
         XCTAssertNil(state.overlay)
     }
 

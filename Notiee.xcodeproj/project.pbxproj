@@ -112,6 +112,7 @@
 		NEWUIPREVIEWBFT000000015 /* NewUIPreviewStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */; };
 		NEWUIPREVIEWBFT000000016 /* NewUIPreviewMasonryLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */; };
 		NEWUIPREVIEWBFT000000017 /* NewUIPreviewRecordPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */; };
+		NEWUIPREVIEWBFT000000018 /* NewUIPreviewTodayLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000018 /* NewUIPreviewTodayLayoutTests.swift */; };
 		1803E3BB2FF4EBEA004FEE5F /* SparkStyleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B773E34DD76549679196A9FA /* SparkStyleSettingsView.swift */; };
 		1803E3BC2FF4EBEA004FEE5F /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
 		1803E3BD2FF4EBEA004FEE5F /* SparkMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* SparkMemoryView.swift */; };
@@ -664,6 +665,7 @@
 		NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewStateTests.swift; sourceTree = "<group>"; };
 		NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewMasonryLayoutTests.swift; sourceTree = "<group>"; };
 		NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordPresentationTests.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000018 /* NewUIPreviewTodayLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewTodayLayoutTests.swift; sourceTree = "<group>"; };
 		36FB34A0CEC6AA566D28B479 /* VectorMath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
 		394A5D3E16168120244D779C /* ModelPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelPickerView.swift; sourceTree = "<group>"; };
 		3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventDetailSheetView.swift; sourceTree = "<group>"; };
@@ -1139,6 +1141,7 @@
 				NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */,
 				NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */,
 				NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */,
+				NEWUIPREVIEWFREF00000018 /* NewUIPreviewTodayLayoutTests.swift */,
 				100000000000000000000013 /* ProjectConfigurationTests.swift */,
 				100000000000000000000014 /* TodayViewModelTests.swift */,
 				100000000000000000000016 /* CaptureViewModelTests.swift */,
@@ -2056,6 +2059,7 @@
 				NEWUIPREVIEWBFT000000015 /* NewUIPreviewStateTests.swift in Sources */,
 				NEWUIPREVIEWBFT000000016 /* NewUIPreviewMasonryLayoutTests.swift in Sources */,
 				NEWUIPREVIEWBFT000000017 /* NewUIPreviewRecordPresentationTests.swift in Sources */,
+				NEWUIPREVIEWBFT000000018 /* NewUIPreviewTodayLayoutTests.swift in Sources */,
 				200000000000000000000013 /* ProjectConfigurationTests.swift in Sources */,
 				200000000000000000000014 /* TodayViewModelTests.swift in Sources */,
 				200000000000000000000016 /* CaptureViewModelTests.swift in Sources */,
