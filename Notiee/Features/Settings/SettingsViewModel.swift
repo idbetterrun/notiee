@@ -37,7 +37,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var notificationAdvanceTime: Int
     @Published var tokenWarningThreshold: Int
     
-    // Spark Agent
+    // Notti Agent
     @Published var agentTrustLevel: String
     @Published var agentMaxIterations: Int
     @Published var agentMaxToolsPerRound: Int
@@ -82,9 +82,9 @@ final class SettingsViewModel: ObservableObject {
         notificationAdvanceTime = settingsStore.loadInt(forKey: UDK.notificationAdvanceTime, defaultValue: 5)
         tokenWarningThreshold = settingsStore.loadInt(forKey: UDK.tokenWarningThreshold, defaultValue: 0)
         
-        agentTrustLevel = settingsStore.loadString(forKey: UDK.sparkAgentTrustLevel, defaultValue: "standard")
-        agentMaxIterations = settingsStore.loadInt(forKey: UDK.sparkAgentMaxIterations, defaultValue: 5)
-        agentMaxToolsPerRound = settingsStore.loadInt(forKey: UDK.sparkAgentMaxToolsPerRound, defaultValue: 3)
+        agentTrustLevel = settingsStore.loadString(forKey: UDK.nottiAgentTrustLevel, defaultValue: "standard")
+        agentMaxIterations = settingsStore.loadInt(forKey: UDK.nottiAgentMaxIterations, defaultValue: 5)
+        agentMaxToolsPerRound = settingsStore.loadInt(forKey: UDK.nottiAgentMaxToolsPerRound, defaultValue: 3)
         bochaSearchAPIKey = settingsStore.loadSecret(forKey: UDK.bochaSearchAPIKey)
         
         customModels = settingsStore.loadCustomModels()
@@ -138,9 +138,9 @@ final class SettingsViewModel: ObservableObject {
         settingsStore.saveInt(notificationAdvanceTime, forKey: UDK.notificationAdvanceTime)
         settingsStore.saveInt(tokenWarningThreshold, forKey: UDK.tokenWarningThreshold)
         
-        settingsStore.saveString(agentTrustLevel, forKey: UDK.sparkAgentTrustLevel)
-        settingsStore.saveInt(agentMaxIterations, forKey: UDK.sparkAgentMaxIterations)
-        settingsStore.saveInt(agentMaxToolsPerRound, forKey: UDK.sparkAgentMaxToolsPerRound)
+        settingsStore.saveString(agentTrustLevel, forKey: UDK.nottiAgentTrustLevel)
+        settingsStore.saveInt(agentMaxIterations, forKey: UDK.nottiAgentMaxIterations)
+        settingsStore.saveInt(agentMaxToolsPerRound, forKey: UDK.nottiAgentMaxToolsPerRound)
         settingsStore.saveSecret(bochaSearchAPIKey, forKey: UDK.bochaSearchAPIKey)
 
         settingsStore.saveCustomModels(customModels)

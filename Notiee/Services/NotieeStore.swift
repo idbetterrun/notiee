@@ -311,8 +311,10 @@ final class NotieeStore: ObservableObject {
         folderTagManager.findOrCreateFolder(named: name)
     }
 
-    var sparkFolder: CustomFolder? {
-        customFolders.first { $0.name == FolderTagManager.sparkFolderName }
+    var nottiFolder: CustomFolder? {
+        customFolders.first {
+            $0.systemRole == .nottiGenerated || $0.name == FolderTagManager.nottiFolderName
+        }
     }
 
     // MARK: - Tag Mutations

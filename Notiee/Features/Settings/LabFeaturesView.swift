@@ -8,7 +8,7 @@ struct LabFeaturesView: View {
     @AppStorage(UDK.labFullVisionModeEnabled) private var fullVisionModeEnabled = false
     @AppStorage(UDK.labDeepAssociationModeEnabled) private var deepAssociationModeEnabled = false
     @AppStorage(UDK.labLowConsumptionModeEnabled) private var lowConsumptionModeEnabled = false
-    @AppStorage("spark.semanticSearch.useCloud") private var useCloudEmbedding = false
+    @AppStorage("notti.semanticSearch.useCloud") private var useCloudEmbedding = false
     @AppStorage(UDK.labRecordOutputLanguage) private var recordOutputLanguage = "auto"
 
     @State private var showDeepAssociationDetail = false
@@ -43,7 +43,7 @@ struct LabFeaturesView: View {
             } header: {
                 Text("界面")
             } footer: {
-                Text("预览下一代导航方向的原型：底部一排玻璃控件 + 中间的 Spark 胶囊。纯静态样例，不接你的真实记录，也不会改变主 App 的界面。进入后点左上角菜单键退出。")
+                Text("预览下一代导航方向的原型：底部一排玻璃控件 + 中间的 Notti 胶囊。纯静态样例，不接你的真实记录，也不会改变主 App 的界面。进入后点左上角菜单键退出。")
             }
 
             Section {

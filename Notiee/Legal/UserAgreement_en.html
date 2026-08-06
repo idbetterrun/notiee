@@ -40,7 +40,7 @@
 <body>
 
 <h1>Notiee Terms of Service</h1>
-<div class="meta"><b>Version:</b> v1.0.6　<b>Effective Date:</b> July 2, 2026</div>
+<div class="meta"><b>Version:</b> v1.0.7　<b>Effective Date:</b> August 6, 2026</div>
 
 <h2>1. Terms Overview</h2>
 <p>Welcome to Notiee. Please read the following terms of service (the "Terms") carefully before using this App.</p>
@@ -53,8 +53,8 @@
 <table>
   <tr><th>Item</th><th>Details</th></tr>
   <tr><td>App Name</td><td>Notiee</td></tr>
-  <tr><td>Current Version</td><td>v1.0.6</td></tr>
-  <tr><td>Core Features</td><td>Schedule-aware photo capture, plain text notes, AI knowledge extraction (OCR / Summarization / Key Points / To-dos), Calendar and schedule tag management, To-do management (due dates / reminders), Spark AI Assistant (conversation + Agent operations), Semantic search and Deep Recall (related note recommendations)</td></tr>
+  <tr><td>Current Version</td><td>v1.0.7</td></tr>
+  <tr><td>Core Features</td><td>Schedule-aware photo capture, plain text notes, AI knowledge extraction (OCR / Summarization / Key Points / To-dos), Calendar and schedule tag management, To-do management (due dates / reminders), Notti AI Assistant (conversation + Agent operations), Semantic search and Deep Recall (related note recommendations)</td></tr>
   <tr><td>Service Type</td><td>Local tool-based app, not a cloud service</td></tr>
   <tr><td>Requirements</td><td>iOS 18.0 or later, iPhone device</td></tr>
 </table>
@@ -71,8 +71,8 @@
 <ul>
   <li>Personal learning and work-related recording</li>
   <li>Photographing class notes, meeting notes, whiteboard content, and other lawful scenarios</li>
-  <li>Using the Spark AI Assistant for note retrieval, schedule management, and to-do operations</li>
-  <li>Using Agent mode to let Spark perform actions such as note creation and schedule modification on your behalf</li>
+  <li>Using the Notti AI Assistant for note retrieval, schedule management, and to-do operations</li>
+  <li>Using Agent mode to let Notti perform actions such as note creation and schedule modification on your behalf</li>
 </ul>
 <h3>4.2 Prohibited Conduct</h3>
 <ul>
@@ -85,19 +85,19 @@
 
 <h2>5. Intellectual Property</h2>
 <p>5.1 All intellectual property rights in the App itself (including but not limited to its code, UI design, icons, logo, and the name "Notiee") belong to the developer.</p>
-<p>5.2 All intellectual property rights in content created by users through the App (such as photos, notes, AI summaries, To-dos, Spark conversation logs, etc.) belong to the user.</p>
+<p>5.2 All intellectual property rights in content created by users through the App (such as photos, notes, AI summaries, To-dos, Notti conversation logs, etc.) belong to the user.</p>
 <p>5.3 The third-party open source components used by the App and their license information are listed in the Appendix to these Terms.</p>
 
 <h2>6. AI Features Special Terms</h2>
-<p>6.1 <b>How AI Services Are Provided:</b> Users configure their own API Key to connect to the AI service provider of their choice (such as OpenAI, DeepSeek, Anthropic, Alibaba Cloud Bailian, Volcano Engine, MiniMax, etc.). Notiee does not provide its own AI cloud services.</p>
+<p>6.1 <b>How AI Services Are Provided:</b> Notiee+ connects directly to the AI provider configured by the user with the user's API key. The free Notiee app accesses supported AI models through Notiee's self-hosted backend using server-managed credentials.</p>
 <p>6.2 <b>Data Processing:</b></p>
 <ul>
-  <li>Text and images are sent to the user-configured AI service provider for processing. Notiee does not intercept or store them in transit.</li>
-  <li>Spark AI Assistant conversation content (including user messages and AI replies) is sent to the user-configured AI service provider.</li>
-  <li>In Agent mode, Spark may call tools to access the user's local data such as Snapnotes, schedules, and To-dos. Relevant data may be sent as context to the AI service provider.</li>
-  <li>The semantic search feature computes vectors locally on the device by default. Snapnote text is sent to the AI service provider's Embedding API only when the user manually enables "High-Quality Cloud Search" in Labs. The "Deep Recall" related recommendations on the detail page always use local vectors and are never transmitted externally.</li>
+  <li>Text and images required for AI processing are relayed to supported AI models through Notiee's self-hosted backend in the free app. In Notiee+, they are sent directly to the AI provider configured by the user.</li>
+  <li>Notti user messages, answer requests, and local context required by Agent mode follow the transport path for the applicable edition described above.</li>
+  <li>The Notti memory database and vectors are encrypted locally and are not synchronized through iCloud. To generate answers or extract memory, the current user message, confirmed tool results, and a bounded set of locally matched memory candidates may be sent temporarily to the selected AI model. The full memory database is not uploaded, and unconfirmed sensitive memories are not recalled.</li>
+  <li>Semantic search computes vectors locally on the device by default. Snapnote text is sent to an Embedding API through the applicable edition's transport path only when the user manually enables "High-Quality Cloud Search" in Labs. The "Deep Recall" related recommendations on the detail page always use local vectors and are never transmitted externally.</li>
 </ul>
-<p>6.3 <b>WebFetch Feature:</b> In Agent mode, Spark may fetch web page content from a specified URL based on user instructions. This feature uses temporary network sessions (no persistent cookies/cache) and includes built-in security protections that block access to local and intranet addresses.</p>
+<p>6.3 <b>WebFetch Feature:</b> In Agent mode, Notti may fetch web page content from a specified URL based on user instructions. This feature uses temporary network sessions (no persistent cookies/cache) and includes built-in security protections that block access to local and intranet addresses.</p>
 <p>6.4 <b>User Responsibility:</b> Users must obtain their own API Key and comply with the applicable terms of service and policies of the corresponding AI service provider.</p>
 <p>6.5 <b>AI Output Disclaimer:</b> AI-generated summaries, To-dos, conversation replies, and other content are for reference only and do not constitute professional advice (including but not limited to legal, medical, financial, or other professional advice). Users should independently assess the accuracy and applicability of AI outputs.</p>
 
@@ -143,10 +143,11 @@
 
 <hr>
 <blockquote><b>Version History</b><br>
+v1.0.7 (2026-08-06): Renamed Spark to Notti; added the two AI transport paths, encrypted local memory, and bounded memory-context transmission terms<br>
 v1.0.6 (2026-07-02): Added encrypted notes and privacy lock (Face ID / passcode) terms; added per-note multi-language output and custom AI model terms; noted the Notiee+ edition<br>
 v1.0.5 (2026-06-24): Added plain text notes, Deep Recall (related note recommendations), and schedule color tag terms; clarified local persistence of To-dos and localization of Deep Recall<br>
-v1.0.4 (2026-06-24, not publicly released): Added local accounts, Spark Agent extended tools (WebFetch / DateInfo / ScheduleUpdate), semantic search, comprehensive To-do management, and other term updates<br>
-v1.0.3 (2026-06-04): Added Spark AI Assistant, Agent mode, multi-language support, and other terms<br>
+v1.0.4 (2026-06-24, not publicly released): Added local accounts, Spark (now Notti) Agent extended tools (WebFetch / DateInfo / ScheduleUpdate), semantic search, comprehensive To-do management, and other term updates<br>
+v1.0.3 (2026-06-04): Added Spark (now Notti) AI Assistant, Agent mode, multi-language support, and other terms<br>
 v1.0.1: Initial version</blockquote>
 
 </body>

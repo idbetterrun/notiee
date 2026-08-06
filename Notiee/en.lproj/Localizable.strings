@@ -432,11 +432,11 @@
 "NSMicrophoneUsageDescription" = "Notiee needs microphone access for voice recording.";
 "NSPhotoLibraryUsageDescription" = "Notiee needs photo library access to import images for note-taking.";
 "NSSpeechRecognitionUsageDescription" = "Notiee uses speech recognition to convert your voice to text notes.";
-"Spark聊天风格" = "Spark Chat Style";
-"设置 Spark 伴侣的聊天风格和语气。留空则使用默认风格。" = "Configure Spark's chat tone and style. Leave blank to use the default style.";
-"Spark 耗费Token估计" = "Spark Token Estimate";
+"Notti聊天风格" = "Notti Chat Style";
+"设置 Notti 伴侣的聊天风格和语气。留空则使用默认风格。" = "Configure Notti's chat tone and style. Leave blank to use the default style.";
+"Notti 耗费Token估计" = "Notti Token Estimate";
 
-/* Spark - ViewModel */
+/* Notti - ViewModel */
 "嗨" = "Hey there";
 "输入包含不安全的指令，请修改后重试" = "Your message contains unsafe instructions. Please revise and try again.";
 "网络不可用，无法进行 AI 问答。请检查网络后重试。" = "Network unavailable. AI chat requires an internet connection. Please check and try again.";
@@ -446,7 +446,7 @@
 "用户询问身份" = "Identity Inquiry";
 "新对话" = "New Chat";
 
-/* Spark - Greetings */
+/* Notti - Greetings */
 "嗨，又见面了" = "Hey, nice to see you again";
 "有什么想聊的？" = "What would you like to talk about?";
 "今天是个适合整理知识的好日子" = "A perfect day to organize your thoughts";
@@ -456,7 +456,7 @@
 "随时准备好帮你回顾笔记" = "Always ready to help review your notes";
 "我帮你理一理思路" = "Let me help you sort things out";
 
-/* Spark - Question Pool */
+/* Notti - Question Pool */
 "最近一周我拍了哪些内容？" = "What did I capture this week?";
 "帮我总结最近的会议要点。" = "Summarize my recent meeting notes.";
 "我有哪些还没完成的待办？" = "What tasks do I still have pending?";
@@ -470,14 +470,14 @@
 "今天有什么好心情吗？" = "Anything exciting today?";
 "回顾一下这周拍的所有板书。" = "Review all this week's lecture captures.";
 
-/* Spark - ChatBubble */
+/* Notti - ChatBubble */
 "复制" = "Copy";
 "参考来源" = "Sources";
 
-/* Spark - InputBar */
-"向 Spark 提问..." = "Ask Spark...";
+/* Notti - InputBar */
+"向 Notti 提问..." = "Ask Notti...";
 
-/* Spark - History */
+/* Notti - History */
 "今天" = "Today";
 "昨天" = "Yesterday";
 "加载中..." = "Loading...";
@@ -489,17 +489,17 @@
 "暂无历史对话" = "No Chat History";
 "%lld 条消息" = "%lld messages";
 
-/* Spark - View Footer */
+/* Notti - View Footer */
 "内容由AI生成，Notiee不会把拍记内容用于任何模型训练" = "Content is AI-generated. Notiee does not use captured content for any model training.";
 
-/* SparkStyle - Presets */
+/* NottiStyle - Presets */
 "温柔知心" = "Gentle & Caring";
 "犀利毒舌" = "Sharp & Witty";
 "简洁高效" = "Concise & Efficient";
 "幽默风趣" = "Humorous & Fun";
 "学究严谨" = "Scholarly & Precise";
 
-/* SparkStyle - UI */
+/* NottiStyle - UI */
 "预设风格" = "Preset Styles";
 "自定义风格" = "Custom Styles";
 "新建风格" = "New Style";
@@ -523,7 +523,7 @@
 "agent_too_many_iterations" = "Agent reached max iterations, generating summary...";
 "agent_init_failed" = "Agent mode requires full data access. Please check settings.";
 
-/* Spark Agent timeline (Task 15) */
+/* Notti Agent timeline (Task 15) */
 "用 Agent 模式重试" = "Retry in Agent mode";
 "执行了 %lld 步" = "Ran %lld step(s)";
 "搜索拍记" = "Search notes";
@@ -548,7 +548,7 @@
 "正在查看记忆…" = "Loading memory…";
 "正在执行…" = "Working…";
 
-/* Account + Spark batch */
+/* Account + Notti batch */
 "本地登录" = "Local sign-in";
 "头像（可选）" = "Avatar (optional)";
 "用户名" = "Username";
@@ -567,7 +567,7 @@
 "正在修改日程…" = "Updating event…";
 "当前通过 %@ 方式登录" = "Signed in via %@";
 
-/* Spark model/thinking batch */
+/* Notti model/thinking batch */
 "查日期" = "Date info";
 "正在查日期…" = "Looking up date…";
 "思考强度" = "Reasoning";
@@ -609,7 +609,7 @@
 "进行中 · 还剩 25 分钟" = "In progress · 25 minutes left";
 "截止今晚 22:00，还剩不到 2 小时" = "Due by 10:00 PM, less than 2 hours left";
 "今天已记录 %lld 条" = "%lld records captured today";
-"继续补充，或问问 Spark" = "Keep adding, or ask Spark";
+"继续补充，或问问 Notti" = "Keep adding, or ask Notti";
 "此刻很安静" = "It is quiet right now";
 "下拉拍一张，或上拉录一段" = "Pull down for camera, or pull up for audio";
 "今天还没有新记录。" = "No new records today.";
@@ -681,10 +681,67 @@
 "✨ 今天想记录什么？" = "✨ What would you like to capture?";
 "全部" = "All";
 "录音" = "Audio";
-"来自 Spark" = "From Spark";
+"来自 Notti" = "From Notti";
 "此分类还没有记录" = "No records in this category";
 "查看全部记录" = "View All Records";
 "查看全部待办" = "View All Todos";
+
+/* Notti Memory */
+"使用中" = "Active";
+"待确认" = "Pending";
+"已归档" = "Archived";
+"自动记住有用信息" = "Automatically remember useful information";
+"在回答中使用记忆" = "Use memory in answers";
+"关闭不会删除已有记忆。记忆库只保存在本机，命中的少量内容会临时发送给所选 AI 模型。" = "Turning this off does not delete existing memories. The encrypted memory store remains on this device; a small set of matched memories is sent temporarily to the selected AI model.";
+"记忆暂不可用" = "Memory Unavailable";
+"记忆" = "Memory";
+"搜索记忆" = "Search Memory";
+"导出记忆" = "Export Memory";
+"清空全部记忆" = "Clear All Memory";
+"编辑记忆" = "Edit Memory";
+"清空全部记忆？" = "Clear all memory?";
+"永久清空" = "Clear Permanently";
+"正文、修订记录、关联和本地向量都会被永久删除，此操作无法撤销。" = "Memory text, revisions, links, and local vectors will be permanently deleted. This cannot be undone.";
+"暂无记忆" = "No Memories";
+"暂无归档记忆" = "No Archived Memories";
+"与 Notti 对话后，有用的信息会出现在这里。" = "Useful information from your Notti conversations will appear here.";
+"过期或手动归档的记忆会出现在这里。" = "Expired or manually archived memories will appear here.";
+"共 %lld 条" = "%lld total";
+"永久删除" = "Delete Permanently";
+"没有待确认项" = "Nothing Pending";
+"敏感信息只有在你确认后才会成为可用记忆。" = "Sensitive information becomes usable memory only after you confirm it.";
+"不保存" = "Do Not Save";
+"确认保存" = "Confirm and Save";
+"包含敏感信息" = "Contains sensitive information";
+"提及 %lld 次" = "Mentioned %lld times";
+"全部分类" = "All Categories";
+"筛选分类" = "Filter Categories";
+"画像" = "Profile";
+"偏好" = "Preference";
+"关系" = "Relationship";
+"事件" = "Event";
+"计划" = "Plan";
+"模式" = "Pattern";
+"长期" = "Durable";
+"稳定" = "Stable";
+"阶段" = "Episodic";
+"短期" = "Transient";
+"确认执行此操作？" = "Confirm this action?";
+"Notti 请求执行“%@”。此操作无法撤销。" = "Notti requests to perform “%@”. This action cannot be undone.";
+"确认执行" = "Confirm";
+
+/* Notti Memory Privacy */
+"Notti · 你的知识助手" = "Notti · Your Knowledge Assistant";
+"记忆在本地加密" = "Memory is encrypted locally";
+"Notti 的记忆库和向量使用设备密钥加密，只保存在本机，不同步到 iCloud。" = "Notti encrypts its memory store and vectors with a device key. They stay on this device and are not synced to iCloud.";
+"只发必要内容" = "Only necessary context is sent";
+"生成回答或提取记忆时，仅把当前消息、已确认的工具结果和检索命中的少量内容临时发送给所选 AI 模型。" = "To generate an answer or extract memories, only the current message, confirmed tool results, and a small set of matched memories are sent temporarily to the selected AI model.";
+"敏感信息需确认" = "Sensitive information requires confirmation";
+"健康、精确地址、联系方式、财务和身份信息默认不会生效，需由你明确要求或确认。" = "Health, precise address, contact, financial, and identity information remains inactive unless you explicitly ask to remember it or confirm it.";
+"联网读取需授权" = "Web access requires your instruction";
+"仅在 Agent 模式下、且你提供链接时，Notti 才会访问对应网页，相关请求会发往该第三方站点。" = "Notti accesses a webpage only in Agent mode when you provide its link. The request is sent to that third-party site.";
+"了解，开始使用" = "I Understand, Continue";
 "查看全部日程" = "View Full Schedule";
 "打开完整列表" = "Open the full list";
 "录音波形" = "Audio waveform";
+"Notti 生成" = "Notti Generated";

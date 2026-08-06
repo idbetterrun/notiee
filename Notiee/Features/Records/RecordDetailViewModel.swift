@@ -53,16 +53,16 @@ final class RecordDetailViewModel: ObservableObject {
 
     // MARK: - 区块可见性（按来源差异化）
 
-    /// AI 摘要：拍照记录始终展示；Spark 记录仅当有真摘要且不等于正文时展示；纯文本不展示。
+    /// AI 摘要：拍照记录始终展示；Notti 记录仅当有真摘要且不等于正文时展示；纯文本不展示。
     var showsSummarySection: Bool {
         switch record.source {
         case .photo: return true
-        case .spark: return !record.summary.isEmpty && record.summary != record.detailedContent
+        case .notti: return !record.summary.isEmpty && record.summary != record.detailedContent
         case .text: return false
         }
     }
 
-    /// OCR 原文只对拍照记录有意义（纯文本/Spark 无图、无 OCR）。
+    /// OCR 原文只对拍照记录有意义（纯文本/Notti 无图、无 OCR）。
     var showsOCRSection: Bool {
         record.source == .photo
     }
@@ -153,7 +153,7 @@ final class RecordDetailViewModel: ObservableObject {
 
     // MARK: - 相关内容（语义联想）
 
-    /// 被动推荐的质量门槛：高于 Spark 主动搜索的阈值，宁缺毋滥。需在真机数据上调优。
+    /// 被动推荐的质量门槛：高于 Notti 主动搜索的阈值，宁缺毋滥。需在真机数据上调优。
     private static let relatedThreshold: Float = 0.6
     private static let relatedLimit = 3
 

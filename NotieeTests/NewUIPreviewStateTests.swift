@@ -160,13 +160,13 @@ final class NewUIPreviewStateTests: XCTestCase {
         )
     }
 
-    func testAudioAndSparkFixturesUseStablePreviewSources() throws {
+    func testAudioAndNottiFixturesUseStablePreviewSources() throws {
         let audio = try XCTUnwrap(NewUIPreviewFixtures.records.first { $0.previewSource == .audio })
-        let spark = try XCTUnwrap(NewUIPreviewFixtures.records.first { $0.previewSource == .spark })
+        let notti = try XCTUnwrap(NewUIPreviewFixtures.records.first { $0.previewSource == .notti })
 
         XCTAssertTrue(audio.media.isEmpty)
         XCTAssertEqual(audio.id, UUID(uuidString: "10000000-0000-0000-0000-000000000010"))
-        XCTAssertEqual(spark.id, UUID(uuidString: "10000000-0000-0000-0000-000000000011"))
+        XCTAssertEqual(notti.id, UUID(uuidString: "10000000-0000-0000-0000-000000000011"))
     }
 
     func testRecordsStateSurvivesSiblingAndDetailRoundTrips() throws {

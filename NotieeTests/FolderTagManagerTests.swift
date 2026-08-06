@@ -37,18 +37,27 @@ final class FolderTagManagerTests: XCTestCase {
 
     func testFindOrCreateFolderCreatesWhenMissing() {
         let mgr = makeManager()
-        let id = mgr.findOrCreateFolder(named: "Spark 生成")
+        let id = mgr.findOrCreateFolder(named: "Notti 生成")
         XCTAssertEqual(mgr.customFolders.count, 1)
         XCTAssertEqual(mgr.customFolders.first?.id, id)
-        XCTAssertEqual(mgr.customFolders.first?.name, "Spark 生成")
+        XCTAssertEqual(mgr.customFolders.first?.name, "Notti 生成")
     }
 
     func testFindOrCreateFolderReusesExisting() {
-        let existing = CustomFolder(name: "Spark 生成")
+        let existing = CustomFolder(name: "Notti 生成")
         let mgr = makeManager(folders: [existing])
-        let id = mgr.findOrCreateFolder(named: "Spark 生成")
+        let id = mgr.findOrCreateFolder(named: "Notti 生成")
         XCTAssertEqual(id, existing.id)
         XCTAssertEqual(mgr.customFolders.count, 1)
+    }
+
+    func testMigratesLegacySparkFolderToStableNottiRoleWithoutChangingID() {
+        let existing = CustomFolder(name: "Spark 生成")
+        let mgr = makeManager(folders: [existing])
+
+        XCTAssertEqual(mgr.customFolders.first?.id, existing.id)
+        XCTAssertEqual(mgr.customFolders.first?.systemRole, .nottiGenerated)
+        XCTAssertEqual(mgr.customFolders.first?.name, FolderTagManager.nottiFolderName)
     }
 
     // MARK: - Tag tests

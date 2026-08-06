@@ -258,7 +258,7 @@ struct RecordDetailView: View {
     private var showsSummarySection: Bool {
         switch displayRecord.source {
         case .photo: return true
-        case .spark: return !displayRecord.summary.isEmpty && displayRecord.summary != displayRecord.detailedContent
+        case .notti: return !displayRecord.summary.isEmpty && displayRecord.summary != displayRecord.detailedContent
         case .text: return false
         }
     }
@@ -500,7 +500,7 @@ struct RecordDetailView: View {
     }
 
     private var todoSection: some View {
-        // 待办为空时：拍照记录展示「将自动提取」占位；纯文本/Spark 直接隐藏。
+        // 待办为空时：拍照记录展示「将自动提取」占位；纯文本/Notti 直接隐藏。
         guard !displayTodos.isEmpty || showsTodoPlaceholder else {
             return AnyView(EmptyView())
         }

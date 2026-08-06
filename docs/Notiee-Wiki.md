@@ -12,7 +12,7 @@
 | 构建 | Xcode 16.0+ |
 | 架构 | SwiftUI + MVVM + 中心化 Store/Manager 组合 |
 | 数据 | 离线优先（本地 JSON / UserDefaults / Keychain） |
-| 版本 | v1.0.6（含 Spark AI 助手、Agent 工具与语义检索；双版本 Notiee / Notiee+） |
+| 版本 | 当前 main（含 Notti AI 助手、加密记忆、Agent 工具与语义检索；双版本 Notiee / Notiee+） |
 | 许可 | Proprietary |
 
 ---
@@ -24,7 +24,7 @@
 3. [应用结构（四大模块）](#3-应用结构四大模块)
 4. [记录来源（RecordSource）](#4-记录来源recordsource)
 5. [本地账户系统](#5-本地账户系统)
-6. [Spark AI 助手与 Agent](#6-spark-ai-助手与-agent)
+6. [Notti AI 助手与 Agent](#6-notti-ai-助手与-agent)
 7. [语义检索引擎 / RAG](#7-语义检索引擎--rag)
 8. [深度联想 / 相关笔记推荐](#8-深度联想--相关笔记推荐)
 9. [AI 处理流水线](#9-ai-处理流水线)
@@ -52,7 +52,7 @@
 - **拍照只是最省事的输入**：物理世界的信息（纸、屏幕、白板）不用打字，拍一下就进库。
 - **拍完自动理成笔记**：后台异步队列调用大模型做 OCR（含 LaTeX）、生成一句摘要 + 要点 + 待办，
   你不用当场整理，拍完就走。
-- **落点在检索端**：既能穿透全文搜索（标题 / 摘要 / OCR 原文、命中词高亮），也能直接问 **Spark**——
+- **落点在检索端**：既能穿透全文搜索（标题 / 摘要 / OCR 原文、命中词高亮），也能直接问 **Notti**——
   从你自己拍过的内容里给出答案，并附上出处、可跳回原图。这是 Notiee 与"随手拍进相册"之间真正的鸿沟。
 - **离线优先**：无网时本地缓存秒开，网络恢复后自动续跑 AI 处理。
 
@@ -80,23 +80,25 @@
 
 **隔离机制**（详见 `AGENTS.md` 与 `docs/Notiee-免费版改造计划.md`）：
 - 免费版**独有**的后端相关文件（`AuthService` / `BackendAPIClient` / `EntitlementStore` /
-  `BackendAIProcessingService` / `BackendSparkAIService` / `StoreKitService` / `QuotaCard` 等）
+  `BackendAIProcessingService` / `BackendNottiAIService` / `StoreKitService` / `QuotaCard` 等）
   **只勾 `Notiee` target**，Notiee+ 里根本不存在。
 - 两版都要编译、只是走不同分支的共享文件 → 统一用 **`#if NOTIEE_PLUS`**，严禁散落 `if 免费版 {}` 运行时判断。
 - 中心化 `AppBranding`（`#if NOTIEE_PLUS`）是既定范式，品牌名/图标/文案分叉都收敛于此。
 
-**免费版后端**（`notiee-ping-stream/`，Express + 腾讯云 SCF + MySQL，非流式）承担五件事：
+**免费版后端**（`notiee-ping-stream/`，Express + 腾讯云 SCF + MySQL，非流式）承担六件事：
 1. **Apple 身份校验**：`identityToken` 验签（含 nonce 防重放）→ 换发自有 30 天 JWT（`/auth/apple`、`/auth/refresh`）。
-2. **AI 代付代理**：`/ai/chat`（Spark 文本问答）、`/ai/process`（视觉 + 文本，占 1 篇额度）、`/ai/agent`（工具调用透传）；
+2. **AI 代付代理**：`/ai/chat`（Notti 文本问答）、`/ai/process`（视觉 + 文本，占 1 篇额度）、`/ai/agent`（工具调用透传）；
    按 provider 适配 OpenAI / Anthropic 两种格式，多厂商路由（DeepSeek / MiniMax / 豆包），key 在服务端。
 3. **额度账本**：按「篇」计（一篇拍记扣一篇），月度自然重置，`GET /me/quota` 查询，用尽自动降级本地 OCR 而非硬堵。
 4. **订阅校验**：StoreKit 2 凭证上报（`/subscription/verify`）+ App Store 服务端通知（`/apple/notifications`）维护 Pro 档位。
-5. **防刷**：Spark 按「模型调用次数」频控（不占篇数），DeviceCheck / App Attest 规划中。
+5. **防刷**：Notti 按「模型调用次数」频控（不占篇数），DeviceCheck / App Attest 规划中。
+6. **无状态记忆提取**：`POST /ai/memory/extract` 只接收当前消息、成功工具结果和最多 8 条本地候选，校验严格 JSON 后返回 ADD-only proposal；不存储、不记录正文。
 
-**免费档 vs Pro（运行时概念，由后端下发的档位决定，非编译标志）**：额度、可用模型、Spark 能力按档位区分——
-免费档锁定便宜模型（如 `deepseek-v4-flash`）、Spark 记忆上限 5 条、单会话 20 轮、无 Agent 模式；
+**免费档 vs Pro（运行时概念，由后端下发的档位决定，非编译标志）**：额度、可用模型、Notti 能力按档位区分——
+免费档锁定便宜模型（如 `deepseek-v4-flash`）、单轮最多召回 5 条本地记忆、单会话 20 轮、无 Agent 模式；
+Pro 与 Notiee+ 单轮最多召回 10 条。两档本地记忆存储均不设条数上限。
 Pro 全放开。客户端限制仅为 UX，**后端会按档位再校验一遍**，改包无法绕过。收敛到中心化出口
-`SparkTierLimits`（`#if NOTIEE_PLUS` 分支恒为"不限"，免费版读 `EntitlementStore`）。
+`NottiTierLimits`（`#if NOTIEE_PLUS` 分支恒为"不限"，免费版读 `EntitlementStore`）。
 
 > 现状：两个 App（`com.idbetterrun.notiee` / `com.idbetterrun.notieeplus`）均**尚未上架**，
 > 无历史买断用户，因此 EntitlementStore 与后端账户模型不需要老用户 grandfathering 逻辑。
@@ -107,17 +109,17 @@ Pro 全放开。客户端限制仅为 UX，**后端会按档位再校验一遍**
 
 | 概念 | 说明 |
 |---|---|---|
-| **记录（NoteRecord）** | 核心实体。支持三种来源（`RecordSource`）：拍照 `.photo`、Spark Agent 生成 `.spark`、纯文字 `.text`。包含原图、OCR 文本、AI 摘要、详细内容、要点、术语定义、待办与 token 用量。 |
+| **记录（NoteRecord）** | 核心实体。支持三种来源（`RecordSource`）：拍照 `.photo`、Notti Agent 生成 `.notti`、纯文字 `.text`。`.notti` 仍编码为旧 `"spark"` raw value，以保证旧安装和回滚兼容。 |
 | **日程（ScheduledEvent）** | 来自系统日历 / `.ics` 导入 / 手动创建的事件，支持彩色标签分类，用于为记录提供时间上下文。 |
 | **特殊日（SpecialDayEvent）** | 节假日、节气、生日等，在 Today 时间轴中标注。 |
 | **待办（NoteTodo）** | AI 抽取或手动创建的行动项，可勾选完成、设截止日期与提醒，可独立存在或挂在某条记录下。按截止日分桶管理。 |
-| **文件夹 / 标签** | 自建文件夹与彩色标签用于归类记录与事件；另有系统文件夹（收藏 / 未分类 / 今日 / 待处理 / 回收站）；Agent 创建的记录自动归入「Spark 生成」文件夹。 |
+| **文件夹 / 标签** | 自建文件夹与彩色标签用于归类记录与事件；另有系统文件夹（收藏 / 未分类 / 今日 / 待处理 / 回收站）；Agent 创建的记录自动归入「Notti 生成」文件夹。 |
 | **日程标签（EventTag）** | 为日历事件着色的标签系统，内置 4 个系统标签（个人 / 工作 / 课程 / 临时），支持自定义。 |
 | **场景预设（ScenePreset）** | 高效职场人 / 大学生·研究生 / 中学生 / 创作者·研究者，四种预设自动调整 AI 解析策略、课程模式、LaTeX、视觉策略。 |
 | **Token 用量** | 每条记录消耗的 token，用于 Review 仪表盘统计与预警。 |
 | **深度联想** | 记录详情页底部推荐相关历史笔记（语义向量匹配），同课程相邻时间笔记自动提示续篇关系。 |
-| **Spark** | 内置 AI 对话助手，可化身 Agent 调用工具操作笔记、日程、待办与记忆。支持语义检索（向量召回 + 关键词混合排序）、模型选择与思考强度调节。 |
-| **本地账户** | 本地身份标识（昵称 + 头像），仅存本机设备，免注册免登录。用于 MeView 个人资料展示与 Spark 个性互动。 |
+| **Notti** | 内置 AI 对话助手，可化身 Agent 调用工具操作笔记、日程、待办与记忆。支持语义检索（向量召回 + 关键词混合排序）、模型选择与思考强度调节。 |
+| **本地账户** | 本地身份标识（昵称 + 头像），仅存本机设备，免注册免登录。用于 MeView 个人资料展示与 Notti 个性互动。 |
 
 ---
 
@@ -130,7 +132,7 @@ Pro 全放开。客户端限制仅为 UX，**后端会按档位再校验一遍**
 | **Today** | `calendar` | 今日控制中心 | 日程时间轴 + 待办概览 + 今日动态展板 |
 | **Snap** | `camera.viewfinder` | 极速相机 | 沉浸式拍照 + 情景感知 |
 | **Records** | `book.closed` | 知识库 | 全文检索 + 文件夹层级 + 记录详情 |
-| **Spark** | `sparkles` | AI 助手 | 对话 / Agent 工具调用 / 语义检索 |
+| **Notti** | `sparkles` | AI 助手 | 对话 / Agent 工具调用 / 语义检索 |
 
 > 设置与"我"（`MeView` / `SettingsMainView`）不再占用底栏 Tab，从 Today 工具栏进入。
 > 系统支持自定义 App 冷启动默认进入的 Tab（`launchCandidates`）。
@@ -173,10 +175,10 @@ Pro 全放开。客户端限制仅为 UX，**后端会按档位再校验一遍**
 - **本地账户**：`AccountStore` 管理本地身份标识（昵称 + 头像），仅存本机设备。已登录状态下显示问候语（按时间段自适应：凌晨好/早上好/中午好/下午好/晚上好）与个人头像，点击进入 `ProfileEditView` 编辑资料。未登录状态引导「登录您的 TomaGo 账户」。
 - **登录**：`LoginView` 提供 TomaGo 统一登录（含条款勾选 + 协议链接、未勾选时"摇一摇"警示、加载遮罩动画、明暗自适应渐变背景）；`NavigationLink` 跳转 `LocalLoginView` 本地登录（PhotosPicker 选头像 + 文本字段填昵称，一键创建本地身份）。
 - **日程管理**：「全部日程」（`AllSchedulesView`）、「所有待办」（`AllTodosView`，按截止日分桶 + 已完成折叠）、「导入日程」（`ImportScheduleView`，含 ICS 解析预览 `EventImportPreviewSheet`，支持内联编辑标题、日期、标签）。
-- **回顾**：`ReviewView` — 按事件统计 token 饼图、Top 5 高消耗记录、Spark 累计 token、已删除累计 token、可配置预警阈值。
+- **回顾**：`ReviewView` — 按事件统计 token 饼图、Top 5 高消耗记录、Notti 累计 token、已删除累计 token、可配置预警阈值。
 - **备份与恢复**：`BackupRestoreView` — 一键导出所有记录为 ZIP（含独立 `.tmn` 文件 + 系统分享表单）、从 ZIP 批量导入（解压 → 预览 → 合并到"imported"文件夹）、单文件 .tmn 导入。
-- **实验室（Lab）**：`LabFeaturesView` — 低消耗模式（端侧 OCR via ANE）、全功能视觉模式、深度联想模式、高质量云端检索（`spark.semanticSearch.useCloud`）、iCloud 手动同步。部分功能带 `FeatureHintView` 首次访问说明浮层。
-- **Spark 设置**：`SparkSettingsView` → 聊天风格（`SparkStyleSettingsView`，6 种预设 + 自定义风格 CRUD）、长期记忆（`SparkMemoryView`，查看/编辑/删除已学记忆条目）、Agent 设置（`AgentSettingsView`，信任等级 + 最大轮数 + 每轮最多工具数）。
+- **实验室（Lab）**：`LabFeaturesView` — 低消耗模式（端侧 OCR via ANE）、全功能视觉模式、深度联想模式、高质量云端检索（`notti.semanticSearch.useCloud`）、iCloud 手动同步。部分功能带 `FeatureHintView` 首次访问说明浮层。
+- **Notti 设置**：`NottiSettingsView` → 聊天风格（`NottiStyleSettingsView`，6 种预设 + 自定义风格 CRUD）、长期记忆（`NottiMemoryView`，查看/编辑/删除已学记忆条目）、Agent 设置（`AgentSettingsView`，信任等级 + 最大轮数 + 每轮最多工具数）。
 - **设置**：`SettingsMainView` — 场景预设、启动页、周数、系统日历选择、课程日历标注、外观（主题/强调色/字体/语言）、AI 自助接入（文本/图像模型 + 自定义模型列表 + 连接测试）、通知、token 阈值、Markdown 渲染。
 - **关于 / 法务 / 开源致谢 / 更新日志**：`AboutNotieeView`（含区域感知法务 HTML 路由）、`PrivacyAgreementView`、`OpenSourceAcknowledgmentsView`、`WhatsNewView`。
 
@@ -189,12 +191,12 @@ Notiee 1.0.4 起引入 `RecordSource` 枚举（`Models/NoteRecord.swift`），�
 | 来源 | 枚举值 | 创建方式 | 缩略图 | 详情页特征 |
 |---|---|---|---|---|
 | 拍照记录 | `.photo` | 相机拍摄 / 相册导入 | 照片缩略图 | 显示原图、OCR、AI 摘要（全部区域可见） |
-| Spark 生成 | `.spark` | Agent `note_create` 工具 | sparkles 渐变图标 | 无图片预览，仅显示 AI 摘要与内容 |
+| Notti 生成 | `.notti` | Agent `note_create` 工具 | sparkles 渐变图标 | 无图片预览，仅显示 AI 摘要与内容 |
 | 纯文字记录 | `.text` | 手动创建（`NewTextRecordSheet`） | doc.text 图标 | 无图片预览、无 OCR、无 AI 摘要区域 |
 
-- `.spark` 来源的记录自动归入「Spark 生成」系统文件夹（不在自建文件夹列表中显示）。
+- `.notti` 来源的记录自动归入带稳定 `systemRole = nottiGenerated` 的「Notti 生成」系统文件夹（不在自建文件夹列表中显示）。
 - `.text` 来源通过 `NewTextRecordSheet` 创建（标题 + 正文文本字段），创建后直接 `processingState = .completed`，不进入 AI 处理管线。
-- 详情页 `RecordDetailViewModel` 根据 `source` 控制区域可见性：OCR 仅 `.photo` 显示；摘要区域 `.spark` 仅在摘要 ≠ 内容时显示，`.text` 不显示。
+- 详情页 `RecordDetailViewModel` 根据 `source` 控制区域可见性：OCR 仅 `.photo` 显示；摘要区域 `.notti` 仅在摘要 ≠ 内容时显示，`.text` 不显示。
 - 旧数据缺少 `source` 字段时默认 `.photo`（向后兼容）。
 
 ---
@@ -218,32 +220,32 @@ Notiee 1.0.4 起引入 `RecordSource` 枚举（`Models/NoteRecord.swift`），�
 
 ---
 
-## 6. Spark AI 助手与 Agent
+## 6. Notti AI 助手与 Agent
 
-**Spark** 是 Notiee 内置的 AI 对话助手（底栏第四 Tab），既能普通问答，也能切换为 **Agent** 直接操作 App 数据。
+**Notti** 是 Notiee 内置的 AI 对话助手（底栏第四 Tab），既能普通问答，也能切换为 **Agent** 直接操作 App 数据。
 
 ### 6.1 对话层（非 Agent 模式）
 
-- `SparkView` / `SparkViewModel`：聊天界面、消息流、动态背景（`SparkBackgroundView`）、输入栏（`SparkInputBar`）、气泡（`SparkChatBubble`）。
-- **会话与历史**：`SparkConversationStore`、`SparkConversationRepository`、`SparkHistoryStore` / `SparkHistoryView` 管理多会话与历史记录。
-- **长期记忆**：`SparkMemoryStore` / `SparkMemoryView`，Spark 可记住用户偏好与事实。
-- **引用**：接地于拍记的回答以行内 `[来源N]` 标记，自动解析为 `Citation` 引用卡片（`SparkCitationRow`）。关闭 Agent 时，模型获取全部拍记列表作为上下文。
-- **模型与思考强度**：`SparkModelPreferences` / `SparkModelChip` 支持 Spark 局部覆盖模型；思考强度由 `ModelThinkingPolicy` / `ThinkingCapability` 按 Provider 注入 payload。
-- **意图识别**：`SparkIntentDetector` 判断用户消息意图；如果非 Agent 模式下用户发出类似操作请求的消息，会主动提示切换 Agent。
-- 非 Agent 模式下，Spark 也能看到只读的"即将到来的日程"作为上下文。
+- `NottiView` / `NottiViewModel`：聊天界面、消息流、动态背景（`NottiBackgroundView`）、输入栏（`NottiInputBar`）、气泡（`NottiChatBubble`）。
+- **会话与历史**：`NottiConversationStore`、`NottiConversationRepository`、`NottiHistoryStore` / `NottiHistoryView` 管理多会话与历史记录。
+- **长期记忆**：`NottiMemoryRepository` / `NottiMemoryCoordinator` / `NottiMemoryView` 管理加密快照、证据、待确认项、提取队列、混合召回与生命周期；回答模型没有直接写权限。
+- **引用**：接地于拍记的回答以行内 `[来源N]` 标记，自动解析为 `Citation` 引用卡片（`NottiCitationRow`）。非 Agent 问答使用近期锚点与语义命中的有界拍记集合，不全量注入记录库。
+- **模型与思考强度**：`NottiModelPreferences` / `NottiModelChip` 支持 Notti 局部覆盖模型；思考强度由 `ModelThinkingPolicy` / `ThinkingCapability` 按 Provider 注入 payload。
+- **意图识别**：`NottiIntentDetector` 判断用户消息意图；如果非 Agent 模式下用户发出类似操作请求的消息，会主动提示切换 Agent。
+- 非 Agent 模式下，Notti 也能看到只读的"即将到来的日程"作为上下文。
 
 ### 6.2 Agent 层（工具调用）
 
-位于 `Features/Spark/Agent/`，采用经典的"工具调用循环"：
+位于 `Features/Notti/Agent/`，采用经典的"工具调用循环"：
 
 - **`AgentExecutor`**：最多 **5 轮**迭代的 Reason-Act 循环；把工具以 OpenAI / Anthropic 两种 schema 暴露给模型，
   解析模型返回的 `toolCalls`，逐个执行并把结果回填进对话，直至模型给出最终回答或某工具要求终止。
 - **`AgentToolRegistry`**：工具注册表，按信任等级过滤可用工具，并生成 OpenAI/Anthropic 的函数/工具 JSON Schema。
 - **`AgentTrustManager`**：信任等级（`AgentTrustLevel`）决定 Agent 能调用哪些工具（读 vs 写权限分级）。
 - **`AgentActionStore`**：持久化 Agent 执行过的动作记录。
-- **`AgentToolPresentation`**：把工具调用过程友好地呈现到聊天时间线（`SparkAgentTimelineView`）。
+- **`AgentToolPresentation`**：把工具调用过程友好地呈现到聊天时间线（`NottiAgentTimelineView`）。
 
-**内置工具（`Features/Spark/Agent/Tools/`） 共 17 个**：
+**内置工具（`Features/Notti/Agent/Tools/`） 共 18 个**：
 
 | 工具 | 能力 | 权限 |
 |---|---|---|
@@ -261,7 +263,8 @@ Notiee 1.0.4 起引入 `RecordSource` 枚举（`Models/NoteRecord.swift`），�
 | `TodoCreateTool` | 创建待办 | write |
 | `TodoCompleteTool` | 完成待办 | write |
 | `TodoDeleteTool` | 删除待办 | write |
-| `MemoryManageTool` | 读写 Spark 长期记忆 | write |
+| `MemorySearchTool` | 有界检索 Notti 相关记忆；仅在成功 Agent 回合后记录实际使用 | read |
+| `MemoryForgetTool` | 永久删除用户明确指定的记忆 | destructive |
 | `WebSearchTool` | 联网搜索（`WebSearchTool`，需在设置中配置搜索能力） | read |
 | `WebFetchTool` | 抓取指定 URL 网页正文（SSRF 防护，仅 http/https 公网，2MB 上限，10s 超时） | read |
 
@@ -269,23 +272,23 @@ Notiee 1.0.4 起引入 `RecordSource` 枚举（`Models/NoteRecord.swift`），�
 
 ### 6.3 模型与思考强度选择器
 
-Spark 对话界面顶部设有独立于全局配置的模型与思考选择器：
+Notti 对话界面顶部设有独立于全局配置的模型与思考选择器：
 
-- **`SparkModelChip`**：胶囊形菜单，下拉列出可用模型，选中项显示 checkmark，模型切换仅影响当前 Spark 会话。
-- **`SparkAgentChip`**：Agent 模式切换按钮（bolt 图标），开启后玻璃化高亮，模型可调用工具。
+- **`NottiModelChip`**：胶囊形菜单，下拉列出可用模型，选中项显示 checkmark，模型切换仅影响当前 Notti 会话。
+- **`NottiAgentChip`**：Agent 模式切换按钮（bolt 图标），开启后玻璃化高亮，模型可调用工具。
 - **`ThinkingCapability`**：按 AI 服务商注入思考强度 payload：
   - 分级制（豆包/自定义/MiniMax）：`极简/minimal`、`低/low`、`中/medium`、`高/high`，注入 `reasoning_effort` 参数。
   - 开关制（通义千问/DeepSeek）：`off/on`，注入 `enable_thinking` 或 `reasoning_effort` minimal/high。
   - Vision 模型无思考支持。
-- **`SparkModelPreferences`**：Spark 专属模型覆盖（`modelOverride`）与思考等级（`thinkingLevelID`），持久化于 UserDefaults，不干扰全局 AI 配置。
+- **`NottiModelPreferences`**：Notti 专属模型覆盖（`modelOverride`）与思考等级（`thinkingLevelID`），持久化于 UserDefaults，不干扰全局 AI 配置。
 
 ### 6.4 聊天风格与个性化
 
-- **`SparkStyleSettingsView`**：6 种预设聊天风格（默认 / 温柔知心 / 犀利毒舌 / 简洁高效 / 幽默风趣 / 学究严谨）+ 自定义风格 CRUD（添加/编辑/删除任意风格指令）。风格以 system prompt 注入当前对话。
-- **`SparkMemoryView`**：查看 Spark 已学记忆条目（key-value），支持左滑删除单条记录。
+- **`NottiStyleSettingsView`**：6 种预设聊天风格（默认 / 温柔知心 / 犀利毒舌 / 简洁高效 / 幽默风趣 / 学究严谨）+ 自定义风格 CRUD（添加/编辑/删除任意风格指令）。风格以 system prompt 注入当前对话。
+- **`NottiMemoryView`**：搜索并按分类查看使用中、待确认与已归档记忆；支持敏感项确认、编辑、恢复、导出、永久删除和清空全部。
 - **`AgentSettingsView`**：Agent 信任等级选择（谨慎 / 标准 / 完全信任）、最大迭代轮数、每轮最多工具数。
-- **`SparkPrivacySheet`**：首次使用 Spark 时弹出的隐私同意书，列明 4 项隐私保障（检索在本地 / 只发必要内容 / 不用于训练 / 联网读取需授权）。
-- **`SparkIntentDetector`**：本地启发式意图检测，非 Agent 模式下若用户发出操作指令，主动提示切换到 Agent。
+- **`NottiPrivacySheet`**：独立版本化的记忆隐私同意书；说明记忆/向量本地加密且不进 iCloud，只临时发送当前消息、已确认工具结果和有界命中记忆，并明确敏感记忆确认及联网读取边界。
+- **`NottiIntentDetector`**：本地启发式意图检测，非 Agent 模式下若用户发出操作指令，主动提示切换到 Agent。
 
 ---
 
@@ -297,7 +300,7 @@ Notiee 实现了一套**混合语义检索**系统，用于 Agent 的 `NoteSearc
 ### 7.1 服务架构
 
 ```
-SparkViewModel.makeAgentExecutor()
+NottiViewModel.makeAgentExecutor()
   └── SemanticSearchEngine  ←  HybridEmbeddingService  ←  LocalEmbeddingService  (Apple NLEmbedding, 端侧)
       搜索协调 / 懒补算                                       CloudEmbeddingService  (云端 embeddings API, 可选)
                                     │
@@ -312,7 +315,7 @@ SparkViewModel.makeAgentExecutor()
 |---|---|---|
 | `EmbeddingService` 协议 | `Services/Semantic/EmbeddingService.swift` | 向量服务抽象，声明 `modelIdentifier` + `embed(_:)` |
 | `LocalEmbeddingService` | `Services/Semantic/LocalEmbeddingService.swift` | Apple `NLEmbedding` 端侧句向量，优先简体中文回退英文 |
-| `CloudEmbeddingService` | `Services/Semantic/CloudEmbeddingService.swift` | 云端 OpenAI 兼容 embeddings API，复用 Spark 文本模型 endpoint/key，智能改写 `/chat/completions` → `/embeddings` |
+| `CloudEmbeddingService` | `Services/Semantic/CloudEmbeddingService.swift` | 云端 OpenAI 兼容 embeddings API，复用 Notti 文本模型 endpoint/key，智能改写 `/chat/completions` → `/embeddings` |
 | `HybridEmbeddingService` | `Services/Semantic/HybridEmbeddingService.swift` | 选择策略 + 降级链：云端开关开 → 云端；失败/关闭 → 本地 |
 | `EmbeddingIndex` | `Services/Semantic/EmbeddingIndex.swift` | 旁路向量持久化（`embedding-index.json`），存 `[UUID: EmbeddingEntry]`（vector + model + contentHash），与 NoteRecord JSON 解耦，内容变更后自动重算 |
 | `SemanticSearchEngine` | `Services/Semantic/SemanticSearchEngine.swift` | 懒计算 + 缓存复用：为每条候选拍记 `ensureVector`（已有 + hash 匹配则复用，否则调用 embedding 重算），结果传给 ranker |
@@ -395,7 +398,7 @@ Capture → NoteRecord(.pending) → 入队
 | 模型 | 说明 |
 |---|---|
 | **`NoteRecord`** | 笔记记录主体：`eventID` / `folderID` / `capturedAt` / `localImagePaths` / `title` / `ocrText` / `summary` / `detailedContent` / `source` (`RecordSource`) / `processingState` / `keyPoints` / `definitions` / `isFavorite` / `isDeleted` / `tokenUsage` / `aiRetryCount` / `deviceName` 等。 |
-| **`RecordSource`** | 记录来源枚举：`.photo`（拍照/相册）、`.spark`（Agent 创建）、`.text`（手动文字记录）。 |
+| **`RecordSource`** | 记录来源枚举：`.photo`（拍照/相册）、`.notti`（Agent 创建）、`.text`（手动文字记录）；`.notti` 的稳定持久化值仍为旧 `"spark"`。 |
 | **`KeyDefinition`** | 术语定义（`term` + `explanation`）。 |
 | **`NoteTodo`** | 待办项（内容、完成态、截止日期 `dueDate`、提醒、可关联记录）。 |
 | **`ScheduledEvent`** | 日程/课程/会议事件，支持 `tagID` 关联彩色标签。 |
@@ -407,7 +410,8 @@ Capture → NoteRecord(.pending) → 入队
 | **`AIProcessingState`** (+`+UI`) | AI 处理状态机及其 UI 映射。 |
 | **`UserProfile`** | 用户资料（`displayName` / `loginMethod` / `avatarRelativePath`）。 |
 | **`LoginMethod`** | 登录方式枚举：`.local`（本地免注册）/ `.tomago`（TomaGo 统一账户）。 |
-| **`SparkModelPreferences`** | Spark 会话级模型覆盖（`modelOverride` + `thinkingLevelID`）。 |
+| **`NottiModelPreferences`** | Notti 会话级模型覆盖（`modelOverride` + `thinkingLevelID`）。 |
+| **`NottiMemory`** | 带稳定 UUID、分类、持久度、状态、主题、实体、关键词、时间、证据计数、最近使用、敏感级别、关联和修订历史的本地记忆。 |
 | **`AppTab`** | 一级 Tab 枚举。 |
 | **`ScheduleActivityAttributes`** | Live Activity（灵动岛/锁屏）属性。 |
 | **`TMNModels`** | `.tmn` 备份归档的数据结构。 |
@@ -434,7 +438,8 @@ Capture → NoteRecord(.pending) → 入队
 
 独立服务（不挂载 Store）：
   AccountStore（本地账户身份）  EventTagStore（标签持久化）
-  EmbeddingIndex（向量侧车）    SparkModelPreferences（Spark 模型偏好）
+  EmbeddingIndex（拍记向量侧车） NottiModelPreferences（Notti 模型偏好）
+  NottiMemoryRepository（加密记忆快照 + 加密记忆向量侧车）
 ```
 
 - **Manager 职责**
@@ -445,10 +450,11 @@ Capture → NoteRecord(.pending) → 入队
 - **独立服务**
   - `AccountStore`：`@MainActor` `ObservableObject` 单例，本地身份登录/登出/资料管理，通过 `MeView` 直接绑定。
   - `EventTagStore`：日程标签的 JSON 持久化与 CRUD，在 `FolderTagManager` 中聚合。
-  - `SparkModelPreferences`：Spark 会话级模型覆盖与思考强度偏好，独立于全局 AI 配置。
+  - `NottiModelPreferences`：Notti 会话级模型覆盖与思考强度偏好，独立于全局 AI 配置。
+  - `NottiMemoryRepository`：actor 单写入口；本地 AES-GCM 快照、待确认项、提取队列、修订和可重建向量侧车。
 - **持久化**：`JSONNoteRecordStore` / `JSONCustomFolderStore` / `JSONEventTagStore` / `JSONScheduledEventStore`（本地 JSON）；
   向量单独存储在 `EmbeddingIndex`（`embedding-index.json` 与 `related-notes-index.json`，与记录数据解耦）；
-  偏好走 `UserDefaultsAppSettingsStore`（键集中在 `Utils/UserDefaultsKeys.swift`）；密钥（API Key）加密存于 **Keychain**。
+  Notti 记忆快照写入 `notti_memory_v1.enc`，记忆向量写入独立加密侧车；偏好走 `UserDefaultsAppSettingsStore`（键集中在 `Utils/UserDefaultsKeys.swift`）；API Key 与记忆 DEK 存于 **Keychain**。
 - **拍照匹配**：`ScheduleMatcher` 处理课表冲突/重叠（关联最近创建/更新的日程，可手动切换）。
 - **两套初始化**：`NotieeStore.live(...)` 从磁盘加载真实数据；`NotieeStore.sample(...)` 提供预览/测试样例数据。
 
@@ -507,7 +513,7 @@ Notiee 全面适配 iOS 26 全新的 Liquid Glass 设计语言，同时保持 iO
 | 区域 | 玻璃化组件 |
 |---|---|
 | **Today** | 头像按钮、加号按钮（加号为 prominent accent 玻璃） |
-| **Spark** | 新建/历史按钮、输入栏背景、发送按钮、Agent chip、重试 chip、模型选择胶囊 |
+| **Notti** | 新建/历史按钮、输入栏背景、发送按钮、Agent chip、重试 chip、模型选择胶囊 |
 | **相机** | 闪光灯、变焦预设、文件夹按钮、单拍/连拍切换胶囊 |
 | **Tab Bar** | 系统自动玻璃化，无需额外处理 |
 
@@ -543,10 +549,10 @@ Notiee/
 │   ├── Today/                     # 今日控制中心 + 待办分桶 (TodoBucketer)
 │   ├── Capture/                   # 极速相机
 │   ├── Records/                   # 知识库 + 记录详情
-│   ├── Settings/                  # 我、设置、登录、备份、Review、Lab、Spark 设置、所有待办 (AllTodosView)
-│   └── Spark/                     # AI 助手
+│   ├── Settings/                  # 我、设置、登录、备份、Review、Lab、Notti 设置、所有待办 (AllTodosView)
+│   └── Notti/                     # AI 助手
 │       └── Agent/                 # Agent 执行器、注册表、信任、工具
-│           └── Tools/             # 17 个 Agent 工具
+│           └── Tools/             # 18 个 Agent 工具
 ├── Models/                        # 领域模型
 ├── Services/                      # 基础设施
 │   ├── NotieeStore.swift          # 中心状态门面
@@ -655,11 +661,11 @@ open Notiee.xcodeproj
 
 **测试**：`NotieeTests/` 含 **38 个**单元测试，覆盖 Store、各 Manager、ViewModel、
 日程匹配（`ScheduleMatcherTests`）、AI Mock（`MockAIProcessingServiceTests`）、
-Spark 与 Agent 工具（`Spark*Tests`、`*ToolTests`）、思考策略（`ModelThinkingPolicyTests`/`ThinkingCapabilityTests`）、
+Notti 记忆/迁移/召回与 Agent 工具（`Notti*Tests`、`*ToolTests`）、思考策略（`ModelThinkingPolicyTests`/`ThinkingCapabilityTests`）、
 语义检索（`SemanticSearchEngineTests` / `SemanticRankerTests` / `EmbeddingIndexTests` /
 `LocalEmbeddingServiceTests` / `HybridEmbeddingServiceTests` / `RecordEmbeddingTextTests`）、
 待办分桶（`TodoBucketerTests`）等。
 
 ---
 
-<sub>本 Wiki 基于源码通读整理（v1.0.6），反映当前实现：双版本架构（Notiee 免费后端订阅版 / Notiee+ 买断 BYOK 版，同源码 `#if NOTIEE_PLUS` 隔离）+ 免费版自建后端（`notiee-ping-stream`：Apple 登录 + AI 代付 + 篇数额度 + 订阅校验）+ Spark AI 助手 + Agent 17 工具 + 混合语义检索引擎 + 深度联想 + 本地账户系统 + 三种记录来源（照片/Spark/文字）+ 日程彩色标签 + iOS 26 Liquid Glass 适配 + 四语种法务本地化。如与早期 README/PRD 表述不一致，以源码为准。</sub>
+<sub>本 Wiki 基于当前 main 源码整理：双版本架构（Notiee 免费后端订阅版 / Notiee+ 买断 BYOK 版，同源码 `#if NOTIEE_PLUS` 隔离）+ Notti 本地加密记忆与有界混合召回 + 免费版无状态提取后端 + Agent 18 工具 + 拍记混合语义检索 + 深度联想 + 本地账户系统 + 三种记录来源（照片/Notti/文字）+ 日程彩色标签 + iOS 26 Liquid Glass 适配 + 四语种法务本地化。如与早期 README/PRD 表述不一致，以源码为准。</sub>

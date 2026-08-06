@@ -88,27 +88,45 @@ enum UDK {
     // MARK: - iCloud
     static let icloudLastSyncDate = "notiee.icloudLastSyncDate"
 
-    // MARK: - Spark Token Tracking
-    static let sparkAccumulatedTokens = "notiee.sparkAccumulatedTokens"
+    // MARK: - Notti Token Tracking
+    static let nottiAccumulatedTokens = "notiee.nottiAccumulatedTokens"
 
 
-    // MARK: - Spark
-    static let sparkCustomStyle = "spark_custom_style"
-    static let sparkCustomStyles = "spark_custom_styles"
-    static let sparkLastMemoryCompressionRounds = "spark_last_memory_compression_rounds"
-    static let sparkCurrentConversationId = "spark_current_conversation_id"
+    // MARK: - Notti
+    static let nottiCustomStyle = "notti_custom_style"
+    static let nottiCustomStyles = "notti_custom_styles"
+    static let nottiCurrentConversationId = "notti_current_conversation_id"
 
-    // MARK: - Spark Agent
-    static let sparkAgentTrustLevel = "spark_agent_trust_level"
-    static let sparkAgentMaxIterations = "spark_agent_max_iterations"
-    static let sparkAgentMaxToolsPerRound = "spark_agent_max_tools_per_round"
-    static let sparkAgentUndoTTLMinutes = "spark_agent_undo_ttl_minutes"
-    static let sparkAgentHistoryRetentionDays = "spark_agent_history_retention_days"
-    static let sparkAgentTokenWarning = "spark_agent_token_warning"
-    static let sparkModelOverride = "spark_model_override"
-    static let sparkThinkingLevel = "spark_thinking_level"
+    // MARK: - Notti Agent
+    static let nottiAgentTrustLevel = "notti_agent_trust_level"
+    static let nottiAgentMaxIterations = "notti_agent_max_iterations"
+    static let nottiAgentMaxToolsPerRound = "notti_agent_max_tools_per_round"
+    static let nottiAgentUndoTTLMinutes = "notti_agent_undo_ttl_minutes"
+    static let nottiAgentHistoryRetentionDays = "notti_agent_history_retention_days"
+    static let nottiAgentTokenWarning = "notti_agent_token_warning"
+    static let nottiModelOverride = "notti_model_override"
+    static let nottiThinkingLevel = "notti_thinking_level"
+    static let nottiAutomaticMemoryEnabled = "notti.memory.automatic.enabled"
+    static let nottiMemoryUseEnabled = "notti.memory.use.enabled"
+    static let nottiMemoryPrivacyNoticeVersion = "notti.memory.privacy.version"
+    static let nottiMemoryMigrationVersion = "notti.memory.migration.version"
     /// Keychain account for the Bocha web-search API key (BYOK, Plus-only).
-    static let bochaSearchAPIKey = "spark.websearch.bocha.apiKey"
+    static let bochaSearchAPIKey = "notti.websearch.bocha.apiKey"
+
+    // Explicit one-release compatibility keys. Do not use these for new writes.
+    static let legacySparkAccumulatedTokens = "notiee.sparkAccumulatedTokens"
+    static let legacySparkCustomStyle = "spark_custom_style"
+    static let legacySparkCustomStyles = "spark_custom_styles"
+    static let legacySparkCurrentConversationId = "spark_current_conversation_id"
+    static let legacySparkAgentTrustLevel = "spark_agent_trust_level"
+    static let legacySparkAgentMaxIterations = "spark_agent_max_iterations"
+    static let legacySparkAgentMaxToolsPerRound = "spark_agent_max_tools_per_round"
+    static let legacySparkAgentUndoTTLMinutes = "spark_agent_undo_ttl_minutes"
+    static let legacySparkAgentHistoryRetentionDays = "spark_agent_history_retention_days"
+    static let legacySparkAgentTokenWarning = "spark_agent_token_warning"
+    static let legacySparkModelOverride = "spark_model_override"
+    static let legacySparkThinkingLevel = "spark_thinking_level"
+    static let legacySparkBochaSearchAPIKey = "spark.websearch.bocha.apiKey"
 
     // MARK: - Security
     static let securityAppLockEnabled = "notiee.security.appLockEnabled"

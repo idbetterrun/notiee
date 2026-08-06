@@ -12,6 +12,9 @@ tmn/
 .gemini/
 .workbuddy/
 
+# mem0 upstream snapshot (local reference only)
+mem0-main/
+
 # Android port docs — local staging, will be moved to the Android repo
 docs/android/
 
@@ -19,8 +22,9 @@ docs/android/
 *.ipa
 Notiee+ 20*/
 
-# Backend (Tencent SCF) — separate deploy target, not part of the iOS repo
-notiee-ping-stream/
+# Backend (Tencent SCF) — source is versioned; dependencies and deploy bundles are local
+notiee-ping-stream/node_modules/
+notiee-ping-stream/.DS_Store
 notiee-ping-stream*.zip
 
 # Xcode build output (local artifact, 28M+)

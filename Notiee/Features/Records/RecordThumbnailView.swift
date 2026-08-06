@@ -48,7 +48,7 @@ struct RecordThumbnailView: View {
 
                 Group {
                     switch record.source {
-                    case .spark:
+                    case .notti:
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .fill(Color(.secondarySystemGroupedBackground))
                             .overlay {

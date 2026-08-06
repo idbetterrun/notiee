@@ -67,7 +67,9 @@ xcodebuild build -project Notiee.xcodeproj -scheme Notiee \
 - Explain changes **in the chat in Chinese (中文)** every time there's a change.
 - Always tell the user, per change, whether it hit **both targets / free only /
   Plus only**.
-- Only commit/push when the user asks. If on `main`, branch first.
+- Work directly on `main`; do not create or switch to feature branches for this
+  project.
+- Only commit/push when the user asks.
 - Commit message trailer:
   `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`
 

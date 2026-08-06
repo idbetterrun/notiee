@@ -1,15 +1,17 @@
 # Notiee AI 代理后端 · MVP 设计文档
 
-> 状态：草案 v0.1 · 2026-07-01
+> 状态：早期设计 v0.2 · 2026-08-06 补充 Notti 记忆端点。本文保留部分未实施方案，运行契约以 `notiee-ping-stream/index.js` 为准。
 > 作者：Notiee 团队
 > 范围：为 **Notiee（免费/Pro）** 客户端提供托管 AI 能力的后端代理。**Notiee+（买断 BYOK）不依赖本后端**。
 > 🔲 = 待你拍板的参数/决策。
+
+> **当前实现差异**：现后端是 Express + 腾讯 SCF + MySQL，AI 响应为非流式 JSON；身份路径是 Apple 登录换发 JWT。已实现 `/auth/apple`、`/auth/refresh`、`/account/delete`、`/me/quota`、`/ai/chat`、`/ai/memory/extract`、`/ai/search`、`/ai/agent`、`/ai/process`、`/subscription/verify` 和 `/apple/notifications`。下文的 `/config`、`/ai/embed`、App Attest、Redis 和 SSE 仍是规划，不代表当前运行能力。
 
 ---
 
 ## 1. 背景与目标
 
-Notiee 免费/Pro 版内置 AI（拍记总结、Spark 对话、语义搜索），由官方替用户调用第三方大模型（DeepSeek / 智谱 GLM / 豆包 / MiniMax）。因此**不能把 provider API Key 打进客户端**，所有 AI 调用必须经过官方后端代理。
+Notiee 免费/Pro 版内置 AI（拍记总结、Notti 对话、记忆提取、语义搜索），由官方替用户调用第三方大模型（DeepSeek / 豆包 / MiniMax）。因此**不能把 provider API Key 打进客户端**，所有 AI 调用必须经过官方后端代理。
 
 本后端要解决四件靠"发版"解决不了的事：
 
@@ -121,7 +123,7 @@ Notiee 免费/Pro 版内置 AI（拍记总结、Spark 对话、语义搜索）�
 ```
 错误码：`UNAUTHORIZED` `ATTEST_FAILED` `MODEL_NOT_ALLOWED` `QUOTA_EXCEEDED` `RATE_LIMITED` `KILL_SWITCH` `UPSTREAM_ERROR`。
 
-### 6.1 `GET /config`
+### 6.1 `GET /config`（规划，当前未实现）
 客户端启动 & 每 N 小时拉一次。**远程控制的抓手。**
 ```json
 {
@@ -156,15 +158,15 @@ Notiee 免费/Pro 版内置 AI（拍记总结、Spark 对话、语义搜索）�
   "model": "deepseek-v4-flash",
   "messages": [ { "role": "user", "content": "..." } ],
   "stream": true,
-  "purpose": "spark" // spark | summary | ...（用于分类计量/审计）
+  "purpose": "notti" // notti | summary | ...（用于分类计量/审计）
 }
 // 请求头： X-Notiee-Session: <jwt>  或  X-Notiee-Attest: <assertion>
 ```
 - 成功：**SSE 流**（OpenAI 兼容的 `data: {...}` 分片），末尾带一条包含 `usage` 的事件，供客户端展示 & 后端计量。
 - 失败：非 2xx + 上面的错误结构。
 
-### 6.3 `POST /ai/agent`（Spark Agent，仅 Pro）
-Spark Agent 一轮 Reason-Act 的模型调用。**工具在客户端端上执行**，后端只代跑一次
+### 6.3 `POST /ai/agent`（Notti Agent，仅 Pro）
+Notti Agent 一轮 Reason-Act 的模型调用。**工具在客户端端上执行**，后端只代跑一次
 模型调用（key 不下发）。客户端 `AgentExecutor` 恒用 **OpenAI 格式**发 `messages` + `tools`，
 后端对 Anthropic 系（minimax）做双向翻译。非流式。不占「篇」额度。
 ```json
@@ -177,10 +179,29 @@ Spark Agent 一轮 Reason-Act 的模型调用。**工具在客户端端上执行
 // 成功
 { "text": "...", "tokensUsed": 123, "toolCalls": [ /* OpenAI(function.arguments) 或 Anthropic(input) 形状，客户端都认 */ ] }
 ```
-- 档位：**仅 Pro**（free → `403 UPGRADE_REQUIRED`，与客户端 `SparkTierLimits.isAgentAllowed` 对齐）。
+- 档位：**仅 Pro**（free → `403 UPGRADE_REQUIRED`，与客户端 `NottiTierLimits.isAgentAllowed` 对齐）。
 - 失败：`BAD_REQUEST` / `BAD_MODEL` / `UPGRADE_REQUIRED` / `UPSTREAM_ERROR`，结构同上。
 
-### 6.4 `POST /ai/embed`
+### 6.4 `POST /ai/memory/extract`
+Notti 的无状态记忆提取端点。服务端持有固定的 ADD-only 提取提示，不记录或持久化请求/响应正文；客户端仍是记忆解析、敏感性判断和最终写入的唯一权限方。
+```json
+// 请求（鉴权同其他 AI 端点）
+{
+  "model": "deepseek-v4-flash",
+  "userMessage": "用户当前原话，最多 4000 字符",
+  "confirmedToolResults": ["已确认的工具结果，最多 8 条，每条 2000 字符"],
+  "candidates": [
+    { "id": "UUID", "text": "本地相关记忆，最多 500 字符", "category": "preference", "topicKey": "preference.coffee" }
+  ]
+}
+// 成功：严格 JSON envelope；最多 12 条 proposal
+{ "proposals": [ /* ADD-only proposal */ ] }
+```
+- 候选最多 8 条；模型必须在文本模型白名单内并符合用户档位。
+- 服务端验证 proposal 枚举、字段长度、ISO-8601 日期、关联候选 UUID、逐字证据来源，并拒绝密码、验证码、API Key、令牌、银行卡号和私钥。
+- 不直接修改用户记忆；iOS 本地 resolver 决定新增、强化、合并、替代、待确认或拒绝。
+
+### 6.5 `POST /ai/embed`（规划，当前未实现）
 语义搜索用（仅 Pro 走云端；免费走端侧）。
 ```json
 { "model": "embedding-v1", "input": ["文本1","文本2"] }

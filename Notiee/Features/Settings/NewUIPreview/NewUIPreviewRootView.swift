@@ -3,8 +3,8 @@ import SwiftUI
 struct NewUIPreviewRootView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @StateObject private var sparkState = NewUIPreviewState()
-    @Namespace private var sparkNamespace
+    @StateObject private var nottiState = NewUIPreviewState()
+    @Namespace private var nottiNamespace
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -17,16 +17,16 @@ struct NewUIPreviewRootView: View {
                 )
                 .offset(x: !hasModuleOverlay || reduceMotion ? 0 : -12)
 
-            if sparkState.overlay == nil {
+            if nottiState.overlay == nil {
                 NewUIPreviewDockBar()
-                    .allowsHitTesting(!sparkState.isExpanded)
+                    .allowsHitTesting(!nottiState.isExpanded)
                     .transition(.opacity)
                     .zIndex(1)
             }
 
-            if sparkState.isExpanded {
+            if nottiState.isExpanded {
                 NewUIPreviewComposerView()
-                    .environmentObject(sparkState)
+                    .environmentObject(nottiState)
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),
                         removal: .move(edge: .bottom).combined(with: .opacity)
@@ -37,19 +37,19 @@ struct NewUIPreviewRootView: View {
             overlay
                 .zIndex(3)
         }
-        .animation(pageAnimation, value: sparkState.destination)
-        .animation(overlayAnimation, value: sparkState.overlay)
-        .environmentObject(sparkState)
+        .animation(pageAnimation, value: nottiState.destination)
+        .animation(overlayAnimation, value: nottiState.overlay)
+        .environmentObject(nottiState)
         .navigationBarBackButtonHidden(true)
         .navigationTitle(recordsNavigationIsActive ? String(localized: "记录") : "")
         .navigationBarTitleDisplayMode(recordsNavigationIsActive ? .large : .inline)
         .toolbarBackground(
-            sparkState.destination == .records && sparkState.overlay == nil ? .visible : .hidden,
+            nottiState.destination == .records && nottiState.overlay == nil ? .visible : .hidden,
             for: .navigationBar
         )
-        .toolbar(sparkState.overlay == nil ? .visible : .hidden, for: .navigationBar)
+        .toolbar(nottiState.overlay == nil ? .visible : .hidden, for: .navigationBar)
         .toolbar { labToolbar }
-        .onAppear { sparkState.namespace = sparkNamespace }
+        .onAppear { nottiState.namespace = nottiNamespace }
     }
 
     private var destinationPages: some View {
@@ -57,35 +57,35 @@ struct NewUIPreviewRootView: View {
             NewUIPreviewTodayView()
                 .opacity(pageIsVisible(.today) ? 1 : 0)
                 .offset(x: pageOffset(for: .today))
-                .allowsHitTesting(sparkState.destination == .today && sparkState.overlay == nil)
-                .accessibilityHidden(sparkState.destination != .today || sparkState.overlay != nil)
-                .zIndex(sparkState.destination == .today ? 1 : 0)
+                .allowsHitTesting(nottiState.destination == .today && nottiState.overlay == nil)
+                .accessibilityHidden(nottiState.destination != .today || nottiState.overlay != nil)
+                .zIndex(nottiState.destination == .today ? 1 : 0)
 
             NewUIPreviewRecordsView()
                 .opacity(pageIsVisible(.records) ? 1 : 0)
                 .offset(x: pageOffset(for: .records))
-                .allowsHitTesting(sparkState.destination == .records && sparkState.overlay == nil)
-                .accessibilityHidden(sparkState.destination != .records || sparkState.overlay != nil)
-                .zIndex(sparkState.destination == .records ? 1 : 0)
+                .allowsHitTesting(nottiState.destination == .records && nottiState.overlay == nil)
+                .accessibilityHidden(nottiState.destination != .records || nottiState.overlay != nil)
+                .zIndex(nottiState.destination == .records ? 1 : 0)
         }
     }
 
     @ViewBuilder
     private var overlay: some View {
-        switch sparkState.overlay {
+        switch nottiState.overlay {
         case .module(let section):
             NewUIPreviewModuleView(section: section) {
-                sparkState.dismissOverlay()
+                nottiState.dismissOverlay()
             }
             .transition(childPageTransition)
         case .recordDetail(let recordID, let origin):
-            if let fixture = sparkState.recordFixture(id: recordID) {
+            if let fixture = nottiState.recordFixture(id: recordID) {
                 NewUIPreviewRecordDetailView(
                     fixture: fixture,
                     transitionOrigin: origin,
-                    transitionNamespace: reduceMotion ? nil : sparkNamespace
+                    transitionNamespace: reduceMotion ? nil : nottiNamespace
                 ) {
-                    sparkState.dismissOverlay()
+                    nottiState.dismissOverlay()
                 }
                 .transition(.opacity)
             }
@@ -95,21 +95,21 @@ struct NewUIPreviewRootView: View {
     }
 
     private var recordsNavigationIsActive: Bool {
-        sparkState.destination == .records && sparkState.overlay == nil
+        nottiState.destination == .records && nottiState.overlay == nil
     }
 
     private var hasModuleOverlay: Bool {
-        guard case .module = sparkState.overlay else { return false }
+        guard case .module = nottiState.overlay else { return false }
         return true
     }
 
     private var hasRecordDetailOverlay: Bool {
-        guard case .recordDetail = sparkState.overlay else { return false }
+        guard case .recordDetail = nottiState.overlay else { return false }
         return true
     }
 
     private func pageIsVisible(_ destination: NewUIPreviewDestination) -> Bool {
-        sparkState.destination == destination && !hasRecordDetailOverlay
+        nottiState.destination == destination && !hasRecordDetailOverlay
     }
 
     private var pageAnimation: Animation {
@@ -132,7 +132,7 @@ struct NewUIPreviewRootView: View {
 
     private func pageOffset(for destination: NewUIPreviewDestination) -> CGFloat {
         guard !reduceMotion else { return 0 }
-        switch (destination, sparkState.destination) {
+        switch (destination, nottiState.destination) {
         case (.today, .today), (.records, .records): return 0
         case (.today, .records): return -18
         case (.records, .today): return 18
@@ -141,7 +141,7 @@ struct NewUIPreviewRootView: View {
 
     @ToolbarContentBuilder
     private var labToolbar: some ToolbarContent {
-        if sparkState.overlay == nil {
+        if nottiState.overlay == nil {
             ToolbarItem(placement: .topBarLeading) {
                 Menu {
                     Button {
@@ -163,9 +163,9 @@ struct NewUIPreviewRootView: View {
                 Menu {
                     ForEach(NewUIPreviewScenario.allCases) { scenario in
                         Button {
-                            sparkState.scenario = scenario
+                            nottiState.scenario = scenario
                         } label: {
-                            if sparkState.scenario == scenario {
+                            if nottiState.scenario == scenario {
                                 Label(scenario.label, systemImage: "checkmark")
                             } else {
                                 Text(scenario.label)

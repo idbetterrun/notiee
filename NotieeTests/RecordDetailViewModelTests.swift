@@ -111,17 +111,17 @@ final class RecordDetailViewModelTests: XCTestCase {
         XCTAssertFalse(m.showsTodoPlaceholder)
     }
 
-    func testSparkRecord_showsSummaryOnlyWhenRealSummaryDiffersFromContent() {
-        let withReal = NoteRecord(localImagePaths: [], title: "S", summary: "一句话摘要", detailedContent: "很长的正文", source: .spark)
+    func testNottiRecord_showsSummaryOnlyWhenRealSummaryDiffersFromContent() {
+        let withReal = NoteRecord(localImagePaths: [], title: "S", summary: "一句话摘要", detailedContent: "很长的正文", source: .notti)
         XCTAssertTrue(vm(for: withReal).showsSummarySection)
 
-        let noSummary = NoteRecord(localImagePaths: [], title: "S", summary: "", detailedContent: "正文", source: .spark)
+        let noSummary = NoteRecord(localImagePaths: [], title: "S", summary: "", detailedContent: "正文", source: .notti)
         XCTAssertFalse(vm(for: noSummary).showsSummarySection)
 
-        let dup = NoteRecord(localImagePaths: [], title: "S", summary: "正文", detailedContent: "正文", source: .spark)
+        let dup = NoteRecord(localImagePaths: [], title: "S", summary: "正文", detailedContent: "正文", source: .notti)
         XCTAssertFalse(vm(for: dup).showsSummarySection, "摘要等于正文时不展示")
 
-        // Spark 记录无图，OCR 始终隐藏
+        // Notti 记录无图，OCR 始终隐藏
         XCTAssertFalse(vm(for: withReal).showsOCRSection)
     }
 

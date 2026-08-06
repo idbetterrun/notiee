@@ -95,9 +95,9 @@ struct SettingsMainView: View {
                     #endif
 
                     NavigationLink {
-                        SparkSettingsView(viewModel: viewModel)
+                        NottiSettingsView(viewModel: viewModel)
                     } label: {
-                        Label("Spark", systemImage: "sparkles")
+                        Label("Notti", systemImage: "sparkles")
                     }
 
                     NavigationLink {

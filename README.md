@@ -31,7 +31,7 @@ The real value is *later*. Photos you dump into the camera roll usually vanish i
 > 而在 Notiee 里，拍过的内容都能搜到、更能**直接开口问**，从自己拍过的东西里得到答案并溯源回原图。
 > 拍照只是最省事的输入；拍完后台自动 OCR、生成摘要、抽取待办，整体**离线优先**。分两个版本：
 > **Notiee**（免费，后端代付 AI + Pro 订阅）与 **Notiee+**（一次买断，自带模型 key）。
-> AI 流水线在断网时缓存、联网后自动续跑。内置 **Spark** AI 助手可对你自己的拍记、日程与待办进行对话与操作。
+> AI 流水线在断网时缓存、联网后自动续跑。内置 **Notti** AI 助手可对你自己的拍记、日程与待办进行对话与操作。
 
 ---
 
@@ -43,7 +43,7 @@ The real value is *later*. Photos you dump into the camera roll usually vanish i
 | **Snap · 拍记** | Dark immersive camera with zoom presets, flash, burst mode, and schedule-aware auto-categorization; seamless capture with no blocking dialogs. · 暗色沉浸式相机，缩放预设、闪光、连拍、日程感知自动归类；无阻断式弹窗的无缝连拍。 |
 | **Records · 记录** | Full-text search across titles, AI summaries, and OCR; multi-level folders plus system folders (Favorites / Uncategorized / Today / Pending / Trash). · 标题/摘要/OCR 全文检索，多级文件夹 + 系统文件夹（收藏/未分类/今日/待处理/回收站）。 |
 | **Record Detail · 记录详情** | Image viewer, AI summary, detailed content (Markdown), key points, term definitions, to-dos, related-note suggestions; long-press copy/share on all text. · 图片查看、AI 摘要、详细内容（Markdown）、要点、术语定义、待办、相关笔记推荐；全文长按复制/分享。 |
-| **Spark · AI 助手** | In-app AI chat grounded in your notes with inline citations, long-term memory, and an **Agent** mode that calls 17 tools to operate notes / schedule / to-dos. · 接地于拍记的 AI 对话（行内引用）、长期记忆，以及可调用 17 个工具操作笔记/日程/待办的 **Agent** 模式。 |
+| **Notti · AI 助手** | In-app AI chat grounded in your notes with inline citations, encrypted local memory, and an **Agent** mode that calls 18 tools to operate notes / schedule / to-dos / memory. · 接地于拍记的 AI 对话（行内引用）、本地加密记忆，以及可调用 18 个工具操作笔记/日程/待办/记忆的 **Agent** 模式。 |
 | **Review · 用量** | Token dashboard with per-event pie chart, Top-5 records, accumulated deleted tokens, configurable warning threshold. · token 仪表盘：按事件饼图、Top 5 记录、已删累计、可配置预警阈值。 |
 | **Scene Presets · 场景预设** | Professional / College / High School / Creator — auto-tunes AI parsing, course mode, LaTeX, vision strategy. · 高效职场人 / 大学生·研究生 / 中学生 / 创作者·研究者，自动调整解析策略、课程模式、LaTeX、视觉策略。 |
 | **Live Activities · 实时活动** | Dynamic Island & Lock Screen with real-time event progress and countdown. · 灵动岛 & 锁屏实时事件进度与倒计时。 |
@@ -55,24 +55,24 @@ The real value is *later*. Photos you dump into the camera roll usually vanish i
 
 ---
 
-## Spark AI Assistant · Spark AI 助手
+## Notti AI Assistant · Notti AI 助手
 
-Spark is the fourth tab — an in-app AI companion that can both chat and **act**.
+Notti is the fourth tab — an in-app AI companion that can both chat and **act**.
 
-Spark 是底栏第四个 Tab —— 一个既能对话、又能**动手操作**的 App 内 AI 伴侣。
+Notti 是底栏第四个 Tab —— 一个既能对话、又能**动手操作**的 App 内 AI 伴侣。
 
 **Chat mode · 对话模式**
 - Grounds answers in your captured notes and cites them inline as `[来源N]`, rendered as tappable citation cards. · 回答接地于你的拍记，行内以 `[来源N]` 引用并渲染为可点引用卡片。
-- Long-term **memory** of your preferences and facts. · 关于你偏好与事实的长期**记忆**。
-- Multi-conversation history, per-Spark model override, and adjustable thinking effort. · 多会话历史、Spark 局部模型覆盖、可调思考强度。
+- Local-first encrypted **memory** with hybrid Top-K recall, evidence/access reinforcement, lifecycle states, and confirmation for sensitive facts. · 本地优先的加密**记忆**：混合 Top-K 召回、证据/使用强化、生命周期管理与敏感事实确认。
+- Multi-conversation history, per-Notti model override, and adjustable thinking effort. · 多会话历史、Notti 局部模型覆盖、可调思考强度。
 - Read-only awareness of upcoming schedule for context. · 只读感知未来日程作为上下文。
 
 **Agent mode · Agent 模式**
 - A Reason–Act loop (up to 5 iterations) exposes tools to the model via OpenAI / Anthropic schemas. · Reason–Act 循环（最多 5 轮），以 OpenAI/Anthropic schema 把工具暴露给模型。
 - A **trust manager** gates which tools are available (read vs. write). · **信任等级**控制可用工具（读 / 写）。
-- 12 built-in tools: date info, calendar query, schedule create/update, note search/get/create/update, todo list/create/complete, memory manage. · 12 个内置工具：日期信息、日程查询、日程增改、笔记搜/查/增/改、待办列/增/完成、记忆管理。
+- 18 built-in tools cover dates, schedules, notes, to-dos, bounded memory search/forget, and web search/fetch. · 18 个内置工具覆盖日期、日程、笔记、待办、有界记忆检索/遗忘与网页搜索/读取。
 
-> Note · 说明: Note retrieval is keyword/lexical (title + summary + OCR substring match) or full-context injection — **not** vector/embedding RAG. · 笔记检索为关键词/词法匹配或全量上下文注入，**非**向量/嵌入式 RAG。
+> Note · 说明: Note and memory retrieval are both bounded. Notes use anchor + semantic recall; Notti memory combines local semantic, BM25, entity, and time signals before injecting only the ranked Top-K. · 笔记与记忆召回均有界：拍记使用锚点 + 语义召回，Notti 记忆在本地融合语义、BM25、实体和时间信号后只注入排序后的 Top-K。
 
 ---
 
@@ -157,15 +157,15 @@ Capture → NoteRecord(.pending) → enqueue
 Notiee/
 ├── App/
 │   ├── NotieeApp.swift                # @main entry · 入口
-│   └── RootTabView.swift              # 4 tabs: Today / Snap / Records / Spark
+│   └── RootTabView.swift              # 4 tabs: Today / Snap / Records / Notti
 ├── Features/
 │   ├── Today/                         # Today dashboard (settings entry → MeView)
 │   ├── Capture/                       # Camera + capture flow
 │   ├── Records/                       # Record archive + detail
-│   ├── Settings/                      # Me, settings, login, backup, Review, Lab, Spark settings
-│   └── Spark/                         # AI assistant
+│   ├── Settings/                      # Me, settings, login, backup, Review, Lab, Notti settings
+│   └── Notti/                         # AI assistant
 │       └── Agent/                     # Executor, registry, trust, tools
-│           └── Tools/                 # 12 agent tools
+│           └── Tools/                 # 18 agent tools
 ├── Models/                            # Domain models (NoteRecord, ScheduledEvent, ScenePreset, …)
 ├── Services/                          # Infrastructure
 │   ├── NotieeStore.swift              # Central facade
@@ -231,9 +231,9 @@ API keys are encrypted in the iOS **Keychain** and never leave the device. · AP
 **v1.0.6** · two editions (Notiee / Notiee+) + backend-powered free tier · 双版本（Notiee / Notiee+）+ 免费版后端代付
 
 - [x] **Two editions** — Notiee (free: self-hosted backend AI + Apple login + Pro subscription) / Notiee+ (one-time BYOK) · **双版本** —— Notiee（免费：自建后端代付 + Apple 登录 + Pro 订阅）/ Notiee+（一次买断 BYOK）
-- [x] **Spark AI assistant** — chat with citations, long-term memory, history · **Spark AI 助手** —— 带引用对话、长期记忆、历史
-- [x] **Spark Agent** — 17 tools, trust levels, 5-iteration reason-act loop · **Spark Agent** —— 17 工具、信任等级、5 轮循环
-- [x] Per-Spark model override + per-provider thinking effort · Spark 局部模型覆盖 + 按服务商思考强度
+- [x] **Notti AI assistant** — chat with citations, long-term memory, history · **Notti AI 助手** —— 带引用对话、长期记忆、历史
+- [x] **Notti Agent** — 18 tools, trust levels, 5-iteration reason-act loop · **Notti Agent** —— 18 工具、信任等级、5 轮循环
+- [x] Per-Notti model override + per-provider thinking effort · Notti 局部模型覆盖 + 按服务商思考强度
 - [x] Manager-based store architecture (Record / Calendar / FolderTag / AIPipeline) · 基于 Manager 的状态架构
 - [x] Scene presets (Professional / College / High School / Creator) · 场景预设
 - [x] Theme accent color, course-calendar marking, deep association mode · 主题强调色、课程日历标注、深度关联
@@ -241,7 +241,7 @@ API keys are encrypted in the iOS **Keychain** and never leave the device. · AP
 - [x] `.tmn` backup/restore · `.tmn` 备份恢复
 - [x] Full localization (EN / 简体中文 / 繁體中文) · 全量本地化
 - [ ] iCloud CloudKit auto-sync (planned) · iCloud 自动同步（规划中）
-- [ ] Semantic (vector) retrieval for Spark (planned) · Spark 语义向量检索（规划中）
+- [x] Bounded semantic/hybrid retrieval for notes and encrypted Notti memory · 拍记有界语义召回与 Notti 加密混合记忆召回
 
 ---
 

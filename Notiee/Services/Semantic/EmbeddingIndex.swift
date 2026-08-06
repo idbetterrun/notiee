@@ -39,14 +39,14 @@ final class EmbeddingIndex {
         try? data.write(to: fileURL, options: .atomic)
     }
 
-    /// 默认位置：Application Support/embedding-index.json（Spark 搜索用，可走云端向量）
+    /// 默认位置：Application Support/embedding-index.json（Notti 搜索用，可走云端向量）
     static let live: EmbeddingIndex = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return EmbeddingIndex(fileURL: dir.appendingPathComponent("embedding-index.json"))
     }()
 
-    /// 详情页「相关内容」专用索引，固定走本地向量，与 Spark 的云端向量隔离，避免互相失效。
+    /// 详情页「相关内容」专用索引，固定走本地向量，与 Notti 的云端向量隔离，避免互相失效。
     static let relatedNotes: EmbeddingIndex = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

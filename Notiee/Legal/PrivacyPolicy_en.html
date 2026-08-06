@@ -70,8 +70,8 @@
   <tr><td>Plain Text Records</td><td>Local JSON files</td><td>Manual text notes</td></tr>
   <tr><td>To-Do Items</td><td>Local JSON files</td><td>Task management (including deadlines, reminder markers)</td></tr>
   <tr><td>Custom Folders, Tags, Schedule Tags</td><td>Local JSON files</td><td>Categorization and schedule coloring</td></tr>
-  <tr><td>Spark Conversation History</td><td>Local JSON files</td><td>AI conversation record storage and search</td></tr>
-  <tr><td>Spark Long-Term Memory</td><td>Local JSON files</td><td>AI assistant personalized memory</td></tr>
+  <tr><td>Notti Conversation History</td><td>Local JSON files</td><td>AI conversation record storage and search</td></tr>
+  <tr><td>Notti Long-Term Memory and Vectors</td><td>AES-GCM encrypted local files; encryption key stored separately in iOS Keychain</td><td>AI assistant personalized memory and local retrieval</td></tr>
   <tr><td>Local Account Profile (Nickname, Avatar)</td><td>Local file system</td><td>Profile display</td></tr>
   <tr><td>Semantic Vector Index (Search / Deep Association)</td><td>Local file system</td><td>Photo note semantic search and related note recommendations (on-device vectors)</td></tr>
   <tr><td>API Key</td><td>iOS Keychain (hardware-level encryption)</td><td>AI service invocation</td></tr>
@@ -80,17 +80,18 @@
 </table>
 
 <h3>2.3 Information Sent to Third Parties</h3>
-<p>In the following scenarios, data is sent to third-party AI service providers <b>configured by the user</b>:</p>
+<p>In the following scenarios, data is sent to the selected AI model. Notiee+ connects directly to the provider configured by the user; the free Notiee app uses Notiee's AI relay backend.</p>
 <table>
   <tr><th>Scenario</th><th>Content Sent</th><th>Recipient</th><th>User Control</th></tr>
   <tr><td>AI Photo Note Processing</td><td>Photo image data + text prompts</td><td>User-configured AI service provider</td><td>Automatically processed after user-initiated capture; AI features can be disabled</td></tr>
-  <tr><td>Spark Conversations</td><td>User messages + conversation history context</td><td>User-configured AI service provider</td><td>User-initiated conversations</td></tr>
-  <tr><td>Spark Agent Operations</td><td>User instructions + related photo notes/schedule/to-do data</td><td>User-configured AI service provider</td><td>User-initiated Agent mode</td></tr>
+  <tr><td>Notti Conversations</td><td>User messages + conversation history context</td><td>User-configured AI service provider</td><td>User-initiated conversations</td></tr>
+  <tr><td>Notti Memory Recall and Extraction</td><td>Current user message, confirmed tool results, and a small set of locally matched memory candidates (up to 5 for Free, up to 10 for Pro/Plus)</td><td>Selected AI model; routed through Notiee's stateless relay in the free app</td><td>Requires versioned Notti privacy consent; automatic memory and memory use can each be disabled</td></tr>
+  <tr><td>Notti Agent Operations</td><td>User instructions + related photo notes/schedule/to-do data</td><td>User-configured AI service provider</td><td>User-initiated Agent mode</td></tr>
   <tr><td>WebFetch Web Scraping</td><td>Target URL (provided by user)</td><td>Server hosting the target webpage</td><td>Triggered only by user instructions in Agent mode</td></tr>
   <tr><td>Cloud Semantic Retrieval (Optional)</td><td>Photo note text summaries</td><td>User-configured AI service provider Embedding API</td><td><b>Disabled by default</b>; must be manually enabled in Labs</td></tr>
   <tr><td>iCloud Sync (if enabled)</td><td>.tmn archive files</td><td>Apple iCloud Drive</td><td>Manually triggered by user</td></tr>
 </table>
-<blockquote><b>Important:</b> All AI service calls above use API Keys <b>provided by the user</b> and are sent to AI service providers <b>chosen by the user</b>. Notiee does not operate its own servers and does not intercept or store any data sent to third parties. <b>The "Deep Association" related note recommendations on the detail page are computed entirely on-device by default and send no data to any server.</b></blockquote>
+<blockquote><b>Important:</b> Notiee+ uses API keys and providers configured by the user. The free Notiee app sends AI requests through Notiee's backend using server-managed credentials. The Notti memory extraction endpoint is stateless and does not persist or log request/response body text. <b>The "Deep Association" related note recommendations on the detail page are computed entirely on-device by default and send no data to any server.</b></blockquote>
 
 <h2>3. Permission Usage</h2>
 <table>
@@ -108,13 +109,13 @@
 <table>
   <tr><th>Measure</th><th>Description</th></tr>
   <tr><td>Local-First</td><td>All records and to-dos are stored locally on device by default, not dependent on the cloud</td></tr>
-  <tr><td>Keychain Encryption</td><td>API Keys are stored using iOS Keychain (hardware-level Secure Enclave encryption), not written to regular files, and automatically cleared upon app uninstallation</td></tr>
+  <tr><td>Keychain Encryption</td><td>API Keys are stored in iOS Keychain and are not written to regular files. Depending on system behavior, Keychain items may remain after App uninstallation; use the in-app reset or key-removal controls before uninstalling when removal is required</td></tr>
   <tr><td>HTTPS Transport</td><td>All AI service calls use HTTPS encrypted transport</td></tr>
   <tr><td>No Cloud Retention</td><td>Notiee does not operate its own servers and does not collect or store user content data</td></tr>
   <tr><td>iCloud Security</td><td>If the user manually enables iCloud sync, data is stored in the user's personal iCloud Drive, protected by Apple's security framework</td></tr>
   <tr><td>WebFetch Security</td><td>Uses ephemeral network sessions (non-persistent cookies/cache), built-in SSRF protection, blocks access to local and intranet addresses (localhost, 10.x, 172.16-31.x, 192.168.x, etc.)</td></tr>
   <tr><td>On-Device Semantic Computing</td><td>Uses Apple NLEmbedding on-device vector engine by default; vector computation for photo note search and "Deep Association" related recommendations is performed entirely on-device and not uploaded to any server</td></tr>
-  <tr><td>No Unsolicited Network Requests</td><td>Except for user-initiated AI processing, Spark conversations, WebFetch, or iCloud sync, this App does not spontaneously send data to any server</td></tr>
+  <tr><td>No Unsolicited Network Requests</td><td>Except for user-initiated AI processing, Notti conversations, WebFetch, or iCloud sync, this App does not spontaneously send data to any server</td></tr>
 </table>
 
 <h2>5. Data Sharing and Disclosure</h2>
@@ -126,25 +127,26 @@
 <h2>6. User Rights</h2>
 <table>
   <tr><th>Right</th><th>Description</th></tr>
-  <tr><td>Right of Access</td><td>All data can be viewed directly within the App, including photo notes, to-dos, Spark conversations, profiles, etc.</td></tr>
+  <tr><td>Right of Access</td><td>All data can be viewed directly within the App, including photo notes, to-dos, Notti conversations, profiles, etc.</td></tr>
   <tr><td>Right of Export</td><td>Supports one-click export of all records as .tmn archive files (Settings → Me → Backup &amp; Restore)</td></tr>
   <tr><td>Right of Deletion</td><td>Individual records, to-dos, conversations can be deleted within the App, or all data can be cleared</td></tr>
-  <tr><td>Right of Search</td><td>Supports full-text search and semantic search of photo notes and Spark conversations</td></tr>
+  <tr><td>Right of Search</td><td>Supports full-text search and semantic search of photo notes and Notti conversations</td></tr>
   <tr><td>Right to Withdraw Consent</td><td>Any permission can be disabled in system settings</td></tr>
-  <tr><td>Account Deletion</td><td>Currently uses a local account; uninstalling the App clears all local data (iCloud synced files must be manually deleted in iCloud)</td></tr>
+  <tr><td>Account Deletion</td><td>Local files in the App container are normally removed when the App is uninstalled, but Keychain items may remain and iCloud-synced files must be deleted separately. Use the in-app deletion, reset, or clear controls before uninstalling when complete removal is required</td></tr>
 </table>
 
 <h2>7. Protection of Minors</h2>
 <p>7.1 This App is designed for students and professionals and is not specifically targeted at children under 14.</p>
 <p>7.2 If a guardian discovers that a minor is using this App without consent, they may contact us using the contact information at the end of this policy to delete the data.</p>
 
-<h2>8. Spark AI Assistant Privacy</h2>
-<p>Spark is the built-in AI assistant of this App with the following privacy features:</p>
-<p>8.1 <b>Conversation Content:</b> Spark's conversation messages (user input and AI responses) are sent to the user-configured AI service provider for processing. Conversation history is stored locally on the device.</p>
-<p>8.2 <b>Agent Mode:</b> When using Agent mode, Spark may read the user's photo notes, schedules, to-dos, and other local data as operational context, and related data may be sent to the AI service provider with the request.</p>
+<h2>8. Notti AI Assistant Privacy</h2>
+<p>Notti is the built-in AI assistant of this App with the following privacy features:</p>
+<p>8.1 <b>Conversation Content:</b> Notti's conversation messages (user input and AI responses) follow the transport path for the edition: the free Notiee app relays them through the Notiee backend to the selected AI model, while Notiee+ connects directly to the user-configured AI provider. Conversation history is stored locally on the device.</p>
+<p>8.2 <b>Agent Mode:</b> When using Agent mode, Notti may read the user's photo notes, schedules, to-dos, and other local data as operational context, and related data may be sent to the AI service provider with the request.</p>
 <p>8.3 <b>WebFetch:</b> In Agent mode, web content may be fetched based on user instructions, using ephemeral secure sessions with no persistent network data.</p>
-<p>8.4 <b>Long-Term Memory:</b> Spark's memory system (user preferences, habits, etc.) is stored locally on the device and not uploaded to any server.</p>
-<p>8.5 <b>Privacy Consent:</b> When using Spark for the first time, users must read and agree to the Spark Privacy Consent.</p>
+<p>8.4 <b>Long-Term Memory:</b> Notti's memory database and vectors are encrypted locally with AES-GCM and are not synced to iCloud. To answer a request or extract a new memory, only the current message, confirmed tool results, and a small set of locally matched memory candidates are sent temporarily to the selected AI model. The full memory database is never uploaded.</p>
+<p>8.5 <b>Sensitive Information:</b> Health, precise address, contact, financial, and identity information remains pending until the user explicitly asks Notti to remember it or confirms it. Passwords, one-time codes, API keys, tokens, bank card numbers, and private keys are never saved as memory.</p>
+<p>8.6 <b>Privacy Consent and Controls:</b> The redesigned memory system requires separate versioned consent. Users can independently disable automatic memory writing or memory use without deleting existing memories, and can permanently delete memories from Settings.</p>
 
 <h2>9. Policy Updates</h2>
 <p>9.1 We reserve the right to update this Privacy Policy at any time.</p>
@@ -176,7 +178,9 @@
 <h2>Appendix A: Data Lifecycle</h2>
 <pre>Capture → Local Storage → [User triggers AI Processing] → Sent to AI Service Provider → Returns Result → Local Storage
                         ↓
-                [Spark Conversation] → Sent to AI Service Provider → Returns Result → Local Storage
+                [Notti Conversation] → Sent to AI Service Provider → Returns Result → Local Storage
+                        ↓
+                [Notti Memory] → Local Retrieval → Small Matched Set Sent Temporarily → Encrypted Local Update
                         ↓
                 [Agent Operation] → Reads Local Data → Sent to AI Service Provider → Executes Operation
                         ↓
@@ -196,7 +200,7 @@
   <tr><td>No Tracking</td><td>Does not integrate any analytics/statistics SDKs</td></tr>
   <tr><td>No Ads</td><td>Does not integrate advertising SDKs</td></tr>
   <tr><td>No Unsolicited Network Requests</td><td>Except for user-initiated actions, does not spontaneously send data to any server</td></tr>
-  <tr><td>API Key Localization</td><td>Stored in Keychain, automatically cleared upon app uninstallation</td></tr>
+  <tr><td>API Key Localization</td><td>Stored in Keychain; it may remain after App uninstallation depending on system behavior, so remove or reset it in the App first when required</td></tr>
   <tr><td>Transport Encryption</td><td>All AI requests use HTTPS</td></tr>
   <tr><td>WebFetch Ephemeral Sessions</td><td>Uses URLSessionConfiguration.ephemeral, no persistent cookies/cache</td></tr>
   <tr><td>WebFetch SSRF Protection</td><td>Blocks localhost, intranet IPs, IPv6 local addresses</td></tr>
@@ -207,10 +211,11 @@
 
 <hr>
 <blockquote><b>Version History</b><br>
+v1.0.7 (2026-08-06): Renamed Spark to Notti; added encrypted local memory, bounded memory recall/extraction transmission, sensitive-memory confirmation, and independent memory controls<br>
 v1.0.6 (2026-07-02): Added encrypted notes (AES-GCM on-device encryption, key stored in the system Keychain) and biometric/passcode privacy lock (credentials never leave the device) description; encrypted notes are excluded from export, sync, search, and indexing; added data-flow description for custom AI models<br>
 v1.0.5 (2026-06-24): Added "Deep Association" on-device semantic related notes (local vectors, independent local index, no external transmission) description; to-do items local persistence; added plain text record data description<br>
-v1.0.4 (2026-06-24, unreleased): Added Spark Agent WebFetch privacy description, cloud semantic retrieval description, local account data description, WebFetch security measures, etc.<br>
-v1.0.3 (2026-06-04): Added Spark AI Assistant conversation data description<br>
+v1.0.4 (2026-06-24, unreleased): Added Spark (now Notti) Agent WebFetch privacy description, cloud semantic retrieval description, local account data description, WebFetch security measures, etc.<br>
+v1.0.3 (2026-06-04): Added Spark (now Notti) AI Assistant conversation data description<br>
 v1.0.1: Initial version</blockquote>
 
 </body>

@@ -194,7 +194,11 @@ private struct SplashView: View {
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        try? SparkConversationRepository.live.clearDraft()
+        try? NottiMigrationCoordinator.live.migrateFilesAndSettings()
+        Task {
+            try? await NottiMigrationCoordinator.live.migrateLegacyMemory()
+            await NottiMemoryCoordinator.live.processQueue()
+        }
         #if !NOTIEE_PLUS
         // First launch after a (re)install: drop any Keychain session the deleted
         // install left behind, so the app doesn't appear logged-in with stale

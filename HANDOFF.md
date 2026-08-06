@@ -36,6 +36,41 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-06 — Packaged the updated free backend for root-level extraction _(free target only)_
+
+- Created `notiee-ping-stream-notti-memory-2026-08-06.zip` at the repository root without overwriting the older `notiee-ping-stream.zip`. The archive contains the backend directory's contents at ZIP root, including `node_modules`, certificates, source, tests, lockfile, schema, and SCF bootstrap; `.DS_Store` is excluded.
+- `unzip -t` reports no errors. The archive contains 2,076 entries, has no `notiee-ping-stream/` path prefix, is 3.6 MB compressed, and has SHA-256 `f92d21f7f2d303e51eb74ba6a2289182f4526c2612a46806febe6011e30a5ab2`.
+
+### 2026-08-06 — Completed the Notti memory refactor and closeout hardening _(both targets; free-only backend extractor)_
+
+- Replaced current Spark product/source naming with Notti while preserving the legacy `spark` storage identifiers, files, exact placeholder-title migration, settings keys, record source encoding, and generated-folder UUIDs needed for upgrade and rollback compatibility. The shared iOS implementation now has one encrypted local memory domain, hybrid bounded recall, independent evidence/access reinforcement, lifecycle states, a durable extraction queue, strict local proposal resolution, sensitive confirmation, management UI, and confirmed destructive Agent deletion.
+- Added repository-wide in-memory rollback boundaries for snapshot and vector persistence failures. Queue changes, proposal resolution, pending decisions, lifecycle transitions, status changes, touches, and vector replacement now restore the snapshot, vectors, and rebuild flag when atomic persistence throws; the existing two-file delete/edit compensation remains in place.
+- Accepted sensitive proposals now remove only pending items whose normalized proposal text matches after the user explicitly asks Notti to remember the fact or confirms it. Focused tests cover this flow plus representative snapshot and vector persistence rollback, alongside migration, retrieval, secret rejection, Agent deletion, and compatibility coverage.
+- Corrected every bundled and website privacy-policy mirror that claimed Keychain data is automatically removed on uninstall or that uninstall clears all local data. The policies now disclose that Keychain items may survive uninstall and direct users to in-app delete/reset/clear controls before uninstalling when complete removal is required.
+- Verification completed without Simulator/XCTest per user direction: all Notti Swift sources and the focused test file pass Swift parsing; backend syntax passes; all 23 Node tests pass; pbxproj and all three localization files pass plist lint; legal false-claim scans and `git diff --check` are clean. Remaining `Spark` occurrences in current source/tests are migration compatibility values, fixtures, historical text, or the `sparkles` SF Symbol.
+- Physical-device XCTest/build and UI migration validation remain with the user's device workflow. The free backend source is implemented but `/ai/memory/extract` has not been deployed to production. No commit or push was created; work remains directly on `main` as required by `AGENTS.md`.
+
+### 2026-08-06 — Verified Mem0 decay, access reinforcement, and count-based ranking claims _(both targets; architecture investigation only)_
+
+- The claim is accurate only when scoped to Mem0 Platform v3 and split into separate mechanisms. Platform Memory Decay is opt-in, records a fire-and-forget touch for every returned search result, retains the latest 20 access timestamps, and applies a bounded `0.3x...1.5x` search-time multiplier after relevance/reranking. It is soft reordering, not eviction, and is explicitly unavailable in the OSS SDK.
+- Repeated user mentions do not increment a visible mention counter in the OSS v3 pipeline. Exact repeats are hash-deduplicated, the extraction prompt suppresses semantic duplicates, and Platform Dream handles repetition through Merge or scheduled Synthesis rather than a direct mention-frequency score.
+- OSS entity retrieval does contain a memory-count term, but it penalizes broad entities: `1 / (1 + 0.001 * (linkedCount - 1)^2)` reduces each entity boost as that entity links to more memories. It should not be described as repeated mentions strengthening a fact. Base OSS ranking fuses semantic similarity, normalized BM25, and this entity boost; an optional reranker is separate.
+- Mem0 lifecycle controls are distinct: decay only reorders; expiration hides by default but retains data; Dream Supersede marks old facts yet leaves them visible unless `latest_only`; Dream Merge hides retained duplicates by default; explicit delete is destructive. Feedback is a separate Platform API whose exact scoring effect is not exposed in this checkout.
+- For Spark, keep evidence repetition and retrieval usage as separate metadata/signals. Access reinforcement should be bounded and category-aware, should apply only to memories actually injected/used rather than the broad candidate pool, and must never silently delete durable profile/safety facts. No product code changed; only this handoff note was added.
+
+### 2026-08-06 — Assessed `mem0-main` as the reference for a Spark memory redesign _(both targets; architecture investigation only)_
+
+- The useful Mem0 boundary is a standalone memory layer with separate post-response extraction and pre-response retrieval. Its v3 write path uses one ADD-only structured extraction call, semantic context lookup, exact-hash deduplication, embeddings, metadata/history, and optional entity links; retrieval fuses semantic, normalized BM25, and entity signals before returning only relevant memories.
+- Spark currently has three overlapping write paths: hidden CRUD tags in the main answer, a personal-info-triggered background extraction, and 10-round compression. The two background paths write `SparkMemoryStore` directly and bypass `SparkTierLimits`, while the read path injects the complete `[String: String]` dictionary into every prompt. The current model has no stable memory ID, timestamps, provenance, temporal status, history, embedding, relevance score, or tests dedicated to memory persistence/retrieval.
+- Recommended direction is a shared, local, Mem0-inspired Swift memory domain for both targets, reusing Notiee's existing embedding primitives and keeping transport behind a protocol. Do not embed the Python/TypeScript SDK or require Mem0 Cloud. Free-only backend extraction may branch at the transport boundary; Notiee+ remains BYOK. Migration from `spark_memory.json` must be explicit and idempotent.
+- Do not assume the checked-in OSS code implements all advertised v3 behavior: Mem0's temporal reasoning, decay, graph memory, and published benchmark optimizations are managed-platform features; OSS rejects `timestamp`/`reference_date`, and the README explicitly says benchmark results include proprietary optimizations.
+- No Swift, backend, project, localization, persistence data, or target membership changed. Only this handoff note was added; no build or test was needed.
+
+### 2026-08-06 — Audited prior Spark memory-system discussion history _(both targets; investigation only)_
+
+- The accessible recent Codex task history contains no dedicated conversation explicitly about a "Spark memory system refactor." Repository history does contain the original Spark v3 memory-mechanism plan (`docs/superpowers/plans/2026-06-03-spark-v3-personality-streaming.md`), the later free-tier memory-cap plan, and semantic record-recall work; these are related but should not be conflated with a newly proposed long-term-memory redesign.
+- No Swift, project, localization, persistence, backend, or target-membership file changed. Only this handoff audit note was added; no build or test was needed.
+
 ### 2026-08-05 — Made NewUIPreview Today height-adaptive and restored an opaque detail layer _(both targets; experimental preview only)_
 
 - Today now measures the rendered Hero and `Today + selector` header, reserves the 44 pt contextual action and 104 pt Dock/capture runway, and derives the largest complete prefix using 68 pt rows plus 12 pt spacing. There is no three-row cap; measurement updates suppress animation, and non-empty supported portrait layouts retain at least one row.

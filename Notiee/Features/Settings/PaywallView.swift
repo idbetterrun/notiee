@@ -49,7 +49,7 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: 12) {
             benefitRow("每月大幅提升处理额度")
             benefitRow("解锁全部文本 / 视觉模型")
-            benefitRow("Spark Agent 智能体模式")
+            benefitRow("Notti Agent 智能体模式")
             benefitRow("对话不限轮数、记忆不限条数")
         }
         .frame(maxWidth: .infinity, alignment: .leading)

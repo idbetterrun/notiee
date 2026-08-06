@@ -266,7 +266,7 @@ private extension NewUIPreviewRecordsFilter {
         case .photo: return "照片"
         case .audio: return "录音"
         case .text: return "文字"
-        case .spark: return "来自 Spark"
+        case .notti: return "来自 Notti"
         }
     }
 
@@ -276,7 +276,7 @@ private extension NewUIPreviewRecordsFilter {
         case .photo: return "photo"
         case .audio: return "waveform"
         case .text: return "doc.text"
-        case .spark: return "sparkles"
+        case .notti: return "sparkles"
         }
     }
 
@@ -286,7 +286,7 @@ private extension NewUIPreviewRecordsFilter {
         case .photo: return .blue
         case .audio: return .red
         case .text: return .indigo
-        case .spark: return .purple
+        case .notti: return .purple
         }
     }
 }

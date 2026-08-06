@@ -17,14 +17,30 @@ final class FolderTagManager: ObservableObject {
         folderStore: CustomFolderPersisting,
         tagStore: EventTagPersisting
     ) {
-        self.customFolders = customFolders
+        var migratedFolders = customFolders
+        var didMigrateNottiFolder = false
+        for index in migratedFolders.indices
+        where migratedFolders[index].systemRole == .nottiGenerated ||
+            migratedFolders[index].name == "Spark 生成" ||
+            migratedFolders[index].name == "Notti 生成" {
+            if migratedFolders[index].systemRole != .nottiGenerated ||
+                migratedFolders[index].name != Self.nottiFolderName {
+                didMigrateNottiFolder = true
+            }
+            migratedFolders[index].systemRole = .nottiGenerated
+            migratedFolders[index].name = Self.nottiFolderName
+        }
+        self.customFolders = migratedFolders
         self.customTags = customTags
         self.eventTagMapping = eventTagMapping
         self.folderStore = folderStore
         self.tagStore = tagStore
+        if didMigrateNottiFolder {
+            try? folderStore.saveFolders(migratedFolders)
+        }
     }
 
-    static let sparkFolderName = "Spark 生成"
+    static var nottiFolderName: String { String(localized: "Notti 生成") }
 
     // MARK: - Folder CRUD
 
@@ -58,10 +74,17 @@ final class FolderTagManager: ObservableObject {
 
     @discardableResult
     func findOrCreateFolder(named name: String) -> UUID {
+        if name == Self.nottiFolderName,
+           let existing = customFolders.first(where: { $0.systemRole == .nottiGenerated }) {
+            return existing.id
+        }
         if let existing = customFolders.first(where: { $0.name == name }) {
             return existing.id
         }
-        let folder = CustomFolder(name: name)
+        let folder = CustomFolder(
+            name: name,
+            systemRole: name == Self.nottiFolderName ? .nottiGenerated : nil
+        )
         customFolders.append(folder)
         persistFolders()
         return folder.id

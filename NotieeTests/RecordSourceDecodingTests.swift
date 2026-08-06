@@ -28,10 +28,22 @@ final class RecordSourceDecodingTests: XCTestCase {
         XCTAssertEqual(record.title, "Legacy")
     }
 
-    func testSparkRecordRoundTrips() throws {
-        let original = NoteRecord(localImagePaths: [], title: "S", source: .spark)
+    func testNottiRecordRoundTrips() throws {
+        let original = NoteRecord(localImagePaths: [], title: "S", source: .notti)
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode(NoteRecord.self, from: data)
-        XCTAssertEqual(decoded.source, .spark)
+        XCTAssertEqual(decoded.source, .notti)
+    }
+
+    func testLegacySparkSourceDecodesAsNottiAndKeepsStableEncoding() throws {
+        XCTAssertEqual(try JSONDecoder().decode(RecordSource.self, from: Data(#""spark""#.utf8)), .notti)
+        XCTAssertEqual(try JSONDecoder().decode(RecordSource.self, from: Data(#""notti""#.utf8)), .notti)
+        XCTAssertEqual(String(decoding: try JSONEncoder().encode(RecordSource.notti), as: UTF8.self), #""spark""#)
+    }
+
+    func testLegacySparkTabDecodesAsNottiAndKeepsStableEncoding() throws {
+        XCTAssertEqual(try JSONDecoder().decode(AppTab.self, from: Data(#""spark""#.utf8)), .notti)
+        XCTAssertEqual(try JSONDecoder().decode(AppTab.self, from: Data(#""notti""#.utf8)), .notti)
+        XCTAssertEqual(String(decoding: try JSONEncoder().encode(AppTab.notti), as: UTF8.self), #""spark""#)
     }
 }

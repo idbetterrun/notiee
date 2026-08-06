@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// 独立的全屏 Spark 页面，从底部进入；不从 dock 变形，导航栏那一排控件保持稳定。
+/// 独立的全屏 Notti 页面，从底部进入；不从 dock 变形，导航栏那一排控件保持稳定。
 struct NewUIPreviewComposerView: View {
-    @EnvironmentObject private var sparkState: NewUIPreviewState
+    @EnvironmentObject private var nottiState: NewUIPreviewState
     @FocusState private var isInputFocused: Bool
 
     @State private var inputText = ""
@@ -21,16 +21,16 @@ struct NewUIPreviewComposerView: View {
                         .newUIPreviewGlass(in: Circle(), interactive: true)
                 }
                 .buttonStyle(NewUIPreviewPressStyle())
-                .accessibilityLabel("关闭 Spark")
+                .accessibilityLabel("关闭 Notti")
                 .padding(.leading, 20)
                 .padding(.top, 12)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Spark")
+                    Text("Notti")
                         .font(.system(size: 34, weight: .bold))
                         .foregroundStyle(Color.newUIPreviewPrimary)
 
-                    Text(sparkState.dockText)
+                    Text(nottiState.dockText)
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(Color.newUIPreviewSecondary)
                 }
@@ -79,7 +79,7 @@ struct NewUIPreviewComposerView: View {
 
     private func close() {
         isInputFocused = false
-        sparkState.collapse()
+        nottiState.collapse()
     }
 
     private func send() {

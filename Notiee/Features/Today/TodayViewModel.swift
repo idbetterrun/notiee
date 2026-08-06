@@ -116,7 +116,7 @@ final class TodayViewModel: ObservableObject {
     }
 
     /// 待办是否应在 Today 展示。
-    /// - 无关联拍记的独立待办（如 Spark / 手动创建）：始终展示。
+    /// - 无关联拍记的独立待办（如 Notti / 手动创建）：始终展示。
     /// - 有关联拍记的待办：仅当其拍记仍存在且未删除时展示。
     private func isVisible(_ todo: NoteTodo) -> Bool {
         guard let recordID = todo.recordID else { return true }

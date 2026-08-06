@@ -10,7 +10,7 @@ enum Logger {
     static let calendar = os.Logger(subsystem: subsystem, category: "calendar")
     static let network = os.Logger(subsystem: subsystem, category: "network")
     static let camera = os.Logger(subsystem: subsystem, category: "camera")
-    static let spark = os.Logger(subsystem: subsystem, category: "spark")
+    static let notti = os.Logger(subsystem: subsystem, category: "notti")
 
     static func logError(_ error: Error, category: os.Logger = general, file: String = #fileID, line: Int = #line) {
         category.error("[\(file):\(line)] \(error.localizedDescription, privacy: .public)")

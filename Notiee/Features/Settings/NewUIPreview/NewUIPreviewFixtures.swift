@@ -5,7 +5,7 @@ enum NewUIPreviewRecordSource: String, CaseIterable, Identifiable, Hashable {
     case photo
     case audio
     case text
-    case spark
+    case notti
 
     var id: String { rawValue }
 
@@ -14,7 +14,7 @@ enum NewUIPreviewRecordSource: String, CaseIterable, Identifiable, Hashable {
         case .photo: return String(localized: "照片")
         case .audio: return String(localized: "录音")
         case .text: return String(localized: "文字")
-        case .spark: return String(localized: "来自 Spark")
+        case .notti: return String(localized: "来自 Notti")
         }
     }
 
@@ -23,7 +23,7 @@ enum NewUIPreviewRecordSource: String, CaseIterable, Identifiable, Hashable {
         case .photo: return "photo"
         case .audio: return "waveform"
         case .text: return "doc.text"
-        case .spark: return "sparkles"
+        case .notti: return "sparkles"
         }
     }
 }
@@ -172,11 +172,11 @@ enum NewUIPreviewFixtures {
             id: "10000000-0000-0000-0000-000000000011",
             minutesAgo: 420,
             mediaCount: 0,
-            title: "Spark 整理的发布复盘",
-            summary: "Spark 汇总了发布过程中的决策、反馈和后续问题。",
+            title: "Notti 整理的发布复盘",
+            summary: "Notti 汇总了发布过程中的决策、反馈和后续问题。",
             detailedContent: "## 复盘\n\n保留有效决策，同时继续验证首次体验。",
-            source: .spark,
-            previewSource: .spark,
+            source: .notti,
+            previewSource: .notti,
             folderName: "工作"
         )
     ]
@@ -240,7 +240,7 @@ enum NewUIPreviewFixtures {
     private static func defaultPreviewSource(for source: RecordSource) -> NewUIPreviewRecordSource {
         switch source {
         case .photo: return .photo
-        case .spark: return .spark
+        case .notti: return .notti
         case .text: return .text
         }
     }

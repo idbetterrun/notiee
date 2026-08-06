@@ -26,18 +26,18 @@ enum NewUIPreviewTodayLayout {
 }
 
 struct NewUIPreviewTodayView: View {
-    @EnvironmentObject private var sparkState: NewUIPreviewState
+    @EnvironmentObject private var nottiState: NewUIPreviewState
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.newUIPreviewBackground.ignoresSafeArea()
 
-            if sparkState.hero.context.showsAurora {
+            if nottiState.hero.context.showsAurora {
                 VStack(spacing: 0) {
                     NewUIPreviewAuroraBackdrop(
                         colorHex: NewUIPreviewBrand.accentHex,
-                        isActive: sparkState.destination == .today
+                        isActive: nottiState.destination == .today
                     )
                         .frame(height: 300)
                         .opacity(colorScheme == .dark ? 0.62 : 0.78)
@@ -54,7 +54,7 @@ struct NewUIPreviewTodayView: View {
                         0
                     )
                 )
-                    .environmentObject(sparkState)
+                    .environmentObject(nottiState)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .padding(.bottom, NewUIPreviewTodayLayout.dockReservedHeight)
                     .contentShape(Rectangle())
@@ -70,40 +70,40 @@ struct NewUIPreviewTodayView: View {
         DragGesture(minimumDistance: 12)
             .onChanged { value in
                 guard abs(value.translation.height) > abs(value.translation.width),
-                      sparkState.captureGestureEnabled else { return }
-                if sparkState.capturePhase == .idle {
-                    sparkState.beginCaptureDrag(direction: value.translation.height > 0 ? .camera : .audio)
+                      nottiState.captureGestureEnabled else { return }
+                if nottiState.capturePhase == .idle {
+                    nottiState.beginCaptureDrag(direction: value.translation.height > 0 ? .camera : .audio)
                 }
-                sparkState.updateCaptureDrag(
+                nottiState.updateCaptureDrag(
                     progress: abs(value.translation.height) / NewUIPreviewState.dragThresholdPoints
                 )
             }
             .onEnded { _ in
-                guard sparkState.capturePhase != .idle else { return }
-                sparkState.endCaptureDrag()
+                guard nottiState.capturePhase != .idle else { return }
+                nottiState.endCaptureDrag()
             }
     }
 
     @ViewBuilder
     private var captureFeedback: some View {
-        if sparkState.cameraAffordanceVisible, sparkState.captureDirection == .camera {
+        if nottiState.cameraAffordanceVisible, nottiState.captureDirection == .camera {
             NewUIPreviewCameraAffordance()
                 .transition(.scale.combined(with: .opacity))
         }
 
         VStack {
-            if sparkState.captureDirection == .camera, sparkState.capturePhase != .idle {
-                CapturePullIndicator(progress: sparkState.captureDragProgress, direction: .camera)
+            if nottiState.captureDirection == .camera, nottiState.capturePhase != .idle {
+                CapturePullIndicator(progress: nottiState.captureDragProgress, direction: .camera)
                     .padding(.top, 8)
             }
             Spacer()
-            if sparkState.captureDirection == .audio, sparkState.capturePhase != .idle {
-                CapturePullIndicator(progress: sparkState.captureDragProgress, direction: .audio)
+            if nottiState.captureDirection == .audio, nottiState.capturePhase != .idle {
+                CapturePullIndicator(progress: nottiState.captureDragProgress, direction: .audio)
                     .padding(.bottom, 112)
             }
         }
 
-        if let toast = sparkState.captureActionToast {
+        if let toast = nottiState.captureActionToast {
             Text(toast)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color.newUIPreviewPrimary)
@@ -117,7 +117,7 @@ struct NewUIPreviewTodayView: View {
 }
 
 private struct NewUIPreviewDashboardContent: View {
-    @EnvironmentObject private var sparkState: NewUIPreviewState
+    @EnvironmentObject private var nottiState: NewUIPreviewState
 
     let availableHeight: CGFloat
 
@@ -132,7 +132,7 @@ private struct NewUIPreviewDashboardContent: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, NewUIPreviewTodayLayout.topPadding)
-        .animation(.easeInOut(duration: 0.22), value: sparkState.hero.context)
+        .animation(.easeInOut(duration: 0.22), value: nottiState.hero.context)
     }
 
     private var hero: some View {
@@ -142,13 +142,13 @@ private struct NewUIPreviewDashboardContent: View {
                 .foregroundStyle(Color.newUIPreviewSecondary)
                 .lineLimit(1)
 
-            Text(sparkState.hero.title)
+            Text(nottiState.hero.title)
                 .font(.system(size: 31, weight: .bold))
                 .foregroundStyle(Color.newUIPreviewPrimary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(sparkState.hero.supporting)
+            Text(nottiState.hero.supporting)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(Color.newUIPreviewSecondary)
                 .lineLimit(2)
@@ -170,7 +170,7 @@ private struct NewUIPreviewDashboardContent: View {
             todayRows
 
             NewUIPreviewViewAllButton(
-                section: sparkState.selectedTodaySection,
+                section: nottiState.selectedTodaySection,
                 action: openFullSection
             )
         }
@@ -182,8 +182,8 @@ private struct NewUIPreviewDashboardContent: View {
                 .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(Color.newUIPreviewPrimary)
 
-            NewUIPreviewTodaySelector(selection: sparkState.selectedTodaySection) { section in
-                sparkState.selectTodaySection(section)
+            NewUIPreviewTodaySelector(selection: nottiState.selectedTodaySection) { section in
+                nottiState.selectTodaySection(section)
             }
         }
         .onGeometryChange(for: CGFloat.self) { proxy in
@@ -196,14 +196,14 @@ private struct NewUIPreviewDashboardContent: View {
     @ViewBuilder
     private var todayRows: some View {
         VStack(alignment: .leading, spacing: NewUIPreviewTodayLayout.itemSpacing) {
-            switch sparkState.selectedTodaySection {
+            switch nottiState.selectedTodaySection {
             case .records:
-                if sparkState.todayRecords.isEmpty {
+                if nottiState.todayRecords.isEmpty {
                     emptyRow("今天还没有新记录。")
                 } else {
-                    ForEach(sparkState.todayRecords.prefix(visibleItemCount)) { record in
+                    ForEach(nottiState.todayRecords.prefix(visibleItemCount)) { record in
                         Button {
-                            sparkState.openRecord(record.id, origin: .today)
+                            nottiState.openRecord(record.id, origin: .today)
                         } label: {
                             NewUIPreviewTodayItemCard(
                                 title: record.title,
@@ -211,18 +211,18 @@ private struct NewUIPreviewDashboardContent: View {
                                 style: .record(imageName: record.thumbnailImageName),
                                 recordID: record.id,
                                 transitionOrigin: .today,
-                                transitionNamespace: sparkState.namespace
+                                transitionNamespace: nottiState.namespace
                             )
                         }
                         .buttonStyle(NewUIPreviewPressStyle())
                     }
                 }
             case .todos:
-                if sparkState.actionableTodos.isEmpty {
+                if nottiState.actionableTodos.isEmpty {
                     emptyRow("今天没有待处理事项。")
                 } else {
-                    ForEach(sparkState.actionableTodos.prefix(visibleItemCount)) { item in
-                        Button { sparkState.openModule(.todos) } label: {
+                    ForEach(nottiState.actionableTodos.prefix(visibleItemCount)) { item in
+                        Button { nottiState.openModule(.todos) } label: {
                             NewUIPreviewTodayItemCard(
                                 title: item.title,
                                 detail: item.detail,
@@ -237,7 +237,7 @@ private struct NewUIPreviewDashboardContent: View {
                     emptyRow("今天没有日程安排。")
                 } else {
                     ForEach(scheduleItems.prefix(visibleItemCount)) { item in
-                        Button { sparkState.openModule(.schedule) } label: {
+                        Button { nottiState.openModule(.schedule) } label: {
                             NewUIPreviewTodayItemCard(
                                 title: item.title,
                                 detail: item.detail,
@@ -249,7 +249,7 @@ private struct NewUIPreviewDashboardContent: View {
                 }
             }
         }
-        .id(sparkState.selectedTodaySection)
+        .id(nottiState.selectedTodaySection)
         .transition(.opacity)
     }
 
@@ -279,21 +279,21 @@ private struct NewUIPreviewDashboardContent: View {
     }
 
     private var selectedItemCount: Int {
-        switch sparkState.selectedTodaySection {
-        case .records: return sparkState.todayRecords.count
-        case .todos: return sparkState.actionableTodos.count
+        switch nottiState.selectedTodaySection {
+        case .records: return nottiState.todayRecords.count
+        case .todos: return nottiState.actionableTodos.count
         case .schedule: return scheduleItems.count
         }
     }
 
     private func openFullSection() {
-        switch sparkState.selectedTodaySection {
+        switch nottiState.selectedTodaySection {
         case .records:
-            sparkState.select(.records)
+            nottiState.select(.records)
         case .todos:
-            sparkState.openModule(.todos)
+            nottiState.openModule(.todos)
         case .schedule:
-            sparkState.openModule(.schedule)
+            nottiState.openModule(.schedule)
         }
     }
 
@@ -307,14 +307,14 @@ private struct NewUIPreviewDashboardContent: View {
     }
 
     private var scheduleItems: [NewUIPreviewUrgentItem] {
-        var items = sparkState.urgentItems.filter { $0.kind != .dueTodo }
-        if sparkState.hero.context == .activeEvent || sparkState.hero.context == .imminentEvent {
+        var items = nottiState.urgentItems.filter { $0.kind != .dueTodo }
+        if nottiState.hero.context == .activeEvent || nottiState.hero.context == .imminentEvent {
             items.insert(
                 NewUIPreviewUrgentItem(
                     id: UUID(uuidString: "30000000-0000-0000-0000-000000000099")!,
-                    kind: sparkState.hero.context == .activeEvent ? .activeEvent : .imminentEvent,
-                    title: sparkState.hero.title,
-                    detail: sparkState.hero.supporting
+                    kind: nottiState.hero.context == .activeEvent ? .activeEvent : .imminentEvent,
+                    title: nottiState.hero.title,
+                    detail: nottiState.hero.supporting
                 ),
                 at: 0
             )

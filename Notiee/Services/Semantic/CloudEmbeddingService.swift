@@ -1,6 +1,6 @@
 import Foundation
 
-/// 云端 embedding。复用 Spark 文本模型的 endpoint/key，将 chat 路径替换为 embeddings 路径。
+/// 云端 embedding。复用 Notti 文本模型的 endpoint/key，将 chat 路径替换为 embeddings 路径。
 final class CloudEmbeddingService: EmbeddingService {
     struct Config { let endpoint: String; let apiKey: String; let model: String }
     private let configProvider: @Sendable () -> Config?

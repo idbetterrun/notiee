@@ -25,7 +25,7 @@ final class NoteCreateToolTests: XCTestCase {
         )
     }
 
-    func testCreateMarksSparkSourceAndFilesIntoSparkFolder() async throws {
+    func testCreateMarksNottiSourceAndFilesIntoNottiFolder() async throws {
         let records = makeRecordManager()
         let folders = makeFolderManager()
         let tool = NoteCreateTool(recordManager: records, folderTagManager: folders)
@@ -34,9 +34,9 @@ final class NoteCreateToolTests: XCTestCase {
 
         XCTAssertTrue(result.success)
         let created = try XCTUnwrap(records.records.first)
-        XCTAssertEqual(created.source, .spark)
-        let sparkFolder = try XCTUnwrap(folders.customFolders.first { $0.name == "Spark 生成" })
-        XCTAssertEqual(created.folderID, sparkFolder.id)
+        XCTAssertEqual(created.source, .notti)
+        let nottiFolder = try XCTUnwrap(folders.customFolders.first { $0.name == "Notti 生成" })
+        XCTAssertEqual(created.folderID, nottiFolder.id)
     }
 
     func testCreate_usesProvidedSummary() async throws {
@@ -68,6 +68,6 @@ final class NoteCreateToolTests: XCTestCase {
         _ = try await tool.execute(parameters: ["title": "A"])
         _ = try await tool.execute(parameters: ["title": "B"])
 
-        XCTAssertEqual(folders.customFolders.filter { $0.name == "Spark 生成" }.count, 1)
+        XCTAssertEqual(folders.customFolders.filter { $0.name == "Notti 生成" }.count, 1)
     }
 }

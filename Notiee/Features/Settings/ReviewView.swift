@@ -9,7 +9,7 @@ struct ReviewView: View {
 
     @AppStorage(UDK.tokenWarningThreshold) private var tokenWarningThreshold: Int = 0
     @AppStorage(UDK.accumulatedDeletedTokens) private var accumulatedDeletedTokens: Int = 0
-    @AppStorage(UDK.sparkAccumulatedTokens) private var sparkAccumulatedTokens: Int = 0
+    @AppStorage(UDK.nottiAccumulatedTokens) private var nottiAccumulatedTokens: Int = 0
 
     var body: some View {
         ScrollView {
@@ -114,15 +114,15 @@ struct ReviewView: View {
                     }
                 }
 
-                // Spark Token Estimation
+                // Notti Token Estimation
                 HStack {
                     Image(systemName: "sparkles")
                         .foregroundColor(.accentColor)
-                    Text(String(localized: "Spark 耗费Token估计"))
+                    Text(String(localized: "Notti 耗费Token估计"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("\(sparkAccumulatedTokens) tk")
+                    Text("\(nottiAccumulatedTokens) tk")
                         .font(.caption.weight(.semibold))
                         .foregroundColor(.secondary)
                 }

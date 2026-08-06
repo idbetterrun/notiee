@@ -1,10 +1,44 @@
 import Foundation
 import UIKit
 
-enum RecordSource: String, Codable, Sendable {
+enum RecordSource: Codable, Sendable {
     case photo
-    case spark
+    case notti
     case text
+
+    var rawValue: String {
+        switch self {
+        case .photo: "photo"
+        case .notti: "spark"
+        case .text: "text"
+        }
+    }
+
+    init?(rawValue: String) {
+        switch rawValue {
+        case "photo": self = .photo
+        case "spark", "notti": self = .notti
+        case "text": self = .text
+        default: return nil
+        }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(String.self)
+        guard let value = Self(rawValue: raw) else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unknown record source: \(raw)"
+            )
+        }
+        self = value
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 }
 
 struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {

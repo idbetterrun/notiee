@@ -1,11 +1,11 @@
 import SwiftUI
 
-struct NewUIPreviewSparkDock: View {
-    @EnvironmentObject var sparkState: NewUIPreviewState
+struct NewUIPreviewNottiDock: View {
+    @EnvironmentObject var nottiState: NewUIPreviewState
 
     var body: some View {
         Button(action: {
-            sparkState.expand()
+            nottiState.expand()
         }) {
             HStack(spacing: 11) {
                 Image(systemName: "sparkles")
@@ -18,7 +18,7 @@ struct NewUIPreviewSparkDock: View {
                         )
                     )
 
-                Text("问问 Spark...")
+                Text("问问 Notti...")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.newUIPreviewPrimary)
                     .lineLimit(1)
@@ -31,12 +31,12 @@ struct NewUIPreviewSparkDock: View {
             .newUIPreviewGlass(in: Capsule(), interactive: true)
         }
         .buttonStyle(NewUIPreviewPressStyle())
-        .accessibilityLabel("打开 Spark，问问 Spark")
+        .accessibilityLabel("打开 Notti，问问 Notti")
     }
 }
 
 struct NewUIPreviewDockBar: View {
-    @EnvironmentObject private var sparkState: NewUIPreviewState
+    @EnvironmentObject private var nottiState: NewUIPreviewState
 
     var body: some View {
         dockControls
@@ -50,20 +50,20 @@ struct NewUIPreviewDockBar: View {
             NewUIPreviewCircleButton(
                 symbol: "square.grid.2x2.fill",
                 label: "Today",
-                isSelected: sparkState.selectedTab == .today
+                isSelected: nottiState.selectedTab == .today
             ) {
-                sparkState.select(.today)
+                nottiState.select(.today)
             }
 
-            NewUIPreviewSparkDock()
+            NewUIPreviewNottiDock()
                 .frame(maxWidth: .infinity)
 
             NewUIPreviewCircleButton(
                 symbol: "book.closed.fill",
                 label: "记录",
-                isSelected: sparkState.selectedTab == .records
+                isSelected: nottiState.selectedTab == .records
             ) {
-                sparkState.select(.records)
+                nottiState.select(.records)
             }
         }
     }

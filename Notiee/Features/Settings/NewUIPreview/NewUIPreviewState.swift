@@ -25,7 +25,7 @@ enum NewUIPreviewRecordsFilter: String, CaseIterable, Identifiable, Hashable {
     case photo
     case audio
     case text
-    case spark
+    case notti
 
     var id: String { rawValue }
 
@@ -35,7 +35,7 @@ enum NewUIPreviewRecordsFilter: String, CaseIterable, Identifiable, Hashable {
         case .photo: return source == .photo
         case .audio: return source == .audio
         case .text: return source == .text
-        case .spark: return source == .spark
+        case .notti: return source == .notti
         }
     }
 }
@@ -335,7 +335,7 @@ final class NewUIPreviewState: ObservableObject {
                     locale: Locale.current,
                     Int64(todayCount)
                 ),
-                supporting: String(localized: "继续补充，或问问 Spark")
+                supporting: String(localized: "继续补充，或问问 Notti")
             )
         case .calm:
             urgentItems = []

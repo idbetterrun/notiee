@@ -1,0 +1,19 @@
+{
+  "name": "notiee-ping-stream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apple/app-store-server-library": "^3.1.0",
+    "apple-signin-auth": "^2.0.0",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.5"
+  }
+}

@@ -121,7 +121,7 @@ struct RecordsView: View {
                     }
                 }
 
-                if !store.eventsWithRecords.isEmpty || store.sparkFolder != nil {
+                if !store.eventsWithRecords.isEmpty || store.nottiFolder != nil {
                     Section(header: HStack {
                         Text("日程文件夹")
                         Spacer()
@@ -134,19 +134,19 @@ struct RecordsView: View {
                         withAnimation { isEventFolderExpanded.toggle() }
                     }) {
                         if isEventFolderExpanded {
-                            if let sparkFolder = store.sparkFolder {
+                            if let nottiFolder = store.nottiFolder {
                                 NavigationLink {
                                     GenericRecordListView(
-                                        title: sparkFolder.name,
+                                        title: nottiFolder.name,
                                         systemImage: "sparkles",
-                                        records: store.sortedRecords.filter { $0.folderID == sparkFolder.id },
+                                        records: store.sortedRecords.filter { $0.folderID == nottiFolder.id },
                                         store: store
                                     )
                                 } label: {
                                     FolderSummaryRow(
-                                        title: sparkFolder.name,
+                                        title: nottiFolder.name,
                                         systemImage: "sparkles",
-                                        count: store.records.filter { $0.folderID == sparkFolder.id && !$0.isDeleted }.count
+                                        count: store.records.filter { $0.folderID == nottiFolder.id && !$0.isDeleted }.count
                                     )
                                 }
                             }
@@ -282,7 +282,9 @@ struct RecordsView: View {
     }
 
     private var userCustomFolders: [CustomFolder] {
-        store.customFolders.filter { $0.name != FolderTagManager.sparkFolderName }
+        store.customFolders.filter {
+            $0.systemRole != .nottiGenerated && $0.name != FolderTagManager.nottiFolderName
+        }
     }
 
     private var displayedRecords: [NoteRecord] {

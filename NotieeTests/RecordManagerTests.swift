@@ -257,12 +257,12 @@ final class RecordManagerTests: XCTestCase {
         XCTAssertNil(store.todos.first?.recordID)
     }
 
-    // MARK: - Todo persistence (Spark todos must survive app relaunch)
+    // MARK: - Todo persistence (Notti todos must survive app relaunch)
 
     func testAddTodoPersistsToStore() throws {
         let persistence = todoStore()
         let store = makeStore(todoPersistence: persistence)
-        let todo = NoteTodo(recordID: nil, content: "Spark todo")
+        let todo = NoteTodo(recordID: nil, content: "Notti todo")
         store.addTodo(todo)
         XCTAssertEqual(try persistence.loadTodos(), [todo])
     }
