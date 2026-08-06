@@ -87,7 +87,7 @@ struct NoteRecord: Identifiable, Equatable, Hashable, Codable, Sendable {
         modelsUsed: [String]? = nil,
         tokenUsage: Int = 0,
         aiRetryCount: Int = 0,
-        deviceName: String? = UIDevice.current.modelName,
+        deviceName: String? = UIDevice.currentModelName,
         source: RecordSource = .photo,
         isEncrypted: Bool = false
     ) {

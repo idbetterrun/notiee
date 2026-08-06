@@ -4,6 +4,8 @@ struct NewUIPreviewRootView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var nottiState = NewUIPreviewState()
+    @StateObject private var nottiConversation = NewUIPreviewNottiState()
+    @State private var recordsPreviewNotice: String?
     @Namespace private var nottiNamespace
 
     var body: some View {
@@ -17,9 +19,8 @@ struct NewUIPreviewRootView: View {
                 )
                 .offset(x: !hasModuleOverlay || reduceMotion ? 0 : -12)
 
-            if nottiState.overlay == nil {
+            if nottiState.overlay == nil && !nottiState.isExpanded {
                 NewUIPreviewDockBar()
-                    .allowsHitTesting(!nottiState.isExpanded)
                     .transition(.opacity)
                     .zIndex(1)
             }
@@ -27,6 +28,7 @@ struct NewUIPreviewRootView: View {
             if nottiState.isExpanded {
                 NewUIPreviewComposerView()
                     .environmentObject(nottiState)
+                    .environmentObject(nottiConversation)
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),
                         removal: .move(edge: .bottom).combined(with: .opacity)
@@ -41,14 +43,27 @@ struct NewUIPreviewRootView: View {
         .animation(overlayAnimation, value: nottiState.overlay)
         .environmentObject(nottiState)
         .navigationBarBackButtonHidden(true)
-        .navigationTitle(recordsNavigationIsActive ? String(localized: "记录") : "")
+        .navigationTitle(recordsNavigationIsActive ? nottiState.selectedRecordsScope.title : "")
         .navigationBarTitleDisplayMode(recordsNavigationIsActive ? .large : .inline)
         .toolbarBackground(
-            nottiState.destination == .records && nottiState.overlay == nil ? .visible : .hidden,
+            recordsNavigationIsActive ? .visible : .hidden,
             for: .navigationBar
         )
-        .toolbar(nottiState.overlay == nil ? .visible : .hidden, for: .navigationBar)
+        .toolbar(nottiState.overlay == nil && !nottiState.isExpanded ? .visible : .hidden, for: .navigationBar)
+        .toolbarTitleMenu { recordsScopeMenu }
         .toolbar { labToolbar }
+        .alert(
+            "预览提示",
+            isPresented: Binding(
+                get: { recordsPreviewNotice != nil },
+                set: { if !$0 { recordsPreviewNotice = nil } }
+            ),
+            presenting: recordsPreviewNotice
+        ) { _ in
+            Button("好", role: .cancel) {}
+        } message: { notice in
+            Text(notice)
+        }
         .onAppear { nottiState.namespace = nottiNamespace }
     }
 
@@ -57,15 +72,31 @@ struct NewUIPreviewRootView: View {
             NewUIPreviewTodayView()
                 .opacity(pageIsVisible(.today) ? 1 : 0)
                 .offset(x: pageOffset(for: .today))
-                .allowsHitTesting(nottiState.destination == .today && nottiState.overlay == nil)
-                .accessibilityHidden(nottiState.destination != .today || nottiState.overlay != nil)
+                .allowsHitTesting(
+                    nottiState.destination == .today
+                        && nottiState.overlay == nil
+                        && !nottiState.isExpanded
+                )
+                .accessibilityHidden(
+                    nottiState.destination != .today
+                        || nottiState.overlay != nil
+                        || nottiState.isExpanded
+                )
                 .zIndex(nottiState.destination == .today ? 1 : 0)
 
             NewUIPreviewRecordsView()
                 .opacity(pageIsVisible(.records) ? 1 : 0)
                 .offset(x: pageOffset(for: .records))
-                .allowsHitTesting(nottiState.destination == .records && nottiState.overlay == nil)
-                .accessibilityHidden(nottiState.destination != .records || nottiState.overlay != nil)
+                .allowsHitTesting(
+                    nottiState.destination == .records
+                        && nottiState.overlay == nil
+                        && !nottiState.isExpanded
+                )
+                .accessibilityHidden(
+                    nottiState.destination != .records
+                        || nottiState.overlay != nil
+                        || nottiState.isExpanded
+                )
                 .zIndex(nottiState.destination == .records ? 1 : 0)
         }
     }
@@ -95,7 +126,9 @@ struct NewUIPreviewRootView: View {
     }
 
     private var recordsNavigationIsActive: Bool {
-        nottiState.destination == .records && nottiState.overlay == nil
+        nottiState.destination == .records
+            && nottiState.overlay == nil
+            && !nottiState.isExpanded
     }
 
     private var hasModuleOverlay: Bool {
@@ -141,7 +174,7 @@ struct NewUIPreviewRootView: View {
 
     @ToolbarContentBuilder
     private var labToolbar: some ToolbarContent {
-        if nottiState.overlay == nil {
+        if nottiState.overlay == nil && !nottiState.isExpanded {
             ToolbarItem(placement: .topBarLeading) {
                 Menu {
                     Button {
@@ -180,6 +213,62 @@ struct NewUIPreviewRootView: View {
                         .contentShape(Rectangle())
                 }
                 .accessibilityLabel("场景切换")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var recordsScopeMenu: some View {
+        if recordsNavigationIsActive {
+            scopeButton(.all, symbol: "rectangle.grid.2x2")
+            scopeButton(.favorites, symbol: "star")
+            scopeButton(.unclassified, symbol: "tray")
+            scopeButton(.today, symbol: "calendar")
+            scopeButton(.pending, symbol: "clock")
+            scopeButton(.trash, symbol: "trash")
+
+            Divider()
+
+            Menu {
+                ForEach(nottiState.recordFolderNames, id: \.self) { folderName in
+                    scopeButton(.folder(folderName), symbol: "folder")
+                }
+
+                Divider()
+
+                Button {
+                    recordsPreviewNotice = String(localized: "新建文件夹仅用于预览，暂不保存更改。")
+                } label: {
+                    Label("新建文件夹", systemImage: "folder.badge.plus")
+                }
+
+                Button {
+                    recordsPreviewNotice = String(localized: "管理文件夹仅用于预览，暂不保存更改。")
+                } label: {
+                    Label("管理文件夹", systemImage: "slider.horizontal.3")
+                }
+            } label: {
+                Label("文件夹", systemImage: "folder")
+            }
+
+            Menu {
+                ForEach(nottiState.recordEventNames, id: \.self) { eventName in
+                    scopeButton(.event(eventName), symbol: "calendar")
+                }
+            } label: {
+                Label("关联日程", systemImage: "calendar.badge.clock")
+            }
+        }
+    }
+
+    private func scopeButton(_ scope: NewUIPreviewRecordsScope, symbol: String) -> some View {
+        Button {
+            nottiState.selectRecordsScope(scope)
+        } label: {
+            if nottiState.selectedRecordsScope == scope {
+                Label(scope.title, systemImage: "checkmark")
+            } else {
+                Label(scope.title, systemImage: symbol)
             }
         }
     }

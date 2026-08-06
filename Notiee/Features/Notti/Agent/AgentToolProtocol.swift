@@ -6,7 +6,8 @@ enum AgentToolPermission: String, Codable, Sendable {
     case destructive
 }
 
-protocol AgentTool: Sendable {
+@MainActor
+protocol AgentTool: AnyObject {
     var name: String { get }
     var description: String { get }
     var permission: AgentToolPermission { get }
@@ -42,15 +43,20 @@ final class AgentToolProperty: @unchecked Sendable {
 struct AgentToolResult: Sendable {
     let success: Bool
     let message: String
-    let data: [String: Any]?
+    private let dataStorage: Data?
     let undoAction: AgentUndoAction?
     let shouldTerminate: Bool
+
+    var data: [String: Any]? {
+        guard let dataStorage else { return nil }
+        return try? JSONSerialization.jsonObject(with: dataStorage) as? [String: Any]
+    }
 
     init(success: Bool, message: String, data: [String: Any]?,
          undoAction: AgentUndoAction?, shouldTerminate: Bool = false) {
         self.success = success
         self.message = message
-        self.data = data
+        self.dataStorage = data.flatMap { try? JSONSerialization.data(withJSONObject: $0) }
         self.undoAction = undoAction
         self.shouldTerminate = shouldTerminate
     }
@@ -59,6 +65,17 @@ struct AgentToolResult: Sendable {
 struct AgentUndoAction: Sendable {
     let toolName: String
     let description: String
-    let undoParameters: [String: Any]
+    private let undoParametersData: Data
     let snapshotPath: String?
+
+    init(toolName: String, description: String, undoParameters: [String: Any], snapshotPath: String?) {
+        self.toolName = toolName
+        self.description = description
+        self.undoParametersData = (try? JSONSerialization.data(withJSONObject: undoParameters)) ?? Data()
+        self.snapshotPath = snapshotPath
+    }
+
+    var undoParameters: [String: Any] {
+        (try? JSONSerialization.jsonObject(with: undoParametersData) as? [String: Any]) ?? [:]
+    }
 }

@@ -40,6 +40,42 @@ enum NewUIPreviewRecordsFilter: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+enum NewUIPreviewRecordsScope: Equatable, Hashable, Identifiable {
+    case all
+    case favorites
+    case unclassified
+    case today
+    case pending
+    case trash
+    case folder(String)
+    case event(String)
+
+    var id: String {
+        switch self {
+        case .all: return "all"
+        case .favorites: return "favorites"
+        case .unclassified: return "unclassified"
+        case .today: return "today"
+        case .pending: return "pending"
+        case .trash: return "trash"
+        case .folder(let name): return "folder-\(name)"
+        case .event(let name): return "event-\(name)"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .all: return String(localized: "记录")
+        case .favorites: return String(localized: "收藏夹")
+        case .unclassified: return String(localized: "未分类")
+        case .today: return String(localized: "今日拍记")
+        case .pending: return String(localized: "待处理")
+        case .trash: return String(localized: "回收站")
+        case .folder(let name), .event(let name): return name
+        }
+    }
+}
+
 enum NewUIPreviewRecordOrigin: String, Hashable {
     case today
     case records
@@ -159,6 +195,7 @@ enum NewUIPreviewCaptureDirection: Equatable {
     case audio
 }
 
+@MainActor
 final class NewUIPreviewState: ObservableObject {
     @Published var isExpanded = false
     @Published var dockText: String = ""
@@ -181,6 +218,8 @@ final class NewUIPreviewState: ObservableObject {
     @Published var selectedTodaySection: NewUIPreviewTodaySection = .records
     @Published var recordsSearchQuery = ""
     @Published var selectedRecordsFilter: NewUIPreviewRecordsFilter = .all
+    @Published var selectedRecordsScope: NewUIPreviewRecordsScope = .all
+    @Published private(set) var recordsScrollRevision = 0
     @Published var overlay: NewUIPreviewOverlay?
 
     @Published var hero: NewUIPreviewHero = NewUIPreviewState.calmHero
@@ -258,10 +297,48 @@ final class NewUIPreviewState: ObservableObject {
     }
 
     var filteredRecordFixtures: [NewUIPreviewRecordFixture] {
-        let sourceMatches = recordFixtures.filter {
-            selectedRecordsFilter.includes($0.previewSource)
-        }
+        let scoped = recordFixtures.filter(scopeIncludes)
+        let sourceMatches = scoped.filter { selectedRecordsFilter.includes($0.previewSource) }
         return NewUIPreviewFixtures.records(matching: recordsSearchQuery, in: sourceMatches)
+    }
+
+    var recordFolderNames: [String] {
+        Array(Set(recordFixtures.compactMap(\.folderName)))
+            .filter { $0 != FolderTagManager.nottiFolderName }
+            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+
+    var recordEventNames: [String] {
+        Array(Set(recordFixtures.compactMap(\.eventName)))
+            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+
+    func selectRecordsScope(_ scope: NewUIPreviewRecordsScope) {
+        guard selectedRecordsScope != scope else { return }
+        selectedRecordsScope = scope
+        recordsScrollRevision += 1
+    }
+
+    private func scopeIncludes(_ fixture: NewUIPreviewRecordFixture) -> Bool {
+        switch selectedRecordsScope {
+        case .all:
+            return !fixture.record.isDeleted
+        case .favorites:
+            return !fixture.record.isDeleted && fixture.record.isFavorite
+        case .unclassified:
+            return !fixture.record.isDeleted && fixture.folderName == nil
+        case .today:
+            return !fixture.record.isDeleted
+                && Calendar.current.isDate(fixture.record.capturedAt, inSameDayAs: NewUIPreviewFixtures.referenceDate)
+        case .pending:
+            return !fixture.record.isDeleted && fixture.record.processingState == .pending
+        case .trash:
+            return fixture.record.isDeleted
+        case .folder(let name):
+            return !fixture.record.isDeleted && fixture.folderName == name
+        case .event(let name):
+            return !fixture.record.isDeleted && fixture.eventName == name
+        }
     }
 
     func recordFixture(id: UUID) -> NewUIPreviewRecordFixture? {
@@ -475,7 +552,7 @@ final class NewUIPreviewState: ObservableObject {
                                            supporting: String(localized: "下拉拍一张，或上拉录一段"))
 
     private func makeTodayRecords(limit: Int? = nil) -> [NewUIPreviewTodayRecord] {
-        let safeFixtures = recordFixtures.filter { !$0.record.isEncrypted }
+        let safeFixtures = recordFixtures.filter { !$0.record.isEncrypted && !$0.record.isDeleted }
         let selectedFixtures = limit.map { Array(safeFixtures.prefix($0)) } ?? safeFixtures
 
         return selectedFixtures.map {

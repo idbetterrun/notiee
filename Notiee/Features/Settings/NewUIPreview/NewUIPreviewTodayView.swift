@@ -159,7 +159,7 @@ private struct NewUIPreviewDashboardContent: View {
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.height
         } action: { height in
-            updateMeasuredHeight(height, target: $measuredHeroHeight)
+            scheduleMeasuredHeight(height, target: $measuredHeroHeight)
         }
     }
 
@@ -189,7 +189,7 @@ private struct NewUIPreviewDashboardContent: View {
         .onGeometryChange(for: CGFloat.self) { proxy in
             proxy.size.height
         } action: { height in
-            updateMeasuredHeight(height, target: $measuredTodayHeaderHeight)
+            scheduleMeasuredHeight(height, target: $measuredTodayHeaderHeight)
         }
     }
 
@@ -297,12 +297,15 @@ private struct NewUIPreviewDashboardContent: View {
         }
     }
 
-    private func updateMeasuredHeight(_ height: CGFloat, target: Binding<CGFloat>) {
+    private func scheduleMeasuredHeight(_ height: CGFloat, target: Binding<CGFloat>) {
         guard height > 0, abs(target.wrappedValue - height) > 0.5 else { return }
-        var transaction = Transaction(animation: nil)
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            target.wrappedValue = height
+        DispatchQueue.main.async {
+            guard abs(target.wrappedValue - height) > 0.5 else { return }
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                target.wrappedValue = height
+            }
         }
     }
 

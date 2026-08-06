@@ -343,8 +343,12 @@ struct NewUIPreviewRecordDetailView: View {
         }
         .coordinateSpace(name: "new-ui-preview-detail-scroll")
         .onPreferenceChange(NewUIPreviewDetailScrollOffsetKey.self) { offset in
-            withAnimation(.easeOut(duration: 0.18)) {
-                showsScrollToTop = offset < -480
+            let shouldShow = offset < -480
+            guard showsScrollToTop != shouldShow else { return }
+            DispatchQueue.main.async {
+                withAnimation(.easeOut(duration: 0.18)) {
+                    showsScrollToTop = shouldShow
+                }
             }
         }
     }

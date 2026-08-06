@@ -14,16 +14,21 @@ final class CameraManager: NSObject, ObservableObject {
     @Published private(set) var capturedImage: UIImage?
     @Published private(set) var currentZoomFactor: CGFloat = 1.0
     @Published var flashMode: AVCaptureDevice.FlashMode = .auto
+    private var lensZoomRange: ClosedRange<CGFloat> = 1.0...1.0
 
-    let session = AVCaptureSession()
-    private let photoOutput = AVCapturePhotoOutput()
+    /// AVFoundation session objects are confined to `sessionQueue`. The wrapper is
+    /// sendable because its mutable members are accessed only on that serial queue.
+    private final class SessionState: @unchecked Sendable {
+        let session = AVCaptureSession()
+        let photoOutput = AVCapturePhotoOutput()
+        var videoDevice: AVCaptureDevice?
+        var isConfigured = false
+    }
+
+    private let sessionState = SessionState()
     private let sessionQueue = DispatchQueue(label: "com.notiee.camera.session")
-    private var videoDevice: AVCaptureDevice?
-    /// Set once the session has inputs/outputs wired. Guards against a second
-    /// configuration pass (rapid tab re-appear / double call), which would add
-    /// duplicate inputs and wedge the session — the root of the occasional hang.
-    /// Read and written only on `sessionQueue`.
-    private var isConfigured = false
+
+    var session: AVCaptureSession { sessionState.session }
 
     struct LensPreset {
         let factor: CGFloat
@@ -31,10 +36,9 @@ final class CameraManager: NSObject, ObservableObject {
     }
 
     var availableLensPresets: [LensPreset] {
-        guard let device = videoDevice else { return [LensPreset(factor: 1.0, label: "1x")] }
         var presets: [LensPreset] = []
-        let minZoom = device.minAvailableVideoZoomFactor
-        let maxZoom = device.maxAvailableVideoZoomFactor
+        let minZoom = lensZoomRange.lowerBound
+        let maxZoom = lensZoomRange.upperBound
 
         if minZoom < 0.9 {
             presets.append(LensPreset(factor: minZoom * 2, label: "超广角 0.5x"))
@@ -97,18 +101,19 @@ final class CameraManager: NSObject, ObservableObject {
     }
 
     private func configureSession() {
-        sessionQueue.async { [weak self] in
+        let state = sessionState
+        sessionQueue.async { [weak self, state] in
             guard let self else { return }
 
             // Configure exactly once. A second pass would re-add inputs/outputs to
             // an already-wired session and can deadlock it; just (re)start instead.
-            guard !self.isConfigured else {
-                if !self.session.isRunning { self.session.startRunning() }
+            guard !state.isConfigured else {
+                if !state.session.isRunning { state.session.startRunning() }
                 return
             }
 
-            self.session.beginConfiguration()
-            self.session.sessionPreset = .photo
+            state.session.beginConfiguration()
+            state.session.sessionPreset = .photo
 
             // Add video input
             let deviceTypes: [AVCaptureDevice.DeviceType] = [
@@ -125,71 +130,76 @@ final class CameraManager: NSObject, ObservableObject {
             )
             
             if let videoDevice = discoverySession.devices.first ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
-                self.videoDevice = videoDevice
+                state.videoDevice = videoDevice
                 guard let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
-                      self.session.canAddInput(videoDeviceInput) else {
+                      state.session.canAddInput(videoDeviceInput) else {
                     Task { @MainActor in self.status = .failed }
-                    self.session.commitConfiguration()
+                    state.session.commitConfiguration()
                     return
                 }
-                self.session.addInput(videoDeviceInput)
+                state.session.addInput(videoDeviceInput)
             }
 
             // Add photo output
-            guard self.session.canAddOutput(self.photoOutput) else {
+            guard state.session.canAddOutput(state.photoOutput) else {
                 Task { @MainActor in self.status = .failed }
-                self.session.commitConfiguration()
+                state.session.commitConfiguration()
                 return
             }
-            self.session.addOutput(self.photoOutput)
+            state.session.addOutput(state.photoOutput)
 
-            self.session.commitConfiguration()
-            self.isConfigured = true
+            state.session.commitConfiguration()
+            state.isConfigured = true
 
             // Start on the session queue right away so the first frame isn't
             // gated behind a hop to the main actor (which made cold start feel
             // slow). Publish `.ready` and sync zoom back on the main actor.
-            self.session.startRunning()
+            state.session.startRunning()
+
+            let minZoom = state.videoDevice?.minAvailableVideoZoomFactor ?? 1
+            let maxZoom = state.videoDevice?.maxAvailableVideoZoomFactor ?? 1
+            let currentZoom = state.videoDevice?.videoZoomFactor ?? 1
 
             Task { @MainActor in
                 self.status = .ready
-                self.syncZoomFactor()
+                self.lensZoomRange = minZoom...maxZoom
+                self.currentZoomFactor = currentZoom
             }
         }
     }
 
     func startSession() {
-        sessionQueue.async { [weak self] in
-            guard let self, self.isConfigured, !self.session.isRunning else { return }
-            self.session.startRunning()
+        let state = sessionState
+        sessionQueue.async { [state] in
+            guard state.isConfigured, !state.session.isRunning else { return }
+            state.session.startRunning()
         }
     }
 
     func stopSession() {
-        sessionQueue.async { [weak self] in
-            guard let self = self, self.session.isRunning else { return }
-            self.session.stopRunning()
+        let state = sessionState
+        sessionQueue.async { [state] in
+            guard state.session.isRunning else { return }
+            state.session.stopRunning()
         }
     }
 
     // MARK: - Photo Capture
 
     func setZoom(factor: CGFloat) {
-        guard let device = videoDevice else { return }
-        do {
-            try device.lockForConfiguration()
-            let clamp = max(device.minAvailableVideoZoomFactor, min(factor, device.maxAvailableVideoZoomFactor))
-            device.videoZoomFactor = clamp
-            device.unlockForConfiguration()
-            currentZoomFactor = clamp
-        } catch {
-            print("Failed to set zoom: \(error)")
+        let state = sessionState
+        sessionQueue.async { [weak self, state] in
+            guard let device = state.videoDevice else { return }
+            do {
+                try device.lockForConfiguration()
+                let clamp = max(device.minAvailableVideoZoomFactor, min(factor, device.maxAvailableVideoZoomFactor))
+                device.videoZoomFactor = clamp
+                device.unlockForConfiguration()
+                Task { @MainActor in self?.currentZoomFactor = clamp }
+            } catch {
+                print("Failed to set zoom: \(error)")
+            }
         }
-    }
-
-    func syncZoomFactor() {
-        guard let device = videoDevice else { return }
-        currentZoomFactor = device.videoZoomFactor
     }
 
     func capturePhoto() {
@@ -214,21 +224,23 @@ final class CameraManager: NSObject, ObservableObject {
         return
         #endif
 
-        sessionQueue.async { [weak self] in
+        let state = sessionState
+        let selectedFlashMode = flashMode
+        sessionQueue.async { [weak self, state] in
             guard let self else { return }
             let settings = AVCapturePhotoSettings()
-            if self.photoOutput.supportedFlashModes.contains(self.flashMode) {
-                settings.flashMode = self.flashMode
+            if state.photoOutput.supportedFlashModes.contains(selectedFlashMode) {
+                settings.flashMode = selectedFlashMode
             }
             
-            if let videoConnection = self.photoOutput.connection(with: .video) {
+            if let videoConnection = state.photoOutput.connection(with: .video) {
                 // Ensure orientation is correct for portrait (common on iPhones)
                 if videoConnection.isVideoRotationAngleSupported(90) {
                     videoConnection.videoRotationAngle = 90
                 }
             }
 
-            self.photoOutput.capturePhoto(with: settings, delegate: self)
+            state.photoOutput.capturePhoto(with: settings, delegate: self)
         }
     }
 }

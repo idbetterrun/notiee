@@ -4,6 +4,7 @@ import UIKit
 #endif
 
 /// Protocol through which AIPipelineManager reads and mutates records during processing.
+@MainActor
 protocol AIPipelineRecordAccess: AnyObject {
     func record(id: UUID) -> NoteRecord?
     func setProcessingState(_ state: AIProcessingState, for recordID: UUID)
@@ -111,7 +112,7 @@ final class AIPipelineManager {
         // 申请后台执行时间：用户退出 app / 划走后，系统仍给约 30s 让请求跑完，
         // 避免拍记处理被立刻取消（否则上游返回 499、记录变 .failed 需重试）。
         #if canImport(UIKit)
-        let bgTask = await UIApplication.shared.beginBackgroundTask(withName: "ai-process-\(recordID)")
+        let bgTask = UIApplication.shared.beginBackgroundTask(withName: "ai-process-\(recordID)")
         defer {
             if bgTask != .invalid { UIApplication.shared.endBackgroundTask(bgTask) }
         }

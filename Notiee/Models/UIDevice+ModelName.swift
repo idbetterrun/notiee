@@ -1,7 +1,7 @@
 import UIKit
 
 extension UIDevice {
-    var modelName: String {
+    nonisolated static var currentModelName: String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -31,4 +31,6 @@ extension UIDevice {
         default: return identifier
         }
     }
+
+    var modelName: String { Self.currentModelName }
 }

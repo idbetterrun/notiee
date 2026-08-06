@@ -95,6 +95,7 @@
 		NEWUIPREVIEWBFA000000012 /* NewUIPreviewRecordCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000012 /* NewUIPreviewRecordCard.swift */; };
 		NEWUIPREVIEWBFA000000013 /* NewUIPreviewRecordMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000013 /* NewUIPreviewRecordMedia.swift */; };
 		NEWUIPREVIEWBFA000000014 /* NewUIPreviewRecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000014 /* NewUIPreviewRecordDetailView.swift */; };
+		NEWUIPREVIEWBFA000000019 /* NewUIPreviewNottiState.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000019 /* NewUIPreviewNottiState.swift */; };
 		NEWUIPREVIEWBFB000000001 /* NewUIPreviewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000001 /* NewUIPreviewState.swift */; };
 		NEWUIPREVIEWBFB000000002 /* NewUIPreviewGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000002 /* NewUIPreviewGlass.swift */; };
 		NEWUIPREVIEWBFB000000003 /* NewUIPreviewDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000003 /* NewUIPreviewDock.swift */; };
@@ -109,10 +110,12 @@
 		NEWUIPREVIEWBFB000000012 /* NewUIPreviewRecordCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000012 /* NewUIPreviewRecordCard.swift */; };
 		NEWUIPREVIEWBFB000000013 /* NewUIPreviewRecordMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000013 /* NewUIPreviewRecordMedia.swift */; };
 		NEWUIPREVIEWBFB000000014 /* NewUIPreviewRecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000014 /* NewUIPreviewRecordDetailView.swift */; };
+		NEWUIPREVIEWBFB000000019 /* NewUIPreviewNottiState.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000019 /* NewUIPreviewNottiState.swift */; };
 		NEWUIPREVIEWBFT000000015 /* NewUIPreviewStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000015 /* NewUIPreviewStateTests.swift */; };
 		NEWUIPREVIEWBFT000000016 /* NewUIPreviewMasonryLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */; };
 		NEWUIPREVIEWBFT000000017 /* NewUIPreviewRecordPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */; };
 		NEWUIPREVIEWBFT000000018 /* NewUIPreviewTodayLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000018 /* NewUIPreviewTodayLayoutTests.swift */; };
+		NEWUIPREVIEWBFT000000020 /* NewUIPreviewNottiStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEWUIPREVIEWFREF00000020 /* NewUIPreviewNottiStateTests.swift */; };
 		1803E3BB2FF4EBEA004FEE5F /* NottiStyleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B773E34DD76549679196A9FA /* NottiStyleSettingsView.swift */; };
 		1803E3BC2FF4EBEA004FEE5F /* AIFeatureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FEE96D9C7F48DCA337492A /* AIFeatureSettingsView.swift */; };
 		1803E3BD2FF4EBEA004FEE5F /* NottiMemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E620797C134376A9E304BE /* NottiMemoryView.swift */; };
@@ -665,6 +668,8 @@
 		NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewMasonryLayoutTests.swift; sourceTree = "<group>"; };
 		NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewRecordPresentationTests.swift; sourceTree = "<group>"; };
 		NEWUIPREVIEWFREF00000018 /* NewUIPreviewTodayLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewTodayLayoutTests.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000019 /* NewUIPreviewNottiState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NewUIPreviewNottiState.swift; sourceTree = "<group>"; };
+		NEWUIPREVIEWFREF00000020 /* NewUIPreviewNottiStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewUIPreviewNottiStateTests.swift; sourceTree = "<group>"; };
 		36FB34A0CEC6AA566D28B479 /* VectorMath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
 		394A5D3E16168120244D779C /* ModelPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelPickerView.swift; sourceTree = "<group>"; };
 		3A1D333C08F2251BF04CEE39 /* EventDetailSheetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventDetailSheetView.swift; sourceTree = "<group>"; };
@@ -1093,6 +1098,7 @@
 				NEWUIPREVIEWFREF00000003 /* NewUIPreviewDock.swift */,
 				NEWUIPREVIEWFREF00000004 /* NewUIPreviewTodayView.swift */,
 				NEWUIPREVIEWFREF00000005 /* NewUIPreviewComposerView.swift */,
+				NEWUIPREVIEWFREF00000019 /* NewUIPreviewNottiState.swift */,
 				NEWUIPREVIEWFREF00000007 /* NewUIPreviewAuroraView.swift */,
 				NEWUIPREVIEWFREF00000008 /* NewUIPreviewAurora.metal */,
 				NEWUIPREVIEWFREF00000009 /* NewUIPreviewFixtures.swift */,
@@ -1141,6 +1147,7 @@
 				NEWUIPREVIEWFREF00000016 /* NewUIPreviewMasonryLayoutTests.swift */,
 				NEWUIPREVIEWFREF00000017 /* NewUIPreviewRecordPresentationTests.swift */,
 				NEWUIPREVIEWFREF00000018 /* NewUIPreviewTodayLayoutTests.swift */,
+				NEWUIPREVIEWFREF00000020 /* NewUIPreviewNottiStateTests.swift */,
 				100000000000000000000013 /* ProjectConfigurationTests.swift */,
 				100000000000000000000014 /* TodayViewModelTests.swift */,
 				100000000000000000000016 /* CaptureViewModelTests.swift */,
@@ -1709,6 +1716,7 @@
 				NEWUIPREVIEWBFA000000012 /* NewUIPreviewRecordCard.swift in Sources */,
 				NEWUIPREVIEWBFA000000013 /* NewUIPreviewRecordMedia.swift in Sources */,
 				NEWUIPREVIEWBFA000000014 /* NewUIPreviewRecordDetailView.swift in Sources */,
+				NEWUIPREVIEWBFA000000019 /* NewUIPreviewNottiState.swift in Sources */,
 				1803E3BB2FF4EBEA004FEE5F /* NottiStyleSettingsView.swift in Sources */,
 				1803E3BC2FF4EBEA004FEE5F /* AIFeatureSettingsView.swift in Sources */,
 				1803E3BD2FF4EBEA004FEE5F /* NottiMemoryView.swift in Sources */,
@@ -1924,6 +1932,7 @@
 				NEWUIPREVIEWBFB000000012 /* NewUIPreviewRecordCard.swift in Sources */,
 				NEWUIPREVIEWBFB000000013 /* NewUIPreviewRecordMedia.swift in Sources */,
 				NEWUIPREVIEWBFB000000014 /* NewUIPreviewRecordDetailView.swift in Sources */,
+				NEWUIPREVIEWBFB000000019 /* NewUIPreviewNottiState.swift in Sources */,
 				B208EB091BB4420BBB3BF191 /* NottiStyleSettingsView.swift in Sources */,
 				DE73D12C383D493DA00442F3 /* AIFeatureSettingsView.swift in Sources */,
 				77EC9069E9B54046B3291D00 /* NottiMemoryView.swift in Sources */,
@@ -2059,6 +2068,7 @@
 				NEWUIPREVIEWBFT000000016 /* NewUIPreviewMasonryLayoutTests.swift in Sources */,
 				NEWUIPREVIEWBFT000000017 /* NewUIPreviewRecordPresentationTests.swift in Sources */,
 				NEWUIPREVIEWBFT000000018 /* NewUIPreviewTodayLayoutTests.swift in Sources */,
+				NEWUIPREVIEWBFT000000020 /* NewUIPreviewNottiStateTests.swift in Sources */,
 				200000000000000000000013 /* ProjectConfigurationTests.swift in Sources */,
 				200000000000000000000014 /* TodayViewModelTests.swift in Sources */,
 				200000000000000000000016 /* CaptureViewModelTests.swift in Sources */,

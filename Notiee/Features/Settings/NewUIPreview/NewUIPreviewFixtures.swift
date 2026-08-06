@@ -67,6 +67,7 @@ enum NewUIPreviewFixtures {
             detailedContent: "## 决策\n\n先完成发布节奏，再验证首次体验与留存指标。",
             keyPoints: ["发布节奏优先", "用数据验证首次体验"],
             definitions: [KeyDefinition(term: "留存验证", explanation: "观察用户是否持续回到产品。")],
+            isFavorite: true,
             eventName: "产品周会",
             folderName: "工作",
             todos: ["整理路线图", "发送会议纪要"]
@@ -74,6 +75,7 @@ enum NewUIPreviewFixtures {
         fixture(
             id: "10000000-0000-0000-0000-000000000002",
             minutesAgo: 46,
+            daysAgo: 1,
             mediaCount: 0,
             title: "咖啡店里的界面灵感",
             summary: "",
@@ -89,12 +91,12 @@ enum NewUIPreviewFixtures {
             mediaStartIndex: 3,
             title: "窗边的绿植",
             summary: "一张竖图记录了午后光线落在叶片和陶盆上的层次。",
-            detailedContent: "单张竖图在概览中限制高度，在详情中保留完整比例。",
-            folderName: "生活"
+            detailedContent: "单张竖图在概览中限制高度，在详情中保留完整比例。"
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000003",
             minutesAgo: 75,
+            daysAgo: 2,
             mediaCount: 2,
             title: "街角光影",
             summary: "两张照片记录了午后建筑立面与树影。",
@@ -129,6 +131,7 @@ enum NewUIPreviewFixtures {
             summary: "五张照片依次记录入口、展墙、互动区、休息区和出口。",
             detailedContent: "处理失败时仍允许进入详情查看已有素材。",
             processingState: .failed,
+            isDeleted: true,
             folderName: "生活"
         ),
         fixture(
@@ -139,6 +142,7 @@ enum NewUIPreviewFixtures {
             ocrText: "番茄、罗勒、意面、橄榄油",
             summary: "六张照片保留从备料到装盘的完整过程。",
             detailedContent: "## 步骤\n\n1. 备料\n2. 熬酱\n3. 煮面\n4. 装盘",
+            isFavorite: true,
             folderName: "生活",
             todos: ["补充食材用量"]
         ),
@@ -165,7 +169,7 @@ enum NewUIPreviewFixtures {
             detailedContent: "先确认页面的主任务，再决定每个模块应该占据多少空间。",
             source: .text,
             previewSource: .audio,
-            folderName: "灵感",
+            eventName: "散步",
             todos: ["整理成界面草图"]
         ),
         fixture(
@@ -194,6 +198,7 @@ enum NewUIPreviewFixtures {
     private static func fixture(
         id: String,
         minutesAgo: TimeInterval,
+        daysAgo: Int = 0,
         mediaCount: Int,
         mediaStartIndex: Int = 0,
         title: String,
@@ -206,6 +211,8 @@ enum NewUIPreviewFixtures {
         source: RecordSource = .photo,
         previewSource: NewUIPreviewRecordSource? = nil,
         isEncrypted: Bool = false,
+        isFavorite: Bool = false,
+        isDeleted: Bool = false,
         eventName: String? = nil,
         folderName: String? = nil,
         todos: [String] = []
@@ -215,7 +222,7 @@ enum NewUIPreviewFixtures {
         }
         let record = NoteRecord(
             id: UUID(uuidString: id)!,
-            capturedAt: referenceDate.addingTimeInterval(-minutesAgo * 60),
+            capturedAt: referenceDate.addingTimeInterval(-minutesAgo * 60 - TimeInterval(daysAgo * 86_400)),
             localImagePaths: media.map(\.imageName),
             title: title,
             ocrText: ocrText,
@@ -224,6 +231,8 @@ enum NewUIPreviewFixtures {
             processingState: processingState,
             keyPoints: keyPoints,
             definitions: definitions,
+            isFavorite: isFavorite,
+            isDeleted: isDeleted,
             source: source,
             isEncrypted: isEncrypted
         )

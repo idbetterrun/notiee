@@ -32,9 +32,9 @@ final class SystemPermissionManager: ObservableObject {
     }
     
     private func requestMicrophone() async {
-        if AVAudioSession.sharedInstance().recordPermission == .undetermined {
+        if AVAudioApplication.shared.recordPermission == .undetermined {
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                AVAudioSession.sharedInstance().requestRecordPermission { _ in
+                AVAudioApplication.requestRecordPermission { _ in
                     continuation.resume(returning: ())
                 }
             }

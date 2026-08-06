@@ -42,6 +42,11 @@ struct NewUIPreviewRecordsView: View {
                     }
                 }
                 .scrollIndicators(.hidden)
+                .onChange(of: previewState.recordsScrollRevision) { _, _ in
+                    withAnimation(.snappy(duration: 0.32, extraBounce: 0)) {
+                        scrollProxy.scrollTo(topAnchor, anchor: .top)
+                    }
+                }
             }
         }
         .background(Color.newUIPreviewBackground)
@@ -150,6 +155,9 @@ struct NewUIPreviewRecordsView: View {
         }
         if previewState.selectedRecordsFilter != .all {
             return "此分类还没有记录"
+        }
+        if previewState.selectedRecordsScope != .all {
+            return "此范围还没有记录"
         }
         return "还没有记录"
     }

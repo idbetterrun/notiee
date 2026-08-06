@@ -7,7 +7,8 @@ import UIKit
 ///
 /// Reuses `RealAIProcessingService`'s image encoding and JSON parsing so the two
 /// paths stay byte-identical where it matters. Notiee-target only.
-struct BackendAIProcessingService: AIProcessingService {
+// UserDefaults, Keychain, and BackendAPIClient are thread-safe shared dependencies.
+struct BackendAIProcessingService: AIProcessingService, @unchecked Sendable {
     let settingsStore: AppSettingsPersisting
     private let api: BackendAPIClient
 

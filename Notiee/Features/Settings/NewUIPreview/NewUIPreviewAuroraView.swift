@@ -43,6 +43,7 @@ struct NewUIPreviewAuroraBackdrop: UIViewRepresentable {
     }
 }
 
+@MainActor
 final class NewUIPreviewAuroraRenderer: NSObject, MTKViewDelegate {
     private weak var view: MTKView?
     private var commandQueue: MTLCommandQueue?

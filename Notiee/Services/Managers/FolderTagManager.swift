@@ -40,7 +40,7 @@ final class FolderTagManager: ObservableObject {
         }
     }
 
-    static var nottiFolderName: String { String(localized: "Notti 生成") }
+    nonisolated static var nottiFolderName: String { String(localized: "Notti 生成") }
 
     // MARK: - Folder CRUD
 

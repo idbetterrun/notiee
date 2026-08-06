@@ -26,10 +26,21 @@ struct AgentChatResponse: Sendable {
 struct AgentToolCall: Sendable {
     let id: String
     let name: String
-    let parameters: [String: Any]
+    private let parametersData: Data?
+
+    init(id: String, name: String, parameters: [String: Any]) {
+        self.id = id
+        self.name = name
+        self.parametersData = try? JSONSerialization.data(withJSONObject: parameters)
+    }
+
+    var parameters: [String: Any] {
+        guard let parametersData else { return [:] }
+        return (try? JSONSerialization.jsonObject(with: parametersData) as? [String: Any]) ?? [:]
+    }
 
     var isValid: Bool {
-        (try? JSONSerialization.data(withJSONObject: parameters)) != nil
+        parametersData != nil
     }
 }
 

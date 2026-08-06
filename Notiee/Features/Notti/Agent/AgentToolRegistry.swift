@@ -1,6 +1,7 @@
 import Foundation
 
-final class AgentToolRegistry: @unchecked Sendable {
+@MainActor
+final class AgentToolRegistry {
     private let tools: [String: any AgentTool]
 
     init(tools: [any AgentTool]) {

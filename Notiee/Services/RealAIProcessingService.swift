@@ -1,7 +1,8 @@
 import Foundation
 import UIKit
 
-struct RealAIProcessingService: AIProcessingService {
+// UserDefaults and Keychain are thread-safe; the injected store is treated as the same boundary.
+struct RealAIProcessingService: AIProcessingService, @unchecked Sendable {
     let settingsStore: AppSettingsPersisting
 
     init(settingsStore: AppSettingsPersisting = UserDefaultsAppSettingsStore.live) {

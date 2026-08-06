@@ -8,7 +8,7 @@ enum RecordMigrator {
     static let currentVersion = 1
 
     static func migrate(records: [NoteRecord], from version: Int) -> [NoteRecord] {
-        var result = records
+        let result = records
         var current = version
 
         while current < currentVersion {

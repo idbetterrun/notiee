@@ -82,7 +82,9 @@ final class NewUIPreviewStateTests: XCTestCase {
 
     func testRecordMomentumUsesAllSafeTodayFixturesAndKeepsHeroCountConsistent() {
         let state = makeState(scenario: .recordMomentum)
-        let safeFixtureCount = state.recordFixtures.filter { !$0.record.isEncrypted }.count
+        let safeFixtureCount = state.recordFixtures.filter {
+            !$0.record.isEncrypted && !$0.record.isDeleted
+        }.count
 
         XCTAssertGreaterThan(state.todayRecords.count, 3)
         XCTAssertEqual(state.todayRecords.count, safeFixtureCount)
@@ -145,6 +147,84 @@ final class NewUIPreviewStateTests: XCTestCase {
 
         state.recordsSearchQuery = "语音"
         XCTAssertEqual(state.filteredRecordFixtures.map(\.previewSource), [.audio])
+    }
+
+    func testAllScopeExcludesDeletedRecordsAndTrashContainsOnlyDeletedRecords() {
+        let state = makeState()
+
+        XCTAssertFalse(state.filteredRecordFixtures.contains { $0.record.isDeleted })
+
+        state.selectRecordsScope(.trash)
+
+        XCTAssertFalse(state.filteredRecordFixtures.isEmpty)
+        XCTAssertTrue(state.filteredRecordFixtures.allSatisfy { $0.record.isDeleted })
+    }
+
+    func testSmartRecordScopesMatchTheirDefinitions() {
+        let state = makeState()
+
+        state.selectRecordsScope(.favorites)
+        XCTAssertTrue(state.filteredRecordFixtures.allSatisfy {
+            $0.record.isFavorite && !$0.record.isDeleted
+        })
+
+        state.selectRecordsScope(.today)
+        XCTAssertTrue(state.filteredRecordFixtures.allSatisfy {
+            Calendar.current.isDate(
+                $0.record.capturedAt,
+                inSameDayAs: NewUIPreviewFixtures.referenceDate
+            ) && !$0.record.isDeleted
+        })
+
+        state.selectRecordsScope(.pending)
+        XCTAssertEqual(state.filteredRecordFixtures.map(\.record.processingState), [.pending])
+    }
+
+    func testUnclassifiedIncludesEventLinkedRecordWithoutFolder() throws {
+        let state = makeState()
+        state.selectRecordsScope(.unclassified)
+
+        let audio = try XCTUnwrap(
+            state.filteredRecordFixtures.first { $0.previewSource == .audio }
+        )
+        XCTAssertEqual(audio.eventName, "散步")
+        XCTAssertNil(audio.folderName)
+    }
+
+    func testFolderAndEventScopesCombineWithSourceAndSearchFilters() {
+        let state = makeState()
+        state.selectRecordsScope(.folder("工作"))
+        state.selectedRecordsFilter = .notti
+        state.recordsSearchQuery = "发布复盘"
+
+        XCTAssertEqual(
+            state.filteredRecordFixtures.map(\.record.title),
+            ["Notti 整理的发布复盘"]
+        )
+
+        state.selectRecordsScope(.event("产品周会"))
+        state.selectedRecordsFilter = .photo
+        state.recordsSearchQuery = "路线图"
+
+        XCTAssertEqual(
+            state.filteredRecordFixtures.map(\.record.title),
+            ["产品周会：Q3 路线图"]
+        )
+    }
+
+    func testRecordScopeListsAndScrollRevisionAreDeterministic() {
+        let state = makeState()
+        let initialRevision = state.recordsScrollRevision
+
+        XCTAssertEqual(state.recordFolderNames, ["保险箱", "工作", "灵感", "生活", "阅读"])
+        XCTAssertEqual(state.recordEventNames, ["产品周会", "散步", "私人日程", "设计评审"])
+
+        state.selectRecordsScope(.folder("工作"))
+        XCTAssertEqual(state.recordsScrollRevision, initialRevision + 1)
+        XCTAssertEqual(state.selectedRecordsScope.title, "工作")
+
+        state.selectRecordsScope(.folder("工作"))
+        XCTAssertEqual(state.recordsScrollRevision, initialRevision + 1)
     }
 
     func testPreviewUsesTheCanonicalBrandGreen() {

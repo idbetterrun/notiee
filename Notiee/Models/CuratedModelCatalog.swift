@@ -46,7 +46,8 @@ enum CuratedModelCatalog {
     }
 }
 
-struct CuratedModelSelection {
+// UserDefaults supports concurrent reads and writes; this wrapper has no mutable state of its own.
+struct CuratedModelSelection: @unchecked Sendable {
     let defaults: UserDefaults
     static let live = CuratedModelSelection(defaults: .standard)
 
@@ -79,7 +80,7 @@ struct CuratedModelSelection {
 /// 客户端档位仅解锁 UI；后端对每次 AI 调用二次校验，改这里骗不到额度。
 enum CurrentEntitlement {
     /// 可注入（测试用）；生产恒为 `.standard`。
-    static var defaults: UserDefaults = .standard
+    nonisolated(unsafe) static var defaults: UserDefaults = .standard
 
     static var tier: ModelTier {
         get { ModelTier(rawValue: defaults.string(forKey: UDK.entitlementTier) ?? "") ?? .free }

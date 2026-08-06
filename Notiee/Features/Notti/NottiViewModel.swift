@@ -268,12 +268,13 @@ final class NottiViewModel: ObservableObject {
             aiService.accumulatePublic(tokens)
 
             let promptRecords = recall.records
-            let (clean, cits) = await Task.detached {
+            let responseCleanup = Task.detached {
                 let visible = NottiAIService.stripThinkTags(full)
                 let cits = NottiAIService.mapCitations(from: visible, records: promptRecords)
                 let cleanStripped = NottiAIService.stripCitationMarkers(visible)
                 return (cleanStripped, cits)
-            }.value
+            }
+            let (clean, cits) = await responseCleanup.value
 
             if Task.isCancelled { return }
 
