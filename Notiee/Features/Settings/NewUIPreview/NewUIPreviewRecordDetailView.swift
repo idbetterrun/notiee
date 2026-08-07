@@ -312,47 +312,68 @@ struct NewUIPreviewRecordDetailView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                NewUIPreviewRecordDetailBackground(
-                    recordID: fixture.id,
-                    origin: transitionOrigin,
-                    namespace: transitionNamespace
-                )
+            ScrollViewReader { proxy in
+                ZStack {
+                    NewUIPreviewRecordDetailBackground(
+                        recordID: fixture.id,
+                        origin: transitionOrigin,
+                        namespace: transitionNamespace
+                    )
 
-                ScrollViewReader { proxy in
-                    detailScroll(topContentInset: geometry.safeAreaInsets.top + 70)
+                    detailScroll(
+                        topContentInset: geometry.safeAreaInsets.top + 70,
+                        bottomContentInset: NewUIPreviewDetailChromeMetrics.documentBottomPadding(
+                            safeAreaBottom: geometry.safeAreaInsets.bottom
+                        )
+                    )
                         .ignoresSafeArea(edges: .top)
-                        .overlay(alignment: .bottomTrailing) {
-                            if showsScrollToTop {
-                                Button {
-                                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.28)) {
-                                        proxy.scrollTo(topAnchor, anchor: .top)
-                                    }
-                                } label: {
-                                    Image(systemName: "arrow.up")
-                                        .font(.system(size: 17, weight: .bold))
-                                        .foregroundStyle(Color.newUIPreviewPrimary)
-                                        .frame(width: 48, height: 48)
-                                        .contentShape(Circle())
-                                        .newUIPreviewGlass(in: Circle(), interactive: true)
-                                }
-                                .buttonStyle(NewUIPreviewPressStyle())
-                                .accessibilityLabel("返回顶部")
-                                .padding(.trailing, 20)
-                                .padding(.bottom, geometry.safeAreaInsets.bottom + 82)
-                                .transition(.scale.combined(with: .opacity))
-                            }
-                        }
-                }
 
-                toolbar
-                    .padding(.top, geometry.safeAreaInsets.top + 8)
+                    NewUIPreviewEdgeFade(
+                        edge: .top,
+                        height: NewUIPreviewDetailChromeMetrics.topFadeHeight(
+                            safeAreaTop: geometry.safeAreaInsets.top
+                        )
+                    )
                     .frame(maxHeight: .infinity, alignment: .top)
 
-                actionDock
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, max(geometry.safeAreaInsets.bottom, 8))
+                    NewUIPreviewEdgeFade(
+                        edge: .bottom,
+                        height: NewUIPreviewDetailChromeMetrics.bottomFadeHeight(
+                            safeAreaBottom: geometry.safeAreaInsets.bottom
+                        )
+                    )
                     .frame(maxHeight: .infinity, alignment: .bottom)
+
+                    if showsScrollToTop {
+                        Button {
+                            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.28)) {
+                                proxy.scrollTo(topAnchor, anchor: .top)
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundStyle(Color.newUIPreviewPrimary)
+                                .frame(width: 48, height: 48)
+                                .contentShape(Circle())
+                                .newUIPreviewGlass(in: Circle(), interactive: true)
+                        }
+                        .buttonStyle(NewUIPreviewPressStyle())
+                        .accessibilityLabel("返回顶部")
+                        .padding(.trailing, 20)
+                        .padding(.bottom, geometry.safeAreaInsets.bottom + 82)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                        .transition(.scale.combined(with: .opacity))
+                    }
+
+                    toolbar
+                        .padding(.top, geometry.safeAreaInsets.top + 8)
+                        .frame(maxHeight: .infinity, alignment: .top)
+
+                    actionDock
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, max(geometry.safeAreaInsets.bottom, 8))
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -385,7 +406,6 @@ struct NewUIPreviewRecordDetailView: View {
     private var toolbar: some View {
         HStack(spacing: 10) {
             NewUIPreviewCircleButton(symbol: "chevron.left", label: "返回", action: onClose)
-                .background(detailControlSurface, in: Circle())
 
             Spacer(minLength: 4)
 
@@ -411,76 +431,79 @@ struct NewUIPreviewRecordDetailView: View {
                 .padding(.leading, 14)
                 .padding(.trailing, 8)
                 .frame(height: 50)
-                .background(detailControlSurface, in: Capsule())
                 .newUIPreviewGlass(in: Capsule(), interactive: true)
             } else {
-                NewUIPreviewCircleButton(
-                    symbol: "magnifyingglass",
-                    label: "搜索当前记录",
-                    action: { isSearching = true }
-                )
-                .background(detailControlSurface, in: Circle())
-                .disabled(fixture.record.isEncrypted)
-
-                if fixture.record.isEncrypted {
-                    NewUIPreviewCircleButton(symbol: "square.and.arrow.up", label: "分享", action: {})
-                        .background(detailControlSurface, in: Circle())
-                        .disabled(true)
-                } else {
-                    ShareLink(item: NewUIPreviewRecordPresentation.shareText(
-                        for: fixture.record,
-                        todos: fixture.todos
-                    )) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(Color.newUIPreviewPrimary.opacity(0.9))
-                            .frame(width: 50, height: 50)
-                            .contentShape(Circle())
-                            .background(detailControlSurface, in: Circle())
-                            .newUIPreviewGlass(in: Circle(), interactive: true)
-                    }
-                    .buttonStyle(NewUIPreviewPressStyle())
-                    .accessibilityLabel("分享")
-                }
-
-                Menu {
-                    Button("原文", systemImage: "doc.plaintext") {
-                        showsRawSheet = true
-                    }
-                    .disabled(fixture.record.isEncrypted)
-
-                    if fixture.record.isEncrypted {
-                        Button("已加密（预览）", systemImage: "lock.fill") {}
-                            .disabled(true)
-                    } else {
-                        Button("编辑", systemImage: "pencil") { showsEditSheet = true }
-                        Button("更多信息", systemImage: "info.circle") { showsInfoSheet = true }
-                        Button("加密", systemImage: "lock") {}
-                        Divider()
-                        Button("删除", systemImage: "trash", role: .destructive) {}
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(Color.newUIPreviewPrimary.opacity(0.9))
-                        .frame(width: 50, height: 50)
-                        .contentShape(Circle())
-                        .background(detailControlSurface, in: Circle())
-                        .newUIPreviewGlass(in: Circle(), interactive: true)
-                }
-                .buttonStyle(NewUIPreviewPressStyle())
-                .accessibilityLabel("更多")
+                toolbarActions
             }
         }
         .padding(.horizontal, 16)
         .zIndex(2)
     }
 
-    private var detailControlSurface: Color {
-        Color(uiColor: .systemBackground).opacity(0.78)
+    private var toolbarActions: some View {
+        HStack(spacing: 0) {
+            Button {
+                isSearching = true
+            } label: {
+                toolbarIcon("magnifyingglass")
+            }
+            .buttonStyle(NewUIPreviewPressStyle())
+            .disabled(fixture.record.isEncrypted)
+            .accessibilityLabel("搜索当前记录")
+
+            if fixture.record.isEncrypted {
+                Button {} label: {
+                    toolbarIcon("square.and.arrow.up")
+                }
+                .buttonStyle(NewUIPreviewPressStyle())
+                .disabled(true)
+                .accessibilityLabel("分享")
+            } else {
+                ShareLink(item: NewUIPreviewRecordPresentation.shareText(
+                    for: fixture.record,
+                    todos: fixture.todos
+                )) {
+                    toolbarIcon("square.and.arrow.up")
+                }
+                .buttonStyle(NewUIPreviewPressStyle())
+                .accessibilityLabel("分享")
+            }
+
+            Menu {
+                Button("原文", systemImage: "doc.plaintext") {
+                    showsRawSheet = true
+                }
+                .disabled(fixture.record.isEncrypted)
+
+                if fixture.record.isEncrypted {
+                    Button("已加密（预览）", systemImage: "lock.fill") {}
+                        .disabled(true)
+                } else {
+                    Button("编辑", systemImage: "pencil") { showsEditSheet = true }
+                    Button("更多信息", systemImage: "info.circle") { showsInfoSheet = true }
+                    Button("加密", systemImage: "lock") {}
+                    Divider()
+                    Button("删除", systemImage: "trash", role: .destructive) {}
+                }
+            } label: {
+                toolbarIcon("ellipsis")
+            }
+            .buttonStyle(NewUIPreviewPressStyle())
+            .accessibilityLabel("更多")
+        }
+        .frame(height: 50)
+        .newUIPreviewGlass(in: Capsule(), interactive: true)
     }
 
-    private func detailScroll(topContentInset: CGFloat) -> some View {
+    private func toolbarIcon(_ symbol: String) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 20, weight: .semibold))
+            .foregroundStyle(Color.newUIPreviewPrimary.opacity(0.9))
+            .frame(width: 48, height: 50)
+            .contentShape(Rectangle())
+    }
+
+    private func detailScroll(topContentInset: CGFloat, bottomContentInset: CGFloat) -> some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                 Color.clear
@@ -511,7 +534,7 @@ struct NewUIPreviewRecordDetailView: View {
                     detailDocument
                         .padding(.horizontal, 22)
                         .padding(.top, 24)
-                        .padding(.bottom, 176)
+                        .padding(.bottom, bottomContentInset)
                 } header: {
                     sectionSelector
                         .padding(.horizontal, 16)
@@ -863,14 +886,21 @@ struct NewUIPreviewRecordDetailView: View {
     }
 
     private var actionDock: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 0) {
             actionButton(
                 "编辑",
                 symbol: "pencil",
                 isDisabled: fixture.record.isEncrypted
             ) { showsEditSheet = true }
+
+            Rectangle()
+                .fill(Color.newUIPreviewSecondary.opacity(0.2))
+                .frame(width: 0.5, height: 20)
+
             actionButton("Notti 涌现", symbol: "sparkles") { showsEmergenceSheet = true }
         }
+        .frame(height: NewUIPreviewDetailChromeMetrics.bottomControlHeight)
+        .newUIPreviewGlass(in: Capsule(), interactive: true)
     }
 
     private func actionButton(
@@ -883,20 +913,15 @@ struct NewUIPreviewRecordDetailView: View {
             Label(title, systemImage: symbol)
                 .font(.headline)
                 .foregroundStyle(Color.newUIPreviewPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .background(
-                    Color(uiColor: .systemBackground).opacity(0.88),
-                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                )
-                .newUIPreviewGlass(
-                    in: RoundedRectangle(cornerRadius: 8, style: .continuous),
-                    interactive: true
-                )
+                .frame(height: NewUIPreviewDetailChromeMetrics.bottomControlHeight)
+                .contentShape(Rectangle())
         }
         .buttonStyle(NewUIPreviewPressStyle())
         .disabled(isDisabled)
+        .opacity(isDisabled ? 0.45 : 1)
     }
 
     private var infoSheet: some View {

@@ -267,6 +267,27 @@ final class NewUIPreviewStateTests: XCTestCase {
         XCTAssertEqual(state.filteredRecordFixtures.map(\.id), [recordID])
     }
 
+    func testDestinationMotionUsesShortDirectionalOffsets() {
+        XCTAssertEqual(
+            NewUIPreviewDestinationMotion.offset(for: .today),
+            -NewUIPreviewDestinationMotion.distance
+        )
+        XCTAssertEqual(
+            NewUIPreviewDestinationMotion.offset(for: .records),
+            NewUIPreviewDestinationMotion.distance
+        )
+        XCTAssertEqual(NewUIPreviewDestinationMotion.distance, 28)
+        XCTAssertEqual(NewUIPreviewDestinationMotion.activeOpacity, 0.88)
+    }
+
+    func testDetailChromeMetricsIncludeSafeAreaAndFadeRunway() {
+        XCTAssertEqual(NewUIPreviewDetailChromeMetrics.topFadeHeight(safeAreaTop: 59), 163)
+        XCTAssertEqual(NewUIPreviewDetailChromeMetrics.bottomFadeHeight(safeAreaBottom: 34), 160)
+        XCTAssertEqual(NewUIPreviewDetailChromeMetrics.documentBottomPadding(safeAreaBottom: 34), 176)
+        XCTAssertEqual(NewUIPreviewDetailChromeMetrics.topFadeHeight(safeAreaTop: -10), 104)
+        XCTAssertEqual(NewUIPreviewDetailChromeMetrics.bottomFadeHeight(safeAreaBottom: -10), 126)
+    }
+
     func testPreviewEditUpdatesFixtureCardAndSearchForCurrentLifecycle() throws {
         let state = makeState(scenario: .recordMomentum)
         let fixture = try XCTUnwrap(state.recordFixtures.first)

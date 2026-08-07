@@ -9,6 +9,33 @@ enum NewUIPreviewBrand {
     )
 }
 
+enum NewUIPreviewEdgeFadeEdge {
+    case top
+    case bottom
+}
+
+struct NewUIPreviewDetailChromeMetrics {
+    static let topControlInset: CGFloat = 8
+    static let topControlHeight: CGFloat = 50
+    static let topFadeRunway: CGFloat = 46
+    static let bottomControlInset: CGFloat = 8
+    static let bottomControlHeight: CGFloat = 56
+    static let bottomFadeRunway: CGFloat = 62
+    static let documentClearance: CGFloat = 16
+
+    static func topFadeHeight(safeAreaTop: CGFloat) -> CGFloat {
+        max(0, safeAreaTop) + topControlInset + topControlHeight + topFadeRunway
+    }
+
+    static func bottomFadeHeight(safeAreaBottom: CGFloat) -> CGFloat {
+        max(0, safeAreaBottom) + bottomControlInset + bottomControlHeight + bottomFadeRunway
+    }
+
+    static func documentBottomPadding(safeAreaBottom: CGFloat) -> CGFloat {
+        bottomFadeHeight(safeAreaBottom: safeAreaBottom) + documentClearance
+    }
+}
+
 struct NewUIPreviewRecordTransitionKey: Hashable {
     let recordID: UUID
     let origin: NewUIPreviewRecordOrigin
@@ -80,6 +107,52 @@ struct NewUIPreviewGlassContainer<Content: View>: View {
         } else {
             content
         }
+    }
+}
+
+struct NewUIPreviewEdgeFade: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    let edge: NewUIPreviewEdgeFadeEdge
+    let height: CGFloat
+
+    var body: some View {
+        ZStack {
+            if reduceTransparency {
+                Color(uiColor: .systemBackground).opacity(0.96)
+            } else {
+                Rectangle().fill(.regularMaterial)
+                Color(uiColor: .systemBackground).opacity(0.18)
+            }
+        }
+        .mask(maskGradient)
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private var maskGradient: LinearGradient {
+        let stops: [Gradient.Stop]
+        switch edge {
+        case .top:
+            stops = [
+                .init(color: .black, location: 0),
+                .init(color: .black.opacity(0.92), location: 0.46),
+                .init(color: .clear, location: 1)
+            ]
+        case .bottom:
+            stops = [
+                .init(color: .clear, location: 0),
+                .init(color: .black.opacity(0.92), location: 0.54),
+                .init(color: .black, location: 1)
+            ]
+        }
+        return LinearGradient(
+            gradient: Gradient(stops: stops),
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 }
 

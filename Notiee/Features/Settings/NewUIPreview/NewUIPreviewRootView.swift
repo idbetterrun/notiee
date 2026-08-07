@@ -1,5 +1,28 @@
 import SwiftUI
 
+struct NewUIPreviewDestinationMotion {
+    static let distance: CGFloat = 28
+    static let activeOpacity = 0.88
+
+    static func offset(for destination: NewUIPreviewDestination) -> CGFloat {
+        switch destination {
+        case .today: return -distance
+        case .records: return distance
+        }
+    }
+}
+
+private struct NewUIPreviewDestinationTransitionModifier: ViewModifier {
+    let horizontalOffset: CGFloat
+    let opacity: Double
+
+    func body(content: Content) -> some View {
+        content
+            .offset(x: horizontalOffset)
+            .opacity(opacity)
+    }
+}
+
 struct NewUIPreviewRootView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -12,7 +35,7 @@ struct NewUIPreviewRootView: View {
         ZStack(alignment: .bottom) {
             Color.newUIPreviewBackground.ignoresSafeArea()
 
-            destinationPages
+            destinationHost
                 .scaleEffect(
                     !hasModuleOverlay || reduceMotion ? 1 : 0.985,
                     anchor: .center
@@ -67,6 +90,25 @@ struct NewUIPreviewRootView: View {
         .onAppear { nottiState.namespace = nottiNamespace }
     }
 
+    private var destinationHost: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                destinationPages
+                    .frame(
+                        width: geometry.size.width,
+                        height: geometry.size.height,
+                        alignment: .top
+                    )
+            }
+            .frame(
+                width: geometry.size.width,
+                height: geometry.size.height,
+                alignment: .top
+            )
+            .clipped()
+        }
+    }
+
     @ViewBuilder
     private var destinationPages: some View {
         switch nottiState.destination {
@@ -80,7 +122,7 @@ struct NewUIPreviewRootView: View {
                     nottiState.overlay != nil
                         || nottiState.isExpanded
                 )
-                .transition(todayPageTransition)
+                .transition(pageTransition(for: .today))
 
         case .records:
             NewUIPreviewRecordsView()
@@ -92,7 +134,7 @@ struct NewUIPreviewRootView: View {
                     nottiState.overlay != nil
                         || nottiState.isExpanded
                 )
-                .transition(recordsPageTransition)
+                .transition(pageTransition(for: .records))
         }
     }
 
@@ -143,19 +185,21 @@ struct NewUIPreviewRootView: View {
     }
 
     private var pageAnimation: Animation? {
-        reduceMotion ? nil : .snappy(duration: 0.34, extraBounce: 0)
+        reduceMotion ? nil : .snappy(duration: 0.30, extraBounce: 0)
     }
 
-    private var todayPageTransition: AnyTransition {
-        reduceMotion
-            ? .identity
-            : .move(edge: .leading).combined(with: .opacity)
-    }
-
-    private var recordsPageTransition: AnyTransition {
-        reduceMotion
-            ? .identity
-            : .move(edge: .trailing).combined(with: .opacity)
+    private func pageTransition(for destination: NewUIPreviewDestination) -> AnyTransition {
+        guard !reduceMotion else { return .identity }
+        return .modifier(
+            active: NewUIPreviewDestinationTransitionModifier(
+                horizontalOffset: NewUIPreviewDestinationMotion.offset(for: destination),
+                opacity: NewUIPreviewDestinationMotion.activeOpacity
+            ),
+            identity: NewUIPreviewDestinationTransitionModifier(
+                horizontalOffset: 0,
+                opacity: 1
+            )
+        )
     }
 
     private var childPageTransition: AnyTransition {

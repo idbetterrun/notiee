@@ -36,6 +36,13 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-07 — Refined NewUIPreview destination motion and detail edge chrome _(both targets; experimental preview only)_
+
+- Replaced the full-width Today/Records `.move` transitions with a stable, top-aligned, clipped page host and a 28 pt directional offset at 0.88 opacity. Only the selected destination remains mounted at rest, preserving the Records large-title fix, while Reduce Motion still switches without movement.
+- Rebuilt record-detail chrome as three explicit layers: full-screen scrolling content, noninteractive top/bottom regular-material fades, and fixed controls. Fade and document-clearance heights derive from safe-area-aware preview metrics; Reduce Transparency uses a stronger semantic-background gradient.
+- Consolidated Search/Share/More into one top-right Glass capsule while keeping Back separate. Consolidated Edit/Notti Emergence into one bottom Glass capsule with equal actions and a restrained divider. The scroll-to-top affordance remains above the fades, and image media still begins at the screen top.
+- Added pure metric/direction assertions for destination motion and detail chrome. Low-memory verification passed: all app Swift parses; the complete NewUIPreview source set strictly type-checks for both normal and `NOTIEE_PLUS`; all `NewUIPreview*` XCTest sources type-check against a newly emitted testable module; project/localization plist lint and `git diff --check` pass. Xcode, Simulator, `xcodebuild`, and runtime visual QA were not used. No commit or push was created.
+
 ### 2026-08-07 — Fixed NewUIPreview page, detail, and Aurora regressions _(both targets; experimental preview only)_
 
 - Restored directional Today/Records transitions while retaining the single-mounted destination architecture that fixes the Records large-title bug. Today exits/enters from the leading edge and Records from the trailing edge; Reduce Motion still switches immediately.
