@@ -267,6 +267,80 @@ final class NewUIPreviewStateTests: XCTestCase {
         XCTAssertEqual(state.filteredRecordFixtures.map(\.id), [recordID])
     }
 
+    func testPreviewEditUpdatesFixtureCardAndSearchForCurrentLifecycle() throws {
+        let state = makeState(scenario: .recordMomentum)
+        let fixture = try XCTUnwrap(state.recordFixtures.first)
+        var edited = fixture.record
+        edited.title = "预览编辑后的标题"
+        edited.summary = "预览编辑后的摘要"
+        edited.detailedContent = "预览编辑后的正文"
+
+        state.updateRecord(edited, todos: ["预览编辑后的待办"])
+
+        let updated = try XCTUnwrap(state.recordFixture(id: fixture.id))
+        XCTAssertEqual(updated.record.title, "预览编辑后的标题")
+        XCTAssertEqual(updated.cardSummary, "预览编辑后的摘要")
+        XCTAssertEqual(updated.todos, ["预览编辑后的待办"])
+        XCTAssertEqual(
+            state.todayRecords.first(where: { $0.id == fixture.id })?.title,
+            "预览编辑后的标题"
+        )
+
+        state.recordsSearchQuery = "编辑后的摘要"
+        XCTAssertEqual(state.filteredRecordFixtures.map(\.id), [fixture.id])
+    }
+
+    func testRelatedRecordsExcludeSelfDeletedAndEncryptedAndCapAtThree() throws {
+        var fixtures = Array(NewUIPreviewFixtures.records.prefix(6))
+        let sourceRecord = fixtures[0].record
+        fixtures[1].record.isDeleted = true
+        fixtures[2].record.isEncrypted = true
+        fixtures[0] = NewUIPreviewRecordFixture(
+            record: sourceRecord,
+            previewSource: fixtures[0].previewSource,
+            media: fixtures[0].media,
+            eventName: fixtures[0].eventName,
+            folderName: fixtures[0].folderName,
+            todos: fixtures[0].todos,
+            relations: [
+                NewUIPreviewRecordRelation(recordID: sourceRecord.id, reason: .similarTopic),
+                NewUIPreviewRecordRelation(recordID: fixtures[1].id, reason: .sameFolder),
+                NewUIPreviewRecordRelation(recordID: fixtures[2].id, reason: .sameEvent),
+                NewUIPreviewRecordRelation(recordID: fixtures[3].id, reason: .similarTopic),
+                NewUIPreviewRecordRelation(recordID: fixtures[4].id, reason: .sameFolder),
+                NewUIPreviewRecordRelation(recordID: fixtures[5].id, reason: .sameEvent)
+            ]
+        )
+        let state = NewUIPreviewState(
+            recordFixtures: fixtures,
+            startsContextTimer: false
+        )
+
+        let related = state.relatedRecords(for: sourceRecord.id)
+
+        XCTAssertEqual(related.map(\.id), [fixtures[3].id, fixtures[4].id, fixtures[5].id])
+        XCTAssertEqual(related.count, 3)
+        XCTAssertTrue(related.allSatisfy {
+            $0.id != sourceRecord.id && !$0.fixture.record.isDeleted && !$0.fixture.record.isEncrypted
+        })
+    }
+
+    func testRecordDetailRoutePushesAndPopsOneRecordAtATime() {
+        let root = UUID(uuidString: "10000000-0000-0000-0000-000000000001")!
+        let second = UUID(uuidString: "10000000-0000-0000-0000-000000000002")!
+        let third = UUID(uuidString: "10000000-0000-0000-0000-000000000003")!
+        var route = NewUIPreviewRecordDetailRoute(rootID: root)
+
+        route.open(second)
+        route.open(third)
+        XCTAssertEqual(route.currentID, third)
+        XCTAssertTrue(route.goBack())
+        XCTAssertEqual(route.currentID, second)
+        XCTAssertTrue(route.goBack())
+        XCTAssertEqual(route.currentID, root)
+        XCTAssertFalse(route.goBack())
+    }
+
     func testOverlayRoutingUsesKnownFixturesAndCanDismiss() throws {
         let state = makeState()
         let recordID = try XCTUnwrap(state.recordFixtures.first?.id)

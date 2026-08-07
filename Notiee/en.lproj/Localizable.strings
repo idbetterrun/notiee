@@ -643,6 +643,10 @@
 "记录图片 %lld" = "Record image %lld";
 "整理内容" = "Organized";
 "原文" = "Original";
+"联系" = "Connections";
+"同一日程" = "Same Event";
+"同一文件夹" = "Same Folder";
+"相似主题" = "Similar Topic";
 "返回顶部" = "Back to Top";
 "在当前内容中搜索" = "Search current content";
 "关闭搜索" = "Close Search";
@@ -659,8 +663,16 @@
 "这条记录暂无整理内容。" = "This record has no organized content.";
 "这条记录没有独立原文。" = "This record has no separate original text.";
 "这条记录没有待办。" = "This record has no todos.";
+"没有可显示的关联记录。" = "No related records to show.";
+"原文中没有匹配结果" = "No matches in the original text";
+"搜索原文" = "Search Original Text";
 "要点" = "Key Points";
 "术语" = "Definitions";
+"标题与摘要" = "Title and Summary";
+"待办（每行一项）" = "Todos (one per line)";
+"要点（每行一项）" = "Key Points (one per line)";
+"术语（每行“术语：解释”）" = "Definitions (one “term: explanation” per line)";
+"Notti 涌现" = "Notti Emergence";
 "%1$@：%2$@" = "%1$@: %2$@";
 "追加记录" = "Add to Record";
 "涌现" = "Emergence";

@@ -4,16 +4,16 @@ import MarkdownUI
 
 enum NewUIPreviewRecordDetailSection: String, CaseIterable, Identifiable {
     case organized
-    case raw
     case todos
+    case relations
 
     var id: String { rawValue }
 
     var title: LocalizedStringKey {
         switch self {
         case .organized: return "整理内容"
-        case .raw: return "原文"
         case .todos: return "待办"
+        case .relations: return "联系"
         }
     }
 }
@@ -62,30 +62,53 @@ struct NewUIPreviewRecordPresentation {
     static func visibleText(
         for section: NewUIPreviewRecordDetailSection,
         record: NoteRecord,
-        todos: [String]
+        todos: [String],
+        relations: [NewUIPreviewResolvedRecordRelation] = []
     ) -> String {
         guard !record.isEncrypted else { return "" }
 
         switch section {
         case .organized:
             return organizedPlainText(for: record)
-        case .raw:
-            return trimmed(record.ocrText)
         case .todos:
             return todos.map(trimmed).filter { !$0.isEmpty }.joined(separator: "\n")
+        case .relations:
+            return relations.map { relation in
+                [
+                    relation.fixture.record.title,
+                    relation.fixture.record.summary,
+                    relation.reason.title
+                ]
+                .map(trimmed)
+                .filter { !$0.isEmpty }
+                .joined(separator: "\n")
+            }
+            .joined(separator: "\n\n")
         }
+    }
+
+    static func rawText(for record: NoteRecord) -> String {
+        guard !record.isEncrypted else { return "" }
+        return trimmed(record.ocrText)
     }
 
     static func matches(
         query: String,
         section: NewUIPreviewRecordDetailSection,
         record: NoteRecord,
-        todos: [String]
+        todos: [String],
+        relations: [NewUIPreviewResolvedRecordRelation] = []
     ) -> Bool {
         let query = trimmed(query)
         guard !query.isEmpty, !record.isEncrypted else { return false }
-        return visibleText(for: section, record: record, todos: todos)
+        return visibleText(for: section, record: record, todos: todos, relations: relations)
             .localizedCaseInsensitiveContains(query)
+    }
+
+    static func rawMatches(query: String, record: NoteRecord) -> Bool {
+        let query = trimmed(query)
+        guard !query.isEmpty, !record.isEncrypted else { return false }
+        return rawText(for: record).localizedCaseInsensitiveContains(query)
     }
 
     static func shareText(for record: NoteRecord, todos: [String]) -> String {
@@ -137,69 +160,166 @@ struct NewUIPreviewRecordPresentation {
     }
 }
 
+struct NewUIPreviewRecordDetailRoute: Equatable {
+    let rootID: UUID
+    var path: [UUID] = []
+
+    var currentID: UUID { path.last ?? rootID }
+
+    mutating func open(_ recordID: UUID) {
+        guard recordID != currentID else { return }
+        path.append(recordID)
+    }
+
+    @discardableResult
+    mutating func goBack() -> Bool {
+        guard !path.isEmpty else { return false }
+        path.removeLast()
+        return true
+    }
+}
+
+struct NewUIPreviewRecordDetailHost: View {
+    let initialRecordID: UUID
+    let transitionOrigin: NewUIPreviewRecordOrigin?
+    let transitionNamespace: Namespace.ID?
+    let onClose: () -> Void
+
+    @EnvironmentObject private var previewState: NewUIPreviewState
+    @State private var route: NewUIPreviewRecordDetailRoute
+
+    init(
+        initialRecordID: UUID,
+        transitionOrigin: NewUIPreviewRecordOrigin?,
+        transitionNamespace: Namespace.ID?,
+        onClose: @escaping () -> Void
+    ) {
+        self.initialRecordID = initialRecordID
+        self.transitionOrigin = transitionOrigin
+        self.transitionNamespace = transitionNamespace
+        self.onClose = onClose
+        _route = State(initialValue: NewUIPreviewRecordDetailRoute(rootID: initialRecordID))
+    }
+
+    var body: some View {
+        NavigationStack(path: $route.path) {
+            detail(
+                recordID: initialRecordID,
+                origin: transitionOrigin,
+                namespace: transitionNamespace
+            )
+            .navigationDestination(for: UUID.self) { recordID in
+                detail(recordID: recordID, origin: nil, namespace: nil)
+            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    @ViewBuilder
+    private func detail(
+        recordID: UUID,
+        origin: NewUIPreviewRecordOrigin?,
+        namespace: Namespace.ID?
+    ) -> some View {
+        if let fixture = previewState.recordFixture(id: recordID) {
+            NewUIPreviewRecordDetailView(
+                fixture: fixture,
+                transitionOrigin: origin,
+                transitionNamespace: namespace,
+                onClose: closeCurrent,
+                onOpenRelatedRecord: { route.open($0) }
+            )
+        } else {
+            Color.newUIPreviewBackground
+                .ignoresSafeArea()
+                .onAppear(perform: closeCurrent)
+        }
+    }
+
+    private func closeCurrent() {
+        if !route.goBack() {
+            onClose()
+        }
+    }
+}
+
 struct NewUIPreviewRecordDetailView: View {
     let fixture: NewUIPreviewRecordFixture
     var transitionOrigin: NewUIPreviewRecordOrigin? = nil
     var transitionNamespace: Namespace.ID? = nil
     let onClose: () -> Void
+    var onOpenRelatedRecord: (UUID) -> Void = { _ in }
 
+    @EnvironmentObject private var previewState: NewUIPreviewState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedSection: NewUIPreviewRecordDetailSection = .organized
+    @State private var sectionMovesForward = true
     @State private var searchQuery = ""
     @State private var isSearching = false
     @State private var selectedImageIndex = 0
     @State private var showsFullScreenMedia = false
-    @State private var showsAppendSheet = false
+    @State private var showsEditSheet = false
+    @State private var showsRawSheet = false
     @State private var showsEmergenceSheet = false
     @State private var showsInfoSheet = false
     @State private var showsScrollToTop = false
+    @Namespace private var sectionSelectionNamespace
 
     private let topAnchor = "new-ui-preview-detail-top"
 
     var body: some View {
-        ZStack {
-            NewUIPreviewRecordDetailBackground(
-                recordID: fixture.id,
-                origin: transitionOrigin,
-                namespace: transitionNamespace
-            )
-
-            VStack(spacing: 0) {
-                toolbar
+        GeometryReader { geometry in
+            ZStack {
+                NewUIPreviewRecordDetailBackground(
+                    recordID: fixture.id,
+                    origin: transitionOrigin,
+                    namespace: transitionNamespace
+                )
 
                 ScrollViewReader { proxy in
-                    ZStack(alignment: .bottomTrailing) {
-                        detailScroll
-
-                        if showsScrollToTop {
-                            Button {
-                                withAnimation(.easeOut(duration: 0.28)) {
-                                    proxy.scrollTo(topAnchor, anchor: .top)
+                    detailScroll(topContentInset: geometry.safeAreaInsets.top + 70)
+                        .ignoresSafeArea(edges: .top)
+                        .overlay(alignment: .bottomTrailing) {
+                            if showsScrollToTop {
+                                Button {
+                                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.28)) {
+                                        proxy.scrollTo(topAnchor, anchor: .top)
+                                    }
+                                } label: {
+                                    Image(systemName: "arrow.up")
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundStyle(Color.newUIPreviewPrimary)
+                                        .frame(width: 48, height: 48)
+                                        .contentShape(Circle())
+                                        .newUIPreviewGlass(in: Circle(), interactive: true)
                                 }
-                            } label: {
-                                Image(systemName: "arrow.up")
-                                    .font(.system(size: 17, weight: .bold))
-                                    .foregroundStyle(Color.newUIPreviewPrimary)
-                                    .frame(width: 48, height: 48)
-                                    .contentShape(Circle())
-                                    .newUIPreviewGlass(in: Circle(), interactive: true)
+                                .buttonStyle(NewUIPreviewPressStyle())
+                                .accessibilityLabel("返回顶部")
+                                .padding(.trailing, 20)
+                                .padding(.bottom, geometry.safeAreaInsets.bottom + 82)
+                                .transition(.scale.combined(with: .opacity))
                             }
-                            .buttonStyle(NewUIPreviewPressStyle())
-                            .accessibilityLabel("返回顶部")
-                            .padding(.trailing, 20)
-                            .padding(.bottom, 16)
-                            .transition(.scale.combined(with: .opacity))
                         }
-                    }
                 }
+
+                toolbar
+                    .padding(.top, geometry.safeAreaInsets.top + 8)
+                    .frame(maxHeight: .infinity, alignment: .top)
+
+                actionDock
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, max(geometry.safeAreaInsets.bottom, 8))
+                    .frame(maxHeight: .infinity, alignment: .bottom)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            actionDock
+        .sheet(isPresented: $showsEditSheet) {
+            NewUIPreviewEditRecordSheet(fixture: fixture) { record, todos in
+                previewState.updateRecord(record, todos: todos)
+            }
         }
-        .sheet(isPresented: $showsAppendSheet) {
-            NewUIPreviewAppendRecordSheet()
-                .presentationDetents([.medium])
+        .sheet(isPresented: $showsRawSheet) {
+            NewUIPreviewRawTextSheet(record: fixture.record)
         }
         .sheet(isPresented: $showsEmergenceSheet) {
             NewUIPreviewEmergenceSheet(recordTitle: safeTitle)
@@ -276,11 +396,16 @@ struct NewUIPreviewRecordDetailView: View {
                 }
 
                 Menu {
+                    Button("原文", systemImage: "doc.plaintext") {
+                        showsRawSheet = true
+                    }
+                    .disabled(fixture.record.isEncrypted)
+
                     if fixture.record.isEncrypted {
                         Button("已加密（预览）", systemImage: "lock.fill") {}
                             .disabled(true)
                     } else {
-                        Button("编辑", systemImage: "pencil") {}
+                        Button("编辑", systemImage: "pencil") { showsEditSheet = true }
                         Button("更多信息", systemImage: "info.circle") { showsInfoSheet = true }
                         Button("加密", systemImage: "lock") {}
                         Divider()
@@ -299,12 +424,10 @@ struct NewUIPreviewRecordDetailView: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.newUIPreviewBackground.opacity(0.92))
         .zIndex(2)
     }
 
-    private var detailScroll: some View {
+    private func detailScroll(topContentInset: CGFloat) -> some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                 Color.clear
@@ -321,9 +444,12 @@ struct NewUIPreviewRecordDetailView: View {
 
                 if fixture.record.isEncrypted {
                     encryptedPlaceholder
-                        .padding(.top, 84)
+                        .padding(.top, topContentInset)
                         .padding(.bottom, 36)
                 } else {
+                    if fixture.media.isEmpty {
+                        Color.clear.frame(height: topContentInset)
+                    }
                     mediaHeader
                     recordHeader
                 }
@@ -332,12 +458,11 @@ struct NewUIPreviewRecordDetailView: View {
                     detailDocument
                         .padding(.horizontal, 22)
                         .padding(.top, 24)
-                        .padding(.bottom, 132)
+                        .padding(.bottom, 176)
                 } header: {
                     sectionSelector
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
-                        .background(Color.newUIPreviewBackground.opacity(0.94))
                 }
             }
         }
@@ -364,14 +489,10 @@ struct NewUIPreviewRecordDetailView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
-                    .frame(maxHeight: 420)
-                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("查看图片")
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
         } else if fixture.media.count > 1 {
             VStack(spacing: 10) {
                 TabView(selection: $selectedImageIndex) {
@@ -383,7 +504,7 @@ struct NewUIPreviewRecordDetailView: View {
                             Image(media.imageName)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(maxWidth: .infinity, maxHeight: 350)
+                                .frame(maxWidth: .infinity, maxHeight: 420)
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
@@ -392,14 +513,13 @@ struct NewUIPreviewRecordDetailView: View {
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .frame(height: 360)
+                .frame(height: 420)
 
                 Text("第 \(selectedImageIndex + 1) 张，共 \(fixture.media.count) 张")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(Color.newUIPreviewSecondary)
                     .accessibilityHidden(true)
             }
-            .padding(.top, 8)
         }
     }
 
@@ -456,20 +576,28 @@ struct NewUIPreviewRecordDetailView: View {
         HStack(spacing: 4) {
             ForEach(NewUIPreviewRecordDetailSection.allCases) { section in
                 Button {
-                    withAnimation(.easeOut(duration: 0.18)) {
-                        selectedSection = section
-                    }
+                    selectSection(section)
                 } label: {
-                    Text(section.title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(
-                            selectedSection == section
-                                ? Color.newUIPreviewAccent
-                                : Color.newUIPreviewSecondary
-                        )
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .contentShape(Rectangle())
+                    ZStack {
+                        if selectedSection == section {
+                            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                .fill(Color.newUIPreviewAccent.opacity(0.14))
+                                .matchedGeometryEffect(
+                                    id: "new-ui-preview-detail-section",
+                                    in: sectionSelectionNamespace
+                                )
+                        }
+                        Text(section.title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(
+                                selectedSection == section
+                                    ? Color.newUIPreviewAccent
+                                    : Color.newUIPreviewSecondary
+                            )
+                            .frame(maxWidth: .infinity)
+                    }
+                    .frame(height: 44)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(NewUIPreviewPressStyle())
                 .accessibilityAddTraits(selectedSection == section ? .isSelected : [])
@@ -477,6 +605,28 @@ struct NewUIPreviewRecordDetailView: View {
         }
         .padding(4)
         .newUIPreviewGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous), interactive: true)
+    }
+
+    private func selectSection(_ section: NewUIPreviewRecordDetailSection) {
+        guard section != selectedSection else { return }
+        sectionMovesForward = sectionIndex(section) > sectionIndex(selectedSection)
+        if reduceMotion {
+            selectedSection = section
+        } else {
+            withAnimation(.snappy(duration: 0.28, extraBounce: 0)) {
+                selectedSection = section
+            }
+        }
+    }
+
+    private func sectionIndex(_ section: NewUIPreviewRecordDetailSection) -> Int {
+        NewUIPreviewRecordDetailSection.allCases.firstIndex(of: section) ?? 0
+    }
+
+    private func moveSection(by delta: Int) {
+        let sections = NewUIPreviewRecordDetailSection.allCases
+        let destination = min(max(sectionIndex(selectedSection) + delta, 0), sections.count - 1)
+        selectSection(sections[destination])
     }
 
     @ViewBuilder
@@ -487,62 +637,132 @@ struct NewUIPreviewRecordDetailView: View {
             let visibleText = NewUIPreviewRecordPresentation.visibleText(
                 for: selectedSection,
                 record: fixture.record,
-                todos: fixture.todos
+                todos: fixture.todos,
+                relations: relatedRecords
             )
 
-            if visibleText.isEmpty {
-                switch selectedSection {
-                case .organized:
-                    emptyState("这条记录暂无整理内容。", symbol: "doc.text")
-                case .raw:
-                    emptyState("这条记录没有独立原文。", symbol: "text.viewfinder")
-                case .todos:
-                    emptyState("这条记录没有待办。", symbol: "checklist")
-                }
-            } else if !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                highlightedText(visibleText, query: searchQuery)
-                    .font(.body)
-                    .lineSpacing(6)
-                    .textSelection(.enabled)
-            } else {
-                switch selectedSection {
-                case .organized:
-                    Markdown(NewUIPreviewRecordPresentation.organizedMarkdown(for: fixture.record))
-                        .textSelection(.enabled)
-                case .raw:
-                    Text(visibleText)
+            Group {
+                if visibleText.isEmpty {
+                    switch selectedSection {
+                    case .organized:
+                        emptyState("这条记录暂无整理内容。", symbol: "doc.text")
+                    case .todos:
+                        emptyState("这条记录没有待办。", symbol: "checklist")
+                    case .relations:
+                        emptyState("没有可显示的关联记录。", symbol: "link")
+                    }
+                } else if !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    highlightedText(visibleText, query: searchQuery)
                         .font(.body)
                         .lineSpacing(6)
                         .textSelection(.enabled)
-                case .todos:
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(Array(fixture.todos.enumerated()), id: \.offset) { _, todo in
-                            HStack(alignment: .top, spacing: 12) {
-                                Image(systemName: "circle")
-                                    .font(.system(size: 18))
-                                    .foregroundStyle(Color.newUIPreviewAccent)
-                                Text(todo)
-                                    .font(.body)
-                                    .textSelection(.enabled)
-                            }
-                        }
+                } else {
+                    switch selectedSection {
+                    case .organized:
+                        Markdown(NewUIPreviewRecordPresentation.organizedMarkdown(for: fixture.record))
+                            .textSelection(.enabled)
+                    case .todos:
+                        todoDocument
+                    case .relations:
+                        relationDocument
                     }
                 }
-            }
 
-            if !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-               !NewUIPreviewRecordPresentation.matches(
-                    query: searchQuery,
-                    section: selectedSection,
-                    record: fixture.record,
-                    todos: fixture.todos
-               ) {
-                Text("当前内容中没有匹配结果")
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(Color.newUIPreviewSecondary)
-                    .padding(.top, 16)
+                if !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                   !NewUIPreviewRecordPresentation.matches(
+                        query: searchQuery,
+                        section: selectedSection,
+                        record: fixture.record,
+                        todos: fixture.todos,
+                        relations: relatedRecords
+                   ) {
+                    Text("当前内容中没有匹配结果")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(Color.newUIPreviewSecondary)
+                        .padding(.top, 16)
+                }
+            }
+            .id(selectedSection)
+            .transition(sectionTransition)
+            .contentShape(Rectangle())
+            .gesture(sectionSwipeGesture)
+        }
+    }
+
+    private var relatedRecords: [NewUIPreviewResolvedRecordRelation] {
+        previewState.relatedRecords(for: fixture.id)
+    }
+
+    private var todoDocument: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(Array(fixture.todos.enumerated()), id: \.offset) { _, todo in
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "circle")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Color.newUIPreviewAccent)
+                    Text(todo)
+                        .font(.body)
+                        .textSelection(.enabled)
+                }
             }
         }
+    }
+
+    private var relationDocument: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(relatedRecords) { relation in
+                Button {
+                    onOpenRelatedRecord(relation.id)
+                } label: {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(relation.fixture.record.title)
+                                .font(.headline)
+                                .foregroundStyle(Color.newUIPreviewPrimary)
+                                .multilineTextAlignment(.leading)
+                            Spacer(minLength: 12)
+                            Text(relation.fixture.record.capturedAt.formatted(date: .abbreviated, time: .omitted))
+                                .font(.caption)
+                                .foregroundStyle(Color.newUIPreviewSecondary)
+                        }
+                        if !relation.fixture.record.summary.isEmpty {
+                            Text(relation.fixture.record.summary)
+                                .font(.subheadline)
+                                .foregroundStyle(Color.newUIPreviewSecondary)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Label(relation.reason.title, systemImage: relation.reason.symbolName)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.newUIPreviewAccent)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 16)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if relation.id != relatedRecords.last?.id {
+                    Divider()
+                }
+            }
+        }
+    }
+
+    private var sectionTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .move(edge: sectionMovesForward ? .trailing : .leading).combined(with: .opacity),
+            removal: .move(edge: sectionMovesForward ? .leading : .trailing).combined(with: .opacity)
+        )
+    }
+
+    private var sectionSwipeGesture: some Gesture {
+        DragGesture(minimumDistance: 24)
+            .onEnded { value in
+                guard abs(value.translation.width) > abs(value.translation.height),
+                      abs(value.translation.width) > 48 else { return }
+                moveSection(by: value.translation.width < 0 ? 1 : -1)
+            }
     }
 
     private var encryptedPlaceholder: some View {
@@ -587,16 +807,21 @@ struct NewUIPreviewRecordDetailView: View {
 
     private var actionDock: some View {
         HStack(spacing: 10) {
-            actionButton("追加记录", symbol: "plus") { showsAppendSheet = true }
-            actionButton("涌现", symbol: "sparkles") { showsEmergenceSheet = true }
+            actionButton(
+                "编辑",
+                symbol: "pencil",
+                isDisabled: fixture.record.isEncrypted
+            ) { showsEditSheet = true }
+            actionButton("Notti 涌现", symbol: "sparkles") { showsEmergenceSheet = true }
         }
-        .padding(.horizontal, 18)
-        .padding(.top, 10)
-        .padding(.bottom, 8)
-        .background(Color.newUIPreviewBackground.opacity(0.9))
     }
 
-    private func actionButton(_ title: LocalizedStringKey, symbol: String, action: @escaping () -> Void) -> some View {
+    private func actionButton(
+        _ title: LocalizedStringKey,
+        symbol: String,
+        isDisabled: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             Label(title, systemImage: symbol)
                 .font(.headline)
@@ -610,6 +835,7 @@ struct NewUIPreviewRecordDetailView: View {
                 )
         }
         .buttonStyle(NewUIPreviewPressStyle())
+        .disabled(isDisabled)
     }
 
     private var infoSheet: some View {
@@ -737,41 +963,173 @@ private struct NewUIPreviewFullScreenMediaView: View {
     }
 }
 
-private struct NewUIPreviewAppendRecordSheet: View {
+private struct NewUIPreviewEditRecordSheet: View {
+    let fixture: NewUIPreviewRecordFixture
+    let onSave: (NoteRecord, [String]) -> Void
+
     @Environment(\.dismiss) private var dismiss
-    @State private var text = ""
+    @State private var title: String
+    @State private var summary: String
+    @State private var detailedContent: String
+    @State private var todosText: String
+    @State private var rawText: String
+    @State private var keyPointsText: String
+    @State private var definitionsText: String
+
+    init(
+        fixture: NewUIPreviewRecordFixture,
+        onSave: @escaping (NoteRecord, [String]) -> Void
+    ) {
+        self.fixture = fixture
+        self.onSave = onSave
+        _title = State(initialValue: fixture.record.title)
+        _summary = State(initialValue: fixture.record.summary)
+        _detailedContent = State(initialValue: fixture.record.detailedContent)
+        _todosText = State(initialValue: fixture.todos.joined(separator: "\n"))
+        _rawText = State(initialValue: fixture.record.ocrText)
+        _keyPointsText = State(initialValue: fixture.record.keyPoints.joined(separator: "\n"))
+        _definitionsText = State(initialValue: fixture.record.definitions.map {
+            "\($0.term)：\($0.explanation)"
+        }.joined(separator: "\n"))
+    }
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                TextEditor(text: $text)
-                    .font(.body)
-                    .padding(10)
-                    .scrollContentBackground(.hidden)
-                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-                    .overlay(alignment: .topLeading) {
-                        if text.isEmpty {
-                            Text("补充这条记录…")
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal, 15)
-                                .padding(.vertical, 18)
-                                .allowsHitTesting(false)
-                        }
-                    }
+            Form {
+                Section("标题与摘要") {
+                    TextField("标题", text: $title)
+                    TextField("摘要", text: $summary, axis: .vertical)
+                        .lineLimit(3...8)
+                }
+
+                editorSection("详细内容", text: $detailedContent, minimumHeight: 150)
+                editorSection("待办（每行一项）", text: $todosText)
+                editorSection("原文", text: $rawText, minimumHeight: 130)
+                editorSection("要点（每行一项）", text: $keyPointsText)
+                editorSection("术语（每行“术语：解释”）", text: $definitionsText)
             }
-            .padding(20)
-            .navigationTitle("追加记录")
+            .navigationTitle("编辑记录")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("取消") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") { dismiss() }
-                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("保存") { save() }
+                        .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }
+    }
+
+    private func editorSection(
+        _ title: LocalizedStringKey,
+        text: Binding<String>,
+        minimumHeight: CGFloat = 96
+    ) -> some View {
+        Section(title) {
+            TextEditor(text: text)
+                .frame(minHeight: minimumHeight)
+        }
+    }
+
+    private func save() {
+        var record = fixture.record
+        record.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        record.summary = summary.trimmingCharacters(in: .whitespacesAndNewlines)
+        record.detailedContent = detailedContent.trimmingCharacters(in: .whitespacesAndNewlines)
+        record.ocrText = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        record.keyPoints = lines(from: keyPointsText)
+        record.definitions = lines(from: definitionsText).map(definition(from:))
+        record.editedAt = Date()
+        onSave(record, lines(from: todosText))
+        dismiss()
+    }
+
+    private func lines(from text: String) -> [String] {
+        text.components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    private func definition(from line: String) -> KeyDefinition {
+        guard let separator = line.firstIndex(where: { $0 == "：" || $0 == ":" }) else {
+            return KeyDefinition(term: line, explanation: "")
+        }
+        return KeyDefinition(
+            term: String(line[..<separator]).trimmingCharacters(in: .whitespacesAndNewlines),
+            explanation: String(line[line.index(after: separator)...])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+    }
+}
+
+private struct NewUIPreviewRawTextSheet: View {
+    let record: NoteRecord
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var query = ""
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                if rawText.isEmpty {
+                    Label("这条记录没有独立原文。", systemImage: "text.viewfinder")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.newUIPreviewSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(22)
+                } else {
+                    VStack(alignment: .leading, spacing: 14) {
+                        highlightedRawText
+                            .font(.body)
+                            .lineSpacing(6)
+                            .textSelection(.enabled)
+
+                        if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                           !NewUIPreviewRecordPresentation.rawMatches(query: query, record: record) {
+                            Text("原文中没有匹配结果")
+                                .font(.footnote.weight(.medium))
+                                .foregroundStyle(Color.newUIPreviewSecondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(22)
+                }
+            }
+            .navigationTitle("原文")
+            .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $query, prompt: "搜索原文")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var rawText: String {
+        NewUIPreviewRecordPresentation.rawText(for: record)
+    }
+
+    private var highlightedRawText: Text {
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return Text(rawText) }
+
+        var result = Text("")
+        var remaining = rawText.startIndex..<rawText.endIndex
+        while let match = rawText.range(
+            of: query,
+            options: [.caseInsensitive, .diacriticInsensitive],
+            range: remaining
+        ) {
+            result = result + Text(String(rawText[remaining.lowerBound..<match.lowerBound]))
+            result = result + Text(String(rawText[match]))
+                .bold()
+                .foregroundColor(Color.newUIPreviewAccent)
+            remaining = match.upperBound..<rawText.endIndex
+        }
+        return result + Text(String(rawText[remaining]))
     }
 }
 
@@ -780,7 +1138,7 @@ private struct NewUIPreviewEmergenceSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Label("涌现", systemImage: "sparkles")
+            Label("Notti 涌现", systemImage: "sparkles")
                 .font(.title2.bold())
                 .foregroundStyle(Color.newUIPreviewPrimary)
             Text(recordTitle)

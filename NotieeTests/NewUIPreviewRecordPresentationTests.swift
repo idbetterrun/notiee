@@ -44,11 +44,6 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
             record: record,
             todos: todos
         )
-        let raw = NewUIPreviewRecordPresentation.visibleText(
-            for: .raw,
-            record: record,
-            todos: todos
-        )
         let todoText = NewUIPreviewRecordPresentation.visibleText(
             for: .todos,
             record: record,
@@ -57,8 +52,8 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
 
         XCTAssertTrue(organized.contains("整理摘要"))
         XCTAssertFalse(organized.contains("照片原文"))
-        XCTAssertEqual(raw, "照片原文")
-        XCTAssertFalse(raw.contains("整理正文"))
+        XCTAssertEqual(NewUIPreviewRecordPresentation.rawText(for: record), "照片原文")
+        XCTAssertFalse(NewUIPreviewRecordPresentation.rawText(for: record).contains("整理正文"))
         XCTAssertEqual(todoText, "提交纪要\n回复邮件")
         XCTAssertFalse(todoText.contains("照片原文"))
     }
@@ -82,12 +77,39 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
             record: record,
             todos: []
         ))
-        XCTAssertTrue(NewUIPreviewRecordPresentation.matches(
+        XCTAssertTrue(NewUIPreviewRecordPresentation.rawMatches(
             query: "WHITEBOARD",
-            section: .raw,
-            record: record,
-            todos: []
+            record: record
         ))
+    }
+
+    func testMainSectionsHaveStableOrderAndExcludeRawText() {
+        XCTAssertEqual(
+            NewUIPreviewRecordDetailSection.allCases,
+            [.organized, .todos, .relations]
+        )
+        XCTAssertEqual(NewUIPreviewRecordPresentation.rawText(for: makeRecord(
+            summary: "",
+            detailedContent: "",
+            ocrText: "独立原文"
+        )), "独立原文")
+    }
+
+    func testRelationsProjectionIncludesRelatedContentAndReason() throws {
+        let state = NewUIPreviewState(startsContextTimer: false)
+        let fixture = try XCTUnwrap(state.recordFixtures.first)
+        let relations = state.relatedRecords(for: fixture.id)
+
+        let visible = NewUIPreviewRecordPresentation.visibleText(
+            for: .relations,
+            record: fixture.record,
+            todos: fixture.todos,
+            relations: relations
+        )
+
+        XCTAssertEqual(relations.count, 3)
+        XCTAssertTrue(visible.contains(relations[0].fixture.record.title))
+        XCTAssertTrue(visible.contains(relations[0].reason.title))
     }
 
     func testEncryptedRecordNeverLeaksToProjectionSearchOrShare() {
@@ -117,6 +139,8 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
             ))
         }
         XCTAssertEqual(NewUIPreviewRecordPresentation.organizedMarkdown(for: record), "")
+        XCTAssertEqual(NewUIPreviewRecordPresentation.rawText(for: record), "")
+        XCTAssertFalse(NewUIPreviewRecordPresentation.rawMatches(query: "sensitive", record: record))
         XCTAssertEqual(NewUIPreviewRecordPresentation.shareText(for: record, todos: todos), "")
     }
 

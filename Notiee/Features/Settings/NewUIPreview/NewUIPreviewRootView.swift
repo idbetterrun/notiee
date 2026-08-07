@@ -39,12 +39,11 @@ struct NewUIPreviewRootView: View {
             overlay
                 .zIndex(3)
         }
-        .animation(pageAnimation, value: nottiState.destination)
         .animation(overlayAnimation, value: nottiState.overlay)
         .environmentObject(nottiState)
         .navigationBarBackButtonHidden(true)
-        .navigationTitle(recordsNavigationIsActive ? nottiState.selectedRecordsScope.title : "")
-        .navigationBarTitleDisplayMode(recordsNavigationIsActive ? .large : .inline)
+        .navigationTitle(recordsDestinationIsSelected ? nottiState.selectedRecordsScope.title : "")
+        .navigationBarTitleDisplayMode(recordsDestinationIsSelected ? .large : .inline)
         .toolbarBackground(
             recordsNavigationIsActive ? .visible : .hidden,
             for: .navigationBar
@@ -67,37 +66,30 @@ struct NewUIPreviewRootView: View {
         .onAppear { nottiState.namespace = nottiNamespace }
     }
 
+    @ViewBuilder
     private var destinationPages: some View {
-        ZStack {
+        switch nottiState.destination {
+        case .today:
             NewUIPreviewTodayView()
-                .opacity(pageIsVisible(.today) ? 1 : 0)
-                .offset(x: pageOffset(for: .today))
                 .allowsHitTesting(
-                    nottiState.destination == .today
-                        && nottiState.overlay == nil
+                    nottiState.overlay == nil
                         && !nottiState.isExpanded
                 )
                 .accessibilityHidden(
-                    nottiState.destination != .today
-                        || nottiState.overlay != nil
+                    nottiState.overlay != nil
                         || nottiState.isExpanded
                 )
-                .zIndex(nottiState.destination == .today ? 1 : 0)
 
+        case .records:
             NewUIPreviewRecordsView()
-                .opacity(pageIsVisible(.records) ? 1 : 0)
-                .offset(x: pageOffset(for: .records))
                 .allowsHitTesting(
-                    nottiState.destination == .records
-                        && nottiState.overlay == nil
+                    nottiState.overlay == nil
                         && !nottiState.isExpanded
                 )
                 .accessibilityHidden(
-                    nottiState.destination != .records
-                        || nottiState.overlay != nil
+                    nottiState.overlay != nil
                         || nottiState.isExpanded
                 )
-                .zIndex(nottiState.destination == .records ? 1 : 0)
         }
     }
 
@@ -110,14 +102,15 @@ struct NewUIPreviewRootView: View {
             }
             .transition(childPageTransition)
         case .recordDetail(let recordID, let origin):
-            if let fixture = nottiState.recordFixture(id: recordID) {
-                NewUIPreviewRecordDetailView(
-                    fixture: fixture,
+            if nottiState.recordFixture(id: recordID) != nil {
+                NewUIPreviewRecordDetailHost(
+                    initialRecordID: recordID,
                     transitionOrigin: origin,
-                    transitionNamespace: reduceMotion ? nil : nottiNamespace
-                ) {
-                    nottiState.dismissOverlay()
-                }
+                    transitionNamespace: reduceMotion ? nil : nottiNamespace,
+                    onClose: {
+                        nottiState.dismissOverlay()
+                    }
+                )
                 .transition(.opacity)
             }
         case nil:
@@ -126,29 +119,18 @@ struct NewUIPreviewRootView: View {
     }
 
     private var recordsNavigationIsActive: Bool {
-        nottiState.destination == .records
+        recordsDestinationIsSelected
             && nottiState.overlay == nil
             && !nottiState.isExpanded
+    }
+
+    private var recordsDestinationIsSelected: Bool {
+        nottiState.destination == .records
     }
 
     private var hasModuleOverlay: Bool {
         guard case .module = nottiState.overlay else { return false }
         return true
-    }
-
-    private var hasRecordDetailOverlay: Bool {
-        guard case .recordDetail = nottiState.overlay else { return false }
-        return true
-    }
-
-    private func pageIsVisible(_ destination: NewUIPreviewDestination) -> Bool {
-        nottiState.destination == destination && !hasRecordDetailOverlay
-    }
-
-    private var pageAnimation: Animation {
-        reduceMotion
-            ? .easeOut(duration: 0.18)
-            : .snappy(duration: 0.32, extraBounce: 0)
     }
 
     private var overlayAnimation: Animation {
@@ -161,15 +143,6 @@ struct NewUIPreviewRootView: View {
         reduceMotion
             ? .opacity
             : .move(edge: .trailing).combined(with: .opacity)
-    }
-
-    private func pageOffset(for destination: NewUIPreviewDestination) -> CGFloat {
-        guard !reduceMotion else { return 0 }
-        switch (destination, nottiState.destination) {
-        case (.today, .today), (.records, .records): return 0
-        case (.today, .records): return -18
-        case (.records, .today): return 18
-        }
     }
 
     @ToolbarContentBuilder

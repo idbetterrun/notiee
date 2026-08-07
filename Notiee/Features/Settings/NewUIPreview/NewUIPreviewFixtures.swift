@@ -39,13 +39,50 @@ struct NewUIPreviewMedia: Identifiable, Equatable {
     }
 }
 
+enum NewUIPreviewRecordRelationReason: String, Equatable, Hashable {
+    case sameEvent
+    case sameFolder
+    case similarTopic
+
+    var title: String {
+        switch self {
+        case .sameEvent: return String(localized: "同一日程")
+        case .sameFolder: return String(localized: "同一文件夹")
+        case .similarTopic: return String(localized: "相似主题")
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .sameEvent: return "calendar"
+        case .sameFolder: return "folder"
+        case .similarTopic: return "sparkles"
+        }
+    }
+}
+
+struct NewUIPreviewRecordRelation: Identifiable, Equatable, Hashable {
+    let recordID: UUID
+    let reason: NewUIPreviewRecordRelationReason
+
+    var id: UUID { recordID }
+}
+
+struct NewUIPreviewResolvedRecordRelation: Identifiable, Equatable {
+    let fixture: NewUIPreviewRecordFixture
+    let reason: NewUIPreviewRecordRelationReason
+
+    var id: UUID { fixture.id }
+}
+
 struct NewUIPreviewRecordFixture: Identifiable, Equatable {
-    let record: NoteRecord
+    var record: NoteRecord
     let previewSource: NewUIPreviewRecordSource
     let media: [NewUIPreviewMedia]
     let eventName: String?
     let folderName: String?
-    let todos: [String]
+    var todos: [String]
+    let relations: [NewUIPreviewRecordRelation]
 
     var id: UUID { record.id }
 
@@ -70,7 +107,12 @@ enum NewUIPreviewFixtures {
             isFavorite: true,
             eventName: "产品周会",
             folderName: "工作",
-            todos: ["整理路线图", "发送会议纪要"]
+            todos: ["整理路线图", "发送会议纪要"],
+            relations: [
+                ("10000000-0000-0000-0000-000000000011", .sameEvent),
+                ("10000000-0000-0000-0000-000000000004", .sameFolder),
+                ("10000000-0000-0000-0000-000000000002", .similarTopic)
+            ]
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000002",
@@ -82,7 +124,11 @@ enum NewUIPreviewFixtures {
             detailedContent: "用更轻的事实行承接大标题，让首屏先回答此刻最重要的事。",
             source: .text,
             folderName: "灵感",
-            todos: ["画一版无框 Hero 草图"]
+            todos: ["画一版无框 Hero 草图"],
+            relations: [
+                ("10000000-0000-0000-0000-000000000001", .similarTopic),
+                ("10000000-0000-0000-0000-000000000011", .similarTopic)
+            ]
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000009",
@@ -101,7 +147,11 @@ enum NewUIPreviewFixtures {
             title: "街角光影",
             summary: "两张照片记录了午后建筑立面与树影。",
             detailedContent: "保留横向照片和竖向照片的真实比例。",
-            folderName: "生活"
+            folderName: "生活",
+            relations: [
+                ("10000000-0000-0000-0000-000000000009", .similarTopic),
+                ("10000000-0000-0000-0000-000000000007", .sameFolder)
+            ]
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000004",
@@ -112,7 +162,11 @@ enum NewUIPreviewFixtures {
             detailedContent: "尚未完成。",
             processingState: .processing,
             eventName: "设计评审",
-            folderName: "工作"
+            folderName: "工作",
+            relations: [
+                ("10000000-0000-0000-0000-000000000001", .sameFolder),
+                ("10000000-0000-0000-0000-000000000011", .sameFolder)
+            ]
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000005",
@@ -144,7 +198,11 @@ enum NewUIPreviewFixtures {
             detailedContent: "## 步骤\n\n1. 备料\n2. 熬酱\n3. 煮面\n4. 装盘",
             isFavorite: true,
             folderName: "生活",
-            todos: ["补充食材用量"]
+            todos: ["补充食材用量"],
+            relations: [
+                ("10000000-0000-0000-0000-000000000003", .sameFolder),
+                ("10000000-0000-0000-0000-000000000009", .similarTopic)
+            ]
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000008",
@@ -170,7 +228,11 @@ enum NewUIPreviewFixtures {
             source: .text,
             previewSource: .audio,
             eventName: "散步",
-            todos: ["整理成界面草图"]
+            todos: ["整理成界面草图"],
+            relations: [
+                ("10000000-0000-0000-0000-000000000002", .similarTopic),
+                ("10000000-0000-0000-0000-000000000011", .similarTopic)
+            ]
         ),
         fixture(
             id: "10000000-0000-0000-0000-000000000011",
@@ -181,7 +243,13 @@ enum NewUIPreviewFixtures {
             detailedContent: "## 复盘\n\n保留有效决策，同时继续验证首次体验。",
             source: .notti,
             previewSource: .notti,
-            folderName: "工作"
+            eventName: "产品周会",
+            folderName: "工作",
+            relations: [
+                ("10000000-0000-0000-0000-000000000001", .sameEvent),
+                ("10000000-0000-0000-0000-000000000004", .sameFolder),
+                ("10000000-0000-0000-0000-000000000010", .similarTopic)
+            ]
         )
     ]
 
@@ -215,7 +283,8 @@ enum NewUIPreviewFixtures {
         isDeleted: Bool = false,
         eventName: String? = nil,
         folderName: String? = nil,
-        todos: [String] = []
+        todos: [String] = [],
+        relations: [(String, NewUIPreviewRecordRelationReason)] = []
     ) -> NewUIPreviewRecordFixture {
         let media = (0..<mediaCount).map { index in
             mediaFixture(recordID: id, index: mediaStartIndex + index)
@@ -242,7 +311,11 @@ enum NewUIPreviewFixtures {
             media: media,
             eventName: eventName,
             folderName: folderName,
-            todos: todos
+            todos: todos,
+            relations: relations.compactMap { rawID, reason in
+                guard let recordID = UUID(uuidString: rawID) else { return nil }
+                return NewUIPreviewRecordRelation(recordID: recordID, reason: reason)
+            }
         )
     }
 

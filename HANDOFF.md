@@ -36,6 +36,23 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-07 — Redesigned the NewUIPreview record detail _(both targets; experimental preview only)_
+
+- Rebuilt the detail reading surface so image media begins at the screen top behind floating Glass toolbar controls. No-media and encrypted records reserve an equivalent safe-area offset. The bottom Edit / Notti Emergence controls are now independent floating Glass buttons, and the document keeps enough trailing space to scroll fully behind them without a full-width mask.
+- Replaced the old Organized / Original / Todos strip with an animated Organized / Todos / Connections selector. The selected thumb uses matched geometry, content moves directionally, horizontal swipes change sections, and Reduce Motion falls back to non-positional updates. The sticky header retains only the selector's own Glass surface.
+- Added deterministic related-record fixtures and preview-only UUID path navigation. Connections show at most three safe records with title, date, summary, and reason, excluding the current, deleted, and encrypted records; nested detail navigation returns one record at a time before dismissing the original overlay.
+- Moved Original into the overflow menu and added a selectable, searchable, highlighted sheet. Encrypted originals remain disabled and redacted. Bottom and overflow Edit actions share a prefilled in-memory form covering title, summary, detailed content, todos, OCR, key points, and definitions; saving updates detail, Records cards/search, and any projected Today row for the preview lifecycle only.
+- Renamed the detail action and sheet to `Notti Emergence`, added the new detail/relation/editor copy to all three localization catalogs, and expanded projection/state/path tests. Production detail, persistence, backend, and both targets' AI transports remain unchanged.
+- Low-memory verification only: all app Swift files parse; the complete NewUIPreview source set strictly type-checks in both normal and `NOTIEE_PLUS` configurations; an emitted testable preview module and every `NewUIPreview*` XCTest source strictly type-check; project/localization plist lint, localization key parity, and `git diff --check` pass. Xcode, Simulator, `xcodebuild`, and runtime visual QA were intentionally not used.
+- The requested standalone title-fix commit and follow-up detail-redesign commit could not be created because this environment still cannot write `.git/index.lock`; the prior Git authorization service rejection is unchanged. All changes remain unstaged on `main`, and nothing was pushed.
+
+### 2026-08-07 — Fixed missing Records title after destination changes _(both targets; experimental preview only)_
+
+- Changed the NewUIPreview destination host to mount only the selected Today or Records page. The navigation bar can now bind to the active Records `ScrollView` immediately instead of discovering it only after the user scrolls past an invisible sibling scroll view.
+- Kept the Records large-title configuration attached whenever Records is the selected destination. Notti and detail overlays still hide the navigation bar, but no longer clear and rebuild its title state when they close.
+- Records scope/filter/search state remains owned by `NewUIPreviewState`. Returning from Today intentionally creates Records at its top position, matching the fresh large-title state; opening and closing Notti or record detail does not replace the selected destination.
+- Low-memory verification only: all app Swift files parse, and the complete NewUIPreview source set type-checks with strict concurrency for both the free and `NOTIEE_PLUS` configurations. Project/localization plist lint and `git diff --check` pass. Simulator visual confirmation remains pending because Xcode/Simulator were intentionally not run under the user's memory constraint. The intended standalone commit is currently blocked by the sandbox Git authorization service; no push was performed.
+
 ### 2026-08-07 — Refined NewUIPreview Notti conversation chrome and typography _(both targets; experimental preview only)_
 
 - Replaced the conversation-derived center title with the fixed product title `Notti`; the generated conversation title remains in preview state and is still used by history rows only.

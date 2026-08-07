@@ -230,7 +230,7 @@ final class NewUIPreviewState: ObservableObject {
     @Published var todayRecords: [NewUIPreviewTodayRecord] = []
     @Published var statistics: NewUIPreviewStatistics = NewUIPreviewStatistics(todayCount: 0, consecutiveDays: 8)
 
-    let recordFixtures: [NewUIPreviewRecordFixture]
+    @Published private(set) var recordFixtures: [NewUIPreviewRecordFixture]
 
     @Published var captureDirection: NewUIPreviewCaptureDirection?
     @Published var capturePhase: NewUIPreviewCapturePhase = .idle
@@ -317,6 +317,36 @@ final class NewUIPreviewState: ObservableObject {
         guard selectedRecordsScope != scope else { return }
         selectedRecordsScope = scope
         recordsScrollRevision += 1
+    }
+
+    func updateRecord(_ record: NoteRecord, todos: [String]) {
+        guard let index = recordFixtures.firstIndex(where: { $0.id == record.id }) else { return }
+        recordFixtures[index].record = record
+        recordFixtures[index].todos = todos
+        if let todayIndex = todayRecords.firstIndex(where: { $0.id == record.id }) {
+            todayRecords[todayIndex] = NewUIPreviewTodayRecord(
+                id: record.id,
+                title: record.title,
+                summary: record.summary,
+                thumbnailImageName: recordFixtures[index].media.first?.imageName
+            )
+        }
+    }
+
+    func relatedRecords(for recordID: UUID) -> [NewUIPreviewResolvedRecordRelation] {
+        guard let source = recordFixtures.first(where: { $0.id == recordID }) else { return [] }
+
+        return source.relations.compactMap { relation in
+            guard relation.recordID != recordID,
+                  let fixture = recordFixtures.first(where: { $0.id == relation.recordID }),
+                  !fixture.record.isDeleted,
+                  !fixture.record.isEncrypted else {
+                return nil
+            }
+            return NewUIPreviewResolvedRecordRelation(fixture: fixture, reason: relation.reason)
+        }
+        .prefix(3)
+        .map { $0 }
     }
 
     private func scopeIncludes(_ fixture: NewUIPreviewRecordFixture) -> Bool {
