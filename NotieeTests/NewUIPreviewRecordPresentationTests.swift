@@ -31,6 +31,18 @@ final class NewUIPreviewRecordPresentationTests: XCTestCase {
         XCTAssertTrue(markdown.contains("解释"))
     }
 
+    func testOrganizedMarkdownDoesNotInsertEmptyDetailHeadingBeforeExistingHeading() {
+        let record = makeRecord(
+            summary: "摘要内容",
+            detailedContent: "## 决策\n\n先完成发布节奏。"
+        )
+
+        let markdown = NewUIPreviewRecordPresentation.organizedMarkdown(for: record)
+
+        XCTAssertFalse(markdown.contains("## \(String(localized: "详细内容"))\n\n## 决策"))
+        XCTAssertTrue(markdown.contains("## 决策\n\n先完成发布节奏。"))
+    }
+
     func testVisibleTextOnlyUsesSelectedSectionContent() {
         let record = makeRecord(
             summary: "整理摘要",

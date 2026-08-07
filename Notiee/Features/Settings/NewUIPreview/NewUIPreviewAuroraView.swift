@@ -126,8 +126,8 @@ final class NewUIPreviewAuroraRenderer: NSObject, MTKViewDelegate {
 
         var uniforms = NewUIPreviewAuroraUniforms(
             time: elapsedTime,
-            amplitude: 0.82,
-            blend: 0.42,
+            amplitude: 0.58,
+            blend: 0.62,
             resolution: SIMD2(
                 max(Float(view.drawableSize.width), 1),
                 max(Float(view.drawableSize.height), 1)
@@ -201,9 +201,9 @@ private struct NewUIPreviewAuroraColors {
 
     init(hex: String?) {
         let base = Self.parse(hex) ?? SIMD3(9.0 / 255.0, 197.0 / 255.0, 118.0 / 255.0)
-        self.base = base
-        light = Self.mix(base, SIMD3(repeating: 1), amount: 0.38)
-        deep = Self.mix(base, SIMD3(repeating: 0), amount: 0.28)
+        self.base = Self.mix(base, SIMD3(repeating: 1), amount: 0.12)
+        light = Self.mix(base, SIMD3(repeating: 1), amount: 0.58)
+        deep = Self.mix(base, SIMD3(repeating: 1), amount: 0.06)
     }
 
     private static func parse(_ hex: String?) -> SIMD3<Float>? {

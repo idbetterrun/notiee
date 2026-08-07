@@ -18,6 +18,7 @@ struct NewUIPreviewRootView: View {
                     anchor: .center
                 )
                 .offset(x: !hasModuleOverlay || reduceMotion ? 0 : -12)
+                .animation(pageAnimation, value: nottiState.destination)
 
             if nottiState.overlay == nil && !nottiState.isExpanded {
                 NewUIPreviewDockBar()
@@ -79,6 +80,7 @@ struct NewUIPreviewRootView: View {
                     nottiState.overlay != nil
                         || nottiState.isExpanded
                 )
+                .transition(todayPageTransition)
 
         case .records:
             NewUIPreviewRecordsView()
@@ -90,6 +92,7 @@ struct NewUIPreviewRootView: View {
                     nottiState.overlay != nil
                         || nottiState.isExpanded
                 )
+                .transition(recordsPageTransition)
         }
     }
 
@@ -137,6 +140,22 @@ struct NewUIPreviewRootView: View {
         reduceMotion
             ? .easeOut(duration: 0.18)
             : .snappy(duration: 0.38, extraBounce: 0.02)
+    }
+
+    private var pageAnimation: Animation? {
+        reduceMotion ? nil : .snappy(duration: 0.34, extraBounce: 0)
+    }
+
+    private var todayPageTransition: AnyTransition {
+        reduceMotion
+            ? .identity
+            : .move(edge: .leading).combined(with: .opacity)
+    }
+
+    private var recordsPageTransition: AnyTransition {
+        reduceMotion
+            ? .identity
+            : .move(edge: .trailing).combined(with: .opacity)
     }
 
     private var childPageTransition: AnyTransition {

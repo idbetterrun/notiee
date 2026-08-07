@@ -40,7 +40,7 @@ struct NewUIPreviewTodayView: View {
                         isActive: nottiState.destination == .today
                     )
                         .frame(height: 300)
-                        .opacity(colorScheme == .dark ? 0.62 : 0.78)
+                        .opacity(colorScheme == .dark ? 0.48 : 0.68)
                     Spacer(minLength: 0)
                 }
                 .ignoresSafeArea(edges: .top)

@@ -32,7 +32,11 @@ struct NewUIPreviewRecordPresentation {
             sections.append("## \(String(localized: "摘要"))\n\n\(summary)")
         }
         if !detail.isEmpty {
-            sections.append("## \(String(localized: "详细内容"))\n\n\(detail)")
+            if startsWithMarkdownHeading(detail) {
+                sections.append(detail)
+            } else {
+                sections.append("## \(String(localized: "详细内容"))\n\n\(detail)")
+            }
         }
         if !record.keyPoints.isEmpty {
             let points = record.keyPoints
@@ -155,6 +159,10 @@ struct NewUIPreviewRecordPresentation {
         )
     }
 
+    private static func startsWithMarkdownHeading(_ value: String) -> Bool {
+        value.trimmingCharacters(in: .whitespacesAndNewlines).first == "#"
+    }
+
     private static func trimmed(_ value: String) -> String {
         value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -186,7 +194,9 @@ struct NewUIPreviewRecordDetailHost: View {
     let onClose: () -> Void
 
     @EnvironmentObject private var previewState: NewUIPreviewState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var route: NewUIPreviewRecordDetailRoute
+    @State private var movesForward = true
 
     init(
         initialRecordID: UUID,
@@ -202,17 +212,15 @@ struct NewUIPreviewRecordDetailHost: View {
     }
 
     var body: some View {
-        NavigationStack(path: $route.path) {
+        ZStack {
             detail(
-                recordID: initialRecordID,
-                origin: transitionOrigin,
-                namespace: transitionNamespace
+                recordID: route.currentID,
+                origin: route.path.isEmpty ? transitionOrigin : nil,
+                namespace: route.path.isEmpty ? transitionNamespace : nil
             )
-            .navigationDestination(for: UUID.self) { recordID in
-                detail(recordID: recordID, origin: nil, namespace: nil)
-            }
+            .id(route.currentID)
+            .transition(detailTransition)
         }
-        .toolbar(.hidden, for: .navigationBar)
     }
 
     @ViewBuilder
@@ -227,19 +235,54 @@ struct NewUIPreviewRecordDetailHost: View {
                 transitionOrigin: origin,
                 transitionNamespace: namespace,
                 onClose: closeCurrent,
-                onOpenRelatedRecord: { route.open($0) }
+                onOpenRelatedRecord: openRelatedRecord
             )
         } else {
-            Color.newUIPreviewBackground
-                .ignoresSafeArea()
-                .onAppear(perform: closeCurrent)
+            ZStack(alignment: .topLeading) {
+                Color.newUIPreviewBackground.ignoresSafeArea()
+                NewUIPreviewCircleButton(
+                    symbol: "chevron.left",
+                    label: "返回",
+                    action: closeCurrent
+                )
+                .padding(18)
+            }
         }
     }
 
     private func closeCurrent() {
-        if !route.goBack() {
+        guard !route.path.isEmpty else {
             onClose()
+            return
         }
+        movesForward = false
+        if reduceMotion {
+            route.goBack()
+        } else {
+            _ = withAnimation(.snappy(duration: 0.32, extraBounce: 0)) {
+                route.goBack()
+            }
+        }
+    }
+
+    private func openRelatedRecord(_ recordID: UUID) {
+        guard previewState.recordFixture(id: recordID) != nil else { return }
+        movesForward = true
+        if reduceMotion {
+            route.open(recordID)
+        } else {
+            withAnimation(.snappy(duration: 0.32, extraBounce: 0)) {
+                route.open(recordID)
+            }
+        }
+    }
+
+    private var detailTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .move(edge: movesForward ? .trailing : .leading).combined(with: .opacity),
+            removal: .move(edge: movesForward ? .leading : .trailing).combined(with: .opacity)
+        )
     }
 }
 
@@ -342,6 +385,7 @@ struct NewUIPreviewRecordDetailView: View {
     private var toolbar: some View {
         HStack(spacing: 10) {
             NewUIPreviewCircleButton(symbol: "chevron.left", label: "返回", action: onClose)
+                .background(detailControlSurface, in: Circle())
 
             Spacer(minLength: 4)
 
@@ -367,6 +411,7 @@ struct NewUIPreviewRecordDetailView: View {
                 .padding(.leading, 14)
                 .padding(.trailing, 8)
                 .frame(height: 50)
+                .background(detailControlSurface, in: Capsule())
                 .newUIPreviewGlass(in: Capsule(), interactive: true)
             } else {
                 NewUIPreviewCircleButton(
@@ -374,10 +419,12 @@ struct NewUIPreviewRecordDetailView: View {
                     label: "搜索当前记录",
                     action: { isSearching = true }
                 )
+                .background(detailControlSurface, in: Circle())
                 .disabled(fixture.record.isEncrypted)
 
                 if fixture.record.isEncrypted {
                     NewUIPreviewCircleButton(symbol: "square.and.arrow.up", label: "分享", action: {})
+                        .background(detailControlSurface, in: Circle())
                         .disabled(true)
                 } else {
                     ShareLink(item: NewUIPreviewRecordPresentation.shareText(
@@ -389,6 +436,7 @@ struct NewUIPreviewRecordDetailView: View {
                             .foregroundStyle(Color.newUIPreviewPrimary.opacity(0.9))
                             .frame(width: 50, height: 50)
                             .contentShape(Circle())
+                            .background(detailControlSurface, in: Circle())
                             .newUIPreviewGlass(in: Circle(), interactive: true)
                     }
                     .buttonStyle(NewUIPreviewPressStyle())
@@ -417,6 +465,7 @@ struct NewUIPreviewRecordDetailView: View {
                         .foregroundStyle(Color.newUIPreviewPrimary.opacity(0.9))
                         .frame(width: 50, height: 50)
                         .contentShape(Circle())
+                        .background(detailControlSurface, in: Circle())
                         .newUIPreviewGlass(in: Circle(), interactive: true)
                 }
                 .buttonStyle(NewUIPreviewPressStyle())
@@ -425,6 +474,10 @@ struct NewUIPreviewRecordDetailView: View {
         }
         .padding(.horizontal, 16)
         .zIndex(2)
+    }
+
+    private var detailControlSurface: Color {
+        Color(uiColor: .systemBackground).opacity(0.78)
     }
 
     private func detailScroll(topContentInset: CGFloat) -> some View {
@@ -604,6 +657,10 @@ struct NewUIPreviewRecordDetailView: View {
             }
         }
         .padding(4)
+        .background(
+            Color(uiColor: .secondarySystemBackground).opacity(0.9),
+            in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+        )
         .newUIPreviewGlass(in: RoundedRectangle(cornerRadius: 8, style: .continuous), interactive: true)
     }
 
@@ -829,6 +886,10 @@ struct NewUIPreviewRecordDetailView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(
+                    Color(uiColor: .systemBackground).opacity(0.88),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
                 .newUIPreviewGlass(
                     in: RoundedRectangle(cornerRadius: 8, style: .continuous),
                     interactive: true

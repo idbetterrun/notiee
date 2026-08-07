@@ -348,6 +348,16 @@ final class NewUIPreviewStateTests: XCTestCase {
         state.openRecord(recordID, origin: .records)
         XCTAssertEqual(state.overlay, .recordDetail(recordID: recordID, origin: .records))
 
+        state.openRecord(state.recordFixtures[1].id, origin: .records)
+        XCTAssertEqual(
+            state.overlay,
+            .recordDetail(recordID: recordID, origin: .records),
+            "A repeated card action must not replace an in-flight detail route"
+        )
+
+        state.dismissOverlay()
+        XCTAssertNil(state.overlay)
+
         state.openModule(.todos)
         XCTAssertEqual(state.overlay, .module(.todos))
 

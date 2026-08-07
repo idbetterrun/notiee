@@ -105,7 +105,8 @@ fragment float4 newUIPreviewAuroraFragment(
 
     // Keep the effect bounded to the Hero area even when the host view is taller.
     float bottomFade = 1.0 - smoothstep(0.60, 0.98, uv.y);
-    alpha = clamp(alpha * bottomFade * 0.26, 0.0, 0.26);
-    float3 color = rampColor * clamp(intensity, 0.25, 1.0);
+    alpha = clamp(alpha * bottomFade * 0.20, 0.0, 0.20);
+    float visibleIntensity = clamp(intensity, 0.35, 1.0);
+    float3 color = mix(rampColor, float3(1.0), (1.0 - visibleIntensity) * 0.34);
     return float4(color * alpha, alpha);
 }

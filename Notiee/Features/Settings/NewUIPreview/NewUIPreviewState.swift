@@ -376,11 +376,12 @@ final class NewUIPreviewState: ObservableObject {
     }
 
     func openRecord(_ id: UUID, origin: NewUIPreviewRecordOrigin) {
-        guard recordFixture(id: id) != nil else { return }
+        guard overlay == nil, recordFixture(id: id) != nil else { return }
         overlay = .recordDetail(recordID: id, origin: origin)
     }
 
     func openModule(_ section: NewUIPreviewTodaySection) {
+        guard overlay == nil else { return }
         overlay = .module(section)
     }
 

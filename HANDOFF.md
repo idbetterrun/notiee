@@ -36,6 +36,14 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-07 — Fixed NewUIPreview page, detail, and Aurora regressions _(both targets; experimental preview only)_
+
+- Restored directional Today/Records transitions while retaining the single-mounted destination architecture that fixes the Records large-title bug. Today exits/enters from the leading edge and Records from the trailing edge; Reduce Motion still switches immediately.
+- Replaced the record-detail host's nested system `NavigationStack` with a preview-owned UUID path rendered in a local `ZStack`. Related records still push and pop directionally, but detail presentation can no longer mutate or dismiss the outer Settings navigation path. Repeated card/module actions are ignored while an overlay is already active.
+- Recalibrated the active-event Aurora: removed the green-to-black palette mix, brightened low-intensity shader areas toward white, lowered amplitude/opacity, and kept the existing transparent premultiplied blend. This removes the dark-mask appearance without removing motion.
+- Stabilized record-detail chrome over media and text by giving each individual top control, the segmented selector, and each bottom action its own semantic surface beneath Glass; no full-width toolbar or bottom mask was restored. Organized Markdown now avoids inserting an empty `Detailed Content` heading before fixture content that already starts with a Markdown heading.
+- Added regression assertions for repeated overlay routing and pre-headed Markdown. Low-memory verification: all app Swift parses, both normal and `NOTIEE_PLUS` NewUIPreview source sets strictly type-check, all `NewUIPreview*` XCTest sources strictly type-check against an emitted testable module, the Aurora Metal shader compiles directly with an isolated module cache, and `git diff --check` passes. Xcode, Simulator, and `xcodebuild` were not used. No commit or push was created.
+
 ### 2026-08-07 — Redesigned the NewUIPreview record detail _(both targets; experimental preview only)_
 
 - Rebuilt the detail reading surface so image media begins at the screen top behind floating Glass toolbar controls. No-media and encrypted records reserve an equivalent safe-area offset. The bottom Edit / Notti Emergence controls are now independent floating Glass buttons, and the document keeps enough trailing space to scroll fully behind them without a full-width mask.
