@@ -60,7 +60,7 @@ struct NewUIPreviewComposerView: View {
 
     private var topBar: some View {
         ZStack {
-            Text(chat.conversationTitle)
+            Text(verbatim: "Notti")
                 .font(.headline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.78)
@@ -79,22 +79,18 @@ struct NewUIPreviewComposerView: View {
 
                 Spacer(minLength: 0)
 
-                if !chat.messages.isEmpty {
-                    Button {
-                        beginNewConversation()
-                    } label: {
-                        Image(systemName: "square.and.pencil")
-                            .font(.system(size: 17, weight: .semibold))
-                            .frame(width: 44, height: 44)
-                            .contentShape(Circle())
-                            .newUIPreviewGlass(in: Circle(), interactive: true)
-                    }
-                    .buttonStyle(NewUIPreviewPressStyle())
-                    .accessibilityLabel("新对话")
-                }
-
                 NewUIPreviewGlassContainer {
                     HStack(spacing: 0) {
+                        Button {
+                            beginNewConversation()
+                        } label: {
+                            Image(systemName: "square.and.pencil")
+                                .font(.system(size: 17, weight: .semibold))
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .accessibilityLabel("新对话")
+
                         Button { showingHistory = true } label: {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.system(size: 17, weight: .semibold))
@@ -102,27 +98,6 @@ struct NewUIPreviewComposerView: View {
                                 .contentShape(Rectangle())
                         }
                         .accessibilityLabel("对话历史")
-
-                        Menu {
-                            Button {
-                                showToast(String(localized: "这是 NewUIPreview 的本地演示对话。"))
-                            } label: {
-                                Label("隐私说明", systemImage: "hand.raised")
-                            }
-                            if !chat.messages.isEmpty {
-                                Button(role: .destructive) {
-                                    beginNewConversation()
-                                } label: {
-                                    Label("清空对话", systemImage: "trash")
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .font(.system(size: 17, weight: .semibold))
-                                .frame(width: 44, height: 44)
-                                .contentShape(Rectangle())
-                        }
-                        .accessibilityLabel("更多")
                     }
                     .newUIPreviewGlass(in: Capsule(), interactive: true)
                 }
@@ -255,6 +230,7 @@ struct NewUIPreviewComposerView: View {
                     .frame(minHeight: 32)
                 } else {
                     Markdown(message.content)
+                        .markdownTheme(.newUIPreviewNotti)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -501,6 +477,49 @@ struct NewUIPreviewComposerView: View {
             toastTask = nil
         }
     }
+}
+
+private extension MarkdownUI.Theme {
+    @MainActor
+    static let newUIPreviewNotti = MarkdownUI.Theme()
+        .text {
+            FontSize(16)
+        }
+        .code {
+            FontFamilyVariant(.monospaced)
+            FontSize(14)
+            ForegroundColor(Color.newUIPreviewAccent)
+        }
+        .strong {
+            FontWeight(.semibold)
+        }
+        .emphasis {
+            FontStyle(.italic)
+        }
+        .heading1 { configuration in
+            configuration.label
+                .markdownMargin(top: .rem(0.7), bottom: .rem(0.1))
+                .markdownTextStyle {
+                    FontSize(21)
+                    FontWeight(.bold)
+                }
+        }
+        .heading2 { configuration in
+            configuration.label
+                .markdownMargin(top: .rem(0.6), bottom: .rem(0.1))
+                .markdownTextStyle {
+                    FontSize(19)
+                    FontWeight(.semibold)
+                }
+        }
+        .heading3 { configuration in
+            configuration.label
+                .markdownMargin(top: .rem(0.5), bottom: .rem(0.05))
+                .markdownTextStyle {
+                    FontSize(17)
+                    FontWeight(.semibold)
+                }
+        }
 }
 
 private struct NewUIPreviewStreamingCursor: View {

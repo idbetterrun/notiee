@@ -36,6 +36,14 @@ build commands, reporting rules).
 
 ## Work log
 
+### 2026-08-07 — Refined NewUIPreview Notti conversation chrome and typography _(both targets; experimental preview only)_
+
+- Replaced the conversation-derived center title with the fixed product title `Notti`; the generated conversation title remains in preview state and is still used by history rows only.
+- Removed the top-right overflow menu and its privacy/clear actions. New Conversation and History are now always visible together in one Glass capsule.
+- Added a preview-only MarkdownUI theme to reduce assistant typography to a 16 pt body with restrained 21/19/17 pt heading levels and a 14 pt code style. Production Notti rendering is unchanged.
+- Changed the record-detail scroll `PreferenceKey` default from mutable static storage to a constant, removing the final strict-concurrency warning in the focused preview source check without changing behavior.
+- Low-memory verification only: all app Swift files parse; the full NewUIPreview source set type-checks with strict concurrency for both the free and `NOTIEE_PLUS` configurations; `git diff --check`, project plist lint, and all three localization plist lints pass. Xcode, Simulator, and `xcodebuild` were intentionally not run due to the user's memory constraint. No commit or push was created.
+
 ### 2026-08-06 — Xcode issue cleanup after NewUIPreview redesign _(both targets; backend warning fixes free-only where noted)_
 
 - Fixed the NewUIPreview compile error by making `FolderTagManager.nottiFolderName` explicitly nonisolated and confined the preview observable state plus Aurora UIKit/Metal renderer to the main actor.
